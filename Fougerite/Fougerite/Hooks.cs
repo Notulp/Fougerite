@@ -775,18 +775,6 @@ namespace Fougerite
                 }
             }
             
-            if (OnConsoleReceived != null)
-            {
-                try
-                {
-                    OnConsoleReceived(ref a, external);
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError("ConsoleReceived Error: " + ex);
-                }
-            }
-
             if (OnConsoleReceivedWithCancel != null)
             {
                 ConsoleEvent ce = new ConsoleEvent();
@@ -802,6 +790,18 @@ namespace Fougerite
                 if (ce.Cancelled)
                 {
                     return false;
+                }
+            }
+            
+            if (OnConsoleReceived != null)
+            {
+                try
+                {
+                    OnConsoleReceived(ref a, external);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("ConsoleReceived Error: " + ex);
                 }
             }
 
@@ -1022,18 +1022,6 @@ namespace Fougerite
             if (sw == null) return;
             sw.Stop();
             if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("EntityDeployedEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
-            /*ItemRepresentation rp = new TorchItemRep();
-            rp.ActionStream(1, uLink.RPCMode.AllExceptOwner, stream);
-            Server.GetServer().Broadcast(ActualPlacer.ToString());
-            if (ActualPlacer != null) { Server.GetServer().Broadcast(ActualPlacer.Name.ToString());}
-            ScriptableObject td = ScriptableObject.CreateInstance(typeof (ThrowableItemDataBlock));
-            Server.GetServer().Broadcast(td.GetType().ToString());
-            ThrowableItemDataBlock td2 = td as ThrowableItemDataBlock;
-            Server.GetServer().Broadcast(td2.ToString());
-            Vector3 arg = Util.GetUtil().Infront(ActualPlacer, 20f);
-            Vector3 position = ActualPlacer.Location + ((Vector3)(ActualPlacer.Location * 1f));
-            Quaternion rotation = Quaternion.LookRotation(Vector3.up);
-            NetCull.InstantiateDynamicWithArgs<Vector3>(td2.throwObjectPrefab, position, rotation, arg);*/
         }
 
         public static void EntityHurt2(TakeDamage tkd, ref DamageEvent e)

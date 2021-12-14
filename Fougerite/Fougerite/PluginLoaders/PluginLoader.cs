@@ -201,6 +201,9 @@
                         case "On_Console":
                             Hooks.OnConsoleReceived += plugin.OnConsole;
                             break;
+                        case "On_ConsoleWithCancel":
+                            Hooks.OnConsoleReceivedWithCancel += plugin.OnConsoleWithCancel;
+                            break;
                         case "On_Command":
                             Hooks.OnCommand += new Hooks.CommandHandlerDelegate(plugin.OnCommand);
                             break;
@@ -371,6 +374,9 @@
                             break;
                         case "On_Console":
                             Hooks.OnConsoleReceived -= plugin.OnConsole;
+                            break;
+                        case "On_ConsoleWithCancel":
+                            Hooks.OnConsoleReceivedWithCancel -= plugin.OnConsoleWithCancel;
                             break;
                         case "On_Command":
                             Hooks.OnCommand -= new Hooks.CommandHandlerDelegate(plugin.OnCommand);

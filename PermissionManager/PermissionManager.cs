@@ -428,7 +428,11 @@ namespace PermissionManager
                             }
                             break;
                         }
-
+                        default:
+                        {
+                            player.MessageFrom("PermissionSystem", "Invalid command!");
+                            break;
+                        }
                     }
                     #endregion
 
@@ -446,6 +450,60 @@ namespace PermissionManager
                     }
                     
                     string secondcommand = args[0];
+                    switch (secondcommand)
+                    {
+                        case "createg":
+                        {
+                            if (args.Length < 2)
+                            {
+                                player.MessageFrom("PermissionSystem", "/pemg createg groupname");
+                                return;
+                            }
+                            string group = string.Join(" ",Merge(args, 1)).Trim();
+                            bool success = permissionSystem.CreateGroup(group);
+                            player.MessageFrom("PermissionSystem", success ? "Group " + group + " created!"
+                                : "Group already exists!");
+                            break;
+                        }
+                        case "delg":
+                        {
+                            if (args.Length < 2)
+                            {
+                                player.MessageFrom("PermissionSystem", "/pemg delg groupname");
+                                return;
+                            }
+                            string group = string.Join(" ",Merge(args, 1)).Trim();
+                            bool success = permissionSystem.RemoveGroup(group);
+                            player.MessageFrom("PermissionSystem", success ? "Group " + group + " deleted!"
+                                : "Group doesn't exist!");
+                            break;
+                        }
+                        case "listperms":
+                        {
+                            if (args.Length < 2)
+                            {
+                                player.MessageFrom("PermissionSystem", "/pemg listperms groupname");
+                                return;
+                            }
+                            string group = string.Join(" ",Merge(args, 1)).Trim();
+                            PermissionGroup pgroup = permissionSystem.GetGroupByName(group);
+                            if (pgroup != null)
+                            {
+                                var list = new List<string>(pgroup.GroupPermissions);
+                                player.MessageFrom("PermissionSystem", "Perms: " + string.Join(", ", list.ToArray()));
+                            }
+                            else
+                            {
+                                player.MessageFrom("PermissionSystem", "Group " + group + " doesn't exist!");
+                            }
+                            break;
+                        }
+                        default:
+                        {
+                            player.MessageFrom("PermissionSystem", "Invalid command!");
+                            break;
+                        }
+                    }
 
                     break;
                 }

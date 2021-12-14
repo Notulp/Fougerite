@@ -667,7 +667,7 @@ namespace Fougerite.PluginLoaders
             string func = arg.Function.ToLower();
             if (!external)
             {
-                Fougerite.Player player = Fougerite.Player.FindByPlayerClient(arg.argUser.playerClient);
+                Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(arg.argUser.userID);
                 arg.ReplyWith(player.Name + " executed: " + clss + "." + func);
                 this.Invoke("On_Console", new object[] {player, arg});
             }
@@ -675,6 +675,23 @@ namespace Fougerite.PluginLoaders
             {
                 arg.ReplyWith("Rcon: " + clss + "." + func);
                 this.Invoke("On_Console", new object[] {null, arg});
+            }
+        }
+        
+        public void OnConsoleWithCancel(ref ConsoleSystem.Arg arg, bool external, ConsoleEvent consoleEvent)
+        {
+            string clss = arg.Class.ToLower();
+            string func = arg.Function.ToLower();
+            if (!external)
+            {
+                Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(arg.argUser.userID);
+                arg.ReplyWith(player.Name + " executed: " + clss + "." + func);
+                this.Invoke("On_ConsoleWithCancel", new object[] {player, arg, consoleEvent});
+            }
+            else
+            {
+                arg.ReplyWith("Rcon: " + clss + "." + func);
+                this.Invoke("On_ConsoleWithCancel", new object[] {null, arg, consoleEvent});
             }
         }
 
