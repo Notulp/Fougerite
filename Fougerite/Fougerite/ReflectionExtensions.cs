@@ -15,9 +15,9 @@ namespace Fougerite
             if (metInf == null)
                 throw new Exception(String.Format("Couldn't find method '{0}' using reflection.", methodName));
 
-            if (metInf is MethodInfo)
-                return metInf.As<MethodInfo>().Invoke(obj, args);
-            
+            if (metInf is MethodInfo methodInfo)
+                return methodInfo.Invoke(obj, args);
+
             return (object)null;
         }
 
@@ -28,6 +28,7 @@ namespace Fougerite
             {
                 return CallMethodOnBase(obj, GetMethodInfo(Base, methodName), args);
             }
+
             return null;
         }
 
@@ -40,27 +41,32 @@ namespace Fougerite
         {
             var parameters = method.GetParameters();
 
-            if (parameters.Length == 0) {
-                if (args != null && args.Length != 0) 
+            if (parameters.Length == 0)
+            {
+                if (args != null && args.Length != 0)
                     throw new Exception("Arguments count doesn't match");
-            } else {
+            }
+            else
+            {
                 if (parameters.Length != args.Length)
                     throw new Exception("Arguments count doesn't match");
             }
 
             Type returnType = null;
-            if (method.ReturnType != typeof(void)) {
+            if (method.ReturnType != typeof(void))
+            {
                 returnType = method.ReturnType;
             }
 
             var type = obj.GetType();
-            var dynamicMethod = new DynamicMethod("", returnType, 
-                                                  new Type[] { type, typeof(Object) }, type);
+            var dynamicMethod = new DynamicMethod("", returnType,
+                new Type[] { type, typeof(Object) }, type);
 
             var iLGenerator = dynamicMethod.GetILGenerator();
             iLGenerator.Emit(OpCodes.Ldarg_0);
 
-            for (var i = 0; i < parameters.Length; i++) {
+            for (var i = 0; i < parameters.Length; i++)
+            {
                 var parameter = parameters[i];
 
                 iLGenerator.Emit(OpCodes.Ldarg_1);
@@ -69,10 +75,15 @@ namespace Fougerite
                 iLGenerator.Emit(OpCodes.Ldelem_Ref);
 
                 var parameterType = parameter.ParameterType;
-                if (parameterType.IsPrimitive) {
+                if (parameterType.IsPrimitive)
+                {
                     iLGenerator.Emit(OpCodes.Unbox_Any, parameterType);
-                } else if (parameterType == typeof(Object)) {
-                } else {
+                }
+                else if (parameterType == typeof(Object))
+                {
+                }
+                else
+                {
                     iLGenerator.Emit(OpCodes.Castclass, parameterType);
                 }
             }
@@ -80,7 +91,7 @@ namespace Fougerite
             iLGenerator.Emit(OpCodes.Call, method);
             iLGenerator.Emit(OpCodes.Ret);
 
-            return dynamicMethod.Invoke(null, new [] { obj, args });
+            return dynamicMethod.Invoke(null, new[] { obj, args });
         }
 
         public static object GetFieldValue(this object obj, string fieldName)
@@ -88,7 +99,7 @@ namespace Fougerite
             var memInf = GetFieldInfo(obj, fieldName);
 
             if (memInf == null)
-                throw new Exception(String.Format("Couldn't find field '{0}' using reflection.", fieldName));
+                throw new Exception(string.Format("Couldn't find field '{0}' using reflection.", fieldName));
 
             if (memInf is System.Reflection.PropertyInfo)
                 return memInf.As<System.Reflection.PropertyInfo>().GetValue(obj, null);
@@ -101,18 +112,20 @@ namespace Fougerite
 
         public static object GetFieldValueChain(this object obj, params string[] args)
         {
-            foreach (string arg in args) {
+            foreach (string arg in args)
+            {
                 obj = obj.GetFieldValue(arg);
             }
+
             return obj;
         }
 
         public static void SetFieldValue(this object obj, string fieldName, object newValue)
         {
             var memInf = GetFieldInfo(obj, fieldName);
-            
+
             if (memInf == null)
-                throw new Exception(String.Format("Couldn't find field '{0}' using reflection.", fieldName));
+                throw new Exception(string.Format("Couldn't find field '{0}' using reflection.", fieldName));
 
             if (memInf is System.Reflection.PropertyInfo)
                 memInf.As<System.Reflection.PropertyInfo>().SetValue(obj, newValue, null);
@@ -125,7 +138,8 @@ namespace Fougerite
         private static MethodInfo GetMethodInfo(Type classType, string methodName)
         {
             return classType.GetMethod(methodName,
-                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Static);
+                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy |
+                BindingFlags.Static);
         }
 
         private static MethodInfo GetMethodInfo(object obj, string methodName)
@@ -138,7 +152,8 @@ namespace Fougerite
             var prps = new List<System.Reflection.PropertyInfo>();
 
             prps.Add(objType.GetProperty(fieldName,
-                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Static));
+                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy |
+                BindingFlags.Static));
 
             prps = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(prps, i => !ReferenceEquals(i, null)));
 
@@ -148,7 +163,8 @@ namespace Fougerite
             var flds = new System.Collections.Generic.List<System.Reflection.FieldInfo>();
 
             flds.Add(objType.GetField(fieldName,
-                BindingFlags.NonPublic | BindingFlags.Public  | BindingFlags.Instance | BindingFlags.FlattenHierarchy | BindingFlags.Static));          
+                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy |
+                BindingFlags.Static));
 
             flds = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(flds, i => !ReferenceEquals(i, null)));
 
@@ -156,8 +172,9 @@ namespace Fougerite
                 return flds[0];
 
             // if not found on the current type, check the base
-            if (objType.BaseType != null) {
-                return GetFieldInfo (objType.BaseType, fieldName);
+            if (objType.BaseType != null)
+            {
+                return GetFieldInfo(objType.BaseType, fieldName);
             }
 
             return null;
@@ -174,11 +191,11 @@ namespace Fougerite
             var metInf = GetMethodInfo(classType, methodName);
 
             if (metInf == null)
-                throw new Exception(String.Format("Couldn't find method '{0}' using reflection.", methodName));
+                throw new Exception(string.Format("Couldn't find method '{0}' using reflection.", methodName));
 
-            if (metInf is MethodInfo) {
-                MethodInfo meta = metInf.As<MethodInfo>();
-                meta.Invoke(null, args);
+            if (metInf is MethodInfo methodInfo)
+            {
+                methodInfo.Invoke(null, args);
             }
         }
 
@@ -187,7 +204,7 @@ namespace Fougerite
             var memInf = GetFieldInfo(classType, fieldName);
 
             if (memInf == null)
-                throw new Exception(String.Format("Couldn't find field '{0}' using reflection.", fieldName));
+                throw new Exception(string.Format("Couldn't find field '{0}' using reflection.", fieldName));
 
             if (memInf is System.Reflection.PropertyInfo)
                 return memInf.As<System.Reflection.PropertyInfo>().GetValue(null, null);
@@ -203,7 +220,7 @@ namespace Fougerite
             var memInf = GetFieldInfo(classType, fieldName);
 
             if (memInf == null)
-                throw new Exception(String.Format("Couldn't find field '{0}' using reflection.", fieldName));           
+                throw new Exception(string.Format("Couldn't find field '{0}' using reflection.", fieldName));
 
             if (memInf is System.Reflection.PropertyInfo)
                 memInf.As<System.Reflection.PropertyInfo>().SetValue(null, newValue, null);

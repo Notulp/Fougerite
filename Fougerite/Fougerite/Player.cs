@@ -1513,6 +1513,7 @@ namespace Fougerite
             {
                 if (this.IsOnline)
                 {
+                    
                     return this.Structures.Any(e =>
                         (e.Object as StructureMaster).containedBounds.Contains(this.Location));
                 }

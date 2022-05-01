@@ -38,9 +38,9 @@ namespace Fougerite
 				ItemPickup dropped = null;
 				Vector3 position = internalInv.transform.localPosition;
 				// Try making the positions random, instead of letting the objects stuck into together.
-				position.x = position.x + UnityEngine.Random.Range(0f, 0.85f);
-				position.y = position.y + UnityEngine.Random.Range(0.75f, 1f);
-				position.z = position.z + UnityEngine.Random.Range(0f, 0.85f);
+				position.x += UnityEngine.Random.Range(0f, 0.85f);
+				position.y += UnityEngine.Random.Range(0.75f, 1f);
+				position.z += UnityEngine.Random.Range(0f, 0.85f);
 				
 				Vector3 arg = new Vector3(UnityEngine.Random.Range(0.75f, 1.3f), UnityEngine.Random.Range(0.75f, 1.3f), UnityEngine.Random.Range(0.75f, 1.3f));
 				Quaternion rotation = new Quaternion(0f, 0f, 0f, 1f);

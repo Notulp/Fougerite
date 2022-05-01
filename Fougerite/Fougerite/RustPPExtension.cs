@@ -8,6 +8,14 @@ namespace Fougerite
     using RustPP.Social;
     using System.Collections.Generic;
 
+    /// <summary>
+    /// The existence of this class should have never happened.
+    /// It creates a vice-versa link to Rust++.
+    /// The plugin Rust++ It self that was brought in should have been replaced with a far better
+    /// set of structure, json, and easy to access API even for script plugins.
+    /// Although I have shown the examples years later on how proper plugin APIs should be
+    /// I am afraid due to plugins using this, is going to remain as-is.
+    /// </summary>
     public class RustPPExtension
     {
         public FriendList FriendsOf(ulong steamid)

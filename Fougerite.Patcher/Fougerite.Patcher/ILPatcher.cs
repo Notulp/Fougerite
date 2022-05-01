@@ -1359,39 +1359,6 @@ namespace Fougerite.Patcher
             iLProcessor.InsertBefore(orig.Body.Instructions[49], Instruction.Create(OpCodes.Ldarg_0));
         }
 
-        private void NPCHurtKilledPatch_BasicWildLifeAI()
-        {
-            TypeDefinition type = rustAssembly.MainModule.GetType("BasicWildLifeAI");
-            MethodDefinition orig = type.GetMethod("OnHurt");
-            MethodDefinition method = hooksClass.GetMethod("NPCHurt");
-
-            MethodDefinition NPCKilled = type.GetMethod("OnKilled");
-            MethodDefinition NPCKilledHook = hooksClass.GetMethod("NPCKilled");
-
-            this.CloneMethod(orig);
-            // OldNPC Hurt
-            //ILProcessor iLProcessor = orig.Body.GetILProcessor();
-            //iLProcessor.InsertBefore(orig.Body.Instructions[0], Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(method)));
-            //iLProcessor.InsertBefore(orig.Body.Instructions[0], Instruction.Create(OpCodes.Ldarga_S, orig.Parameters[0]));
-
-            // OldNPC Killed
-            //iLProcessor = NPCKilled.Body.GetILProcessor();
-            //iLProcessor.InsertBefore(NPCKilled.Body.Instructions[0], Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(NPCKilledHook)));
-            //iLProcessor.InsertBefore(NPCKilled.Body.Instructions[0], Instruction.Create(OpCodes.Ldarga_S, NPCKilled.Parameters[0]));
-        }
-
-        private void NPCHurtPatch_HostileWildlifeAI()
-        {
-            TypeDefinition type = rustAssembly.MainModule.GetType("HostileWildlifeAI");
-            MethodDefinition orig = type.GetMethod("OnHurt");
-            MethodDefinition method = hooksClass.GetMethod("NPCHurt");
-
-            this.CloneMethod(orig);
-            ILProcessor iLProcessor = orig.Body.GetILProcessor();
-            iLProcessor.InsertBefore(orig.Body.Instructions[0], Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(method)));
-            iLProcessor.InsertBefore(orig.Body.Instructions[0], Instruction.Create(OpCodes.Ldarga_S, orig.Parameters[0]));
-        }
-
         private void PlayerSpawningSpawnedPatch()
         {
             TypeDefinition type = rustAssembly.MainModule.GetType("ServerManagement");
@@ -1632,18 +1599,6 @@ namespace Fougerite.Patcher
             iLProcessor.InsertBefore(orig.Body.Instructions[0x3f], Instruction.Create(OpCodes.Stsfld, type.Fields[4]));
             iLProcessor.InsertBefore(orig.Body.Instructions[0x3f], Instruction.Create(OpCodes.Callvirt, rustAssembly.MainModule.Import(definition4)));
             iLProcessor.InsertBefore(orig.Body.Instructions[0x3f], Instruction.Create(OpCodes.Ldsfld, type.Fields[4]));
-        }
-
-        private void PlayerHurtPatch()
-        {
-            TypeDefinition type = rustAssembly.MainModule.GetType("HumanBodyTakeDamage");
-            MethodDefinition orig = type.GetMethod("Hurt");
-            MethodDefinition method = hooksClass.GetMethod("PlayerHurt");
-            // OldPlayer Hurt
-            //this.CloneMethod(orig);
-            //ILProcessor iLProcessor = orig.Body.GetILProcessor();
-            //iLProcessor.InsertBefore(orig.Body.Instructions[0], Instruction.Create(OpCodes.Ldarg_1));
-            //iLProcessor.InsertAfter(orig.Body.Instructions[0], Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(method)));
         }
 
         private void PlayerJoinLeavePatch()
@@ -2289,10 +2244,8 @@ namespace Fougerite.Patcher
                     this.uLinkLateUpdateInTryCatch();
 
                     this.BootstrapAttachPatch();
-                    this.NPCHurtKilledPatch_BasicWildLifeAI();
                     this.EntityDecayPatch_StructureMaster();
                     this.EntityDecayPatch_EnvDecay();
-                    this.NPCHurtPatch_HostileWildlifeAI();
                     this.ServerShutdownPatch();
                     this.ServerSavePatch();
                     this.BlueprintUsePatch();
@@ -2305,7 +2258,6 @@ namespace Fougerite.Patcher
                     this.ConsolePatch();
                     this.PlayerJoinLeavePatch();
                     this.PlayerKilledPatch();
-                    this.PlayerHurtPatch();
                     this.EntityHurtPatch();
                     this.ItemsTablesLoadedPatch();
                     this.DoorSharing();

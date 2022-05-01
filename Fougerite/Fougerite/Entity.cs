@@ -58,9 +58,8 @@ namespace Fougerite
                     var index = clone.IndexOf("(Clone)");
                     this._name = clone.Substring(0, index);
                 }
-                var deployable = Obj as DeployableObject;
 
-                var inventory = deployable.GetComponent<Inventory>();
+                var inventory = dobj.GetComponent<Inventory>();
                 if (inventory != null)
                 {
                     this.hasInventory = true;
@@ -216,14 +215,19 @@ namespace Fougerite
             {
                 if (this.IsDeployableObject())
                 {
-                    if (this.GetObject<DeployableObject>() != null) NetCull.Destroy(this.GetObject<DeployableObject>().gameObject);
+                    if (this.GetObject<DeployableObject>() != null)
+                        NetCull.Destroy(this.GetObject<DeployableObject>().gameObject);
                 }
                 else if (this.IsStructureMaster())
                 {
-                    if (this.GetObject<StructureMaster>() != null) NetCull.Destroy(this.GetObject<StructureMaster>().networkViewID);
+                    if (this.GetObject<StructureMaster>() != null)
+                        NetCull.Destroy(this.GetObject<StructureMaster>().networkViewID);
                 }
             }
-            catch { }
+            catch
+            {
+                // Ignore.
+            }
         }
 
         private static void DestroyStructure(StructureComponent comp)
