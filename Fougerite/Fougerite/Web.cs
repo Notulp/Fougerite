@@ -6,7 +6,6 @@ using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Facepunch.Load;
 using Stream = System.IO.Stream;
 
 namespace Fougerite
@@ -38,6 +37,7 @@ namespace Fougerite
             //
             // Summary:
             //     Specifies the Transport Layer Security (TLS) 1.1 security protocol.
+            // I'll leave It here, but the upgraded dlls we are using are supporting 1.0 max If i have seen right.
             Tls11 = 768,
 
             //
@@ -97,8 +97,8 @@ namespace Fougerite
             using (WebClient client = new WebClient())
             {
                 client.Headers[HttpRequestHeader.ContentType] = contentType;
-                byte[] bytes = client.UploadData(url, "POST", Encoding.ASCII.GetBytes(data));
-                return Encoding.ASCII.GetString(bytes);
+                byte[] bytes = client.UploadData(url, "POST", Encoding.UTF8.GetBytes(data));
+                return Encoding.UTF8.GetString(bytes);
             }
         }
 
@@ -157,7 +157,8 @@ namespace Fougerite
             {
                 request.Timeout = (int) Math.Round(timeout);
             }
-            request.AutomaticDecompression = allowDecompression ? DecompressionMethods.GZip | DecompressionMethods.Deflate : DecompressionMethods.None;
+            request.AutomaticDecompression = allowDecompression ? DecompressionMethods.GZip | DecompressionMethods.Deflate 
+                : DecompressionMethods.None;
             request.ServicePoint.MaxIdleTime = request.Timeout;
             request.ServicePoint.Expect100Continue = ServicePointManager.Expect100Continue;
             request.ServicePoint.ConnectionLimit = ServicePointManager.DefaultConnectionLimit;

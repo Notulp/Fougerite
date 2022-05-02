@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Fougerite.Permissions
 {
@@ -485,8 +484,14 @@ namespace Fougerite.Permissions
                 return false;
             }
             
-            foreach (PermissionGroup @group in permissionplayer.Groups.Select(GetGroupByName))
+            foreach (PermissionGroup group in permissionplayer.Groups.Select(GetGroupByName))
             {
+                // Ensure that the group indeed existed
+                if (group == null)
+                {
+                    continue;
+                }
+                
                 bool haspermission = group.GroupPermissions.Any(x => x.Trim() == "*" || x.Trim().ToLower() == permission);
                 if (haspermission) return true;
             }
