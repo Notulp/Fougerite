@@ -136,6 +136,9 @@ namespace Fougerite
         /// import json
         /// from System import Action
         /// Web.CreateAsyncHTTPRequest('url', Action[int, str](self.webCallback), 'POST', json.dumps({'name':'test'}))
+        ///
+        /// WARNING: This is an async call. The callback will be on a subthread. If you have something that you need to run
+        /// on the main thread, because It's thread sensitive then call Loom's QueueOnMainThread function.
         /// </summary>
         /// <param name="url"></param>
         /// <param name="callback"></param>
