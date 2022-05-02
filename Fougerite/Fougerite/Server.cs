@@ -1,5 +1,6 @@
 ﻿
 using Fougerite.Events;
+using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
 
 namespace Fougerite
@@ -76,7 +77,10 @@ namespace Fougerite
             }
             if (!AnnounceToServer)
             {
-                foreach (Fougerite.Player pl in Players.Where(pl => pl.Admin || pl.Moderator))
+#pragma warning disable CS0618
+                foreach (Fougerite.Player pl in Players.Where(pl =>
+                             pl.Admin || pl.Moderator || PermissionSystem.GetPermissionSystem().PlayerHasPermission(pl, "bansystem.notification")))
+#pragma warning restore CS0618
                 {
                     pl.Message(red + player.Name + white + " was banned by: " + green + Banner);
                     pl.Message(red + " Reason: " + reason);
@@ -142,7 +146,10 @@ namespace Fougerite
                 if (Sender != null) { Sender.Message(red + "Couldn't find any names matching with " + name); }
                 return false;
             }
-            foreach (Fougerite.Player pl in Players.Where(pl => pl.Admin || pl.Moderator))
+#pragma warning disable CS0618
+            foreach (Fougerite.Player pl in Players.Where(pl => 
+                         pl.Admin || pl.Moderator ||PermissionSystem.GetPermissionSystem().PlayerHasPermission(pl, "bansystem.notification")))
+#pragma warning restore CS0618
             {
                 pl.Message(red + name + white + " was unbanned by: "
                            + green + UnBanner + white + " Different matches: " + ids.Count);

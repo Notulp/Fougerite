@@ -193,7 +193,9 @@
                             Hooks.OnChat += plugin.OnChat;
                             break;
                         case "On_Console":
+#pragma warning disable CS0618
                             Hooks.OnConsoleReceived += plugin.OnConsole;
+#pragma warning restore CS0618
                             break;
                         case "On_ConsoleWithCancel":
                             Hooks.OnConsoleReceivedWithCancel += plugin.OnConsoleWithCancel;
@@ -367,7 +369,9 @@
                             Hooks.OnChat -= plugin.OnChat;
                             break;
                         case "On_Console":
+#pragma warning disable CS0618
                             Hooks.OnConsoleReceived -= plugin.OnConsole;
+#pragma warning restore CS0618
                             break;
                         case "On_ConsoleWithCancel":
                             Hooks.OnConsoleReceivedWithCancel -= plugin.OnConsoleWithCancel;
