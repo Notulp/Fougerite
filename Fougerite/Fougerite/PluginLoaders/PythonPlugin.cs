@@ -100,7 +100,7 @@ namespace Fougerite.PluginLoaders
             Scope.SetVariable("Server", Fougerite.Server.GetServer());
             Scope.SetVariable("DataStore", DataStore.GetInstance());
             Scope.SetVariable("Data", Data.GetData());
-            Scope.SetVariable("Web", new Fougerite.Web());
+            Scope.SetVariable("Web", Web.GetInstance());
             Scope.SetVariable("Util", Util.GetUtil());
             Scope.SetVariable("World", World.GetWorld());
             #pragma warning disable 618

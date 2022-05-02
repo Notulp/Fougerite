@@ -619,6 +619,11 @@ namespace Fougerite.PluginLoaders
         {
             return new Dictionary<string, object>();
         }
+        
+        public Dictionary<string, string> CreateStringDict()
+        {
+            return new Dictionary<string, string>();
+        } 
 
         public Dictionary<object, object> CreateDynamicDict()
         {
@@ -628,6 +633,11 @@ namespace Fougerite.PluginLoaders
         public List<object> CreateList()
         {
             return new List<object>();
+        }
+        
+        public List<string> CreateStringList()
+        {
+            return new List<string>();
         }
 
         public void OnTablesLoaded(Dictionary<string, LootSpawnList> tables)

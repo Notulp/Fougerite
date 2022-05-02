@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Fougerite
 {
-    public class SuperFastHashUInt16Hack
+    public static class SuperFastHashUInt16Hack
     {
         [StructLayout(LayoutKind.Explicit)]
         // no guarantee this will remain working

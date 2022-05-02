@@ -66,7 +66,7 @@ namespace Fougerite.PluginLoaders
                     .SetParameter("Server", Fougerite.Server.GetServer())
                     .SetParameter("DataStore", DataStore.GetInstance())
                     .SetParameter("Data", Data.GetData())
-                    .SetParameter("Web", new Fougerite.Web())
+                    .SetParameter("Web", Web.GetInstance())
                     .SetParameter("Util", Util.GetUtil())
                     .SetParameter("World", World.GetWorld())
                     #pragma warning disable 618

@@ -41,14 +41,16 @@
         public static string GetModulesFolder()
         {
             Regex root = new Regex(@"^%RootFolder%", RegexOptions.IgnoreCase);             
-            string path = root.Replace(FougeriteDirectoryConfig.GetSetting("Settings", "ModulesFolder"), Util.GetRootFolder()) + @"\";
+            string path = root.Replace(FougeriteDirectoryConfig.GetSetting("Settings", "ModulesFolder"),
+                Util.GetRootFolder()) + @"\";
             return Util.NormalizePath(path);
         }
 
         public static string GetPublicFolder()
         {
             Regex root = new Regex(@"^%RootFolder%", RegexOptions.IgnoreCase);             
-            string path = root.Replace(FougeriteDirectoryConfig.GetSetting("Settings", "PublicFolder"), Util.GetRootFolder()) + @"\";
+            string path = root.Replace(FougeriteDirectoryConfig.GetSetting("Settings", "PublicFolder"),
+                Util.GetRootFolder()) + @"\";
             return Util.NormalizePath(path);
         }
     }

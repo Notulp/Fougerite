@@ -1,5 +1,4 @@
-﻿
-namespace Fougerite
+﻿namespace Fougerite
 {
     using System;
     using System.Collections.Generic;
@@ -7,32 +6,20 @@ namespace Fougerite
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public class ApiVersionAttribute : Attribute
-    {
-        public Version ApiVersion;
-        public ApiVersionAttribute(Version version)
-        {
-            this.ApiVersion = version;
-        }
-        public ApiVersionAttribute(int major, int minor) : this(new Version(major, minor))
-        {
-        }
-    }
 
     public class ModuleManager
     {
+        private static readonly Dictionary<string, Assembly> LoadedAssemblies = new Dictionary<string, Assembly>();
         public static readonly Version ApiVersion = new Version(1, 0, 0, 0);
         public static string ModulesFolder = Config.GetModulesFolder();
         public static string PublicFolder = Config.GetPublicFolder();
 
-        //private static bool IsIgnoreVersion = true;
-        private static readonly Dictionary<string, Assembly> LoadedAssemblies = new Dictionary<string, Assembly>();
-        
-        [Obsolete("Modules is obsolete, and might be removed in the future. Use PluginLoader.GetInstance().Plugins.Values", false)]
+        [Obsolete(@"Modules is obsolete, and might be removed in the future.
+             Use PluginLoader.GetInstance().Plugins.Values", false)]
         public static readonly List<ModuleContainer> Modules = new List<ModuleContainer>();
-        
-        [Obsolete("Plugins is obsolete, and might be removed in the future. Use PluginLoader.GetInstance().Plugins.Values", false)]
+
+        [Obsolete(@"Plugins is obsolete, and might be removed in the future.
+             Use PluginLoader.GetInstance().Plugins.Values", false)]
         public static ReadOnlyCollection<ModuleContainer> Plugins
         {
             get { return new ReadOnlyCollection<ModuleContainer>(Modules); }
@@ -54,7 +41,8 @@ namespace Fougerite
                 if (!FileInfo.Exists)
                     continue;
 
-                if (Array.IndexOf(Config.FougeriteConfig.EnumSection("Modules"), DirInfo.Name) == -1) {
+                if (Array.IndexOf(Config.FougeriteConfig.EnumSection("Modules"), DirInfo.Name) == -1)
+                {
                     Logger.LogDebug(string.Format("[Modules] {0} is not configured to be loaded.", DirInfo.Name));
                     continue;
                 }
@@ -63,7 +51,8 @@ namespace Fougerite
                 string FileNameWithoutExtension = Path.GetFileNameWithoutExtension(FileInfo.Name);
                 if (IgnoredModules.Contains(FileNameWithoutExtension))
                 {
-                    Logger.LogWarning(string.Format("[Modules] {0} was ignored from being loaded.", FileNameWithoutExtension));
+                    Logger.LogWarning(string.Format("[Modules] {0} was ignored from being loaded.",
+                        FileNameWithoutExtension));
                     continue;
                 }
 
@@ -94,16 +83,21 @@ namespace Fougerite
                         catch (Exception ex)
                         {
                             // Broken plugins better stop the entire server init.
-                            Logger.LogError(string.Format("[Modules] Could not create an instance of plugin class \"{0}\". {1}", Type.FullName, ex));
+                            Logger.LogError(string.Format(
+                                "[Modules] Could not create an instance of plugin class \"{0}\". {1}", Type.FullName,
+                                ex));
                         }
+
                         if (PluginInstance != null)
                         {
                             ModuleContainer Container = new ModuleContainer(PluginInstance);
-                            Container.Plugin.ModuleFolder = Path.Combine(PublicFolder, Config.GetValue("Modules", DirInfo.Name).TrimStart(new char[]{'\\','/'}).Trim());
-                            #pragma warning disable 618
+                            Container.Plugin.ModuleFolder = Path.Combine(PublicFolder,
+                                Config.GetValue("Modules", DirInfo.Name).TrimStart(new char[] { '\\', '/' }).Trim());
+#pragma warning disable 618
                             Modules.Add(Container);
-                            GlobalPluginCollector.GetPluginCollector().AddPlugin(Container.Plugin.Name, Container, "C#");
-                            #pragma warning restore 618
+                            GlobalPluginCollector.GetPluginCollector()
+                                .AddPlugin(Container.Plugin.Name, Container, "C#");
+#pragma warning restore 618
                             Logger.LogDebug("[Modules] Module added: " + FileInfo.Name);
                             break;
                         }
@@ -117,9 +111,9 @@ namespace Fougerite
             }
 
             IOrderedEnumerable<ModuleContainer> OrderedModuleSelector =
-                #pragma warning disable 618
+#pragma warning disable 618
                 from x in Plugins
-                #pragma warning restore 618
+#pragma warning restore 618
                 orderby x.Plugin.Order, x.Plugin.Name
                 select x;
 
@@ -133,11 +127,13 @@ namespace Fougerite
                 {
                     // Broken modules better stop the entire server init.
                     Logger.LogError(string.Format(
-                        "[Modules] Module \"{0}\" has thrown an exception during initialization. {1}", CurrentModule.Plugin.Name, ex));
+                        "[Modules] Module \"{0}\" has thrown an exception during initialization. {1}",
+                        CurrentModule.Plugin.Name, ex));
                 }
 
                 Logger.Log(string.Format(
-                    "[Modules] Module {0} v{1} (by {2}) initiated.", CurrentModule.Plugin.Name, CurrentModule.Plugin.Version, CurrentModule.Plugin.Author));
+                    "[Modules] Module {0} v{1} (by {2}) initiated.", CurrentModule.Plugin.Name,
+                    CurrentModule.Plugin.Version, CurrentModule.Plugin.Author));
             }
 
             Hooks.ModulesLoaded();
@@ -145,9 +141,9 @@ namespace Fougerite
 
         internal static void UnloadModules()
         {
-            #pragma warning disable 618
+#pragma warning disable 618
             foreach (ModuleContainer ModuleContainer in Modules)
-            #pragma warning restore 618
+#pragma warning restore 618
             {
                 try
                 {
@@ -156,13 +152,14 @@ namespace Fougerite
                 catch (Exception ex)
                 {
                     Logger.LogError(string.Format(
-                        "[Modules] Module \"{0}\" has thrown an exception while being deinitialized:\n{1}", ModuleContainer.Plugin.Name, ex));
+                        "[Modules] Module \"{0}\" has thrown an exception while being deinitialized:\n{1}",
+                        ModuleContainer.Plugin.Name, ex));
                 }
             }
 
-            #pragma warning disable 618
+#pragma warning disable 618
             foreach (ModuleContainer ModuleContainer in Modules)
-            #pragma warning restore 618
+#pragma warning restore 618
             {
                 try
                 {
@@ -171,12 +168,13 @@ namespace Fougerite
                 catch (Exception ex)
                 {
                     Logger.LogError(string.Format(
-                        "[Modules] Module \"{0}\" has thrown an exception while being disposed:\n{1}", ModuleContainer.Plugin.Name, ex));
+                        "[Modules] Module \"{0}\" has thrown an exception while being disposed:\n{1}",
+                        ModuleContainer.Plugin.Name, ex));
                 }
             }
-            #pragma warning disable 618
+#pragma warning disable 618
             Modules.Clear();
-            #pragma warning restore 618
+#pragma warning restore 618
             Logger.LogDebug("All modules unloaded!");
         }
 

@@ -1049,6 +1049,30 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Returns the integer hash of the byte array input using the
+        /// 'superfasthash' algorithm.
+        /// Check out: http://landman-code.blogspot.com/2009/02/c-superfasthash-and-murmurhash2.html
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public UInt32 SuperFastHash(Byte[] input)
+        {
+            return SuperFastHashUInt16Hack.Hash(input);
+        }
+
+        /// <summary>
+        /// Returns the integer hash of the byte array input using the
+        /// 'superfasthash' algorithm.
+        /// Check out: http://landman-code.blogspot.com/2009/02/c-superfasthash-and-murmurhash2.html
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public UInt32 SuperFastHash(string input)
+        {
+            return SuperFastHashUInt16Hack.Hash(Encoding.UTF8.GetBytes(input));
+        }
+
+        /// <summary>
         /// Gets the specified variable's value from the instance using reflection.
         /// </summary>
         /// <param name="type"></param>

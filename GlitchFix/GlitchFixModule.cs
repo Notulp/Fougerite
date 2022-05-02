@@ -81,6 +81,7 @@ namespace GlitchFix
                 Fougerite.Hooks.OnPlayerTeleport -= OnPlayerTeleport;
             }
         }
+        
         public void OnPlayerTeleport(Fougerite.Player player, Vector3 from, Vector3 dest)
         {
             if (RockGlitch)

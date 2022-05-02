@@ -92,32 +92,32 @@
             onground = new Vector3(x, y, z);
         }*/
 
-        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.")]
+        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(float x, float y, float z)
         {
             this.AirdropAt(x, y, z, 1);
         }
 
-        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.")]
+        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(float x, float y, float z, int rep)
         {
             Vector3 target = new Vector3(x, y, z);
             this.AirdropAt(target, rep);
         }
 
-        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.")]
+        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAtPlayer(Fougerite.Player p)
         {
             this.AirdropAt(p.X, p.Y, p.Z, 1);
         }
 
-        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.")]
+        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAtPlayer(Fougerite.Player p, int rep)
         {
             this.AirdropAt(p.X, p.Y, p.Z, rep);
         }
 
-        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.")]
+        [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(Vector3 target, int rep = 1)
         {
             Vector3 original = target;

@@ -1,21 +1,23 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Stream = System.IO.Stream;
 
 namespace Fougerite
 {
-    using System.Net;
-    using System.Text;
-
     /// <summary>
-    /// This class helps plugins to use simple webrequests.
+    /// This class helps plugins to use simple web requests.
+    /// Some Certifications are not supported in Mono when using TLS requests.
     /// </summary>
     public class Web
     {
+        private static Web _webInstance;
+        
         /// <summary>
         /// SSL Protocols.
         /// </summary>
@@ -26,29 +28,57 @@ namespace Fougerite
             // Summary:
             //     Specifies the Secure Socket Layer (SSL) 3.0 security protocol.
             Ssl3 = 48,
+
             //
             // Summary:
             //     Specifies the Transport Layer Security (TLS) 1.0 security protocol.
             Tls = 192,
+
             //
             // Summary:
             //     Specifies the Transport Layer Security (TLS) 1.1 security protocol.
+            // I'll leave It here, but the upgraded dlls we are using are supporting 1.0 max If i have seen right.
             Tls11 = 768,
+
             //
             // Summary:
             //     Specifies the Transport Layer Security (TLS) 1.2 security protocol.
+            // Unsupported in Mono. https://forum.unity.com/threads/unity-2017-1-tls-1-2-still-not-working-with-net-4-6.487415/
+            [Obsolete("Doesn't work in this version of Mono. See https://forum.unity.com/threads/unity-2017-1-tls-1-2-still-not-working-with-net-4-6.487415/", false)]
             Tls12 = 3072
         }
 
-        
+        private Web()
+        {
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)(MySecurityProtocolType.Tls11 | MySecurityProtocolType.Tls | MySecurityProtocolType.Ssl3);
+            ServicePointManager.ServerCertificateValidationCallback = AcceptAllCertifications;
+            ServicePointManager.Expect100Continue = false;
+            ServicePointManager.DefaultConnectionLimit = 200;
+        }
+
+        /// <summary>
+        /// Returns the instance of the Web class.
+        /// </summary>
+        /// <returns></returns>
+        public static Web GetInstance()
+        {
+            if (_webInstance == null)
+            {
+                _webInstance = new Web();
+            }
+
+            return _webInstance;
+        }
+
         /// <summary>
         /// Does a GET request to the specified URL.
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
+        [Obsolete("Use CreateAsyncHTTPRequest instead.", false)]
         public string GET(string url)
         {
-            using (System.Net.WebClient client = new System.Net.WebClient())
+            using (WebClient client = new WebClient())
             {
                 return client.DownloadString(url);
             }
@@ -59,14 +89,16 @@ namespace Fougerite
         /// </summary>
         /// <param name="url"></param>
         /// <param name="data"></param>
+        /// <param name="contentType">For JSON format specify 'application/json'</param>
         /// <returns></returns>
-        public string POST(string url, string data)
+        [Obsolete("Use CreateAsyncHTTPRequest instead.", false)]
+        public string POST(string url, string data, string contentType = "application/x-www-form-urlencoded")
         {
-            using (System.Net.WebClient client = new System.Net.WebClient())
+            using (WebClient client = new WebClient())
             {
-                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                byte[] bytes = client.UploadData(url, "POST", Encoding.ASCII.GetBytes(data));
-                return Encoding.ASCII.GetString(bytes);
+                client.Headers[HttpRequestHeader.ContentType] = contentType;
+                byte[] bytes = client.UploadData(url, "POST", Encoding.UTF8.GetBytes(data));
+                return Encoding.UTF8.GetString(bytes);
             }
         }
 
@@ -75,76 +107,129 @@ namespace Fougerite
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
+        [Obsolete("Use CreateAsyncHTTPRequest instead.", false)]
         public string GETWithSSL(string url)
         {
-            System.Net.ServicePointManager.SecurityProtocol = (SecurityProtocolType)(MySecurityProtocolType.Tls12 | MySecurityProtocolType.Tls11 | MySecurityProtocolType.Tls);
-            ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
-            using (System.Net.WebClient client = new System.Net.WebClient())
-            {
-                return client.DownloadString(url);
-            }
+            return GET(url);
         }
-        
+
         /// <summary>
         /// Does a post request to the specified URL with the data, and accepts all SSL certificates.
         /// </summary>
         /// <param name="url"></param>
         /// <param name="data"></param>
         /// <returns></returns>
+        [Obsolete("Use CreateAsyncHTTPRequest instead.", false)]
         public string POSTWithSSL(string url, string data)
         {
-            System.Net.ServicePointManager.SecurityProtocol = (SecurityProtocolType)(MySecurityProtocolType.Tls12 | MySecurityProtocolType.Tls11 | MySecurityProtocolType.Tls);
-            ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
-            using (System.Net.WebClient client = new System.Net.WebClient())
-            {
-                client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                byte[] bytes = client.UploadData(url, "POST", Encoding.ASCII.GetBytes(data));
-                return Encoding.ASCII.GetString(bytes);
-            }
+            return POST(url, data);
         }
-        
-        private bool AcceptAllCertifications(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslpolicyerrors)
-        {
-            return true;
-        }
-        
+
+
         /// <summary>
         /// Creates an Async request for the specified URL, and headers.
         /// The result will be passed to the specified callback's parameter.
+        /// This is the recommended way to do requests.
+        /// Python example:
+        /// clr.AddReferenceByPartialName('System.Core')
+        /// import System
+        /// import json
+        /// from System import Action
+        /// Web.CreateAsyncHTTPRequest('url', Action[int, str](self.webCallback), 'POST', json.dumps({'name':'test'}))
+        ///
+        /// WARNING: This is an async call. The callback will be on a subthread. If you have something that you need to run
+        /// on the main thread, because It's thread sensitive then call Loom's QueueOnMainThread function.
         /// </summary>
         /// <param name="url"></param>
         /// <param name="callback"></param>
         /// <param name="method"></param>
-        /// <param name="AdditionalHeaders"></param>
-        public void CreateAsyncHTTPRequest(string url, Action<string> callback, string method = "GET", Dictionary<string, string> AdditionalHeaders = null)
+        /// <param name="inputBody"></param>
+        /// <param name="additionalHeaders"></param>
+        /// <param name="timeout"></param>
+        /// <param name="allowDecompression"></param>
+        public void CreateAsyncHTTPRequest(string url, Action<int, string> callback, string method = "GET",
+            string inputBody = null,
+            Dictionary<string, string> additionalHeaders = null, float timeout = 0f,
+            bool allowDecompression = false)
         {
             HttpWebRequest request = (HttpWebRequest) WebRequest.Create(url);
-            request.SetRawHeader("Content-Type", "application/json");
             request.Method = method;
-            if (AdditionalHeaders != null)
+            request.Credentials = CredentialCache.DefaultCredentials;
+            request.KeepAlive = false;
+            if (timeout > 0f)
             {
-                foreach (var x in AdditionalHeaders.Keys)
+                request.Timeout = (int) Math.Round(timeout);
+            }
+            request.AutomaticDecompression = allowDecompression ? DecompressionMethods.GZip | DecompressionMethods.Deflate 
+                : DecompressionMethods.None;
+            request.ServicePoint.MaxIdleTime = request.Timeout;
+            request.ServicePoint.Expect100Continue = ServicePointManager.Expect100Continue;
+            request.ServicePoint.ConnectionLimit = ServicePointManager.DefaultConnectionLimit;
+            request.UserAgent = $"Fougerite Mod (v{Bootstrap.Version}; https://fougerite.com)";
+
+            byte[] input = new byte[0];
+            if (!string.IsNullOrEmpty(inputBody))
+            {
+                input = Encoding.UTF8.GetBytes(inputBody);
+                request.ContentLength = input.Length;
+                request.ContentType = "application/x-www-form-urlencoded";
+            }
+
+            if (additionalHeaders != null)
+            {
+                foreach (var x in additionalHeaders.Keys)
                 {
-                    //request.Headers[x] = AdditionalHeaders[x];
-                    request.SetRawHeader(x, AdditionalHeaders[x]);
+                    request.SetRawHeader(x, additionalHeaders[x]);
                 }
             }
             
-            DoWithResponse(request, (response) =>
+            // Are we posting anything?
+            if (input.Length > 0)
             {
-                Stream stream = response.GetResponseStream();
-                if (stream != null)
+                request.BeginGetRequestStream(result =>
                 {
-                    string body = new StreamReader(stream).ReadToEnd();
-                    callback(body);
+                    try
+                    {
+                        // Write request body
+                        using (Stream stream = request.EndGetRequestStream(result))
+                        {
+                            stream.Write(input, 0, input.Length);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError("[CreateAsyncHTTPRequest Failed] Error: " + ex);
+                    }
+                }, null);
+            }
+
+            DoWithResponse(request, response =>
+            {
+                string body = "Failed";
+                try
+                {
+                    Stream stream = response.GetResponseStream();
+                    if (stream != null)
+                    {
+                        body = new StreamReader(stream).ReadToEnd();
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    callback("Failed");
+                    Logger.LogError("[CreateAsyncHTTPRequest Failed] Error: " + ex);
+                }
+
+                try
+                {
+                    callback((int) response.StatusCode, body);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("[CreateAsyncHTTPRequest Callback] Error: " + ex);
                 }
             });
         }
-        
+
         /// <summary>
         /// This handles the Async webrequests of the CreateAsyncHTTPRequest method.
         /// You can use this if you are creating your own HttpWebRequest instance.
@@ -155,24 +240,38 @@ namespace Fougerite
         {
             Action wrapperAction = () =>
             {
-                request.BeginGetResponse(new AsyncCallback((iar) =>
+                request.BeginGetResponse(iar =>
                 {
                     var response = (HttpWebResponse)((HttpWebRequest)iar.AsyncState).EndGetResponse(iar);
                     responseAction(response);
-                }), request);
+                }, request);
             };
-            wrapperAction.BeginInvoke(new AsyncCallback((iar) =>
+            wrapperAction.BeginInvoke(iar =>
             {
                 var action = (Action)iar.AsyncState;
                 action.EndInvoke(iar);
-            }), wrapperAction);
+            }, wrapperAction);
+        }
+        
+        /// <summary>
+        /// We do not care what the SSL cert gives, we accept any type literally.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="certificate"></param>
+        /// <param name="chain"></param>
+        /// <param name="sslpolicyerrors"></param>
+        /// <returns></returns>
+        private bool AcceptAllCertifications(object sender, X509Certificate certificate, X509Chain chain,
+            SslPolicyErrors sslpolicyerrors)
+        {
+            return true;
         }
     }
-    
+
     // https://stackoverflow.com/questions/239725/cannot-set-some-http-headers-when-using-system-net-webrequest
     public static class HttpWebRequestExtensions
     {
-        static readonly string[] RestrictedHeaders = new string[] {
+        private static readonly string[] RestrictedHeaders = {
             "Accept",
             "Connection",
             "Content-Length",
@@ -189,7 +288,8 @@ namespace Fougerite
             "User-Agent"
         };
 
-        static readonly Dictionary<string, PropertyInfo> HeaderProperties = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, PropertyInfo> HeaderProperties =
+            new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
 
         static HttpWebRequestExtensions()
         {

@@ -10,13 +10,28 @@ namespace Fougerite
 {
     public class Loom : MonoBehaviour
     {
+        private static Loom _current;
+        private static GameObject _gameObject;
+        internal static int numThreads;
+        internal static bool initialized = false;
+        private readonly List<Action> _currentActions = new List<Action>();
+        private readonly List<Action> _actions = new List<Action>();
+        private readonly List<DelayedQueueItem> _delayed = new List<DelayedQueueItem>();
+        private readonly List<DelayedQueueItem> _currentDelayed = new List<DelayedQueueItem>();
+        
+        /// <summary>
+        /// Struct for the action to be ran under a thread.
+        /// </summary>
+        public struct DelayedQueueItem
+        {
+            public float time;
+            public Action action;
+        }
+
         /// <summary>
         /// Maximum amount of threads that can be queued at a time. Do not set this to a large number or rust will die.
         /// </summary>
         public static int maxThreads = 30;
-        private static Loom _current;
-        internal static int numThreads;
-        internal static bool initialized = false;
 
         /// <summary>
         /// Returns the current amount of queued threads.
@@ -36,8 +51,8 @@ namespace Fougerite
                 Initialize();
                 if (_current == null)
                 {
-                    var g = new GameObject("Loom");
-                    _current = g.AddComponent<Loom>();
+                    _gameObject = new GameObject("Loom");
+                    _current = _gameObject.AddComponent<Loom>();
                 }
                 return _current;
             }
@@ -49,7 +64,7 @@ namespace Fougerite
             initialized = true;
         }
 
-        static void Initialize()
+        private static void Initialize()
         {
             if (!initialized)
             {
@@ -59,20 +74,10 @@ namespace Fougerite
                     return;
                 }
                 initialized = true;
-                var g = new GameObject("Loom");
-                _current = g.AddComponent<Loom>();
+                _gameObject = new GameObject("Loom");
+                _current = _gameObject.AddComponent<Loom>();
             }
         }
-
-        private List<Action> _actions = new List<Action>();
-        public struct DelayedQueueItem
-        {
-            public float time;
-            public Action action;
-        }
-
-        private List<DelayedQueueItem> _delayed = new List<DelayedQueueItem>();
-        List<DelayedQueueItem> _currentDelayed = new List<DelayedQueueItem>();
 
         /// <summary>
         /// Runs the code on the MAIN thread.
@@ -109,12 +114,13 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Fougerite Loom Error] " + ex + " - " + Time.time + " - " + time + " - " + action + " - " + Current._actions + " - " + Current._delayed);
+                Logger.LogError("[Fougerite Loom Error] " + ex + " - " + Time.time + " - " + time 
+                                + " - " + action + " - " + Current._actions + " - " + Current._delayed);
             }
         }
 
         /// <summary>
-        /// Runs the code in a larger thread.
+        /// Runs the code on a sub thread.
         /// </summary>
         /// <param name="action"></param>
         public static void ExecuteInBiggerStackThread(Action action)
@@ -142,14 +148,14 @@ namespace Fougerite
             {
                 ((Action)action)();
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.LogError("[Loom RunAction] Error: " + ex);
             }
             finally
             {
                 Interlocked.Decrement(ref numThreads);
             }
-
         }
 
 
@@ -160,16 +166,13 @@ namespace Fougerite
                 _current = null;
             }
         }
-
-
+        
 
         // Use this for initialization
         public void Start()
         {
 
         }
-
-        List<Action> _currentActions = new List<Action>();
 
         // Update is called once per frame
         public void Update()
