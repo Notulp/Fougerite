@@ -763,6 +763,13 @@ namespace Fougerite.Permissions
         public bool RemoveGroup(string groupname)
         {
             groupname = groupname.Trim().ToLower();
+            
+            // Disable the removal of the default group.
+            if (groupname == "default")
+            {
+                return false;
+            }
+            
             PermissionGroup group = GetGroupByName(groupname);
 
             if (group != null)
@@ -807,8 +814,9 @@ namespace Fougerite.Permissions
                     if (!group.GroupPermissions.Contains(permission))
                     {
                         group.GroupPermissions.Add(permission);
-                        return true;
                     }
+                    
+                    return true;
                 }
             }
 
@@ -898,9 +906,11 @@ namespace Fougerite.Permissions
         public bool ChangeGroupName(string groupname, string newname)
         {
             groupname = groupname.Trim().ToLower();
+            newname = newname.Trim();
             PermissionGroup group = GetGroupByName(groupname);
+            PermissionGroup newGroup = GetGroupByName(newname.ToLower());
 
-            if (group != null)
+            if (group != null && newGroup == null)
             {
                 uint id = group.UniqueID;
                 lock (_obj)
