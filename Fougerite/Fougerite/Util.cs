@@ -1070,7 +1070,7 @@ namespace Fougerite
         /// <returns></returns>
         public UInt32 SuperFastHash(string input)
         {
-            return SuperFastHashUInt16Hack.Hash(Encoding.UTF8.GetBytes(input));
+            return SuperFastHash(Encoding.UTF8.GetBytes(input));
         }
 
         /// <summary>
