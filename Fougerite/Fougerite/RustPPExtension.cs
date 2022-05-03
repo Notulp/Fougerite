@@ -1,4 +1,6 @@
 ﻿
+using Fougerite.Permissions;
+
 namespace Fougerite
 {
     using System;
@@ -51,13 +53,16 @@ namespace Fougerite
         public bool HasPermission(ulong userID, string perm)
         {
             var admin = GetAdmin(userID);
-            return admin != null && admin.HasPermission(perm);
+            return (admin != null && admin.HasPermission(perm) || PermissionSystem.GetPermissionSystem().PlayerHasPermission(userID, perm));
         }
 
         public bool HasPermission(string name, string perm)
         {
             var admin = GetAdmin(name);
-            return admin != null && admin.HasPermission(perm);
+            
+            // This only works for admins, the API isn't used though.
+            return (admin != null && admin.HasPermission(perm) 
+                    || (admin != null && PermissionSystem.GetPermissionSystem().PlayerHasPermission(admin.UserID, perm)));
         }
 
         public bool IsAdmin(ulong uid)

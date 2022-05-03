@@ -17,7 +17,7 @@
             {
                 if (this.replies.ContainsKey(sender.Name))
                 {
-                    string replyTo = (string) this.replies[sender.Name];
+                    string replyTo = (string)this.replies[sender.Name];
                     Fougerite.Player recipient = Fougerite.Server.GetServer().FindPlayer(replyTo);
                     if (recipient == null)
                     {
@@ -25,6 +25,7 @@
                         this.replies.Remove(sender.Name);
                         return;
                     }
+
                     string message = string.Join(" ", ChatArguments).Trim(new char[] { ' ', '"' }).Replace('"', 'ˮ');
                     if (message == string.Empty)
                     {

@@ -16,6 +16,7 @@
             {
                 return;
             }
+
             string usage = "Give Item usage:  /give  playerName  itemName  (quantity)";
             if (ChatArguments.Length < 2) // minimum arguments = 2
             {
@@ -33,14 +34,15 @@
                 if (int.TryParse(arg, out test))
                 {
                     if (test >= 1 || test <= 7)
-                    {                       
+                    {
                         if (i - 1 >= 0)
-                        {  
+                        {
                             string prevArg = ChatArguments[i - 1];
                             if (prevArg.Equals("Part", ic) || prevArg.Equals("Kit", ic))
                                 continue;
                         }
                     }
+
                     if (test == 556)
                     {
                         if (i + 1 < ChatArguments.Length)
@@ -51,14 +53,16 @@
                                 continue;
                         }
                     }
+
                     qty = test;
                     qtyIdx = i;
                 }
             }
+
             if (qty == 0)
             {
                 qty = 1;
-            } 
+            }
             else if (ChatArguments.Length < 3) // qty given, but there is < 3 arguments => invalid
             {
                 pl.MessageFrom(Core.Name, usage);
@@ -67,9 +71,11 @@
 
             string quantity = qty.ToString();
             double best = 0d;
-            string[] remain = qtyIdx > -1 ? ChatArguments.Slice(0, qtyIdx)
+            string[] remain = qtyIdx > -1
+                ? ChatArguments.Slice(0, qtyIdx)
                     .Concat(ChatArguments.Slice(Math.Min(qtyIdx + 1, ChatArguments.Length), ChatArguments.Length))
-                    .ToArray() : ChatArguments;
+                    .ToArray()
+                : ChatArguments;
 
             List<string> collect = new List<string>();
             ICollection<string> matches = new List<string>();
@@ -117,10 +123,14 @@
                     pl.MessageFrom(RustPP.Core.Name, "Coudln't find player!");
                     return;
                 }
-                Logger.LogDebug(string.Format("[GiveItemCommand] quantity={0} item={1} recipient={2}", quantity, itemName, recipName));
+
+                Logger.LogDebug(string.Format("[GiveItemCommand] quantity={0} item={1} recipient={2}", quantity,
+                    itemName, recipName));
                 inv.giveplayer(ref Arguments);
-                pl.MessageFrom(RustPP.Core.Name, string.Format("{0}  {1} were placed in {2}'s inventory.", quantity, itemName, recipName));
-                np.MessageFrom(RustPP.Core.Name, string.Format("{0} gave you  {1}  {2}", Arguments.argUser.displayName, quantity, itemName));
+                pl.MessageFrom(RustPP.Core.Name,
+                    string.Format("{0}  {1} were placed in {2}'s inventory.", quantity, itemName, recipName));
+                np.MessageFrom(RustPP.Core.Name,
+                    string.Format("{0} gave you  {1}  {2}", Arguments.argUser.displayName, quantity, itemName));
             }
             else
             {

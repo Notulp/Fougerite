@@ -18,13 +18,19 @@
                     userIDs.Remove(pl.UID);
                     pl.PlayerClient.controllable.character.takeDamage.SetGodMode(false);
                 }
+
                 return;
             }
+
             if (!this.userIDs.Contains(pl.UID))
             {
                 this.userIDs.Add(pl.UID);
                 pl.PlayerClient.controllable.character.takeDamage.SetGodMode(true);
-                if (pl.FallDamage != null) { pl.FallDamage.ClearInjury();}
+                if (pl.FallDamage != null)
+                {
+                    pl.FallDamage.ClearInjury();
+                }
+
                 pl.MessageFrom(Core.Name, "God mode has been activated!");
             }
             else

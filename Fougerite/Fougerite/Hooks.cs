@@ -1648,6 +1648,13 @@ namespace Fougerite
             // Create our API player class
             Player player = new Player(user.playerClient);
             
+            // Does the player have RCON or * permissions?
+            if (PermissionSystem.GetPermissionSystem().PlayerHasPermission(player.UID, "RCON"))
+            {
+                // Force the user to an RCON admin.
+                player.PlayerClient.netUser.admin = true;
+            }
+            
             // Add It to the consistent cache list
             srv.AddCachePlayer(uid, player);
 

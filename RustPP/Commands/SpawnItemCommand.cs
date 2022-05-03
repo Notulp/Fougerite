@@ -15,6 +15,7 @@
             {
                 return;
             }
+
             if (ChatArguments.Length > 0)
             {
                 StringComparison ic = StringComparison.InvariantCultureIgnoreCase;
@@ -35,6 +36,7 @@
                                     continue;
                             }
                         }
+
                         if (test == 556)
                         {
                             if (i + 1 < ChatArguments.Length)
@@ -45,22 +47,28 @@
                                     continue;
                             }
                         }
+
                         qty = test;
                         qtyIdx = i;
                     }
                 }
+
                 if (qty == 0)
                 {
                     qty = 1;
                 }
+
                 string quantity = qty.ToString();
-                string[] remain = qtyIdx > -1 ? ChatArguments.Slice(0, qtyIdx)
-                    .Concat(ChatArguments.Slice(Math.Min(qtyIdx + 1, ChatArguments.Length), ChatArguments.Length))
-                    .ToArray() : ChatArguments;
+                string[] remain = qtyIdx > -1
+                    ? ChatArguments.Slice(0, qtyIdx)
+                        .Concat(ChatArguments.Slice(Math.Min(qtyIdx + 1, ChatArguments.Length), ChatArguments.Length))
+                        .ToArray()
+                    : ChatArguments;
 
                 string itemName = string.Join(" ", remain.ToArray()).MatchItemName();
                 Arguments.Args = new string[] { itemName, quantity };
-                Logger.LogDebug(string.Format("[SpawnItemCommand] terms={0}, itemName={1}, quantity={2}", string.Join(",", remain.ToArray()), itemName, quantity));
+                Logger.LogDebug(string.Format("[SpawnItemCommand] terms={0}, itemName={1}, quantity={2}",
+                    string.Join(",", remain.ToArray()), itemName, quantity));
                 pl.MessageFrom(Core.Name, string.Format("{0}  {1} were placed in your inventory.", quantity, itemName));
                 inv.give(ref Arguments);
             }

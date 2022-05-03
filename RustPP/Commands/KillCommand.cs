@@ -1,4 +1,6 @@
-﻿namespace RustPP.Commands
+﻿using Fougerite.Permissions;
+
+namespace RustPP.Commands
 {
     using Fougerite;
     using System;

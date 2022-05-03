@@ -16,10 +16,11 @@
                 pl.MessageFrom(Core.Name, "Remove Admin Usage:  /unadmin playerName");
                 return;
             }
+
             Fougerite.Player p = Server.GetServer().FindPlayer(playerName);
             if (p != null)
             {
-                Administrator nadministrator = Administrator.AdminList.Find(delegate (Administrator obj)
+                Administrator nadministrator = Administrator.AdminList.Find(delegate(Administrator obj)
                 {
                     return obj.UserID == p.UID;
                 });
@@ -29,6 +30,7 @@
                     return;
                 }
             }
+
             List<Administrator> list = new List<Administrator>();
             list.Add(new Administrator(0, "Cancel"));
             Administrator administrator = Administrator.AdminList.Find(delegate(Administrator obj)
@@ -40,6 +42,7 @@
                 RemoveAdmin(administrator, pl);
                 return;
             }
+
             list.AddRange(Administrator.AdminList.FindAll(delegate(Administrator obj)
             {
                 return obj.DisplayName.ToUpperInvariant().Contains(playerName.ToUpperInvariant());
@@ -49,11 +52,15 @@
                 pl.MessageFrom(Core.Name, string.Format("No adminstrator matches the name:  {0}", playerName));
                 return;
             }
-            pl.MessageFrom(Core.Name, string.Format("{0}  player{1} {2}: ", ((list.Count - 1)).ToString(), (((list.Count - 1) > 1) ? "s match" : " matches"), playerName));
+
+            pl.MessageFrom(Core.Name,
+                string.Format("{0}  player{1} {2}: ", ((list.Count - 1)).ToString(),
+                    (((list.Count - 1) > 1) ? "s match" : " matches"), playerName));
             for (int i = 1; i < list.Count; i++)
             {
                 pl.MessageFrom(Core.Name, string.Format("{0} - {1}", i, list[i].DisplayName));
             }
+
             pl.MessageFrom(Core.Name, "0 - Cancel");
             pl.MessageFrom(Core.Name, "Please enter the number matching the adminstrator to remove.");
             Core.adminRemoveWaitList[pl.UID] = list;
@@ -67,6 +74,7 @@
                 pl.MessageFrom(Core.Name, "Cancelled!");
                 return;
             }
+
             List<Administrator> list = (List<Administrator>)Core.adminRemoveWaitList[pl.UID];
             RemoveAdmin(list[id], pl);
         }
@@ -79,7 +87,8 @@
             }
             else
             {
-                Administrator.NotifyAdmins(string.Format("{0} is no longer an administrator; removed by {1}.", exAdmin.DisplayName, myAdmin.Name));
+                Administrator.NotifyAdmins(string.Format("{0} is no longer an administrator; removed by {1}.",
+                    exAdmin.DisplayName, myAdmin.Name));
                 Administrator.DeleteAdmin(exAdmin.UserID);
             }
         }

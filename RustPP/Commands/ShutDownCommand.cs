@@ -30,13 +30,16 @@ namespace RustPP.Commands
                     Fougerite.Server.GetServer().BroadcastFrom(Core.Name, "Saving Server...");
                     World.GetWorld().ServerSaveHandler.ManualSave();
                     Fougerite.Server.GetServer().BroadcastFrom(Core.Name, "Saved Server Data!");
-                    Fougerite.Server.GetServer().BroadcastFrom(Core.Name, "Server is shutting down in " + ShutdownTime + " seconds.");
+                    Fougerite.Server.GetServer().BroadcastFrom(Core.Name,
+                        "Server is shutting down in " + ShutdownTime + " seconds.");
                     _timer = new Timer(TriggerTime * 1000);
                     _timer.Elapsed += Trigger;
                     _timer.Start();
                 }
+
                 return;
             }
+
             StartShutdown();
         }
 
@@ -52,8 +55,10 @@ namespace RustPP.Commands
                 Logger.LogError("[RustPP] Failed to execute shutdown! Invalid config options!");
                 return;
             }
+
             Fougerite.Hooks.IsShuttingDown = true;
-            Fougerite.Server.GetServer().BroadcastFrom(Core.Name, "Server is shutting down in " + ShutdownTime + " seconds.");
+            Fougerite.Server.GetServer()
+                .BroadcastFrom(Core.Name, "Server is shutting down in " + ShutdownTime + " seconds.");
             _timer = new Timer(TriggerTime * 1000);
             _timer.Elapsed += Trigger;
             _timer.Start();
@@ -75,7 +80,8 @@ namespace RustPP.Commands
             }
             else
             {
-                Fougerite.Server.GetServer().BroadcastFrom(Core.Name, "Server is shutting down in " + (ShutdownTime - Time) + " seconds.");
+                Fougerite.Server.GetServer().BroadcastFrom(Core.Name,
+                    "Server is shutting down in " + (ShutdownTime - Time) + " seconds.");
             }
         }
 

@@ -18,13 +18,16 @@
                     Arguments.ReplyWith(reply);
                     pl.MessageFrom(Core.Name, reply);
                 }
+
                 return;
             }
+
             if (!Administrator.IsAdmin(pl.UID))
             {
                 pl.MessageFrom(Core.Name, "Only Administrators can get the locations of other players.");
                 return;
             }
+
             foreach (Fougerite.Player client in Fougerite.Server.GetServer().Players)
             {
                 if (targetName.Equals("all", StringComparison.OrdinalIgnoreCase) ||
@@ -46,14 +49,17 @@
             bool flag = false;
             try
             {
-                string[] v3 = location.Location.ToString("F").Trim(new char[] { '(', ')', ' ' }).Split(new char[] { ',' });
+                string[] v3 = location.Location.ToString("F").Trim(new char[] { '(', ')', ' ' })
+                    .Split(new char[] { ',' });
                 reply = string.Format("{3} Location: X:{0} Y:{1} Z:{2}", v3[0], v3[1], v3[2],
                     (location.PlayerClient.netUser == source ? "Your" : string.Format("{0}'s", location.Name)));
                 flag = true;
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 reply = string.Empty;
             }
+
             return flag;
         }
     }

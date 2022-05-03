@@ -20,6 +20,7 @@
                 sender.MessageFrom(Core.Name, "Private Message Usage:  /pm playerName message");
                 return;
             }
+
             string search = ChatArguments[0];
             Fougerite.Player recipient = Fougerite.Player.FindByName(search);
             if (recipient == null)
@@ -27,18 +28,21 @@
                 sender.MessageFrom(Core.Name, "Couldn't find player " + search);
                 return;
             }
+
             List<string> wth = ChatArguments.ToList();
             wth.Remove(wth[0]);
             string message;
             try
             {
-                message = string.Join(" ", wth.ToArray()).Replace(search, "").Trim(new char[] {' ', '"'}).Replace('"', 'ˮ');
+                message = string.Join(" ", wth.ToArray()).Replace(search, "").Trim(new char[] { ' ', '"' })
+                    .Replace('"', 'ˮ');
             }
             catch
             {
                 sender.MessageFrom(Core.Name, "Something went wrong. Try again.");
                 return;
             }
+
             if (message == string.Empty)
             {
                 sender.MessageFrom(Core.Name, "Private Message Usage: /pm playerName message");
