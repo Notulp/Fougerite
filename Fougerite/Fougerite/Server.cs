@@ -1,28 +1,31 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Fougerite.Events;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
+using Object = UnityEngine.Object;
 
 namespace Fougerite
 {
-    using System;
-    using System.IO;
-    using System.Linq;
-    using System.Collections.Generic;
-
     public class Server
     {
         private ItemsBlocks _items;
         private StructureMaster _serverStructs = new StructureMaster();
-        public Fougerite.Data data = new Fougerite.Data();
-        private Dictionary<ulong, Fougerite.Player> players = new Dictionary<ulong, Fougerite.Player>();
-        private static Fougerite.Server server;
-        private bool HRustPP = false;
-        public string server_message_name = "Fougerite";
-        public static IDictionary<ulong, Fougerite.Player> Cache = new Dictionary<ulong, Fougerite.Player>();
-        public static IEnumerable<string> ForceCallForCommands = new List<string>();
+        private readonly Dictionary<ulong, Player> _players = new Dictionary<ulong, Player>();
+        private readonly object _playersLock = new object();
+        private readonly object _playersCacheLock = new object();
+        private static Server _server;
+        private bool HRustPP;
         private readonly string path = Path.Combine(Util.GetRootFolder(), Path.Combine("Save", "GlobalBanList.ini"));
         private readonly List<string> _ConsoleCommandCancelList = new List<string>();
+        [Obsolete("Use DataStore, this is used in old Javascript plugins from years ago.", false)]
+        public Data data = new Data();
+        public string server_message_name = "Fougerite";
+        public static Dictionary<ulong, Player> Cache = new Dictionary<ulong, Player>();
+        public static IEnumerable<string> ForceCallForCommands = new List<string>();
 
 
         public void LookForRustPP()
@@ -55,7 +58,7 @@ namespace Fougerite
             }
         }
 
-        public void BanPlayer(Fougerite.Player player, string Banner = "Console", string reason = "You were banned.", Fougerite.Player Sender = null, bool AnnounceToServer = false)
+        public void BanPlayer(Player player, string Banner = "Console", string reason = "You were banned.", Player Sender = null, bool AnnounceToServer = false)
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(player, Banner, reason, Sender));
             if (cancel) { return;}
@@ -78,7 +81,7 @@ namespace Fougerite
             if (!AnnounceToServer)
             {
 #pragma warning disable CS0618
-                foreach (Fougerite.Player pl in Players.Where(pl =>
+                foreach (Player pl in Players.Where(pl =>
                              pl.Admin || pl.Moderator || PermissionSystem.GetPermissionSystem().PlayerHasPermission(pl, "bansystem.notification")))
 #pragma warning restore CS0618
                 {
@@ -134,7 +137,7 @@ namespace Fougerite
             return (DataStore.GetInstance().Get("Ips", ip) != null);
         }
 
-        public bool UnbanByName(string name, string UnBanner = "Console", Fougerite.Player Sender = null)
+        public bool UnbanByName(string name, string UnBanner = "Console", Player Sender = null)
         {
             var ids = FindIDsOfName(name);
             var ips = FindIPsOfName(name);
@@ -147,7 +150,7 @@ namespace Fougerite
                 return false;
             }
 #pragma warning disable CS0618
-            foreach (Fougerite.Player pl in Players.Where(pl => 
+            foreach (Player pl in Players.Where(pl => 
                          pl.Admin || pl.Moderator ||PermissionSystem.GetPermissionSystem().PlayerHasPermission(pl, "bansystem.notification")))
 #pragma warning restore CS0618
             {
@@ -229,7 +232,7 @@ namespace Fougerite
         /// <param name="arg"></param>
         public void Broadcast(string arg)
         {
-            foreach (Fougerite.Player player in this.Players)
+            foreach (Player player in Players)
             {
                 if (player.IsOnline)
                 {
@@ -245,7 +248,7 @@ namespace Fougerite
         /// <param name="arg"></param>
         public void BroadcastFrom(string name, string arg)
         {
-            foreach (Fougerite.Player player in this.Players)
+            foreach (Player player in Players)
             {
                 if (player.IsOnline)
                 {
@@ -260,7 +263,7 @@ namespace Fougerite
         /// <param name="s"></param>
         public void BroadcastNotice(string s)
         {
-            foreach (Fougerite.Player player in this.Players)
+            foreach (Player player in Players)
             {
                 if (player.IsOnline)
                 {
@@ -275,7 +278,7 @@ namespace Fougerite
         /// <param name="s"></param>
         public void BroadcastInv(string s)
         {
-            foreach (Fougerite.Player player in this.Players)
+            foreach (Player player in Players)
             {
                 if (player.IsOnline)
                 {
@@ -298,9 +301,9 @@ namespace Fougerite
         /// </summary>
         /// <param name="np"></param>
         /// <returns></returns>
-        public Fougerite.Player FindByNetworkPlayer(uLink.NetworkPlayer np)
+        public Player FindByNetworkPlayer(uLink.NetworkPlayer np)
         {
-            foreach (var x in Fougerite.Server.GetServer().Players)
+            foreach (var x in GetServer().Players)
             {
                 if (x.PlayerClient.netPlayer == null) continue;
                 if (x.PlayerClient.netPlayer == np) return x;
@@ -313,9 +316,9 @@ namespace Fougerite
         /// </summary>
         /// <param name="pc"></param>
         /// <returns></returns>
-        public Fougerite.Player FindByPlayerClient(PlayerClient pc)
+        public Player FindByPlayerClient(PlayerClient pc)
         {
-            foreach (var x in Fougerite.Server.GetServer().Players)
+            foreach (var x in GetServer().Players)
             {
                 if (x.PlayerClient == pc) return x;
             }
@@ -327,16 +330,17 @@ namespace Fougerite
         /// </summary>
         /// <param name="search"></param>
         /// <returns></returns>
-        public Fougerite.Player FindPlayer(string search)
+        public Player FindPlayer(string search)
         {
             if (search.All(char.IsDigit))
             {
                 ulong uid;
                 if (ulong.TryParse(search, out uid))
                 {
-                    if (Cache.ContainsKey(uid))
+                    Player player = GetCachePlayer(uid);
+                    if (player != null)
                     {
-                        return Cache[uid];
+                        return player;
                     }
                     var flist = Players.Where(x => x.UID == uid).ToList();
                     if (flist.Count >= 1)
@@ -370,12 +374,14 @@ namespace Fougerite
         /// </summary>
         /// <param name="search"></param>
         /// <returns></returns>
-        public Fougerite.Player FindPlayer(ulong search)
+        public Player FindPlayer(ulong search)
         {
-            if (Cache.ContainsKey(search))
+            Player player = GetCachePlayer(search);
+            if (player != null)
             {
-                return Cache[search];
+                return player;
             }
+            
             var flist = Players.Where(x => x.UID == search).ToList();
             if (flist.Count >= 1)
             {
@@ -389,13 +395,13 @@ namespace Fougerite
         /// Returns the instance of the Server class.
         /// </summary>
         /// <returns></returns>
-        public static Fougerite.Server GetServer()
+        public static Server GetServer()
         {
-            if (server == null)
+            if (_server == null)
             {
-                server = new Fougerite.Server();
+                _server = new Server();
             }
-            return server;
+            return _server;
         }
 
         /// <summary>
@@ -413,7 +419,7 @@ namespace Fougerite
         {
             get
             {
-                return Fougerite.Data.GetData().chat_history;
+                return Data.GetData().chat_history;
             }
         }
 
@@ -424,7 +430,7 @@ namespace Fougerite
         {
             get
             {
-                return Fougerite.Data.GetData().chat_history_username;
+                return Data.GetData().chat_history_username;
             }
         }
 
@@ -435,48 +441,123 @@ namespace Fougerite
         {
             get
             {
-                return this._items;
+                return _items;
             }
             set
             {
-                this._items = value;
+                _items = value;
             }
         }
 
         /// <summary>
-        /// Returns all online players. (Iteration safe.)
+        /// Returns all player's that have connected during runtime, meaning
+        /// even offline players can be found in this cache. (Thread safe)
+        /// This dictionary is a shallow copy.
         /// </summary>
-        public List<Fougerite.Player> Players
+        public Dictionary<ulong, Player> PlayersCache
         {
             get
             {
-                return this.players.Values.ToList();
+                lock (_playersCacheLock)
+                {
+                    return new Dictionary<ulong, Player>(Cache);
+                }
             }
         }
 
-        internal void AddPlayer(ulong id, Fougerite.Player player)
+        /// <summary>
+        /// Tries to grab the player by ID directly from the cache
+        /// where we aren't removing players unless specified in the config. (Thread Safe)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Player GetCachePlayer(ulong id)
         {
-            if (!this.players.ContainsKey(id))
+            lock (_playersCacheLock)
             {
-                this.players.Add(id, player);
+                Player player;
+                Cache.TryGetValue(id, out player);
+                return player;
             }
-            else
+        }
+
+        internal void AddCachePlayer(ulong id, Player player)
+        {
+            lock (_playersCacheLock)
             {
-                this.players[id] = player;
+                Cache[id] = player;
+            }
+        }
+
+        internal void RemoveCachePlayer(ulong id)
+        {
+            lock (_playersCacheLock)
+            {
+                Cache.Remove(id);
+            }
+        }
+
+        /// <summary>
+        /// Returns all online players. (Thread safe)
+        /// This list is a shallow copy.
+        /// </summary>
+        public List<Player> Players
+        {
+            get
+            {
+                lock (_playersLock)
+                {
+                    return new List<Player>(_players.Values);
+                }
+            }
+        }
+
+        internal void AddPlayer(ulong id, Player player)
+        {
+            lock (_playersLock)
+            {
+                if (!_players.ContainsKey(id))
+                {
+                    _players.Add(id, player);
+                }
+                else
+                {
+                    _players[id] = player;
+                }
             }
         }
 
         internal void RemovePlayer(ulong id)
         {
-            if (this.players.ContainsKey(id))
+            lock (_playersLock)
             {
-                this.players.Remove(id);
+                if (_players.ContainsKey(id))
+                {
+                    _players.Remove(id);
+                }
             }
         }
 
         internal bool ContainsPlayer(ulong id)
         {
-            return this.players.ContainsKey(id);
+            lock (_playersLock)
+            {
+                return _players.ContainsKey(id);
+            }
+        }
+        
+        /// <summary>
+        /// Returns current list of players. (Thread Safe)
+        /// </summary>
+        internal Dictionary<ulong, Player> DPlayers
+        {
+            get
+            {
+                lock (_playersLock)
+                {
+                    return new Dictionary<ulong, Player>(_players);
+                }
+            }
         }
 
         /// <summary>
@@ -516,13 +597,8 @@ namespace Fougerite
         /// </summary>
         public List<string> ConsoleCommandCancelList
         {
-            get { return this._ConsoleCommandCancelList; }
+            get { return _ConsoleCommandCancelList; }
         }
-
-        internal Dictionary<ulong, Player> DPlayers
-        {
-            get { return this.players; }
-        } 
 
         /// <summary>
         /// Gets all the current sleepers on the server.
@@ -531,9 +607,9 @@ namespace Fougerite
         {
             get
             {
-                var query = from s in UnityEngine.Object.FindObjectsOfType<SleepingAvatar>()
+                var query = from s in Object.FindObjectsOfType<SleepingAvatar>()
                             select new Sleeper(s.GetComponent<DeployableObject>());
-                return query.ToList<Sleeper>();
+                return query.ToList();
             }
         }
         

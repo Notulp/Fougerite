@@ -13,13 +13,14 @@ namespace Fougerite
     public class SQLiteConnector
     {
         private static SQLiteConnector _inst;
-        public string SQLitePath = Directory.GetCurrentDirectory() + "\\Save\\FougeriteSQL.sqlite";
+        public string SQLitePath = Path.Combine(Directory.GetCurrentDirectory(), "\\Save\\FougeriteSQL.sqlite");
         private SQLiteConnection _dbConnection;
 
         internal void Setup()
         {
-            string extDir = Directory.GetCurrentDirectory() + "\\rust_server_Data\\Managed";
-            File.WriteAllText(Path.Combine(extDir, "System.Data.SQLite.dll.config"), $"<configuration>\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x86\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86\" />\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x64\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86-64\" />\n</configuration>");
+            string extDir = Path.Combine(Directory.GetCurrentDirectory(), "\\rust_server_Data\\Managed");
+            File.WriteAllText(Path.Combine(extDir, "System.Data.SQLite.dll.config"), 
+                $"<configuration>\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x86\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86\" />\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x64\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86-64\" />\n</configuration>");
             if (!File.Exists(SQLitePath))
             {
                 SQLiteConnection.CreateFile(SQLitePath);
