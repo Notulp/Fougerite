@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using Fougerite.Concurrent;
 using Fougerite.Events;
 using UnityEngine;
 
@@ -630,6 +631,26 @@ namespace Fougerite.PluginLoaders
             return new Dictionary<object, object>();
         }
 
+        public ReaderWriterLock CreateReaderWriterLock()
+        {
+            return new ReaderWriterLock();
+        }
+        
+        public ConcurrentDictionary<string, object> CreateConcurrentDict()
+        {
+            return new ConcurrentDictionary<string, object>();
+        }
+        
+        public ConcurrentDictionary<string, string> CreateDynamicConcurrentStringDict()
+        {
+            return new ConcurrentDictionary<string, string>();
+        }
+
+        public ConcurrentDictionary<object, object> CreateDynamicConcurrentDict()
+        {
+            return new ConcurrentDictionary<object, object>();
+        }
+
         public List<object> CreateList()
         {
             return new List<object>();
@@ -638,6 +659,16 @@ namespace Fougerite.PluginLoaders
         public List<string> CreateStringList()
         {
             return new List<string>();
+        }
+        
+        public ConcurrentList<object> CreateConcurrentList()
+        {
+            return new ConcurrentList<object>();
+        }
+        
+        public ConcurrentList<string> CreateConcurrentStringList()
+        {
+            return new ConcurrentList<string>();
         }
 
         public void OnTablesLoaded(Dictionary<string, LootSpawnList> tables)
