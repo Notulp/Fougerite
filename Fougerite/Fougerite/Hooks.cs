@@ -1820,8 +1820,11 @@ namespace Fougerite
             }
 
             Player player = Player.FindByNetworkPlayer(rec.inventory.networkView.owner);
-            GatherEvent ge = new GatherEvent(rt, db, amount);
-            ge.Item = "Wood";
+            GatherEvent ge = new GatherEvent(rt, db, amount)
+            {
+                Item = "Wood"
+            };
+            
             try
             {
                 if (OnPlayerGathering != null)

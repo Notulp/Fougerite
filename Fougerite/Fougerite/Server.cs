@@ -24,6 +24,10 @@ namespace Fougerite
         [Obsolete("Use DataStore, this is used in old Javascript plugins from years ago.", false)]
         public Data data = new Data();
         public string server_message_name = "Fougerite";
+        /// <summary>
+        /// This cache is supposed to be private, so make sure to switch your plugin to use
+        /// PlayersCache or GetCachePlayer() if you need to use this.
+        /// </summary>
         public static Dictionary<ulong, Player> Cache = new Dictionary<ulong, Player>();
         public static IEnumerable<string> ForceCallForCommands = new List<string>();
 

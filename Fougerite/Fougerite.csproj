@@ -130,10 +130,10 @@
     <Reference Include="MySql.Data, Version=6.7.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d">
       <HintPath>References\FougeriteExtraReferences\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+    <Reference Include="Newtonsoft.Json">
       <HintPath>References\FougeriteExtraReferences\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json.Schema, Version=3.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+    <Reference Include="Newtonsoft.Json.Schema">
       <HintPath>References\FougeriteExtraReferences\Newtonsoft.Json.Schema.dll</HintPath>
     </Reference>
     <Reference Include="RustPP, Version=1.1.7.9, Culture=neutral, PublicKeyToken=null">

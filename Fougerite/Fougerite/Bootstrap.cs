@@ -255,8 +255,14 @@ namespace Fougerite
         public void Start()
         {
             string FougeriteDirectoryConfig = Path.Combine(Util.GetServerFolder(), "FougeriteDirectory.cfg");
+            
+            // Init Configs
             Config.Init(FougeriteDirectoryConfig);
+            
+            // Init Logger
             Logger.Init();
+            
+            // Init CTimer
             _timergo = new GameObject();
             _timergo.AddComponent<CTimerHandler>();
             UnityEngine.Object.DontDestroyOnLoad(_timergo);
