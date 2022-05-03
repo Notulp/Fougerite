@@ -13,7 +13,7 @@ namespace Fougerite.Concurrent
     /// <typeparam name="TValue"></typeparam>
     public class ConcurrentDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
-        private readonly ReaderWriterLock _padlock = new Fougerite.Concurrent.ReaderWriterLock();
+        private readonly ReaderWriterLock _padlock = new ReaderWriterLock();
         private readonly Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
 
         public TValue this[TKey key]

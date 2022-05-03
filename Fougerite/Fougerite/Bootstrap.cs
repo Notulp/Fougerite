@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
 
@@ -273,6 +274,9 @@ namespace Fougerite
             
             // Load default permissions API.
             PermissionSystem.GetPermissionSystem();
+            
+            // Load Player Cache
+            PlayerCache.GetPlayerCache().LoadPlayersCache();
 
             Rust.Steam.Server.SetModded();
             Rust.Steam.Server.Official = false;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Fougerite.Caches;
 using Fougerite.Permissions;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Interop;
@@ -89,6 +90,7 @@ namespace Fougerite.PluginLoaders
                 script.Globals.Set("MySQL", UserData.Create(MySQLConnector.GetInstance));
                 script.Globals.Set("SQLite", UserData.Create(Fougerite.SQLiteConnector.GetInstance));
                 script.Globals.Set("PermissionSystem", UserData.Create(PermissionSystem.GetPermissionSystem()));
+                script.Globals.Set("PlayerCache", UserData.Create(PlayerCache.GetPlayerCache()));
                 foreach (DynValue v in script.Globals.Keys)
                 {
                     Globals.Add(v.ToString().Replace("\"", ""));

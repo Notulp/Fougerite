@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using Facepunch;
+using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
 using Rust;
@@ -1650,6 +1651,45 @@ namespace Fougerite
             // Add It to the consistent cache list
             srv.AddCachePlayer(uid, player);
 
+            CachedPlayer cachedPlayer;
+            if (!PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(uid, out cachedPlayer))
+            {
+                cachedPlayer = new CachedPlayer
+                {
+                    Name = player.Name,
+                    IPAddresses = new List<string>() { player.IP },
+                    Aliases = new List<string>() { player.Name }
+                };
+                PlayerCache.GetPlayerCache().CachedPlayers[uid] = cachedPlayer;
+            }
+            else
+            {
+                cachedPlayer.Name = player.Name;
+                // Sanity check, shouldn't happen unless user messes with file.
+                if (cachedPlayer.Aliases == null)
+                {
+                    cachedPlayer.Aliases = new List<string>();
+                }
+                
+                // Sanity check, shouldn't happen unless user messes with file.
+                if (cachedPlayer.IPAddresses == null)
+                {
+                    cachedPlayer.IPAddresses = new List<string>();
+                }
+
+                // Check if this name is in the aliases
+                if (!cachedPlayer.Aliases.Contains(player.Name, StringComparer.CurrentCultureIgnoreCase))
+                {
+                    cachedPlayer.Aliases.Add(player.Name);
+                }
+
+                // Check if IP is in the list
+                if (!cachedPlayer.IPAddresses.Contains(player.IP))
+                {
+                    cachedPlayer.IPAddresses.Add(player.IP);
+                }
+            }
+
             // This in theory should never happen as two same ID connections would be disconnected on
             // the steam auth event, but I must have put this check here for a good reason.
             if (srv.ContainsPlayer(uid))
@@ -2168,6 +2208,9 @@ namespace Fougerite
 
             // Save the permissions.
             PermissionSystem.GetPermissionSystem().SaveToDisk();
+            
+            // Save PlayersCache
+            PlayerCache.GetPlayerCache().SaveToDisk();
         }
 
         public static void GlobalQuit()

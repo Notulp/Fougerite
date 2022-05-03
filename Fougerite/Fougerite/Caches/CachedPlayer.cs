@@ -6,16 +6,6 @@ namespace Fougerite.Caches
     public class CachedPlayer
     {
         /// <summary>
-        /// Returns the SteamID of this player.
-        /// </summary>
-        [JsonProperty]
-        public ulong SteamID
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Returns the current name.
         /// </summary>
         [JsonProperty]
@@ -36,10 +26,10 @@ namespace Fougerite.Caches
         }
 
         /// <summary>
-        /// Returns the last known location of the player.
+        /// Contains all the IPs used by this player.
         /// </summary>
         [JsonProperty]
-        public string Location
+        public List<string> IPAddresses
         {
             get;
             set;
