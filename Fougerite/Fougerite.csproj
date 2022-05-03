@@ -44,6 +44,14 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="Fougerite\Caches\CachedPlayer.cs" />
+    <Compile Include="Fougerite\Caches\PlayerCache.cs" />
+    <Compile Include="Fougerite\Concurrent\ConcurrentDictionary.cs" />
+    <Compile Include="Fougerite\Concurrent\ConcurrentEnumerator.cs" />
+    <Compile Include="Fougerite\Concurrent\ConcurrentList.cs" />
+    <Compile Include="Fougerite\Concurrent\LockCookie.cs" />
+    <Compile Include="Fougerite\Concurrent\LockQueue.cs" />
+    <Compile Include="Fougerite\Concurrent\ReadWriterLock.cs" />
     <Compile Include="Fougerite\CTimer.cs" />
     <Compile Include="Fougerite\Events\BanEvent.cs" />
     <Compile Include="Fougerite\Events\BeltUseEvent.cs" />
@@ -139,8 +147,12 @@
     <Reference Include="RustPP, Version=1.1.7.9, Culture=neutral, PublicKeyToken=null">
       <HintPath>References\FougeriteExtraReferences\RustPP.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
+    <Reference Include="System">
+      <HintPath>References\OriginalRustDLLs\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data">
+      <HintPath>References\FougeriteExtraReferences\System.Data.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data.SQLite, Version=1.0.97.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139">
       <HintPath>References\FougeriteExtraReferences\System.Data.SQLite.dll</HintPath>
     </Reference>
@@ -199,6 +211,9 @@
     <Compile Include="Fougerite\Bootstrap.cs" />
     <Compile Include="Fougerite\Events\DestroyEvent.cs" />
     <Compile Include="Fougerite\SerializableDictionary.cs" />
+    <Reference Include="System.Xml">
+      <HintPath>References\FougeriteExtraReferences\System.Xml.dll</HintPath>
+    </Reference>
     <Reference Include="uLink, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>References\PatchedRustDlls\uLink.dll</HintPath>
     </Reference>

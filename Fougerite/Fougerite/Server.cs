@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Fougerite.Concurrent;
 using Fougerite.Events;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
@@ -14,8 +15,7 @@ namespace Fougerite
     {
         private ItemsBlocks _items;
         private StructureMaster _serverStructs = new StructureMaster();
-        private readonly Dictionary<ulong, Player> _players = new Dictionary<ulong, Player>();
-        private readonly object _playersLock = new object();
+        private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
         private readonly object _playersCacheLock = new object();
         private static Server _server;
         private bool HRustPP;
@@ -27,6 +27,7 @@ namespace Fougerite
         /// <summary>
         /// This cache is supposed to be private, so make sure to switch your plugin to use
         /// PlayersCache or GetCachePlayer() if you need to use this.
+        /// (We also can't change this to a ConcurrentDictionary because other old plugins may depend on this)
         /// </summary>
         public static Dictionary<ulong, Player> Cache = new Dictionary<ulong, Player>();
         public static IEnumerable<string> ForceCallForCommands = new List<string>();
@@ -454,22 +455,6 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Returns all player's that have connected during runtime, meaning
-        /// even offline players can be found in this cache. (Thread safe)
-        /// This dictionary is a shallow copy.
-        /// </summary>
-        public Dictionary<ulong, Player> PlayersCache
-        {
-            get
-            {
-                lock (_playersCacheLock)
-                {
-                    return new Dictionary<ulong, Player>(Cache);
-                }
-            }
-        }
-
-        /// <summary>
         /// Tries to grab the player by ID directly from the cache
         /// where we aren't removing players unless specified in the config. (Thread Safe)
         /// </summary>
@@ -500,6 +485,19 @@ namespace Fougerite
                 Cache.Remove(id);
             }
         }
+        
+        /// <summary>
+        /// Returns all player's that have connected during runtime, meaning
+        /// even offline players can be found in this cache. (Thread safe)
+        /// This dictionary is a shallow copy.
+        /// </summary>
+        public Dictionary<ulong, Player> PlayersCache
+        {
+            get
+            {
+                return _players.GetShallowCopy();
+            }
+        }
 
         /// <summary>
         /// Returns all online players. (Thread safe)
@@ -509,59 +507,26 @@ namespace Fougerite
         {
             get
             {
-                lock (_playersLock)
-                {
-                    return new List<Player>(_players.Values);
-                }
+                return new List<Player>(_players.Values);
             }
         }
 
         internal void AddPlayer(ulong id, Player player)
         {
-            lock (_playersLock)
-            {
-                if (!_players.ContainsKey(id))
-                {
-                    _players.Add(id, player);
-                }
-                else
-                {
-                    _players[id] = player;
-                }
-            }
+            _players[id] = player;
         }
 
         internal void RemovePlayer(ulong id)
         {
-            lock (_playersLock)
+            if (_players.ContainsKey(id))
             {
-                if (_players.ContainsKey(id))
-                {
-                    _players.Remove(id);
-                }
+                _players.TryRemove(id);
             }
         }
 
         internal bool ContainsPlayer(ulong id)
         {
-            lock (_playersLock)
-            {
-                return _players.ContainsKey(id);
-            }
-        }
-        
-        /// <summary>
-        /// Returns current list of players. (Thread Safe)
-        /// </summary>
-        internal Dictionary<ulong, Player> DPlayers
-        {
-            get
-            {
-                lock (_playersLock)
-                {
-                    return new Dictionary<ulong, Player>(_players);
-                }
-            }
+            return _players.ContainsKey(id);
         }
 
         /// <summary>
