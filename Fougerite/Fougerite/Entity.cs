@@ -1,4 +1,6 @@
 ﻿
+using Fougerite.Caches;
+
 namespace Fougerite
 {
     using System.Linq;
@@ -118,9 +120,15 @@ namespace Fougerite
             }
 
             Player ownerCache = Server.GetServer().GetCachePlayer(_ownerid);
+            CachedPlayer cachedPlayerOwner;
+            
             if (ownerCache != null)
             {
                 this._ownername = ownerCache.Name;
+            }
+            else if (PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(_ownerid, out cachedPlayerOwner))
+            {
+                this._ownername = cachedPlayerOwner.Name;
             }
             else if (Server.GetServer().HasRustPP)
             {
@@ -135,9 +143,15 @@ namespace Fougerite
             }
 
             Player creatorCache = Server.GetServer().GetCachePlayer(_creatorid);
+            CachedPlayer cachedPlayerCreator;
+            
             if (creatorCache != null)
             {
                 this._creatorname = creatorCache.Name;
+            }
+            else if (PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(_creatorid, out cachedPlayerCreator))
+            {
+                this._ownername = cachedPlayerCreator.Name;
             }
             else if (Server.GetServer().HasRustPP)
             {
