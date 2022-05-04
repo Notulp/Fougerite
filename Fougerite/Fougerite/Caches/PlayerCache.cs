@@ -61,14 +61,18 @@ namespace Fougerite.Caches
                         using (JsonWriter writer = new JsonTextWriter(sw))
                         {
                             writer.Formatting = Formatting.Indented;
-                            serializer.Serialize(writer, CachedPlayers);
+                            // We are serializing the original dictionary class
+                            serializer.Serialize(writer, CachedPlayers.GetShallowCopy());
                         }
                     }
                 }
 
-                CachedPlayers =
-                    JsonConvert.DeserializeObject<ConcurrentDictionary<ulong, CachedPlayer>>(
+                var deserializedDict =
+                    JsonConvert.DeserializeObject<Dictionary<ulong, CachedPlayer>>(
                         File.ReadAllText(Util.GetRootFolder() + "\\Save\\CachedPlayers.json"));
+
+                // Assign deserialized dict.
+                CachedPlayers = new ConcurrentDictionary<ulong, CachedPlayer>(deserializedDict);
 
                 Logger.Log("[PlayerCache] Loaded.");
             }
@@ -108,7 +112,8 @@ namespace Fougerite.Caches
                     using (JsonWriter writer = new JsonTextWriter(sw))
                     {
                         writer.Formatting = Formatting.Indented;
-                        serializer.Serialize(writer, CachedPlayers);
+                        // We are serializing the original dictionary class
+                        serializer.Serialize(writer, CachedPlayers.GetShallowCopy());
                     }
                 }
                 

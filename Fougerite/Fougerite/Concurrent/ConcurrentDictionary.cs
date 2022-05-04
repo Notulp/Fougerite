@@ -11,10 +11,21 @@ namespace Fougerite.Concurrent
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
+    [Serializable]
     public class ConcurrentDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
         private readonly ReaderWriterLock _padlock = new ReaderWriterLock();
         private readonly Dictionary<TKey, TValue> _dictionary = new Dictionary<TKey, TValue>();
+
+        public ConcurrentDictionary()
+        {
+            
+        }
+        
+        public ConcurrentDictionary(Dictionary<TKey, TValue> originalDict)
+        {
+            _dictionary = originalDict;
+        }
 
         public TValue this[TKey key]
         {
@@ -89,6 +100,28 @@ namespace Fougerite.Concurrent
         {
             lock (_padlock)
                 return _dictionary.OrderBy(func).ToList();
+        }
+        
+        public List<TValue> ValuesCopy
+        {
+            get
+            {
+                lock (_padlock)
+                {
+                    return new List<TValue>(_dictionary.Values);
+                }
+            }
+        }
+        
+        public List<TKey> KeysCopy
+        {
+            get
+            {
+                lock (_padlock)
+                {
+                    return new List<TKey>(_dictionary.Keys);
+                }
+            }
         }
 
         public Dictionary<TKey, TValue>.ValueCollection Values

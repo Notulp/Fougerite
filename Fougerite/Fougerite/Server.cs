@@ -507,7 +507,7 @@ namespace Fougerite
         {
             get
             {
-                return new List<Player>(_players.Values);
+                return _players.ValuesCopy;
             }
         }
 

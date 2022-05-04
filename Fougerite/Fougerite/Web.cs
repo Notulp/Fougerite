@@ -136,7 +136,7 @@ namespace Fougerite
         /// import json
         /// from System import Action
         /// Web.CreateAsyncHTTPRequest('url', Action[int, str](self.webCallback), 'POST', json.dumps({'name':'test'}))
-        ///
+        /// 
         /// WARNING: This is an async call. The callback will be on a subthread. If you have something that you need to run
         /// on the main thread, because It's thread sensitive then call Loom's QueueOnMainThread function.
         /// </summary>
@@ -145,11 +145,14 @@ namespace Fougerite
         /// <param name="method"></param>
         /// <param name="inputBody"></param>
         /// <param name="additionalHeaders"></param>
+        /// <param name="contentType"></param>
         /// <param name="timeout"></param>
         /// <param name="allowDecompression"></param>
         public void CreateAsyncHTTPRequest(string url, Action<int, string> callback, string method = "GET",
             string inputBody = null,
-            Dictionary<string, string> additionalHeaders = null, float timeout = 0f,
+            Dictionary<string, string> additionalHeaders = null, 
+            string contentType = "application/x-www-form-urlencoded",
+            float timeout = 0f,
             bool allowDecompression = false)
         {
             HttpWebRequest request = (HttpWebRequest) WebRequest.Create(url);
@@ -166,13 +169,13 @@ namespace Fougerite
             request.ServicePoint.Expect100Continue = ServicePointManager.Expect100Continue;
             request.ServicePoint.ConnectionLimit = ServicePointManager.DefaultConnectionLimit;
             request.UserAgent = $"Fougerite Mod (v{Bootstrap.Version}; https://fougerite.com)";
+            request.ContentType = contentType;
 
             byte[] input = new byte[0];
             if (!string.IsNullOrEmpty(inputBody))
             {
                 input = Encoding.UTF8.GetBytes(inputBody);
                 request.ContentLength = input.Length;
-                request.ContentType = "application/x-www-form-urlencoded";
             }
 
             if (additionalHeaders != null)
