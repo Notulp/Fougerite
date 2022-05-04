@@ -49,7 +49,7 @@ namespace Fougerite
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public bool ExecuteQuery(string query)
+        public bool ExecuteNonQuery(string query)
         {
             try
             {
@@ -64,6 +64,41 @@ namespace Fougerite
                 return false;
             }
             return true;
+        }
+
+        public Dictionary<string, object> ExecuteQuery(string query, Dictionary<string, object> parameters = null)
+        {
+            Dictionary<string, object> result = new Dictionary<string, object>();
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.CommandText = query;
+                cmd.Connection = connection;
+                if (parameters != null)
+                {
+                    foreach (var x in parameters)
+                    {
+                        cmd.Parameters.AddWithValue(x.Key, x.Value);
+                    }
+                }
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    int fieldCount = reader.FieldCount;
+                    for (int i = 0; i < fieldCount; i++)
+                    {
+                        string key = reader.GetName(i);
+                        object val = reader.GetValue(i);
+                        result.Add(key, val);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Failed to execute query " + ex);
+            }
+            return result;
         }
 
         /// <summary>
