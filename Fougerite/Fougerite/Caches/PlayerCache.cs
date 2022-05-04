@@ -17,7 +17,6 @@ namespace Fougerite.Caches
         /// since server startup.
         /// It can be extended to do basically anything.
         /// </summary>
-        [JsonProperty]
         public ConcurrentDictionary<ulong, CachedPlayer> CachedPlayers { get; set; } =
             new ConcurrentDictionary<ulong, CachedPlayer>();
 
