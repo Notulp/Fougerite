@@ -56,13 +56,28 @@ namespace Fougerite.Patcher
 
         private void PatchFacePunch()
         {
-            AssemblyDefinition facepunch = AssemblyDefinition.ReadAssembly("Facepunch.MeshBatch.dll");
-            TypeDefinition MeshBatchPhysicalOutput = facepunch.MainModule.GetType("Facepunch.MeshBatch.Runtime.MeshBatchPhysicalOutput");
+            AssemblyDefinition FacepunchMeshBatch = AssemblyDefinition.ReadAssembly("Facepunch.MeshBatch.dll");
+            TypeDefinition MeshBatchPhysicalOutput = FacepunchMeshBatch.MainModule.GetType("Facepunch.MeshBatch.Runtime.MeshBatchPhysicalOutput");
+            TypeDefinition MeshBatchPhysicalIntegration = FacepunchMeshBatch.MainModule.GetType("Facepunch.MeshBatch.Runtime.Sealed.MeshBatchPhysicalIntegration");
+            
             MethodDefinition ActivateImmediatelyUnchecked = MeshBatchPhysicalOutput.GetMethod("ActivateImmediatelyUnchecked");
-            TypeDefinition logger = fougeriteAssembly.MainModule.GetType("Fougerite.Logger");
-            MethodDefinition logex = logger.GetMethod("LogException");
-            WrapMethod(ActivateImmediatelyUnchecked, logex, facepunch, false);
-            facepunch.Write("Facepunch.MeshBatch.dll");
+            MethodDefinition ActivateImmediatelyUncheckedHook = hooksClass.GetMethod("ActivateImmediatelyUncheckedHook");
+            
+            ILProcessor ilProcessor = ActivateImmediatelyUnchecked.Body.GetILProcessor();
+            ilProcessor.Body.Instructions.Clear();
+            ilProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            ilProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Callvirt, 
+                FacepunchMeshBatch.MainModule.Import(ActivateImmediatelyUncheckedHook)));
+            ilProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+            MeshBatchPhysicalOutput.GetField("FlaggedForActivation").SetPublic(true);
+            MeshBatchPhysicalOutput.GetField("Activated").SetPublic(true);
+            MeshBatchPhysicalOutput.GetField("GameObject").SetPublic(true);
+
+            MeshBatchPhysicalIntegration.IsPublic = true;
+            MeshBatchPhysicalIntegration.GetMethod("Cancel").SetPublic(true);
+            
+            FacepunchMeshBatch.Write("Facepunch.MeshBatch.dll");
         }
 
         private void uLinkLateUpdateInTryCatch()
@@ -2284,7 +2299,7 @@ namespace Fougerite.Patcher
                     //this.ShootPatch();
                     this.BowShootPatch();
                     //this.ShotgunShootPatch();
-                    //this.GrenadePatch();
+                    this.GrenadePatch();
                     this.PatchuLink();
                     this.SlotOperationPatch();
                     this.RepairBenchEvent();

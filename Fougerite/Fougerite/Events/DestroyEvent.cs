@@ -1,8 +1,5 @@
 ﻿namespace Fougerite.Events
 {
-	using Fougerite;
-	using System;
-
 	/// <summary>
 	/// This class runs when an entity is destroyed.
 	/// </summary>
@@ -11,52 +8,53 @@
 		private object _attacker;
 		private DamageEvent _de;
 		private bool _decay;
-		private Fougerite.Entity _ent;
+		private Entity _ent;
 		private string _weapon;
 		private WeaponImpact _wi;
 
 		public DestroyEvent(ref DamageEvent d, Entity ent, bool isdecay)
 		{
-			Fougerite.Player player = Server.Cache[d.attacker.client.userID];
-			if (player != null) {
-				this.Attacker = player;
+			Player player = Server.GetServer().FindPlayer(d.attacker.client.userID);
+			if (player != null) 
+			{
+				Attacker = player;
 			}
 
-			this.WeaponData = null;
-			this.IsDecay = isdecay;
-			this.DamageEvent = d;
-			this.Entity = ent;
+			WeaponData = null;
+			IsDecay = isdecay;
+			DamageEvent = d;
+			Entity = ent;
 
 			string weaponName = "Unknown";
-			if (d.extraData != null)
+			if (d.extraData is WeaponImpact weaponImpact)
 			{
-				WeaponImpact extraData = d.extraData as WeaponImpact;
-				this.WeaponData = extraData;
-				if (extraData.dataBlock != null)
+				WeaponData = weaponImpact;
+				if (weaponImpact.dataBlock != null)
 				{
-					weaponName = extraData.dataBlock.name;
+					weaponName = weaponImpact.dataBlock.name;
 				}
 			}
 			else
 			{
+				string strType = d.attacker.id.ToString();
 				if (d.attacker.id is TimedExplosive)
 					weaponName = "Explosive Charge";
 				else if (d.attacker.id is TimedGrenade)
 					weaponName = "F1 Grenade";
-				else if (d.attacker.id.ToString().Contains("MutantBear"))
+				else if (strType.Contains("MutantBear"))
 					weaponName = "Mutant Bear Claw";
-				else if (d.attacker.id.ToString().Contains("Bear"))
+				else if (strType.Contains("Bear"))
 					weaponName = "Bear Claw";
-				else if (d.attacker.id.ToString().Contains("MutantWolf"))
+				else if (strType.Contains("MutantWolf"))
 					weaponName = "Mutant Wolf Claw";
-				else if (d.attacker.id.ToString().Contains("Wolf"))
+				else if (strType.Contains("Wolf"))
 					weaponName = "Wolf Claw";
 				else if (d.attacker.id.Equals(d.victim.id))
 					weaponName = string.Format("Self ({0})", DamageType);
 				else
 					weaponName = "Hunting Bow";
 			}
-			this.WeaponName = weaponName;
+			WeaponName = weaponName;
 		}
 
 		/// <summary>
@@ -66,11 +64,11 @@
 		{
 			get
 			{
-				return this._attacker;
+				return _attacker;
 			}
 			set
 			{
-				this._attacker = value;
+				_attacker = value;
 			}
 		}
 
@@ -81,11 +79,11 @@
 		{
 			get
 			{
-				return this._de.amount;
+				return _de.amount;
 			}
 			set
 			{
-				this._de.amount = value;
+				_de.amount = value;
 			}
 		}
 
@@ -96,11 +94,11 @@
 		{
 			get
 			{
-				return this._de;
+				return _de;
 			}
 			set
 			{
-				this._de = value;
+				_de = value;
 			}
 		}
 
@@ -112,34 +110,34 @@
 			get
 			{
 				string str = "Unknown";
-				switch (((int)this.DamageEvent.damageTypes))
+				switch ((int) DamageEvent.damageTypes)
 				{
-				case 0:
-					return "Bleeding";
+					case 0:
+						return "Bleeding";
 
-				case 1:
-					return "Generic";
+					case 1:
+						return "Generic";
 
-				case 2:
-					return "Bullet";
+					case 2:
+						return "Bullet";
 
-				case 3:
-				case 5:
-				case 6:
-				case 7:
-					return str;
+					case 3:
+					case 5:
+					case 6:
+					case 7:
+						return str;
 
-				case 4:
-					return "Melee";
+					case 4:
+						return "Melee";
 
-				case 8:
-					return "Explosion";
+					case 8:
+						return "Explosion";
 
-				case 0x10:
-					return "Radiation";
+					case 0x10:
+						return "Radiation";
 
-				case 0x20:
-					return "Cold";
+					case 0x20:
+						return "Cold";
 				}
 				return str;
 			}
@@ -148,15 +146,15 @@
 		/// <summary>
 		/// This getter returns the entity that is being destroyed.
 		/// </summary>
-		public Fougerite.Entity Entity
+		public Entity Entity
 		{
 			get
 			{
-				return this._ent;
+				return _ent;
 			}
 			set
 			{
-				this._ent = value;
+				_ent = value;
 			}
 		}
 
@@ -167,11 +165,11 @@
 		{
 			get
 			{
-				return this._decay;
+				return _decay;
 			}
 			set
 			{
-				this._decay = value;
+				_decay = value;
 			}
 		}
 
@@ -182,11 +180,11 @@
 		{
 			get
 			{
-				return this._wi;
+				return _wi;
 			}
 			set
 			{
-				this._wi = value;
+				_wi = value;
 			}
 		}
 
@@ -197,11 +195,11 @@
 		{
 			get
 			{
-				return this._weapon;
+				return _weapon;
 			}
 			set
 			{
-				this._weapon = value;
+				_weapon = value;
 			}
 		}
 	}

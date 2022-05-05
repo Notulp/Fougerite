@@ -24,6 +24,7 @@
                     Arguments.Args = new string[] { client.Name, pl.Name };
                     teleport.toplayer(ref Arguments);
                 }
+
                 pl.MessageFrom(Core.Name, "You have teleported all players to your location");
                 return;
             }
@@ -41,21 +42,26 @@
                         pl.MessageFrom(Core.Name, "You have teleported " + client.Name + " to your location");
                         return;
                     }
+
                     list.Add(client.Name);
                 }
             }
+
             if (list.Count > 1)
             {
-                pl.MessageFrom(Core.Name, ((list.Count - 1)).ToString() + " Player" + (((list.Count - 1) > 1) ? "s" : "") + " were found: ");
+                pl.MessageFrom(Core.Name,
+                    ((list.Count - 1)).ToString() + " Player" + (((list.Count - 1) > 1) ? "s" : "") + " were found: ");
                 for (int j = 1; j < list.Count; j++)
                 {
                     pl.MessageFrom(Core.Name, j + " - " + list[j]);
                 }
+
                 pl.MessageFrom(Core.Name, "0 - Cancel");
                 pl.MessageFrom(Core.Name, "Please enter the number matching the player you were looking for.");
                 TeleportToCommand command = ChatCommand.GetCommand("tpto") as TeleportToCommand;
                 command.GetTPWaitList().Add(pl.UID, list);
-            } else
+            }
+            else
             {
                 pl.MessageFrom(Core.Name, "No player found with the name: " + playerName);
             }

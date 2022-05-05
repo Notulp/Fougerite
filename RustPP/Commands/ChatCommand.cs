@@ -37,7 +37,7 @@ namespace RustPP.Commands
                                 .PlayerHasPermission(pl.UID, command.AdminFlags);
                             if (command.AdminFlags == "RCON")
                             {
-                                if (arg.argUser.admin)
+                                if (arg.argUser.admin || PermissionSystem.GetPermissionSystem().PlayerHasPermission(pl.UID, "RCON"))
                                 {
                                     command.Execute(ref arg, ref chatArgs);
                                 }
@@ -54,7 +54,9 @@ namespace RustPP.Commands
                                 }
                                 else
                                 {
-                                    pl.MessageFrom(RustPP.Core.Name, string.Format("Only administrators with the {0} permission can use that command.", command.AdminFlags));
+                                    pl.MessageFrom(RustPP.Core.Name, 
+                                        string.Format("Only administrators with the {0} permission can use that command.",
+                                            command.AdminFlags));
                                 }
                             }
                             else

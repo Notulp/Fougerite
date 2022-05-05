@@ -13,7 +13,8 @@
             {
                 if (Fougerite.Data.GetData().chat_history_username.Count >= i)
                 {
-                    string playername = Fougerite.Data.GetData().chat_history_username[Fougerite.Data.GetData().chat_history_username.Count - i];
+                    string playername = Fougerite.Data.GetData()
+                        .chat_history_username[Fougerite.Data.GetData().chat_history_username.Count - i];
                     string arg = Fougerite.Data.GetData().chat_history[Fougerite.Data.GetData().chat_history.Count - i];
                     if (playername != null)
                     {

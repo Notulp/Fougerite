@@ -20,8 +20,10 @@ namespace RustPP
                     userIDs.Remove(pl.UID);
                     pl.MessageFrom(Core.Name, "InstaKO ALL mode has been deactivated!");
                 }
+
                 return;
             }
+
             if (!this.userIDs.Contains(pl.UID))
             {
                 this.userIDs.Add(pl.UID);

@@ -6,14 +6,11 @@
 
     public class PluginLoader : Singleton<PluginLoader>, ISingleton
     {
+        private bool _AllPluginsLoaded = false;
         public readonly Dictionary<string, BasePlugin> Plugins = new Dictionary<string, BasePlugin>();
-
-        public readonly Dictionary<PluginType, IPluginLoader> PluginLoaders =
-            new Dictionary<PluginType, IPluginLoader>();
-
+        public readonly Dictionary<PluginType, IPluginLoader> PluginLoaders = new Dictionary<PluginType, IPluginLoader>();
         public List<String> CurrentlyLoadingPlugins = new List<string>();
-
-
+        
         public static string ModulesFolder = Config.GetModulesFolder();
         public static string PublicFolder = Config.GetPublicFolder();
         
@@ -67,7 +64,8 @@
             "On_SupplySignalExploded",
             "On_PlayerMove",
             "On_BeltUse",
-            "On_Logger"
+            "On_Logger",
+            "On_GrenadeThrow"
         };
 
         public void Initialize()
@@ -79,9 +77,6 @@
         {
             return true;
         }
-
-
-        private bool _AllPluginsLoaded = false;
 
         public void OnPluginLoaded(BasePlugin plugin)
         {
@@ -184,157 +179,162 @@
                     switch (method)
                     {
                         case "On_ServerInit":
-                            Hooks.OnServerInit += new Hooks.ServerInitDelegate(plugin.OnServerInit);
+                            Hooks.OnServerInit += plugin.OnServerInit;
                             break;
                         case "On_ServerShutdown":
-                            Hooks.OnServerShutdown += new Hooks.ServerShutdownDelegate(plugin.OnServerShutdown);
+                            Hooks.OnServerShutdown += plugin.OnServerShutdown;
                             break;
                         case "On_ItemsLoaded":
-                            Hooks.OnItemsLoaded += new Hooks.ItemsDatablocksLoaded(plugin.OnItemsLoaded);
+                            Hooks.OnItemsLoaded += plugin.OnItemsLoaded;
                             break;
                         case "On_TablesLoaded":
-                            Hooks.OnTablesLoaded += new Hooks.LootTablesLoaded(plugin.OnTablesLoaded);
+                            Hooks.OnTablesLoaded += plugin.OnTablesLoaded;
                             break;
                         case "On_Chat":
-                            Hooks.OnChat += new Hooks.ChatHandlerDelegate(plugin.OnChat);
+                            Hooks.OnChat += plugin.OnChat;
                             break;
                         case "On_Console":
+#pragma warning disable CS0618
                             Hooks.OnConsoleReceived += plugin.OnConsole;
+#pragma warning restore CS0618
                             break;
                         case "On_ConsoleWithCancel":
                             Hooks.OnConsoleReceivedWithCancel += plugin.OnConsoleWithCancel;
                             break;
                         case "On_Command":
-                            Hooks.OnCommand += new Hooks.CommandHandlerDelegate(plugin.OnCommand);
+                            Hooks.OnCommand += plugin.OnCommand;
                             break;
                         case "On_PlayerConnected":
                             Hooks.OnPlayerConnected +=
-                                new Hooks.ConnectionHandlerDelegate(plugin.OnPlayerConnected);
+                                plugin.OnPlayerConnected;
                             break;
                         case "On_PlayerDisconnected":
                             Hooks.OnPlayerDisconnected +=
-                                new Hooks.DisconnectionHandlerDelegate(plugin.OnPlayerDisconnected);
+                                plugin.OnPlayerDisconnected;
                             break;
                         case "On_PlayerKilled":
-                            Hooks.OnPlayerKilled += new Hooks.KillHandlerDelegate(plugin.OnPlayerKilled);
+                            Hooks.OnPlayerKilled += plugin.OnPlayerKilled;
                             break;
                         case "On_PlayerHurt":
-                            Hooks.OnPlayerHurt += new Hooks.HurtHandlerDelegate(plugin.OnPlayerHurt);
+                            Hooks.OnPlayerHurt += plugin.OnPlayerHurt;
                             break;
                         case "On_PlayerSpawn":
-                            Hooks.OnPlayerSpawning += new Hooks.PlayerSpawnHandlerDelegate(plugin.OnPlayerSpawn);
+                            Hooks.OnPlayerSpawning += plugin.OnPlayerSpawn;
                             break;
                         case "On_PlayerSpawned":
-                            Hooks.OnPlayerSpawned += new Hooks.PlayerSpawnHandlerDelegate(plugin.OnPlayerSpawned);
+                            Hooks.OnPlayerSpawned += plugin.OnPlayerSpawned;
                             break;
                         case "On_PlayerGathering":
                             Hooks.OnPlayerGathering +=
-                                new Hooks.PlayerGatheringHandlerDelegate(plugin.OnPlayerGathering);
+                                plugin.OnPlayerGathering;
                             break;
                         case "On_EntityHurt":
-                            Hooks.OnEntityHurt += new Hooks.EntityHurtDelegate(plugin.OnEntityHurt);
+                            Hooks.OnEntityHurt += plugin.OnEntityHurt;
                             break;
                         case "On_EntityDecay":
-                            Hooks.OnEntityDecay += new Hooks.EntityDecayDelegate(plugin.OnEntityDecay);
+                            Hooks.OnEntityDecay += plugin.OnEntityDecay;
                             break;
                         case "On_EntityDestroyed":
-                            Hooks.OnEntityDestroyed += new Hooks.EntityDestroyedDelegate(plugin.OnEntityDestroyed);
+                            Hooks.OnEntityDestroyed += plugin.OnEntityDestroyed;
                             break;
                         case "On_EntityDeployed":
                             Hooks.OnEntityDeployedWithPlacer +=
-                                new Hooks.EntityDeployedWithPlacerDelegate(plugin.OnEntityDeployed);
+                                plugin.OnEntityDeployed;
                             break;
                         case "On_NPCHurt":
-                            Hooks.OnNPCHurt += new Hooks.HurtHandlerDelegate(plugin.OnNPCHurt);
+                            Hooks.OnNPCHurt += plugin.OnNPCHurt;
                             break;
                         case "On_NPCKilled":
-                            Hooks.OnNPCKilled += new Hooks.KillHandlerDelegate(plugin.OnNPCKilled);
+                            Hooks.OnNPCKilled += plugin.OnNPCKilled;
                             break;
                         case "On_BlueprintUse":
-                            Hooks.OnBlueprintUse += new Hooks.BlueprintUseHandlerDelegate(plugin.OnBlueprintUse);
+                            Hooks.OnBlueprintUse += plugin.OnBlueprintUse;
                             break;
                         case "On_DoorUse":
-                            Hooks.OnDoorUse += new Hooks.DoorOpenHandlerDelegate(plugin.OnDoorUse);
+                            Hooks.OnDoorUse += plugin.OnDoorUse;
                             break;
                         case "On_AllPluginsLoaded":
                             Hooks.OnAllPluginsLoaded +=
-                                new Hooks.AllPluginsLoadedDelegate(plugin.OnAllPluginsLoaded);
+                                plugin.OnAllPluginsLoaded;
                             break;
                         case "On_PlayerTeleport":
-                            Hooks.OnPlayerTeleport += new Hooks.TeleportDelegate(plugin.OnPlayerTeleport);
+                            Hooks.OnPlayerTeleport += plugin.OnPlayerTeleport;
                             break;
                         //case "On_PluginInit": plugin.Invoke("On_PluginInit", new object[0]); break;
                         case "On_Crafting":
-                            Hooks.OnCrafting += new Hooks.CraftingDelegate(plugin.OnCrafting);
+                            Hooks.OnCrafting += plugin.OnCrafting;
                             break;
                         case "On_ResourceSpawn":
-                            Hooks.OnResourceSpawned += new Hooks.ResourceSpawnDelegate(plugin.OnResourceSpawned);
+                            Hooks.OnResourceSpawned += plugin.OnResourceSpawned;
                             break;
                         case "On_ItemAdded":
-                            Hooks.OnItemAdded += new Hooks.ItemAddedDelegate(plugin.OnItemAdded);
+                            Hooks.OnItemAdded += plugin.OnItemAdded;
                             break;
                         case "On_ItemRemoved":
-                            Hooks.OnItemRemoved += new Hooks.ItemRemovedDelegate(plugin.OnItemRemoved);
+                            Hooks.OnItemRemoved += plugin.OnItemRemoved;
                             break;
                         case "On_Airdrop":
-                            Hooks.OnAirdropCalled += new Hooks.AirdropDelegate(plugin.OnAirdrop);
+                            Hooks.OnAirdropCalled += plugin.OnAirdrop;
                             break;
                         //case "On_AirdropCrateDropped": Hooks.OnAirdropCrateDropped += new Hooks.AirdropCrateDroppedDelegate(plugin.OnAirdropCrateDropped); break;
                         case "On_SteamDeny":
-                            Hooks.OnSteamDeny += new Hooks.SteamDenyDelegate(plugin.OnSteamDeny);
+                            Hooks.OnSteamDeny += plugin.OnSteamDeny;
                             break;
                         case "On_PlayerApproval":
-                            Hooks.OnPlayerApproval += new Hooks.PlayerApprovalDelegate(plugin.OnPlayerApproval);
+                            Hooks.OnPlayerApproval += plugin.OnPlayerApproval;
                             break;
                         case "On_Research":
-                            Hooks.OnResearch += new Hooks.ResearchDelegate(plugin.OnResearch);
+                            Hooks.OnResearch += plugin.OnResearch;
                             break;
                         case "On_ServerSaved":
-                            Hooks.OnServerSaved += new Hooks.ServerSavedDelegate(plugin.OnServerSaved);
+                            Hooks.OnServerSaved += plugin.OnServerSaved;
                             break;
                         case "On_VoiceChat":
-                            Hooks.OnShowTalker += new Hooks.ShowTalkerDelegate(plugin.OnShowTalker);
+                            Hooks.OnShowTalker += plugin.OnShowTalker;
                             break;
                         case "On_ItemPickup":
-                            Hooks.OnItemPickup += new Hooks.ItemPickupDelegate(plugin.OnItemPickup);
+                            Hooks.OnItemPickup += plugin.OnItemPickup;
                             break;
                         case "On_FallDamage":
-                            Hooks.OnFallDamage += new Hooks.FallDamageDelegate(plugin.OnFallDamage);
+                            Hooks.OnFallDamage += plugin.OnFallDamage;
                             break;
                         case "On_LootUse":
-                            Hooks.OnLootUse += new Hooks.LootEnterDelegate(plugin.OnLootUse);
+                            Hooks.OnLootUse += plugin.OnLootUse;
                             break;
                         case "On_PlayerBan":
-                            Hooks.OnPlayerBan += new Hooks.BanEventDelegate(plugin.OnBanEvent);
+                            Hooks.OnPlayerBan += plugin.OnBanEvent;
                             break;
                         case "On_RepairBench":
-                            Hooks.OnRepairBench += new Hooks.RepairBenchEventDelegate(plugin.OnRepairBench);
+                            Hooks.OnRepairBench += plugin.OnRepairBench;
                             break;
                         case "On_ItemMove":
-                            Hooks.OnItemMove += new Hooks.ItemMoveEventDelegate(plugin.OnItemMove);
+                            Hooks.OnItemMove += plugin.OnItemMove;
                             break;
                         case "On_GenericSpawnLoad":
                             Hooks.OnGenericSpawnerLoad +=
-                                new Hooks.GenericSpawnerLoadDelegate(plugin.OnGenericSpawnLoad);
+                                plugin.OnGenericSpawnLoad;
                             break;
                         case "On_ServerLoaded":
-                            Hooks.OnServerLoaded += new Hooks.ServerLoadedDelegate(plugin.OnServerLoaded);
+                            Hooks.OnServerLoaded += plugin.OnServerLoaded;
                             break;
                         case "On_SupplySignalExploded":
                             Hooks.OnSupplySignalExpode +=
-                                new Hooks.SupplySignalDelegate(plugin.OnSupplySignalExploded);
+                                plugin.OnSupplySignalExploded;
                             break;
                         case "On_PlayerMove":
                             if (plugin.Type == PluginType.CSharp || plugin.Type == PluginType.CSScript)
                             {
-                                Hooks.OnPlayerMove += new Hooks.PlayerMoveDelegate(plugin.OnPlayerMove);
+                                Hooks.OnPlayerMove += plugin.OnPlayerMove;
                             }
                             break;
                         case "On_BeltUse":
-                            Hooks.OnBeltUse += new Hooks.BeltUseDelegate(plugin.OnBeltUse);
+                            Hooks.OnBeltUse += plugin.OnBeltUse;
                             break;
                         case "On_Logger":
-                            Hooks.OnLogger += new Hooks.LoggerDelegate(plugin.OnLogger);
+                            Hooks.OnLogger += plugin.OnLogger;
+                            break;
+                        case "On_GrenadeThrow":
+                            Hooks.OnGrenadeThrow += plugin.OnGrenade;
                             break;
                     }
                 }
@@ -358,157 +358,162 @@
                     switch (method)
                     {
                         case "On_ServerInit":
-                            Hooks.OnServerInit -= new Hooks.ServerInitDelegate(plugin.OnServerInit);
+                            Hooks.OnServerInit -= plugin.OnServerInit;
                             break;
                         case "On_ServerShutdown":
-                            Hooks.OnServerShutdown -= new Hooks.ServerShutdownDelegate(plugin.OnServerShutdown);
+                            Hooks.OnServerShutdown -= plugin.OnServerShutdown;
                             break;
                         case "On_ItemsLoaded":
-                            Hooks.OnItemsLoaded -= new Hooks.ItemsDatablocksLoaded(plugin.OnItemsLoaded);
+                            Hooks.OnItemsLoaded -= plugin.OnItemsLoaded;
                             break;
                         case "On_TablesLoaded":
-                            Hooks.OnTablesLoaded -= new Hooks.LootTablesLoaded(plugin.OnTablesLoaded);
+                            Hooks.OnTablesLoaded -= plugin.OnTablesLoaded;
                             break;
                         case "On_Chat":
-                            Hooks.OnChat -= new Hooks.ChatHandlerDelegate(plugin.OnChat);
+                            Hooks.OnChat -= plugin.OnChat;
                             break;
                         case "On_Console":
+#pragma warning disable CS0618
                             Hooks.OnConsoleReceived -= plugin.OnConsole;
+#pragma warning restore CS0618
                             break;
                         case "On_ConsoleWithCancel":
                             Hooks.OnConsoleReceivedWithCancel -= plugin.OnConsoleWithCancel;
                             break;
                         case "On_Command":
-                            Hooks.OnCommand -= new Hooks.CommandHandlerDelegate(plugin.OnCommand);
+                            Hooks.OnCommand -= plugin.OnCommand;
                             break;
                         case "On_PlayerConnected":
                             Hooks.OnPlayerConnected -=
-                                new Hooks.ConnectionHandlerDelegate(plugin.OnPlayerConnected);
+                                plugin.OnPlayerConnected;
                             break;
                         case "On_PlayerDisconnected":
                             Hooks.OnPlayerDisconnected -=
-                                new Hooks.DisconnectionHandlerDelegate(plugin.OnPlayerDisconnected);
+                                plugin.OnPlayerDisconnected;
                             break;
                         case "On_PlayerKilled":
-                            Hooks.OnPlayerKilled -= new Hooks.KillHandlerDelegate(plugin.OnPlayerKilled);
+                            Hooks.OnPlayerKilled -= plugin.OnPlayerKilled;
                             break;
                         case "On_PlayerHurt":
-                            Hooks.OnPlayerHurt -= new Hooks.HurtHandlerDelegate(plugin.OnPlayerHurt);
+                            Hooks.OnPlayerHurt -= plugin.OnPlayerHurt;
                             break;
                         case "On_PlayerSpawn":
-                            Hooks.OnPlayerSpawning -= new Hooks.PlayerSpawnHandlerDelegate(plugin.OnPlayerSpawn);
+                            Hooks.OnPlayerSpawning -= plugin.OnPlayerSpawn;
                             break;
                         case "On_PlayerSpawned":
-                            Hooks.OnPlayerSpawned -= new Hooks.PlayerSpawnHandlerDelegate(plugin.OnPlayerSpawned);
+                            Hooks.OnPlayerSpawned -= plugin.OnPlayerSpawned;
                             break;
                         case "On_PlayerGathering":
                             Hooks.OnPlayerGathering -=
-                                new Hooks.PlayerGatheringHandlerDelegate(plugin.OnPlayerGathering);
+                                plugin.OnPlayerGathering;
                             break;
                         case "On_EntityHurt":
-                            Hooks.OnEntityHurt -= new Hooks.EntityHurtDelegate(plugin.OnEntityHurt);
+                            Hooks.OnEntityHurt -= plugin.OnEntityHurt;
                             break;
                         case "On_EntityDecay":
-                            Hooks.OnEntityDecay -= new Hooks.EntityDecayDelegate(plugin.OnEntityDecay);
+                            Hooks.OnEntityDecay -= plugin.OnEntityDecay;
                             break;
                         case "On_EntityDestroyed":
-                            Hooks.OnEntityDestroyed -= new Hooks.EntityDestroyedDelegate(plugin.OnEntityDestroyed);
+                            Hooks.OnEntityDestroyed -= plugin.OnEntityDestroyed;
                             break;
                         case "On_EntityDeployed":
                             Hooks.OnEntityDeployedWithPlacer -=
-                                new Hooks.EntityDeployedWithPlacerDelegate(plugin.OnEntityDeployed);
+                                plugin.OnEntityDeployed;
                             break;
                         case "On_NPCHurt":
-                            Hooks.OnNPCHurt -= new Hooks.HurtHandlerDelegate(plugin.OnNPCHurt);
+                            Hooks.OnNPCHurt -= plugin.OnNPCHurt;
                             break;
                         case "On_NPCKilled":
-                            Hooks.OnNPCKilled -= new Hooks.KillHandlerDelegate(plugin.OnNPCKilled);
+                            Hooks.OnNPCKilled -= plugin.OnNPCKilled;
                             break;
                         case "On_BlueprintUse":
-                            Hooks.OnBlueprintUse -= new Hooks.BlueprintUseHandlerDelegate(plugin.OnBlueprintUse);
+                            Hooks.OnBlueprintUse -= plugin.OnBlueprintUse;
                             break;
                         case "On_DoorUse":
-                            Hooks.OnDoorUse -= new Hooks.DoorOpenHandlerDelegate(plugin.OnDoorUse);
+                            Hooks.OnDoorUse -= plugin.OnDoorUse;
                             break;
                         case "On_AllPluginsLoaded":
                             Hooks.OnAllPluginsLoaded -=
-                                new Hooks.AllPluginsLoadedDelegate(plugin.OnAllPluginsLoaded);
+                                plugin.OnAllPluginsLoaded;
                             break;
                         case "On_PlayerTeleport":
-                            Hooks.OnPlayerTeleport -= new Hooks.TeleportDelegate(plugin.OnPlayerTeleport);
+                            Hooks.OnPlayerTeleport -= plugin.OnPlayerTeleport;
                             break;
                         //case "On_PluginInit": plugin.Invoke("On_PluginInit", new object[0]); break;
                         case "On_Crafting":
-                            Hooks.OnCrafting -= new Hooks.CraftingDelegate(plugin.OnCrafting);
+                            Hooks.OnCrafting -= plugin.OnCrafting;
                             break;
                         case "On_ResourceSpawn":
-                            Hooks.OnResourceSpawned -= new Hooks.ResourceSpawnDelegate(plugin.OnResourceSpawned);
+                            Hooks.OnResourceSpawned -= plugin.OnResourceSpawned;
                             break;
                         case "On_ItemAdded":
-                            Hooks.OnItemAdded -= new Hooks.ItemAddedDelegate(plugin.OnItemAdded);
+                            Hooks.OnItemAdded -= plugin.OnItemAdded;
                             break;
                         case "On_ItemRemoved":
-                            Hooks.OnItemRemoved -= new Hooks.ItemRemovedDelegate(plugin.OnItemRemoved);
+                            Hooks.OnItemRemoved -= plugin.OnItemRemoved;
                             break;
                         case "On_Airdrop":
-                            Hooks.OnAirdropCalled -= new Hooks.AirdropDelegate(plugin.OnAirdrop);
+                            Hooks.OnAirdropCalled -= plugin.OnAirdrop;
                             break;
                         //case "On_AirdropCrateDropped": Hooks.OnAirdropCrateDropped -= new Hooks.AirdropCrateDroppedDelegate(plugin.OnAirdropCrateDropped); break;
                         case "On_SteamDeny":
-                            Hooks.OnSteamDeny -= new Hooks.SteamDenyDelegate(plugin.OnSteamDeny);
+                            Hooks.OnSteamDeny -= plugin.OnSteamDeny;
                             break;
                         case "On_PlayerApproval":
-                            Hooks.OnPlayerApproval -= new Hooks.PlayerApprovalDelegate(plugin.OnPlayerApproval);
+                            Hooks.OnPlayerApproval -= plugin.OnPlayerApproval;
                             break;
                         case "On_Research":
-                            Hooks.OnResearch -= new Hooks.ResearchDelegate(plugin.OnResearch);
+                            Hooks.OnResearch -= plugin.OnResearch;
                             break;
                         case "On_ServerSaved":
-                            Hooks.OnServerSaved -= new Hooks.ServerSavedDelegate(plugin.OnServerSaved);
+                            Hooks.OnServerSaved -= plugin.OnServerSaved;
                             break;
                         case "On_VoiceChat":
-                            Hooks.OnShowTalker -= new Hooks.ShowTalkerDelegate(plugin.OnShowTalker);
+                            Hooks.OnShowTalker -= plugin.OnShowTalker;
                             break;
                         case "On_ItemPickup":
-                            Hooks.OnItemPickup -= new Hooks.ItemPickupDelegate(plugin.OnItemPickup);
+                            Hooks.OnItemPickup -= plugin.OnItemPickup;
                             break;
                         case "On_FallDamage":
-                            Hooks.OnFallDamage -= new Hooks.FallDamageDelegate(plugin.OnFallDamage);
+                            Hooks.OnFallDamage -= plugin.OnFallDamage;
                             break;
                         case "On_LootUse":
-                            Hooks.OnLootUse -= new Hooks.LootEnterDelegate(plugin.OnLootUse);
+                            Hooks.OnLootUse -= plugin.OnLootUse;
                             break;
                         case "On_PlayerBan":
-                            Hooks.OnPlayerBan -= new Hooks.BanEventDelegate(plugin.OnBanEvent);
+                            Hooks.OnPlayerBan -= plugin.OnBanEvent;
                             break;
                         case "On_RepairBench":
-                            Hooks.OnRepairBench -= new Hooks.RepairBenchEventDelegate(plugin.OnRepairBench);
+                            Hooks.OnRepairBench -= plugin.OnRepairBench;
                             break;
                         case "On_ItemMove":
-                            Hooks.OnItemMove -= new Hooks.ItemMoveEventDelegate(plugin.OnItemMove);
+                            Hooks.OnItemMove -= plugin.OnItemMove;
                             break;
                         case "On_GenericSpawnLoad":
                             Hooks.OnGenericSpawnerLoad -=
-                                new Hooks.GenericSpawnerLoadDelegate(plugin.OnGenericSpawnLoad);
+                                plugin.OnGenericSpawnLoad;
                             break;
                         case "On_ServerLoaded":
-                            Hooks.OnServerLoaded -= new Hooks.ServerLoadedDelegate(plugin.OnServerLoaded);
+                            Hooks.OnServerLoaded -= plugin.OnServerLoaded;
                             break;
                         case "On_SupplySignalExploded":
                             Hooks.OnSupplySignalExpode -=
-                                new Hooks.SupplySignalDelegate(plugin.OnSupplySignalExploded);
+                                plugin.OnSupplySignalExploded;
                             break;
                         case "On_PlayerMove":
                             if (plugin.Type == PluginType.CSharp || plugin.Type == PluginType.CSScript)
                             {
-                                Hooks.OnPlayerMove -= new Hooks.PlayerMoveDelegate(plugin.OnPlayerMove);
+                                Hooks.OnPlayerMove -= plugin.OnPlayerMove;
                             }
                             break;
                         case "On_BeltUse":
-                            Hooks.OnBeltUse -= new Hooks.BeltUseDelegate(plugin.OnBeltUse);
+                            Hooks.OnBeltUse -= plugin.OnBeltUse;
                             break;
                         case "On_Logger":
-                            Hooks.OnLogger -= new Hooks.LoggerDelegate(plugin.OnLogger);
+                            Hooks.OnLogger -= plugin.OnLogger;
+                            break;
+                        case "On_GrenadeThrow":
+                            Hooks.OnGrenadeThrow -= plugin.OnGrenade;
                             break;
                     }
                 }

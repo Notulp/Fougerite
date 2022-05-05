@@ -22,7 +22,7 @@
                 {
                     client.Notice(ch.ToString(), strText, 5f);
                 }
-            }   
+            }
         }
     }
 }

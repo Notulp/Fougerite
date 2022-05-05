@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Fougerite.Caches;
 using Fougerite.Permissions;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
@@ -111,6 +112,7 @@ namespace Fougerite.PluginLoaders
             Scope.SetVariable("MySQL", Fougerite.MySQLConnector.GetInstance);
             Scope.SetVariable("SQLite", Fougerite.SQLiteConnector.GetInstance);
             Scope.SetVariable("PermissionSystem", PermissionSystem.GetPermissionSystem());
+            Scope.SetVariable("PlayerCache", PlayerCache.GetPlayerCache());
 
             try
             {

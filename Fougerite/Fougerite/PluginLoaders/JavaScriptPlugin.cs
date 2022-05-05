@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Fougerite.Caches;
 using Fougerite.Permissions;
 using Jint;
 using Jint.Expressions;
@@ -77,6 +78,7 @@ namespace Fougerite.PluginLoaders
                     .SetParameter("MySQL", Fougerite.MySQLConnector.GetInstance)
                     .SetParameter("SQLite", Fougerite.SQLiteConnector.GetInstance)
                     .SetParameter("PermissionSystem", PermissionSystem.GetPermissionSystem())
+                    .SetParameter("PlayerCache", PlayerCache.GetPlayerCache())
                     .SetFunction("importClass", new importit(importClass));
                 Program = JintEngine.Compile(code, false);
 

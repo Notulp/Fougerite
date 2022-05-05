@@ -881,7 +881,7 @@
                     List<Entity> entities = new List<Entity>(component.Count() + deployable.Count() + supplydrop.Count());
                     entities.AddRange(component);
                     entities.AddRange(deployable);
-                    if (supplydrop.Count() > 0)
+                    if (supplydrop.Any())
                     {
                         entities.AddRange(supplydrop);
                     }

@@ -1,4 +1,6 @@
 ﻿
+using Fougerite.Caches;
+
 namespace Fougerite
 {
     using System.Linq;
@@ -116,9 +118,17 @@ namespace Fougerite
             {
                 this.hasInventory = false;
             }
-            if (Fougerite.Server.Cache.ContainsKey(_ownerid))
+
+            Player ownerCache = Server.GetServer().GetCachePlayer(_ownerid);
+            CachedPlayer cachedPlayerOwner;
+            
+            if (ownerCache != null)
             {
-                this._ownername = Fougerite.Server.Cache[_ownerid].Name;
+                this._ownername = ownerCache.Name;
+            }
+            else if (PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(_ownerid, out cachedPlayerOwner))
+            {
+                this._ownername = cachedPlayerOwner.Name;
             }
             else if (Server.GetServer().HasRustPP)
             {
@@ -131,9 +141,17 @@ namespace Fougerite
             {
                 this._ownername = "UnKnown";
             }
-            if (Fougerite.Server.Cache.ContainsKey(_creatorid))
+
+            Player creatorCache = Server.GetServer().GetCachePlayer(_creatorid);
+            CachedPlayer cachedPlayerCreator;
+            
+            if (creatorCache != null)
             {
-                this._creatorname = Fougerite.Server.Cache[_creatorid].Name;
+                this._creatorname = creatorCache.Name;
+            }
+            else if (PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(_creatorid, out cachedPlayerCreator))
+            {
+                this._ownername = cachedPlayerCreator.Name;
             }
             else if (Server.GetServer().HasRustPP)
             {
@@ -445,7 +463,9 @@ namespace Fougerite
         {
             get
             {
-                return Fougerite.Server.Cache.ContainsKey(_ownerid) ? Fougerite.Server.Cache[_ownerid] : Fougerite.Player.FindByGameID(this.CreatorID);
+                Player creatorPlayer = Server.GetServer().GetCachePlayer(_creatorid);
+                Player ownerPlayer = Server.GetServer().GetCachePlayer(_ownerid);
+                return creatorPlayer ?? ownerPlayer;
             }
         }
 

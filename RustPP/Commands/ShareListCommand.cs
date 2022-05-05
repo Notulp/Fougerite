@@ -16,12 +16,12 @@ namespace RustPP
                     pl.MessageFrom(Core.Name, "You don't have anybody on sharelist!");
                     return;
                 }
-                
+
                 string names = "";
                 foreach (object x in list)
                 {
                     // Do safe casting just in case.
-                    ulong UID = x is ulong ? (ulong) x : 0;
+                    ulong UID = x is ulong ? (ulong)x : 0;
                     if (UID > 0)
                     {
                         var cache = Core.userCache;
@@ -40,7 +40,7 @@ namespace RustPP
                         names += "Unknown, ";
                     }
                 }
-                
+
                 pl.MessageFrom(Core.Name, names);
             }
             else

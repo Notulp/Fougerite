@@ -17,9 +17,9 @@ namespace RustPP.Commands
         [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern IntPtr LoadLibrary(string lpFileName);
 
-        
+
         public static Hashtable tpWaitList = new Hashtable();
-        
+
         public bool V3Equal(Vector3 a, Vector3 b)
         {
             return Vector3.SqrMagnitude(a - b) < 0.0001;
@@ -41,12 +41,14 @@ namespace RustPP.Commands
                     return;
                 }
             }
+
             string playerName = string.Join(" ", ChatArguments).Trim(new char[] { ' ', '"' });
             if (playerName == string.Empty)
             {
                 pl.MessageFrom(Core.Name, "Teleport Usage:  /tpto playerName");
                 return;
             }
+
             List<string> list = new List<string>();
             list.Add("ToTarget");
             foreach (Fougerite.Player client in Fougerite.Server.GetServer().Players)
@@ -63,6 +65,7 @@ namespace RustPP.Commands
                                 pl.MessageFrom(Core.Name, client.Name + " is still loading and has null position!");
                                 return;
                             }
+
                             pl.TeleportTo(client, 1.5f, false);
                             pl.MessageFrom(Core.Name, "You have teleported to " + client.Name);
                         }
@@ -70,22 +73,28 @@ namespace RustPP.Commands
                         {
                             pl.MessageFrom(Core.Name, client.Name + " seems to be offline");
                         }
+
                         return;
                     }
+
                     list.Add(client.Name);
                 }
             }
+
             if (list.Count != 0)
             {
-                pl.MessageFrom(Core.Name, ((list.Count - 1)).ToString() + " Player" + (((list.Count - 1) > 1) ? "s" : "") + " were found: ");
+                pl.MessageFrom(Core.Name,
+                    ((list.Count - 1)).ToString() + " Player" + (((list.Count - 1) > 1) ? "s" : "") + " were found: ");
                 for (int j = 1; j < list.Count; j++)
                 {
                     pl.MessageFrom(Core.Name, j + " - " + list[j]);
                 }
+
                 pl.MessageFrom(Core.Name, "0 - Cancel");
                 pl.MessageFrom(Core.Name, "Please enter the number matching the player you were looking for.");
                 tpWaitList[pl.UID] = list;
-            } else
+            }
+            else
             {
                 pl.MessageFrom(Core.Name, "No player found with the name: " + playerName);
             }
@@ -101,7 +110,8 @@ namespace RustPP.Commands
             var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
             if (tpWaitList.Contains(pl.UID))
             {
-                System.Collections.Generic.List<string> list = (System.Collections.Generic.List<string>)tpWaitList[pl.UID];
+                System.Collections.Generic.List<string> list =
+                    (System.Collections.Generic.List<string>)tpWaitList[pl.UID];
                 string str = list[choice];
                 if (choice == 0)
                 {
@@ -118,6 +128,7 @@ namespace RustPP.Commands
                     {
                         Arguments.Args = new string[] { str, pl.Name };
                     }
+
                     teleport.toplayer(ref Arguments);
                     tpWaitList.Remove(pl.UID);
                 }

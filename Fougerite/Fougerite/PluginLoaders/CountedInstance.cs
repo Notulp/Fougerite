@@ -6,38 +6,40 @@ namespace Fougerite.PluginLoaders
     [Serializable]
     public class CountedInstance
     {
-        [NonSerialized]
-        public static Dictionary<Type, CountedInstance.Counts> InstanceTypes = new Dictionary<Type, CountedInstance.Counts>();
+        [NonSerialized] public static readonly Dictionary<Type, Counts> InstanceTypes;
 
         ~CountedInstance()
         {
-            CountedInstance.RemoveCount(GetType());
+            RemoveCount(GetType());
         }
 
         public CountedInstance()
         {
-            CountedInstance.AddCount(GetType());
+            AddCount(GetType());
         }
 
         static CountedInstance()
         {
-            CountedInstance.InstanceTypes = new Dictionary<Type, CountedInstance.Counts>();
+            InstanceTypes = new Dictionary<Type, Counts>();
         }
 
         internal static void AddCount(Type type)
         {
-            CountedInstance.Counts counts;
-            if (CountedInstance.InstanceTypes.TryGetValue(type, out counts)) {
+            Counts counts;
+            if (InstanceTypes.TryGetValue(type, out counts))
+            {
                 counts.Created++;
                 return;
             }
-            CountedInstance.InstanceTypes.Add(type, new CountedInstance.Counts());
+
+            InstanceTypes.Add(type, new Counts());
         }
 
         internal static void RemoveCount(Type type)
         {
-            CountedInstance.Counts counts;
-            if (CountedInstance.InstanceTypes.TryGetValue(type, out counts)) {
+            Counts counts;
+            if (InstanceTypes.TryGetValue(type, out counts))
+            {
                 counts.Destroyed++;
             }
         }
@@ -45,18 +47,14 @@ namespace Fougerite.PluginLoaders
         public static string InstanceReportText()
         {
             string text = "";
-            foreach (KeyValuePair<Type, CountedInstance.Counts> current in CountedInstance.InstanceTypes) {
+            foreach (KeyValuePair<Type, Counts> current in InstanceTypes)
+            {
                 object obj = text;
-                text = String.Concat(new object[] {
-                    obj,
-                    current.Key.FullName,
-                    Environment.NewLine + "\tCurrently:\t",
-                    current.Value.Created - current.Value.Destroyed,
-                    Environment.NewLine + "\tCreated:  \t",
-                    current.Value.Created,
-                    Environment.NewLine
-                });
+                text = String.Concat(obj, current.Key.FullName, Environment.NewLine + "\tCurrently:\t",
+                    current.Value.Created - current.Value.Destroyed, Environment.NewLine + "\tCreated:  \t",
+                    current.Value.Created, Environment.NewLine);
             }
+
             return text;
         }
 

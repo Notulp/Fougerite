@@ -1,4 +1,6 @@
-﻿namespace RustPP.Commands
+﻿using Fougerite.Permissions;
+
+namespace RustPP.Commands
 {
     using Facepunch.Utility;
     using Fougerite;
@@ -28,24 +30,29 @@
                 if (Administrator.IsValidFlag(arg))
                 {
                     flags.Add(Administrator.GetProperName(arg));
-                } else if (arg.Equals("ALL", StringComparison.OrdinalIgnoreCase))
+                }
+                else if (arg.Equals("ALL", StringComparison.OrdinalIgnoreCase))
                 {
                     flags.Add("ALL");
-                } else
+                }
+                else
                 {
                     name.Add(arg);
-                }            
+                }
             }
+
             if (flags.Count == 0)
             {
                 pl.MessageFrom(Core.Name, "No valid flags were given.");
                 return;
             }
+
             if (flags.Contains("ALL"))
             {
                 flags.Clear();
                 flags.AddRange(Administrator.PermissionsFlags);
             }
+
             Fougerite.Player matchingplayer = Fougerite.Server.GetServer().FindPlayer(name[0]);
             if (matchingplayer != null)
             {
@@ -57,46 +64,54 @@
                 }
                 else
                 {
-                    pl.MessageFrom(Core.Name, string.Format("{0} is not an administrator.", string.Join(" ", name.ToArray())));
+                    pl.MessageFrom(Core.Name,
+                        string.Format("{0} is not an administrator.", string.Join(" ", name.ToArray())));
                 }
+
                 return;
             }
+
             List<Administrator> match = new List<Administrator>();
             for (int i = 0; i < name.Count; i++)
             {
                 match.AddRange(Administrator.AdminList.FindAll(delegate(Administrator a)
-                {
-                    if (i == 0)
-                        return a.DisplayName.Contains(name[0], true);
+                    {
+                        if (i == 0)
+                            return a.DisplayName.Contains(name[0], true);
 
-                    return a.DisplayName.Contains(string.Join(" ", name.GetRange(0, i).ToArray()), true);
-                })
+                        return a.DisplayName.Contains(string.Join(" ", name.GetRange(0, i).ToArray()), true);
+                    })
                 );
             }
+
             if (match.Count == 0)
             {
-                pl.MessageFrom(Core.Name, string.Format("{0} is not an administrator.", string.Join(" ", name.ToArray())));
+                pl.MessageFrom(Core.Name,
+                    string.Format("{0} is not an administrator.", string.Join(" ", name.ToArray())));
                 return;
             }
+
             if (match.Count == 1)
             {
                 Core.adminFlagsList.Add(pl.UID, flags);
                 RemoveFlags(match[0], pl);
                 return;
             }
+
             admins.AddRange(match.Distinct());
             pl.MessageFrom(Core.Name,
-                string.Format("{0}  player{1} {2}: ", ((admins.Count - 1)).ToString(), (((admins.Count - 1) > 1) ? "s match" : " matches"), string.Join(" ", name.ToArray())));
+                string.Format("{0}  player{1} {2}: ", ((admins.Count - 1)).ToString(),
+                    (((admins.Count - 1) > 1) ? "s match" : " matches"), string.Join(" ", name.ToArray())));
 
             for (int i = 1; i < admins.Count; i++)
             {
                 pl.MessageFrom(Core.Name, string.Format("{0} - {1}", i, admins[i].DisplayName));
             }
+
             pl.MessageFrom(Core.Name, "0 - Cancel");
             pl.MessageFrom(Core.Name, "Please enter the number matching the administrator you were looking for.");
             Core.adminUnflagWaitList[pl.UID] = admins;
             Core.adminFlagsList[pl.UID] = flags;
-
         }
 
         public void PartialNameRemoveFlags(ref ConsoleSystem.Arg Arguments, int id)
@@ -107,31 +122,40 @@
                 pl.MessageFrom(Core.Name, "Cancelled!");
                 return;
             }
+
             List<Administrator> list = (List<Administrator>)Core.adminUnflagWaitList[pl.UID];
             RemoveFlags(list[id], pl);
         }
 
         public void RemoveFlags(Administrator administrator, Fougerite.Player myAdmin)
-        {             
+        {
             List<string> flags = (List<string>)Core.adminFlagsList[myAdmin.UID];
             Core.adminFlagsList.Remove(myAdmin.UID);
 
             foreach (string properName in flags)
             {
-                if (properName == "RCON" && !Administrator.GetAdmin(myAdmin.UID).HasPermission("RCON"))
+                if (properName == "RCON" && !Administrator.GetAdmin(myAdmin.UID).HasPermission("RCON")
+                    && !PermissionSystem.GetPermissionSystem().PlayerHasPermission(myAdmin.UID, "RCON"))
                 {
                     myAdmin.MessageFrom(Core.Name, "You can't remove the RCON flag to anyone's permissions.");
-                    Administrator.NotifyAdmins(string.Format("{0} attempted to remove the {1} flag to {2}'s permissions.", myAdmin.Name, properName, administrator.DisplayName));
-                } else if (!administrator.HasPermission(properName))
+                    Administrator.NotifyAdmins(string.Format(
+                        "{0} attempted to remove the {1} flag to {2}'s permissions.", myAdmin.Name, properName,
+                        administrator.DisplayName));
+                }
+                else if (!administrator.HasPermission(properName))
                 {
-                    myAdmin.MessageFrom(Core.Name, string.Format("{0} doesn't have the {1} flag.", administrator.DisplayName, properName));
-                } else
+                    myAdmin.MessageFrom(Core.Name,
+                        string.Format("{0} doesn't have the {1} flag.", administrator.DisplayName, properName));
+                }
+                else
                 {
                     administrator.Flags.Remove(properName);
-                    Administrator.NotifyAdmins(string.Format("{0} removed the {1} flag to {2}'s permissions.", myAdmin.Name, properName, administrator.DisplayName));
+                    Administrator.NotifyAdmins(string.Format("{0} removed the {1} flag to {2}'s permissions.",
+                        myAdmin.Name, properName, administrator.DisplayName));
                     if (properName == "RCON")
-                    {                           
-                        Fougerite.Player adminclient = Fougerite.Server.GetServer().FindPlayer(administrator.UserID.ToString());
+                    {
+                        Fougerite.Player adminclient =
+                            Fougerite.Server.GetServer().FindPlayer(administrator.UserID.ToString());
                         if (adminclient != null)
                             adminclient.PlayerClient.netUser.admin = true;
                     }

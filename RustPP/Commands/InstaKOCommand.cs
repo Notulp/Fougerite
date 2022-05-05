@@ -18,8 +18,10 @@
                     userIDs.Remove(pl.UID);
                     pl.MessageFrom(Core.Name, "InstaKO mode has been deactivated!");
                 }
+
                 return;
             }
+
             if (!this.userIDs.Contains(pl.UID))
             {
                 this.userIDs.Add(pl.UID);

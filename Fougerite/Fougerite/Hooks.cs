@@ -3,6 +3,8 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using Facepunch;
+using Facepunch.MeshBatch;
+using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
 using Rust;
@@ -10,7 +12,7 @@ using Rust;
 namespace Fougerite
 {
     using uLink;
-    using Fougerite.Events;
+    using Events;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -19,7 +21,7 @@ namespace Fougerite
 
     public class Hooks
     {
-        public static System.Collections.Generic.List<object> decayList = new System.Collections.Generic.List<object>();
+        public static List<object> decayList = new List<object>();
         public static Hashtable talkerTimers = new Hashtable();
         public static bool ServerInitialized = false;
 
@@ -56,7 +58,7 @@ namespace Fougerite
         /// <summary>
         /// This delegate runs when a console message is received.
         /// </summary>
-        [System.Obsolete("Use OnConsoleReceivedWithCancel", false)]
+        [Obsolete("Use OnConsoleReceivedWithCancel", false)]
         public static event ConsoleHandlerDelegate OnConsoleReceived;
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace Fougerite
         /// </summary>
         public static event EntityDecayDelegate OnEntityDecay;
 
-        [System.Obsolete("Use OnEntityDeployedWithPlacer", false)]
+        [Obsolete("Use OnEntityDeployedWithPlacer", false)]
         public static event EntityDeployedDelegate OnEntityDeployed;
 
         /// <summary>
@@ -177,7 +179,7 @@ namespace Fougerite
         /// </summary>
         public static event ModulesLoadedDelegate OnModulesLoaded;
 
-        [System.Obsolete("This method is no longer called since the rust api doesn't call It.", false)]
+        [Obsolete("This method is no longer called since the rust api doesn't call It.", false)]
         public static event RecieveNetworkDelegate OnRecieveNetwork;
 
         /// <summary>
@@ -341,7 +343,7 @@ namespace Fougerite
             }
 
             //Fougerite.Player player = Fougerite.Player.FindByPlayerClient(item.controllable.playerClient);
-            Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(item.controllable.playerClient.userID);
+            Player player = Server.GetServer().FindPlayer(item.controllable.playerClient.userID);
             if (player != null)
             {
                 BPUseEvent ae = new BPUseEvent(bdb, item);
@@ -430,7 +432,7 @@ namespace Fougerite
             {
                 string[] args = Facepunch.Utility.String.SplitQuotesStrings(quotedMessage.Trim('"'));
                 var command = args[0].TrimStart('/');
-                Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(arg.argUser.playerClient.userID);
+                Player player = Server.GetServer().FindPlayer(arg.argUser.playerClient.userID);
                 if (command == "fougerite")
                 {
                     player.Message(
@@ -468,7 +470,7 @@ namespace Fougerite
                 {
                     if (OnChat != null)
                     {
-                        OnChat(Fougerite.Server.GetServer().FindPlayer(arg.argUser.playerClient.userID), ref chatstr);
+                        OnChat(Server.GetServer().FindPlayer(arg.argUser.playerClient.userID), ref chatstr);
                     }
                 }
                 catch (Exception ex)
@@ -492,8 +494,8 @@ namespace Fougerite
                 string s = Regex.Replace(newchat, @"\[/?color\b.*?\]", string.Empty);
                 if (s.Length <= 100)
                 {
-                    Fougerite.Data.GetData().chat_history.Add(chatstr);
-                    Fougerite.Data.GetData().chat_history_username.Add(quotedName);
+                    Data.GetData().chat_history.Add(chatstr);
+                    Data.GetData().chat_history_username.Add(quotedName);
                     ConsoleNetworker.Broadcast("chat.add " + quotedName + " " + newchat);
                     return;
                 }
@@ -511,8 +513,8 @@ namespace Fougerite
 
                 foreach (var x in ns)
                 {
-                    Fougerite.Data.GetData().chat_history.Add(x);
-                    Fougerite.Data.GetData().chat_history_username.Add(quotedName);
+                    Data.GetData().chat_history.Add(x);
+                    Data.GetData().chat_history_username.Add(quotedName);
 
                     if (i == 1)
                     {
@@ -840,7 +842,7 @@ namespace Fougerite
             // We have a player
             if (UID > 0)
             {
-                Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(UID);
+                Player player = Server.GetServer().FindPlayer(UID);
                 if (player != null && player.ConsoleCommandCancelList.Contains(data))
                 {
                     a.ReplyWith("This console command is restricted for you!");
@@ -1008,7 +1010,7 @@ namespace Fougerite
             {
                 try
                 {
-                    OnDoorUse(Fougerite.Server.GetServer().FindPlayer(controllable.playerClient.userID), de);
+                    OnDoorUse(Server.GetServer().FindPlayer(controllable.playerClient.userID), de);
                 }
                 catch (Exception ex)
                 {
@@ -1080,12 +1082,12 @@ namespace Fougerite
 
             Entity e = new Entity(entity);
             uLink.NetworkPlayer nplayer = info.sender;
-            Fougerite.Player creator = e.Creator;
+            Player creator = e.Creator;
             var data = nplayer.GetLocalData();
-            Fougerite.Player ActualPlacer = null;
+            Player ActualPlacer = null;
             if (data is NetUser user)
             {
-                ActualPlacer = Fougerite.Server.GetServer().FindPlayer(user.userID);
+                ActualPlacer = Server.GetServer().FindPlayer(user.userID);
             }
 
 
@@ -1401,7 +1403,7 @@ namespace Fougerite
                 Logger.LogDebug("Hijack: " + name);
         }
 
-        public static ItemDataBlock[] ItemsLoaded(System.Collections.Generic.List<ItemDataBlock> items,
+        public static ItemDataBlock[] ItemsLoaded(List<ItemDataBlock> items,
             Dictionary<string, int> stringDB, Dictionary<int, int> idDB)
         {
             ItemsBlocks blocks = new ItemsBlocks(items);
@@ -1423,7 +1425,7 @@ namespace Fougerite
                 num++;
             }
 
-            Fougerite.Server.GetServer().Items = blocks;
+            Server.GetServer().Items = blocks;
             return blocks.ToArray();
         }
 
@@ -1444,7 +1446,7 @@ namespace Fougerite
             }
 
             Inventory inventory2 = pickup.GetLocal<Inventory>();
-            if ((inventory2 == null) || object.ReferenceEquals(item = inventory2.firstItem, null))
+            if ((inventory2 == null) || ReferenceEquals(item = inventory2.firstItem, null))
             {
                 pickup.RemoveThis();
                 return false;
@@ -1615,50 +1617,98 @@ namespace Fougerite
                 sw.Start();
             }
 
-            bool connected = false;
-
+            // Sanity check
             if (user.playerClient == null)
             {
                 Logger.LogDebug("PlayerConnect user.playerClient is null");
-                return connected;
+                return false;
             }
 
+            // Grab values into variables
             ulong uid = user.userID;
-            string nip = user.networkPlayer.externalIP.ToString();
-            string nname = user.displayName.ToString();
+            string nip = user.networkPlayer.externalIP;
+            string nname = user.displayName;
+            
+            // This was a check for some attacks and what not where attackers have sent
+            // random steamids to the servers causing fake connections.
+            // Obviously if this is a real connection we should remove It, although I should have documented this more.
             if (uLinkDCCache.Contains(uid))
             {
                 uLinkDCCache.Remove(uid);
             }
 
+            // Flood check, again same attacking pattern.
             if (FloodCooldown.ContainsKey(nip))
             {
-                Fougerite.Server.GetServer().BanPlayerIP(nip, nname, "FloodCooldown", "Fougerite");
-                return connected;
+                Server.GetServer().BanPlayerIP(nip, nname, "FloodCooldown", "Fougerite");
+                return false;
             }
 
-            Fougerite.Server srv = Fougerite.Server.GetServer();
-            Fougerite.Player player = new Fougerite.Player(user.playerClient);
-            if (!Fougerite.Server.Cache.ContainsKey(uid))
+            Server srv = Server.GetServer();
+            
+            // Create our API player class
+            Player player = new Player(user.playerClient);
+            
+            // Does the player have RCON or * permissions?
+            if (PermissionSystem.GetPermissionSystem().PlayerHasPermission(player.UID, "RCON"))
             {
-                Fougerite.Server.Cache.Add(uid, player);
+                // Force the user to an RCON admin.
+                player.PlayerClient.netUser.admin = true;
+            }
+            
+            // Add It to the consistent cache list
+            srv.AddCachePlayer(uid, player);
+
+            CachedPlayer cachedPlayer;
+            if (!PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(uid, out cachedPlayer))
+            {
+                cachedPlayer = new CachedPlayer
+                {
+                    Name = player.Name,
+                    IPAddresses = new List<string>() { player.IP },
+                    Aliases = new List<string>() { player.Name }
+                };
+                PlayerCache.GetPlayerCache().CachedPlayers[uid] = cachedPlayer;
             }
             else
             {
-                Fougerite.Server.Cache[uid] = player;
+                cachedPlayer.Name = player.Name;
+                // Sanity check, shouldn't happen unless user messes with file.
+                if (cachedPlayer.Aliases == null)
+                {
+                    cachedPlayer.Aliases = new List<string>();
+                }
+                
+                // Sanity check, shouldn't happen unless user messes with file.
+                if (cachedPlayer.IPAddresses == null)
+                {
+                    cachedPlayer.IPAddresses = new List<string>();
+                }
+
+                // Check if this name is in the aliases
+                if (!cachedPlayer.Aliases.Contains(player.Name, StringComparer.CurrentCultureIgnoreCase))
+                {
+                    cachedPlayer.Aliases.Add(player.Name);
+                }
+
+                // Check if IP is in the list
+                if (!cachedPlayer.IPAddresses.Contains(player.IP))
+                {
+                    cachedPlayer.IPAddresses.Add(player.IP);
+                }
             }
 
+            // This in theory should never happen as two same ID connections would be disconnected on
+            // the steam auth event, but I must have put this check here for a good reason.
             if (srv.ContainsPlayer(uid))
             {
                 Logger.LogError(string.Format("[PlayerConnect] Server.Players already contains {0} {1}", player.Name,
                     player.SteamID));
-                connected = user.connected;
-                return connected;
+                return user.connected;
             }
 
+            // Throw player into the current list as well.
             srv.AddPlayer(uid, player);
-            //server.Players.Add(player);
-            //Rust.Steam.Server.Steam_UpdateServer(server.maxplayers, srv.Players.Count, server.hostname, server.map, "rust,modded,fougerite");
 
             try
             {
@@ -1669,13 +1719,12 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("PlayerConnectedEvent Error " + ex.ToString());
-                return connected;
+                Logger.LogError("PlayerConnectedEvent Error " + ex);
             }
 
-            connected = user.connected;
+            bool connected = user.connected;
 
-            if (Fougerite.Config.GetBoolValue("Fougerite", "tellversion"))
+            if (Config.GetBoolValue("Fougerite", "tellversion"))
             {
                 player.Message(string.Format("This server is powered by Fougerite v.{0}!", Bootstrap.Version));
             }
@@ -1731,27 +1780,22 @@ namespace Fougerite
             }
 
             ulong uid = user.userID;
-            Fougerite.Player player = null;
-            if (Fougerite.Server.Cache.ContainsKey(uid))
+            Player player = Server.GetServer().GetCachePlayer(uid);
+            if (player == null)
             {
-                player = Fougerite.Server.Cache[uid];
-            }
-            else
-            {
-                Fougerite.Server.GetServer().RemovePlayer(uid);
+                Server.GetServer().RemovePlayer(uid);
                 Logger.LogWarning(
                     "[WeirdDisconnect] Player was null at the disconnection. Something might be wrong? OPT: " +
-                    Fougerite.Bootstrap.CR);
+                    Bootstrap.CR);
                 return;
             }
 
             player.DisconnectTime = DateTime.UtcNow.Ticks;
             player.IsDisconnecting = true;
-            Fougerite.Server.GetServer().RemovePlayer(uid);
-            //if (Fougerite.Server.GetServer().Players.Contains(player)) { Fougerite.Server.GetServer().Players.Remove(player); }
-            //player.PlayerClient.netUser.Dispose();
-            Fougerite.Server.Cache[uid] = player;
-            //Rust.Steam.Server.Steam_UpdateServer(server.maxplayers, Fougerite.Server.GetServer().Players.Count, server.hostname, server.map, "modded, fougerite");
+            
+            // Remove the player from the current players
+            Server.GetServer().RemovePlayer(uid);
+
             try
             {
                 if (OnPlayerDisconnected != null)
@@ -1765,9 +1809,9 @@ namespace Fougerite
             }
 
             Logger.LogDebug("User Disconnected: " + player.Name + " (" + player.SteamID + ")" + " (" + player.IP + ")");
-            if (Fougerite.Bootstrap.CR && Fougerite.Server.Cache.ContainsKey(uid))
+            if (Bootstrap.CR)
             {
-                Fougerite.Server.Cache.Remove(uid);
+                Server.GetServer().RemoveCachePlayer(uid);
             }
 
             if (sw == null) return;
@@ -1785,7 +1829,7 @@ namespace Fougerite
                 sw.Start();
             }
 
-            Fougerite.Player player = Fougerite.Player.FindByNetworkPlayer(rec.networkView.owner);
+            Player player = Player.FindByNetworkPlayer(rec.networkView.owner);
             GatherEvent ge = new GatherEvent(rt, rg, amount);
             try
             {
@@ -1823,9 +1867,12 @@ namespace Fougerite
                 sw.Start();
             }
 
-            Fougerite.Player player = Fougerite.Player.FindByNetworkPlayer(rec.inventory.networkView.owner);
-            GatherEvent ge = new GatherEvent(rt, db, amount);
-            ge.Item = "Wood";
+            Player player = Player.FindByNetworkPlayer(rec.inventory.networkView.owner);
+            GatherEvent ge = new GatherEvent(rt, db, amount)
+            {
+                Item = "Wood"
+            };
+            
             try
             {
                 if (OnPlayerGathering != null)
@@ -1833,7 +1880,7 @@ namespace Fougerite
                     OnPlayerGathering(player, ge);
                 }
 
-                db = Fougerite.Server.GetServer().Items.Find(ge.Item);
+                db = Server.GetServer().Items.Find(ge.Item);
                 amount = ge.Quantity;
                 name = ge.Item;
             }
@@ -1888,7 +1935,7 @@ namespace Fougerite
                 sw.Start();
             }
 
-            Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(pc.userID);
+            Player player = Server.GetServer().FindPlayer(pc.userID);
             SpawnEvent se = new SpawnEvent(pos, camp);
             try
             {
@@ -1917,7 +1964,7 @@ namespace Fougerite
                 sw.Start();
             }
 
-            Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(pc.userID);
+            Player player = Server.GetServer().FindPlayer(pc.userID);
             SpawnEvent se = new SpawnEvent(pos, camp);
             try
             {
@@ -1967,7 +2014,7 @@ namespace Fougerite
                 Logger.LogSpeed("PluginInit Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
         }
 
-        public static void PlayerTeleport(Fougerite.Player player, Vector3 from, Vector3 dest)
+        public static void PlayerTeleport(Player player, Vector3 from, Vector3 dest)
         {
             Stopwatch sw = null;
             if (Logger.showSpeed)
@@ -2103,7 +2150,7 @@ namespace Fougerite
         }
 
         
-        private static void GrenadeEvent(HandGrenadeDataBlock hgd, uLink.BitStream stream, ItemRepresentation rep,
+        public static void GrenadeEvent(HandGrenadeDataBlock hgd, uLink.BitStream stream, ItemRepresentation rep,
             ref uLink.NetworkMessageInfo info)
         {
             Stopwatch sw = null;
@@ -2114,18 +2161,42 @@ namespace Fougerite
             }
 
             IHandGrenadeItem item;
-            NetCull.VerifyRPC(ref info, false);
-            if (rep.Item<IHandGrenadeItem>(out item) && item.ValidatePrimaryMessageTime(info.timestamp))
+            bool proceed = true;
+            try
+            {
+                NetCull.VerifyRPC(ref info);
+            }
+            catch (Exception)
+            {
+                proceed = false;
+            }
+
+            if (proceed && rep.Item<IHandGrenadeItem>(out item) && item.ValidatePrimaryMessageTime(info.timestamp))
             {
                 rep.ActionStream(1, uLink.RPCMode.AllExceptOwner, stream);
                 Vector3 origin = stream.ReadVector3();
                 Vector3 forward = stream.ReadVector3();
+                
+                // Sanity checks.
+                if (float.IsNaN(origin.x) || float.IsInfinity(origin.x) || float.IsNaN(origin.y) 
+                    || float.IsInfinity(origin.y) || float.IsNaN(origin.z) || float.IsInfinity(origin.z))
+                {
+                    return;
+                }
+                
+                if (float.IsNaN(forward.x) || float.IsInfinity(forward.x) || float.IsNaN(forward.y) 
+                    || float.IsInfinity(forward.y) || float.IsNaN(forward.z) || float.IsInfinity(forward.z))
+                {
+                    return;
+                }
+                
                 GameObject obj2 = hgd.ThrowItem(rep, origin, forward);
                 if (obj2 != null)
                 {
-                    obj2.rigidbody.AddTorque((Vector3)(new Vector3(UnityEngine.Random.Range((float)-1f, (float)1f),
-                        UnityEngine.Random.Range((float)-1f, (float)1f),
-                        UnityEngine.Random.Range((float)-1f, (float)1f)) * 10f));
+                    obj2.rigidbody.AddTorque(new Vector3(
+                        UnityEngine.Random.Range(-1f, 1f),
+                        UnityEngine.Random.Range(-1f, 1f),
+                        UnityEngine.Random.Range(-1f, 1f)) * 10f);
                     try
                     {
                         if (OnGrenadeThrow != null)
@@ -2157,9 +2228,9 @@ namespace Fougerite
         {
             try
             {
-                if (Hooks.OnServerSaved != null)
+                if (OnServerSaved != null)
                 {
-                    Hooks.OnServerSaved(amount, seconds);
+                    OnServerSaved(amount, seconds);
                 }
             }
             catch (Exception ex)
@@ -2169,6 +2240,9 @@ namespace Fougerite
 
             // Save the permissions.
             PermissionSystem.GetPermissionSystem().SaveToDisk();
+            
+            // Save PlayersCache
+            PlayerCache.GetPlayerCache().SaveToDisk();
         }
 
         public static void GlobalQuit()
@@ -2195,16 +2269,16 @@ namespace Fougerite
             Collection<InventoryItem> collection = inv.collection;
             InventoryItem inventoryItem;
             if (mustMatch && (!collection.Get(slot, out inventoryItem) ||
-                              !object.ReferenceEquals((object)inventoryItem, (object)match)) ||
+                              !ReferenceEquals((object)inventoryItem, (object)match)) ||
                 !collection.Evict(slot, out inventoryItem))
             {
                 return false;
             }
 
-            Fougerite.Events.InventoryModEvent e = null;
+            InventoryModEvent e = null;
             try
             {
-                e = new Fougerite.Events.InventoryModEvent(inv, slot, inventoryItem.iface, "Remove");
+                e = new InventoryModEvent(inv, slot, inventoryItem.iface, "Remove");
                 if (OnItemRemoved != null)
                 {
                     OnItemRemoved(e);
@@ -2253,10 +2327,10 @@ namespace Fougerite
                 sw.Start();
             }
 
-            Fougerite.Events.InventoryModEvent e = null;
+            InventoryModEvent e = null;
             try
             {
-                e = new Fougerite.Events.InventoryModEvent(args.inventory, args.slot, args.item.iface, "Add");
+                e = new InventoryModEvent(args.inventory, args.slot, args.item.iface, "Add");
                 if (OnItemAdded != null)
                 {
                     OnItemAdded(e);
@@ -2448,25 +2522,22 @@ namespace Fougerite
                     return;
                 }
 
-                if (NetworkPlayer is uLink.NetworkPlayer)
+                if (NetworkPlayer is uLink.NetworkPlayer np)
                 {
-                    uLink.NetworkPlayer np = (uLink.NetworkPlayer)NetworkPlayer;
-                    var data = np.GetLocalData();
-                    NetUser user = data as NetUser;
-                    if (user != null)
+                    object data = np.GetLocalData();
+                    if (data is NetUser user)
                     {
                         ulong id = user.userID;
                         var client = user.playerClient;
                         var loc = user.playerClient.lastKnownPosition;
-                        Fougerite.Server.Cache[id].IsDisconnecting = true;
-                        Fougerite.Server.Cache[id].DisconnectLocation = loc;
-                        Fougerite.Server.Cache[id].UpdatePlayerClient(client);
-                        var srv = Fougerite.Server.GetServer();
-                        if (srv.DPlayers.ContainsKey(id))
+
+                        Player player = Server.GetServer().GetCachePlayer(id);
+                        // Sanity check
+                        if (player != null)
                         {
-                            srv.DPlayers[id].IsDisconnecting = true;
-                            srv.DPlayers[id].DisconnectLocation = loc;
-                            srv.DPlayers[id].UpdatePlayerClient(client);
+                            player.IsDisconnecting = true;
+                            player.DisconnectLocation = loc;
+                            player.UpdatePlayerClient(client);
                         }
                     }
                 }
@@ -2519,7 +2590,7 @@ namespace Fougerite
                     return;
                 }
 
-                Fougerite.Server srv = Fougerite.Server.GetServer();
+                Server srv = Server.GetServer();
                 ulong uid = clientConnection.UserID;
                 string ip = approval.ipAddress;
                 string name = clientConnection.UserName;
@@ -2598,9 +2669,12 @@ namespace Fougerite
 
                     if (ape.ForceAccept)
                     {
-                        if (Fougerite.Server.Cache.ContainsKey(uid) && !ape.ServerHasPlayer)
+                        Player temp = srv.GetCachePlayer(uid);
+                        // This type of thing can happen when we approve a steamid that is already on server
+                        // such as it can happen on cracked servers
+                        if (temp != null && !ape.ServerHasPlayer)
                         {
-                            Fougerite.Server.Cache[uid].Disconnect();
+                            temp.Disconnect();
                         }
 
                         Accept(ca, approval, clientConnection);
@@ -2670,7 +2744,7 @@ namespace Fougerite
                 float.IsNaN(origin.y) || float.IsInfinity(origin.y) ||
                 float.IsNaN(origin.z) || float.IsInfinity(origin.z))
             {
-                Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                 if (player == null)
                 {
                     // Should never happen but just to be sure.
@@ -2684,9 +2758,9 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[TeleportHack] " + player.Name + " sent invalid packets. " + player.SteamID);
                     Server.GetServer().Broadcast(player.Name + " might have tried to teleport with hacks.");
-                    if (Fougerite.Bootstrap.BI)
+                    if (Bootstrap.BI)
                     {
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "TeleportHack");
+                        Server.GetServer().BanPlayer(player, "Console", "TeleportHack");
                         return;
                     }
 
@@ -2958,7 +3032,7 @@ namespace Fougerite
                                 LootStartEvent lt = null;
                                 if (user != null)
                                 {
-                                    Fougerite.Player pl = Fougerite.Server.GetServer().FindPlayer(user.userID);
+                                    Player pl = Server.GetServer().FindPlayer(user.userID);
                                     if (pl != null)
                                     {
                                         lt = new LootStartEvent(lootableObject, pl, use, ulinkuser);
@@ -3066,8 +3140,8 @@ namespace Fougerite
                     return;
                 }
 
-                NetUser user = networkPlayer_1.GetLocalData() as NetUser;
-                if (user != null)
+                object data = networkPlayer_1.GetLocalData();
+                if (data is NetUser user)
                 {
                     ulong id = user.userID;
                     if (uLinkDCCache.Contains(id))
@@ -3076,23 +3150,20 @@ namespace Fougerite
                     }
 
                     Logger.LogDebug("===Fougerite uLink===");
-                    if (Fougerite.Server.Cache.ContainsKey(id))
+                    Player player = Server.GetServer().GetCachePlayer(id);
+                    if (player != null)
                     {
-                        Fougerite.Player player = Fougerite.Server.Cache[id];
-                        if (player != null)
+                        Logger.LogDebug("[Fougerite uLink] Detected RPC Failing Player: " + player.Name + "-" +
+                                        player.SteamID + " Trying to kick...");
+                        if (player.IsOnline)
                         {
-                            Logger.LogDebug("[Fougerite uLink] Detected RPC Failing Player: " + player.Name + "-" +
-                                            player.SteamID + " Trying to kick...");
-                            if (player.IsOnline)
-                            {
-                                player.Disconnect(false);
-                                Logger.LogDebug("[Fougerite uLink] Should be kicked!");
-                                return; // Return to avoid the RPC Logging
-                            }
-
-                            Logger.LogDebug("[Fougerite uLink] Server says It's offline. Not touching.");
-                            uLinkDCCache.Add(player.UID);
+                            player.Disconnect(false);
+                            Logger.LogDebug("[Fougerite uLink] Should be kicked!");
+                            return; // Return to avoid the RPC Logging
                         }
+
+                        Logger.LogDebug("[Fougerite uLink] Server says It's offline. Not touching.");
+                        uLinkDCCache.Add(player.UID);
                     }
                     else
                     {
@@ -3442,7 +3513,7 @@ namespace Fougerite
                     NetUser user = itr.networkViewOwner.GetLocalData() as NetUser;
                     if (user != null)
                     {
-                        Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(user.userID.ToString());
+                        Player player = Server.GetServer().FindPlayer(user.userID.ToString());
                         if (player != null)
                         {
                             if (!ActionCooldown.ContainsKey(player.UID))
@@ -4028,7 +4099,7 @@ namespace Fougerite
                         component.AddStructureComponent(component2);
 #pragma warning restore 618
                         int count = 1;
-                        Hooks.EntityDeployed(component2, ref info);
+                        EntityDeployed(component2, ref info);
                         if (item.Consume(ref count))
                         {
                             item.inventory.RemoveItem(item.slot);
@@ -4082,43 +4153,43 @@ namespace Fougerite
         public static void ResetHooks()
         {
             OnPluginInit = delegate { };
-            OnPlayerTeleport = delegate(Fougerite.Player param0, Vector3 param1, Vector3 param2) { };
-            OnChat = delegate(Fougerite.Player param0, ref ChatString param1) { };
+            OnPlayerTeleport = delegate(Player param0, Vector3 param1, Vector3 param2) { };
+            OnChat = delegate(Player param0, ref ChatString param1) { };
             OnChatRaw = delegate(ref ConsoleSystem.Arg param0) { };
-            OnCommand = delegate(Fougerite.Player param0, string param1, string[] param2) { };
+            OnCommand = delegate(Player param0, string param1, string[] param2) { };
             OnCommandRaw = delegate(ref ConsoleSystem.Arg param0) { };
-            OnPlayerConnected = delegate(Fougerite.Player param0) { };
-            OnPlayerDisconnected = delegate(Fougerite.Player param0) { };
+            OnPlayerConnected = delegate(Player param0) { };
+            OnPlayerDisconnected = delegate(Player param0) { };
             OnNPCKilled = delegate(DeathEvent param0) { };
             OnNPCHurt = delegate(HurtEvent param0) { };
             OnPlayerKilled = delegate(DeathEvent param0) { };
             OnPlayerHurt = delegate(HurtEvent param0) { };
-            OnPlayerSpawned = delegate(Fougerite.Player param0, SpawnEvent param1) { };
-            OnPlayerSpawning = delegate(Fougerite.Player param0, SpawnEvent param1) { };
-            OnPlayerGathering = delegate(Fougerite.Player param0, GatherEvent param1) { };
+            OnPlayerSpawned = delegate(Player param0, SpawnEvent param1) { };
+            OnPlayerSpawning = delegate(Player param0, SpawnEvent param1) { };
+            OnPlayerGathering = delegate(Player param0, GatherEvent param1) { };
             OnEntityHurt = delegate(HurtEvent param0) { };
             OnEntityDestroyed = delegate(DestroyEvent param0) { };
             OnEntityDecay = delegate(DecayEvent param0) { };
-            OnEntityDeployed = delegate(Fougerite.Player param0, Entity param1) { };
-            OnEntityDeployedWithPlacer = delegate(Fougerite.Player param0, Entity param1, Fougerite.Player param2) { };
+            OnEntityDeployed = delegate(Player param0, Entity param1) { };
+            OnEntityDeployedWithPlacer = delegate(Player param0, Entity param1, Player param2) { };
             OnConsoleReceived = delegate(ref ConsoleSystem.Arg param0, bool param1) { };
             OnConsoleReceivedWithCancel = delegate(ref ConsoleSystem.Arg param0, bool param1, ConsoleEvent ce) { };
-            OnBlueprintUse = delegate(Fougerite.Player param0, BPUseEvent param1) { };
-            OnDoorUse = delegate(Fougerite.Player param0, DoorEvent param1) { };
+            OnBlueprintUse = delegate(Player param0, BPUseEvent param1) { };
+            OnDoorUse = delegate(Player param0, DoorEvent param1) { };
             OnTablesLoaded = delegate(Dictionary<string, LootSpawnList> param0) { };
             OnItemsLoaded = delegate(ItemsBlocks param0) { };
             OnServerInit = delegate { };
             OnServerShutdown = delegate { };
             OnModulesLoaded = delegate { };
-            OnRecieveNetwork = delegate(Fougerite.Player param0, Metabolism param1, float param2, float param3,
+            OnRecieveNetwork = delegate(Player param0, Metabolism param1, float param2, float param3,
                 float param4, float param5, float param6, float param7)
             {
             };
-            OnShowTalker = delegate(uLink.NetworkPlayer param0, Fougerite.Player param1) { };
-            OnCrafting = delegate(Fougerite.Events.CraftingEvent param0) { };
+            OnShowTalker = delegate(uLink.NetworkPlayer param0, Player param1) { };
+            OnCrafting = delegate(CraftingEvent param0) { };
             OnResourceSpawned = delegate(ResourceTarget param0) { };
-            OnItemRemoved = delegate(Fougerite.Events.InventoryModEvent param0) { };
-            OnItemAdded = delegate(Fougerite.Events.InventoryModEvent param0) { };
+            OnItemRemoved = delegate(InventoryModEvent param0) { };
+            OnItemAdded = delegate(InventoryModEvent param0) { };
             OnAirdropCalled = delegate(Vector3 param0) { };
             OnSteamDeny = delegate(SteamDenyEvent param0) { };
             OnPlayerApproval = delegate(PlayerApprovalEvent param0) { };
@@ -4143,7 +4214,7 @@ namespace Fougerite
             OnSupplySignalExpode = delegate(SupplySignalExplosionEvent param0) { };
             OnBeltUse = delegate(BeltUseEvent param0) { };
             OnLogger = delegate(LoggerEvent param0) { };
-            foreach (Fougerite.Player player in Fougerite.Server.GetServer().Players)
+            foreach (Player player in Server.GetServer().Players)
             {
                 player.FixInventoryRef();
             }
@@ -4206,7 +4277,7 @@ namespace Fougerite
                 if (diff > 10)
                 {
                     LasTime2 = DateTime.Now;
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(nplayer);
+                    Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                     if (player != null)
                     {
                         Logger.LogWarning("[VoiceByteOverflown] Received null value. Possible Sender: " + player.Name +
@@ -4226,7 +4297,7 @@ namespace Fougerite
                 if (diff > 10)
                 {
                     LasTime2 = DateTime.Now;
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(nplayer);
+                    Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                     if (player != null)
                     {
                         Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
@@ -4253,7 +4324,7 @@ namespace Fougerite
                         if (diff > 10)
                         {
                             LasTime2 = DateTime.Now;
-                            Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(nplayer);
+                            Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                             if (player != null)
                             {
                                 Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
@@ -4278,7 +4349,7 @@ namespace Fougerite
                     if (diff > 10)
                     {
                         LasTime2 = DateTime.Now;
-                        Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(nplayer);
+                        Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                         if (player != null)
                         {
                             Logger.LogWarning(
@@ -4309,7 +4380,7 @@ namespace Fougerite
                 sw.Start();
             }
 
-            var pl = Fougerite.Server.GetServer().FindPlayer(p2.userID);
+            var pl = Server.GetServer().FindPlayer(p2.userID);
             try
             {
                 if (OnShowTalker != null)
@@ -4476,7 +4547,7 @@ namespace Fougerite
             {
                 if (OnLogger != null)
                 {
-                    Events.LoggerEvent evt = new LoggerEvent(type, message);
+                    LoggerEvent evt = new LoggerEvent(type, message);
                     OnLogger(evt);
                 }
             }
@@ -4517,13 +4588,13 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
                         Logger.LogWarning("[ITSP InvalidPacket] " + slotNumber
                                                                   + " - " + player.Name + " - " + player.SteamID +
                                                                   " - " + player.IP);
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "Invalid ITSP Packet.");
+                        Server.GetServer().BanPlayer(player, "Console", "Invalid ITSP Packet.");
                     }
 
                     LasTime3 = DateTime.Now;
@@ -4557,12 +4628,12 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
                         Logger.LogWarning("[IACT InvalidPacket] " + itemIndex + " - " + action
                                           + " - " + player.Name + " - " + player.SteamID + " - " + player.IP);
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "Invalid IACT Packet.");
+                        Server.GetServer().BanPlayer(player, "Console", "Invalid IACT Packet.");
                     }
 
                     LasTime4 = DateTime.Now;
@@ -4606,12 +4677,12 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
                         Logger.LogWarning("[IAST InvalidPacket] " + itemIndex + " - " + itemRepID
                                           + " - " + player.Name + " - " + player.SteamID + " - " + player.IP);
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "Invalid IAST Packet.");
+                        Server.GetServer().BanPlayer(player, "Console", "Invalid IAST Packet.");
                     }
 
                     LasTime5 = DateTime.Now;
@@ -4720,13 +4791,13 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
                         Logger.LogWarning("[ISMV InvalidPacket] " + fromSlot
                                                                   + " - " + toSlot + " - " + player.Name + " - " +
                                                                   player.SteamID + " - " + player.IP);
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "Invalid ISMV Packet.");
+                        Server.GetServer().BanPlayer(player, "Console", "Invalid ISMV Packet.");
                     }
 
                     LasTime6 = DateTime.Now;
@@ -4765,13 +4836,13 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
                         Logger.LogWarning("[ITMG InvalidPacket] " + fromSlot
                                                                   + " - " + toSlot + " - " + player.Name + " - " +
                                                                   player.SteamID + " - " + player.IP);
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "Invalid ITMG Packet.");
+                        Server.GetServer().BanPlayer(player, "Console", "Invalid ITMG Packet.");
                     }
 
                     LasTime7 = DateTime.Now;
@@ -4811,13 +4882,13 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
                         Logger.LogWarning("[ITMV InvalidPacket] " + fromSlot
                                                                   + " - " + toSlot + " - " + player.Name + " - " +
                                                                   player.SteamID + " - " + player.IP);
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "Invalid ITMV Packet.");
+                        Server.GetServer().BanPlayer(player, "Console", "Invalid ITMV Packet.");
                     }
 
                     LasTime8 = DateTime.Now;
@@ -4857,13 +4928,13 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
                         Logger.LogWarning("[ITSM InvalidPacket] " + fromSlot
                                                                   + " - " + toSlot + " - " + player.Name + " - " +
                                                                   player.SteamID + " - " + player.IP);
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "Invalid ITSM Packet.");
+                        Server.GetServer().BanPlayer(player, "Console", "Invalid ITSM Packet.");
                     }
 
                     LasTime9 = DateTime.Now;
@@ -4900,13 +4971,13 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    Fougerite.Player player = Fougerite.Server.GetServer().FindByNetworkPlayer(info.sender);
+                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
                         Logger.LogWarning("[SVUC InvalidPacket] " + cell
                                                                   + " - " + player.Name + " - " + player.SteamID +
                                                                   " - " + player.IP);
-                        Fougerite.Server.GetServer().BanPlayer(player, "Console", "Invalid SVUC Packet.");
+                        Server.GetServer().BanPlayer(player, "Console", "Invalid SVUC Packet.");
                     }
 
                     LasTime10 = DateTime.Now;
@@ -5126,33 +5197,53 @@ namespace Fougerite
             }
         }
 
-        public delegate void BlueprintUseHandlerDelegate(Fougerite.Player player, BPUseEvent ae);
+        public static void ActivateImmediatelyUncheckedHook(MeshBatchPhysicalOutput meshBatchPhysicalOutput)
+        {
+            if (meshBatchPhysicalOutput.FlaggedForActivation)
+            {
+                Facepunch.MeshBatch.Runtime.Sealed.MeshBatchPhysicalIntegration.Cancel(meshBatchPhysicalOutput);
+                meshBatchPhysicalOutput.FlaggedForActivation = false;
+            }
+            if (!meshBatchPhysicalOutput.Activated)
+            {
+                // This becomes null when the entity is destroyed on deployment before its activated
+                // thus causing null reference exception
+                if (meshBatchPhysicalOutput.GameObject == null)
+                {
+                    return;
+                }
+                meshBatchPhysicalOutput.Activated = true;
+                meshBatchPhysicalOutput.GameObject.SetActive(true);
+            }
+        }
 
-        public delegate void ChatHandlerDelegate(Fougerite.Player player, ref ChatString text);
+        public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
+
+        public delegate void ChatHandlerDelegate(Player player, ref ChatString text);
 
         public delegate void ChatRawHandlerDelegate(ref ConsoleSystem.Arg arg);
 
-        public delegate void CommandHandlerDelegate(Fougerite.Player player, string cmd, string[] args);
+        public delegate void CommandHandlerDelegate(Player player, string cmd, string[] args);
 
         public delegate void CommandRawHandlerDelegate(ref ConsoleSystem.Arg arg);
 
-        public delegate void ConnectionHandlerDelegate(Fougerite.Player player);
+        public delegate void ConnectionHandlerDelegate(Player player);
 
         public delegate void ConsoleHandlerDelegate(ref ConsoleSystem.Arg arg, bool external);
 
         public delegate void
             ConsoleHandlerWithCancelDelegate(ref ConsoleSystem.Arg arg, bool external, ConsoleEvent ce);
 
-        public delegate void DisconnectionHandlerDelegate(Fougerite.Player player);
+        public delegate void DisconnectionHandlerDelegate(Player player);
 
-        public delegate void DoorOpenHandlerDelegate(Fougerite.Player player, DoorEvent de);
+        public delegate void DoorOpenHandlerDelegate(Player player, DoorEvent de);
 
         public delegate void EntityDecayDelegate(DecayEvent de);
 
-        public delegate void EntityDeployedDelegate(Fougerite.Player player, Entity e);
+        public delegate void EntityDeployedDelegate(Player player, Entity e);
 
-        public delegate void EntityDeployedWithPlacerDelegate(Fougerite.Player player, Entity e,
-            Fougerite.Player actualplacer);
+        public delegate void EntityDeployedWithPlacerDelegate(Player player, Entity e,
+            Player actualplacer);
 
         public delegate void EntityHurtDelegate(HurtEvent he);
 
@@ -5166,15 +5257,15 @@ namespace Fougerite
 
         public delegate void LootTablesLoaded(Dictionary<string, LootSpawnList> lists);
 
-        public delegate void PlayerGatheringHandlerDelegate(Fougerite.Player player, GatherEvent ge);
+        public delegate void PlayerGatheringHandlerDelegate(Player player, GatherEvent ge);
 
-        public delegate void PlayerSpawnHandlerDelegate(Fougerite.Player player, SpawnEvent se);
+        public delegate void PlayerSpawnHandlerDelegate(Player player, SpawnEvent se);
 
-        public delegate void ShowTalkerDelegate(uLink.NetworkPlayer player, Fougerite.Player p);
+        public delegate void ShowTalkerDelegate(uLink.NetworkPlayer player, Player p);
 
         public delegate void PluginInitHandlerDelegate();
 
-        public delegate void TeleportDelegate(Fougerite.Player player, Vector3 from, Vector3 dest);
+        public delegate void TeleportDelegate(Player player, Vector3 from, Vector3 dest);
 
         public delegate void ServerInitDelegate();
 
@@ -5182,16 +5273,16 @@ namespace Fougerite
 
         public delegate void ModulesLoadedDelegate();
 
-        public delegate void RecieveNetworkDelegate(Fougerite.Player player, Metabolism m, float cal, float water,
+        public delegate void RecieveNetworkDelegate(Player player, Metabolism m, float cal, float water,
             float rad, float anti, float temp, float poison);
 
-        public delegate void CraftingDelegate(Fougerite.Events.CraftingEvent e);
+        public delegate void CraftingDelegate(CraftingEvent e);
 
         public delegate void ResourceSpawnDelegate(ResourceTarget t);
 
-        public delegate void ItemRemovedDelegate(Fougerite.Events.InventoryModEvent e);
+        public delegate void ItemRemovedDelegate(InventoryModEvent e);
 
-        public delegate void ItemAddedDelegate(Fougerite.Events.InventoryModEvent e);
+        public delegate void ItemAddedDelegate(InventoryModEvent e);
 
         public delegate void AirdropDelegate(Vector3 v);
 

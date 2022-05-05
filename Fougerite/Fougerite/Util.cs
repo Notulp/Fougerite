@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using Facepunch.MeshBatch;
@@ -1059,7 +1060,7 @@ namespace Fougerite
         {
             return SuperFastHashUInt16Hack.Hash(input);
         }
-
+        
         /// <summary>
         /// Returns the integer hash of the byte array input using the
         /// 'superfasthash' algorithm.
@@ -1069,7 +1070,99 @@ namespace Fougerite
         /// <returns></returns>
         public UInt32 SuperFastHash(string input)
         {
-            return SuperFastHashUInt16Hack.Hash(Encoding.UTF8.GetBytes(input));
+            return SuperFastHash(Encoding.UTF8.GetBytes(input));
+        }
+
+        /// <summary>
+        /// Returns the sha1 hash of the given input.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string SHA1Hash(Byte[] input)
+        {
+            using (SHA1Managed sha1 = new SHA1Managed())
+            {
+                var hash = sha1.ComputeHash(input);
+                var sb = new StringBuilder(hash.Length * 2);
+
+                foreach (byte b in hash)
+                {
+                    sb.Append(b.ToString("X2"));
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Returns the sha1 hash of the given input.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string SHA1Hash(string input)
+        {
+            return SHA1Hash(Encoding.UTF8.GetBytes(input));
+        }
+        
+        /// <summary>
+        /// Returns the sha256 hash of the given input.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string SHA256Hash(Byte[] input)
+        {
+            using (SHA256Managed sha256 = new SHA256Managed())
+            {
+                var hash = sha256.ComputeHash(input);
+                var sb = new StringBuilder();
+
+                foreach (byte b in hash)
+                {
+                    sb.Append(b.ToString("X2"));
+                }
+
+                return sb.ToString();
+            }
+        }
+        
+        /// <summary>
+        /// Returns the sha256 hash of the given input.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string SHA256Hash(string input)
+        {
+            return SHA256Hash(Encoding.UTF8.GetBytes(input));
+        }
+        
+        /// <summary>
+        /// Returns the md5 hash of the given input.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string MD5Hash(Byte[] input)
+        {
+            using (MD5 md5 = MD5.Create())
+            {
+                var sb = new StringBuilder();
+                var hash = md5.ComputeHash(input);
+                foreach (byte b in hash)
+                {
+                    sb.Append(b.ToString("X2"));
+                }
+
+                return sb.ToString();
+            }
+        }
+        
+        /// <summary>
+        /// Returns the md5 hash of the given input.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public string MD5Hash(string input)
+        {
+            return MD5Hash(Encoding.UTF8.GetBytes(input));
         }
 
         /// <summary>

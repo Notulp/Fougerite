@@ -1,4 +1,6 @@
-﻿using System.Security;
+﻿using System.Linq;
+using System.Security;
+using Fougerite.Permissions;
 
 namespace RustPP.Permissions
 {
@@ -102,9 +104,7 @@ namespace RustPP.Permissions
 
         public bool HasPermission(string perm)
         {
-            return (this.Flags.FindIndex(delegate(string x) {
-                return x.Equals(perm, StringComparison.OrdinalIgnoreCase);
-            }) != -1);
+            return Flags.Any(x => x.Equals(perm, StringComparison.OrdinalIgnoreCase));
         }
 
         public static bool IsAdmin(ulong uid)

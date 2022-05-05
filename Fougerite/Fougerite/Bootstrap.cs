@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
 
@@ -255,8 +256,14 @@ namespace Fougerite
         public void Start()
         {
             string FougeriteDirectoryConfig = Path.Combine(Util.GetServerFolder(), "FougeriteDirectory.cfg");
+            
+            // Init Configs
             Config.Init(FougeriteDirectoryConfig);
+            
+            // Init Logger
             Logger.Init();
+            
+            // Init CTimer
             _timergo = new GameObject();
             _timergo.AddComponent<CTimerHandler>();
             UnityEngine.Object.DontDestroyOnLoad(_timergo);
@@ -267,6 +274,9 @@ namespace Fougerite
             
             // Load default permissions API.
             PermissionSystem.GetPermissionSystem();
+            
+            // Load Player Cache
+            PlayerCache.GetPlayerCache().LoadPlayersCache();
 
             Rust.Steam.Server.SetModded();
             Rust.Steam.Server.Official = false;

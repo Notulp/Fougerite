@@ -16,6 +16,7 @@
                 pl.MessageFrom(Core.Name, "Unmute Usage:  /unmute playerName");
                 return;
             }
+
             PList list = new PList();
             list.Add(0, "Cancel");
             foreach (PList.Player banned in Core.blackList.PlayerList)
@@ -25,6 +26,7 @@
                     UnbanPlayer(banned, pl);
                     return;
                 }
+
                 if (banned.DisplayName.ToUpperInvariant().Contains(playerName.ToUpperInvariant()))
                     list.Add(banned);
             }
@@ -34,11 +36,15 @@
                 pl.MessageFrom(Core.Name, "No banned player matches the name: " + playerName);
                 return;
             }
-            pl.MessageFrom(Core.Name, string.Format("{0}  player{1} {2}: ", ((list.Count - 1)).ToString(), (((list.Count - 1) > 1) ? "s match" : " matches"), playerName));
+
+            pl.MessageFrom(Core.Name,
+                string.Format("{0}  player{1} {2}: ", ((list.Count - 1)).ToString(),
+                    (((list.Count - 1) > 1) ? "s match" : " matches"), playerName));
             for (int i = 1; i < list.Count; i++)
             {
                 pl.MessageFrom(Core.Name, string.Format("{0} - {1}", i, list.PlayerList[i].DisplayName));
             }
+
             pl.MessageFrom(Core.Name, "0 - Cancel");
             pl.MessageFrom(Core.Name, "Please enter the number matching the player to unban.");
             Core.unbanWaitList[pl.UID] = list;
@@ -52,6 +58,7 @@
                 pl.MessageFrom(Core.Name, "Cancelled!");
                 return;
             }
+
             PList list = (PList)Core.unbanWaitList[pl.UID];
             UnbanPlayer(list.PlayerList[id], pl);
         }

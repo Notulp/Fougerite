@@ -889,11 +889,6 @@ namespace Fougerite
         /// <param name="state"></param>
         public void ForceAdminOff(bool state)
         {
-            if (Fougerite.Server.Cache.ContainsKey(UID) && Fougerite.Server.Cache[UID] != null)
-            {
-                Fougerite.Server.Cache[UID]._adminoff = state;
-            }
-
             if (state && this.ourPlayer.netUser.admin)
             {
                 ourPlayer.netUser.SetAdmin(false);
@@ -909,11 +904,6 @@ namespace Fougerite
         /// <param name="state"></param>
         public void ForceModeratorOff(bool state)
         {
-            if (Fougerite.Server.Cache.ContainsKey(UID) && Fougerite.Server.Cache[UID] != null)
-            {
-                Fougerite.Server.Cache[UID]._modoff = state;
-            }
-
             _modoff = state;
         }
 

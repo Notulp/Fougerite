@@ -18,11 +18,18 @@ namespace Fougerite
 
         internal void Setup()
         {
-            string extDir = Directory.GetCurrentDirectory() + "\\rust_server_Data\\Managed";
-            File.WriteAllText(Path.Combine(extDir, "System.Data.SQLite.dll.config"), $"<configuration>\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x86\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86\" />\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x64\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86-64\" />\n</configuration>");
-            if (!File.Exists(SQLitePath))
+            try
             {
-                SQLiteConnection.CreateFile(SQLitePath);
+                string extDir = Directory.GetCurrentDirectory() + "\\rust_server_Data\\Managed";
+                File.WriteAllText(Path.Combine(extDir, "System.Data.SQLite.dll.config"), $"<configuration>\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x86\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86\" />\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x64\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86-64\" />\n</configuration>");
+                if (!File.Exists(SQLitePath))
+                {
+                    SQLiteConnection.CreateFile(SQLitePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("[SQLiteConnector] Failed: " + ex);
             }
         }
 

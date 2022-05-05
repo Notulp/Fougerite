@@ -37,13 +37,12 @@
                 this.IsDecay = false;
                 this._status = d.status;
                 string weaponName = "Unknown";
-                if (d.victim.idMain is DeployableObject)
+                if (d.victim.idMain is DeployableObject deployableObject)
                 {
                     if (d.victim.id.ToString().ToLower().Contains("sleeping"))
                     {
                         this._sleeper = true;
-                        DeployableObject sleeper = (DeployableObject) d.victim.idMain;
-                        this.Victim = new Sleeper(sleeper);
+                        this.Victim = new Sleeper(deployableObject);
                     }
                     else
                     {
@@ -70,7 +69,8 @@
                 }
                 else if (d.victim.client != null)
                 {
-                    this.Victim = !Fougerite.Server.Cache.ContainsKey(d.victim.client.userID) ? Fougerite.Player.FindByPlayerClient(d.attacker.client) : Fougerite.Server.Cache[d.victim.client.userID];
+                    Player temp = Server.GetServer().GetCachePlayer(d.victim.client.userID);
+                    this.Victim = temp ?? Fougerite.Player.FindByPlayerClient(d.victim.client);
                     this._playervictim = true;
                 }
                 else if (d.victim.character != null)
@@ -79,6 +79,8 @@
                     this._npcvictim = true;
                     this._playervictim = false;
                 }
+                
+                
                 if (!(bool) d.attacker.id)
                 {
                     if (d.victim.client != null)
@@ -104,13 +106,15 @@
                 }
                 else if (d.attacker.id is Metabolism && d.victim.id is Metabolism)
                 {
-                    this.Attacker = !Fougerite.Server.Cache.ContainsKey(d.attacker.client.userID) ? Fougerite.Player.FindByPlayerClient(d.attacker.client) : Fougerite.Server.Cache[d.attacker.client.userID];
+                    // This here looks pretty sus, I assume attacker is always null here, but I don't dare to change It.
+                    Player temp = Server.GetServer().GetCachePlayer(d.attacker.client.userID);
+                    this.Attacker = temp ?? Fougerite.Player.FindByPlayerClient(d.attacker.client);
                     this._playerattacker = false;
                     this._metabolismattacker = true;
                     this.Victim = this.Attacker;
                     ICollection<string> list = new List<string>();
-                    Fougerite.Player vic = this.Victim as Fougerite.Player;
-                    if (vic != null)
+                    
+                    if (Victim is Player vic)
                     {
                         if (vic.IsStarving)
                         {
@@ -142,8 +146,9 @@
                 }
                 else if (d.attacker.client != null)
                 {
-                    if (!Fougerite.Server.Cache.ContainsKey(d.attacker.client.userID)) {this.Attacker = Fougerite.Player.FindByPlayerClient(d.attacker.client);}
-                    else {this.Attacker = Fougerite.Server.Cache[d.attacker.client.userID];}
+                    Player temp = Server.GetServer().GetCachePlayer(d.attacker.client.userID);
+                    this.Attacker = temp ?? Fougerite.Player.FindByPlayerClient(d.attacker.client);
+
                     this._playerattacker = true;
                     if (d.extraData != null)
                     {
@@ -186,7 +191,8 @@
                     this.Attacker = new NPC(d.attacker.character);
                     this._playerattacker = false;
                     this._npcattacker = true;
-                    weaponName = string.Format("{0} Claw", (this.Attacker as NPC).Name);
+                    var temp = (NPC) this.Attacker;
+                    weaponName = string.Format("{0} Claw", temp.Name);
                 }
                 this.WeaponName = weaponName;
             }

@@ -18,6 +18,7 @@
                 i++;
                 setting = Core.config.GetSetting("Settings", "help_string" + i);
             }
+
             if (Administrator.IsAdmin(Arguments.argUser.userID))
             {
                 i = 1;
