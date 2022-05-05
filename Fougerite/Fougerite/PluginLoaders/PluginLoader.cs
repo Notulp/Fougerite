@@ -64,7 +64,8 @@
             "On_SupplySignalExploded",
             "On_PlayerMove",
             "On_BeltUse",
-            "On_Logger"
+            "On_Logger",
+            "On_GrenadeThrow"
         };
 
         public void Initialize()
@@ -332,6 +333,9 @@
                         case "On_Logger":
                             Hooks.OnLogger += plugin.OnLogger;
                             break;
+                        case "On_GrenadeThrow":
+                            Hooks.OnGrenadeThrow += plugin.OnGrenade;
+                            break;
                     }
                 }
             }
@@ -507,6 +511,9 @@
                             break;
                         case "On_Logger":
                             Hooks.OnLogger -= plugin.OnLogger;
+                            break;
+                        case "On_GrenadeThrow":
+                            Hooks.OnGrenadeThrow -= plugin.OnGrenade;
                             break;
                     }
                 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using MySql.Data.MySqlClient;
 
 //using MySql.Data.MySqlClient;
@@ -65,7 +63,37 @@ namespace Fougerite
             }
             return true;
         }
-
+        
+        
+        /// <summary>
+        /// README: Oracle implemented an async way, but there is no way to make a proper async callback
+        /// as you would be doing in Web.CreateAsyncHTTPRequest. They completely left this API call out:
+        /// this.asyncResult = this.caller.BeginInvoke(1, behavior, (AsyncCallback) null, (object) null);
+        /// SOLUTION: Just run the mysql functions in a thread if you don't want to block the game's main thread really.
+        /// This could be patched as well, and extending their shitty class within Fougerite, but I don't think It's worth
+        /// the hassle unless needed.
+        /// You may read their docs here below:
+        /// 
+        /// An System.IAsyncResult interface that represents the asynchronous operation started by calling this method.
+        /// Remarks
+        /// BeginExecuteReader method enables you to execute a query on a
+        /// server without having current thread blocked.
+        /// In other words, your program can continue execution while
+        /// the query runs on MySQL so you do not have to wait for it.
+        /// Refer to "Asynchronous Query Execution" article for detailed information.
+        ///
+        /// To start running a query, you have to call BeginExecuteReader method,
+        /// which in turn invokes appropriate actions in another thread.
+        /// Return value of this method must be assigned to an System.IAsyncResult object.
+        /// After executing this method, the program flow continues.
+        ///
+        /// When you are ready to accept query results, call EndExecuteReader.
+        /// If at the moment you call this function the query execution has not yet been finished, application stops and waits
+        /// till the function returns. Then you can treat a DbDataReaderBase in a common way.
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         public Dictionary<string, object> ExecuteQuery(string query, Dictionary<string, object> parameters = null)
         {
             Dictionary<string, object> result = new Dictionary<string, object>();

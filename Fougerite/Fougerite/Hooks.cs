@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using Facepunch;
+using Facepunch.MeshBatch;
 using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
@@ -2149,7 +2150,7 @@ namespace Fougerite
         }
 
         
-        private static void GrenadeEvent(HandGrenadeDataBlock hgd, uLink.BitStream stream, ItemRepresentation rep,
+        public static void GrenadeEvent(HandGrenadeDataBlock hgd, uLink.BitStream stream, ItemRepresentation rep,
             ref uLink.NetworkMessageInfo info)
         {
             Stopwatch sw = null;
@@ -2160,18 +2161,42 @@ namespace Fougerite
             }
 
             IHandGrenadeItem item;
-            NetCull.VerifyRPC(ref info, false);
-            if (rep.Item<IHandGrenadeItem>(out item) && item.ValidatePrimaryMessageTime(info.timestamp))
+            bool proceed = true;
+            try
+            {
+                NetCull.VerifyRPC(ref info);
+            }
+            catch (Exception)
+            {
+                proceed = false;
+            }
+
+            if (proceed && rep.Item<IHandGrenadeItem>(out item) && item.ValidatePrimaryMessageTime(info.timestamp))
             {
                 rep.ActionStream(1, uLink.RPCMode.AllExceptOwner, stream);
                 Vector3 origin = stream.ReadVector3();
                 Vector3 forward = stream.ReadVector3();
+                
+                // Sanity checks.
+                if (float.IsNaN(origin.x) || float.IsInfinity(origin.x) || float.IsNaN(origin.y) 
+                    || float.IsInfinity(origin.y) || float.IsNaN(origin.z) || float.IsInfinity(origin.z))
+                {
+                    return;
+                }
+                
+                if (float.IsNaN(forward.x) || float.IsInfinity(forward.x) || float.IsNaN(forward.y) 
+                    || float.IsInfinity(forward.y) || float.IsNaN(forward.z) || float.IsInfinity(forward.z))
+                {
+                    return;
+                }
+                
                 GameObject obj2 = hgd.ThrowItem(rep, origin, forward);
                 if (obj2 != null)
                 {
-                    obj2.rigidbody.AddTorque((Vector3)(new Vector3(UnityEngine.Random.Range((float)-1f, (float)1f),
-                        UnityEngine.Random.Range((float)-1f, (float)1f),
-                        UnityEngine.Random.Range((float)-1f, (float)1f)) * 10f));
+                    obj2.rigidbody.AddTorque(new Vector3(
+                        UnityEngine.Random.Range(-1f, 1f),
+                        UnityEngine.Random.Range(-1f, 1f),
+                        UnityEngine.Random.Range(-1f, 1f)) * 10f);
                     try
                     {
                         if (OnGrenadeThrow != null)
@@ -5169,6 +5194,26 @@ namespace Fougerite
                         class48.method_73(class5_0);
                     }
                 }
+            }
+        }
+
+        public static void ActivateImmediatelyUncheckedHook(MeshBatchPhysicalOutput meshBatchPhysicalOutput)
+        {
+            if (meshBatchPhysicalOutput.FlaggedForActivation)
+            {
+                Facepunch.MeshBatch.Runtime.Sealed.MeshBatchPhysicalIntegration.Cancel(meshBatchPhysicalOutput);
+                meshBatchPhysicalOutput.FlaggedForActivation = false;
+            }
+            if (!meshBatchPhysicalOutput.Activated)
+            {
+                // This becomes null when the entity is destroyed on deployment before its activated
+                // thus causing null reference exception
+                if (meshBatchPhysicalOutput.GameObject == null)
+                {
+                    return;
+                }
+                meshBatchPhysicalOutput.Activated = true;
+                meshBatchPhysicalOutput.GameObject.SetActive(true);
             }
         }
 

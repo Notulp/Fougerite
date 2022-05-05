@@ -953,5 +953,10 @@ namespace Fougerite.PluginLoaders
         {
             this.Invoke("On_Logger", new object[] {ev});
         }
+
+        public void OnGrenade(GrenadeThrowEvent ev)
+        {
+            this.Invoke("On_GrenadeThrow", new object[] {ev});
+        }
     }
 }
