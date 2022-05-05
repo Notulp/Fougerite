@@ -135,7 +135,7 @@
     <Reference Include="MoonSharp.Interpreter, Version=0.9.7.1, Culture=neutral, PublicKeyToken=null">
       <HintPath>References\FougeriteExtraReferences\MoonSharp.Interpreter.dll</HintPath>
     </Reference>
-    <Reference Include="MySql.Data, Version=6.7.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d">
+    <Reference Include="MySql.Data">
       <HintPath>References\FougeriteExtraReferences\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
