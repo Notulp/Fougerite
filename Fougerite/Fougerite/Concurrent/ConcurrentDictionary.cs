@@ -92,7 +92,17 @@ namespace Fougerite.Concurrent
         public bool ContainsKey(TKey id)
         {
             lock (_padlock)
+            {
                 return _dictionary.ContainsKey(id);
+            }
+        }
+        
+        public void Clear()
+        {
+            lock (_padlock)
+            {
+                _dictionary.Clear();
+            }
         }
 
         public List<KeyValuePair<TKey, TValue>> OrderBy(Func<KeyValuePair<TKey, TValue>, TKey> func)
