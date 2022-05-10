@@ -10,7 +10,7 @@
 
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (pl.CommandCancelList.Contains("instako"))
             {
                 if (userIDs.Contains(pl.UID))

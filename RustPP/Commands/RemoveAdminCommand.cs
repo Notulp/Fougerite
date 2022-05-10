@@ -9,7 +9,7 @@
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             string playerName = string.Join(" ", ChatArguments).Trim(new char[] { ' ', '"' });
             if (playerName == string.Empty)
             {
@@ -68,7 +68,7 @@
 
         public void PartialNameRemoveAdmin(ref ConsoleSystem.Arg Arguments, int id)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (id == 0)
             {
                 pl.MessageFrom(Core.Name, "Cancelled!");

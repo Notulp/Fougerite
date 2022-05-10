@@ -10,7 +10,7 @@
 
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (!Administrator.IsAdmin(pl.UID))
             {
                 Administrator.AddAdmin(new Administrator(pl.UID, pl.Name, MasterAdminPreset));

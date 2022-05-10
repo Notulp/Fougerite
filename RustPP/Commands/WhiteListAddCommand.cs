@@ -10,7 +10,7 @@
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             string playerName = string.Join(" ", ChatArguments).Trim(new char[] { ' ', '"' });
             if (playerName == string.Empty)
             {
@@ -68,7 +68,7 @@
 
         public void PartialNameWhitelist(ref ConsoleSystem.Arg Arguments, int id)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (Core.whiteWaitList.Contains(pl.UID))
             {
                 if (id == 0)

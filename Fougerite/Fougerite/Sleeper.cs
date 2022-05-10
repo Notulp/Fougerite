@@ -1,4 +1,6 @@
 ﻿
+using Fougerite.Caches;
+
 namespace Fougerite
 {
     using UnityEngine;
@@ -18,7 +20,9 @@ namespace Fougerite
             this._sleeper = obj;
             this._instanceid = this._sleeper.GetInstanceID();
             this._uid = this._sleeper.ownerID;
-            this._name = Fougerite.Server.Cache.ContainsKey(UID) ? Fougerite.Server.Cache[UID].Name : this._sleeper.ownerName;
+            CachedPlayer cachedPlayer;
+            bool success = PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(UID, out cachedPlayer);
+            this._name = success ? cachedPlayer.Name : this._sleeper.ownerName;
         }
 
         /// <summary>

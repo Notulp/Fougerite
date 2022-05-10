@@ -1,4 +1,6 @@
-﻿namespace RustPP.Commands
+﻿using Fougerite;
+
+namespace RustPP.Commands
 {
     using RustPP;
     using System;
@@ -7,7 +9,8 @@
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            Core.motd(Fougerite.Server.Cache[Arguments.argUser.userID]);
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
+            Core.motd(pl);
         }
     }
 }

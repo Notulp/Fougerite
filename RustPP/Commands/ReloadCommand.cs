@@ -11,7 +11,7 @@
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            Fougerite.Player sender = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var sender = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             sender.MessageFrom(Core.Name, "Reloading...");
             TimedEvents.startEvents();
             if (File.Exists(RustPPModule.GetAbsoluteFilePath("admins.xml")))

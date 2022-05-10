@@ -8,7 +8,7 @@
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             //AvatarSaveProc.SaveAll();
             pl.MessageFrom(Core.Name, "Saved ALL Avatar files!");
             World.GetWorld().ServerSaveHandler.ManualBackGroundSave();

@@ -139,7 +139,7 @@ namespace Fougerite.PluginLoaders
 
                 PythonPlugin pythonPlugin = (PythonPlugin) plugin;
 
-                if (plugin.Globals.Contains("On_PluginDeinit"))
+                if (plugin.CachedGlobals.ContainsKey("On_PluginDeinit"))
                     plugin.Invoke("On_PluginDeinit");
 
                 plugin.KillTimers();

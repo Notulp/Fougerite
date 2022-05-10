@@ -23,7 +23,7 @@ namespace RustPP.Commands
 
         public static void CallCommand(string cmd, ref ConsoleSystem.Arg arg, ref string[] chatArgs)
         {
-            var pl = Fougerite.Server.Cache[arg.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(arg.argUser.userID);
             if (pl.CommandCancelList.Contains(cmd)) { return; }
             foreach (ChatCommand command in classInstances)
             {

@@ -10,7 +10,7 @@
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             string queryName = Arguments.ArgsStr.Trim(new char[] { ' ', '"' });
 
             string playerName = string.Join(" ", ChatArguments).Trim(new char[] { ' ', '"' });
@@ -88,7 +88,7 @@
 
         public void PartialNameGetFlags(ref ConsoleSystem.Arg Arguments, int id)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (id == 0)
             {
                 pl.MessageFrom(Core.Name, "Cancelled!");

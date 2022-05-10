@@ -15,14 +15,17 @@
         {
             get { return "RustPP"; }
         }
+
         public override string Author
         {
             get { return "xEnt22, mikec, DreTaX"; }
         }
+
         public override string Description
         {
             get { return "Rust++ Legacy Module"; }
         }
+
         public override Version Version
         {
             get { return new Version("1.1.8.1"); }
@@ -57,27 +60,33 @@
                 Logger.LogError("[RPP] Can't load config!");
                 return;
             }
+
             string chatname = Core.config.GetSetting("Settings", "chatname");
             if (!string.IsNullOrEmpty(chatname))
             {
                 Core.Name = Core.config.GetSetting("Settings", "chatname");
             }
+
             if (Core.config.ContainsSetting("Settings", "joinmsg"))
             {
                 JoinMsg = Core.config.GetSetting("Settings", "joinmsg");
             }
+
             if (Core.config.ContainsSetting("Settings", "leavemsg"))
             {
                 LeaveMsg = Core.config.GetSetting("Settings", "leavemsg");
             }
+
             if (Core.config.ContainsSetting("Settings", "startermsg"))
             {
                 StarterMsg = Core.config.GetSetting("Settings", "startermg");
             }
+
             if (Core.config.ContainsSetting("Settings", "startercdmsg"))
             {
                 StarterCDMsg = Core.config.GetSetting("Settings", "startercdmsg");
             }
+
             TimedEvents.startEvents();
 
             Fougerite.Hooks.OnDoorUse += DoorUse;
@@ -127,91 +136,106 @@
 
         void ChatReceived(ref ConsoleSystem.Arg arg)
         {
-            Fougerite.Player pl = Fougerite.Server.Cache[arg.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(arg.argUser.userID);
             var command = ChatCommand.GetCommand("tpto") as TeleportToCommand;
-            if (command.GetTPWaitList().Contains(pl.UID))
+            if (command != null && command.GetTPWaitList().Contains(pl.UID))
             {
                 command.PartialNameTP(ref arg, arg.GetInt(0));
                 arg.ArgsStr = string.Empty;
             }
             else if (Core.friendWaitList.Contains(arg.argUser.userID))
             {
-                (ChatCommand.GetCommand("addfriend") as AddFriendCommand).PartialNameAddFriend(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("addfriend") as AddFriendCommand)?.PartialNameAddFriend(ref arg, arg.GetInt(0));
                 Core.friendWaitList.Remove(arg.argUser.userID);
-                arg.ArgsStr = string.Empty; 
-            } else if (Core.shareWaitList.Contains(pl.UID))
+                arg.ArgsStr = string.Empty;
+            }
+            else if (Core.shareWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("share") as ShareCommand).PartialNameDoorShare(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("share") as ShareCommand)?.PartialNameDoorShare(ref arg, arg.GetInt(0));
                 Core.shareWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.banWaitList.Contains(pl.UID))
+            }
+            else if (Core.banWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("ban") as BanCommand).PartialNameBan(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("ban") as BanCommand)?.PartialNameBan(ref arg, arg.GetInt(0));
                 Core.banWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.kickWaitList.Contains(pl.UID))
+            }
+            else if (Core.kickWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("kick") as KickCommand).PartialNameKick(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("kick") as KickCommand)?.PartialNameKick(ref arg, arg.GetInt(0));
                 Core.kickWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.killWaitList.Contains(pl.UID))
+            }
+            else if (Core.killWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("kill") as KillCommand).PartialNameKill(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("kill") as KillCommand)?.PartialNameKill(ref arg, arg.GetInt(0));
                 Core.killWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.unfriendWaitList.Contains(pl.UID))
+            }
+            else if (Core.unfriendWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("unfriend") as UnfriendCommand).PartialNameUnfriend(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("unfriend") as UnfriendCommand)?.PartialNameUnfriend(ref arg, arg.GetInt(0));
                 Core.unfriendWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.unshareWaitList.Contains(pl.UID))
+            }
+            else if (Core.unshareWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("unshare") as UnshareCommand).PartialNameUnshareDoors(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("unshare") as UnshareCommand)?.PartialNameUnshareDoors(ref arg, arg.GetInt(0));
                 Core.unshareWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.whiteWaitList.Contains(pl.UID))
+            }
+            else if (Core.whiteWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("addwl") as WhiteListAddCommand).PartialNameWhitelist(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("addwl") as WhiteListAddCommand)?.PartialNameWhitelist(ref arg, arg.GetInt(0));
                 Core.whiteWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.adminAddWaitList.Contains(arg.argUser.userID))
+            }
+            else if (Core.adminAddWaitList.Contains(arg.argUser.userID))
             {
-                (ChatCommand.GetCommand("addadmin") as AddAdminCommand).PartialNameNewAdmin(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("addadmin") as AddAdminCommand)?.PartialNameNewAdmin(ref arg, arg.GetInt(0));
                 Core.adminAddWaitList.Remove(arg.argUser.userID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.adminRemoveWaitList.Contains(pl.UID))
+            }
+            else if (Core.adminRemoveWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("unadmin") as RemoveAdminCommand).PartialNameRemoveAdmin(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("unadmin") as RemoveAdminCommand)?.PartialNameRemoveAdmin(ref arg, arg.GetInt(0));
                 Core.adminRemoveWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.adminFlagsWaitList.Contains(pl.UID))
+            }
+            else if (Core.adminFlagsWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("getflags") as GetFlagsCommand).PartialNameGetFlags(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("getflags") as GetFlagsCommand)?.PartialNameGetFlags(ref arg, arg.GetInt(0));
                 Core.adminFlagsWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.muteWaitList.Contains(pl.UID))
+            }
+            else if (Core.muteWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("mute") as MuteCommand).PartialNameMute(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("mute") as MuteCommand)?.PartialNameMute(ref arg, arg.GetInt(0));
                 Core.muteWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.unmuteWaitList.Contains(pl.UID))
+            }
+            else if (Core.unmuteWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("unmute") as UnmuteCommand).PartialNameUnmute(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("unmute") as UnmuteCommand)?.PartialNameUnmute(ref arg, arg.GetInt(0));
                 Core.unmuteWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.adminFlagWaitList.Contains(pl.UID))
+            }
+            else if (Core.adminFlagWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("addflag") as AddFlagCommand).PartialNameAddFlags(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("addflag") as AddFlagCommand)?.PartialNameAddFlags(ref arg, arg.GetInt(0));
                 Core.adminFlagWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.adminUnflagWaitList.Contains(pl.UID))
+            }
+            else if (Core.adminUnflagWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("unflag") as RemoveFlagsCommand).PartialNameRemoveFlags(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("unflag") as RemoveFlagsCommand)?.PartialNameRemoveFlags(ref arg, arg.GetInt(0));
                 Core.adminUnflagWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
-            } else if (Core.unbanWaitList.Contains(pl.UID))
+            }
+            else if (Core.unbanWaitList.Contains(pl.UID))
             {
-                (ChatCommand.GetCommand("unban") as UnbanCommand).PartialNameUnban(ref arg, arg.GetInt(0));
+                (ChatCommand.GetCommand("unban") as UnbanCommand)?.PartialNameUnban(ref arg, arg.GetInt(0));
                 Core.unbanWaitList.Remove(pl.UID);
                 arg.ArgsStr = string.Empty;
             }
@@ -235,7 +259,7 @@
             {
                 if (falldamageevent.Player != null)
                 {
-                    GodModeCommand command = (GodModeCommand) ChatCommand.GetCommand("god");
+                    GodModeCommand command = (GodModeCommand)ChatCommand.GetCommand("god");
                     if (command.IsOn(falldamageevent.Player.UID))
                     {
                         falldamageevent.Cancel();
@@ -254,14 +278,17 @@
 
             if (Fougerite.Hooks.talkerTimers.ContainsKey(p.UID))
             {
-                if ((Environment.TickCount - ((int)Fougerite.Hooks.talkerTimers[p.UID])) < int.Parse(Core.config.GetSetting("Settings", "voice_notification_delay")))
+                if ((Environment.TickCount - ((int)Fougerite.Hooks.talkerTimers[p.UID])) <
+                    int.Parse(Core.config.GetSetting("Settings", "voice_notification_delay")))
                     return;
 
                 Fougerite.Hooks.talkerTimers[p.UID] = Environment.TickCount;
-            } else
-            {   
+            }
+            else
+            {
                 Fougerite.Hooks.talkerTimers.Add(p.UID, Environment.TickCount);
             }
+
             Notice.Inventory(player, "☎ " + p.Name);
         }
 
@@ -279,6 +306,7 @@
                 {
                     return;
                 }
+
                 Fougerite.Player attacker = event2.Attacker as Fougerite.Player;
                 Fougerite.Player victim = event2.Victim as Fougerite.Player;
                 if (attacker != victim)
@@ -327,6 +355,7 @@
                 {
                     return;
                 }
+
                 InstaKOCommand command = ChatCommand.GetCommand("instako") as InstaKOCommand;
                 InstaKOAllCommand command2 = ChatCommand.GetCommand("instakoall") as InstaKOAllCommand;
                 Fougerite.Player pl = (Fougerite.Player)he.Attacker;
@@ -351,6 +380,7 @@
                         else Logger.LogDebug("he.Entity is null!");
                     }
                 }
+
                 if (command2 != null)
                 {
                     if (command2.IsOn(pl.UID))
@@ -368,9 +398,9 @@
                                 }
                                 catch
                                 {
-                                    
                                 }
                             }
+
                             try
                             {
                                 he.Entity.Destroy();

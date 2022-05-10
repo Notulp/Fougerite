@@ -7,7 +7,7 @@
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             pl.MessageFrom(Core.Name,
                 string.Concat(new object[]
                     { PlayerClient.All.Count, " Player", (PlayerClient.All.Count > 1) ? "s" : "", " Online: " }));

@@ -11,7 +11,7 @@
             int items;
             if (int.TryParse(Core.config.GetSetting("AdminLoadout", "items"), out items))
             {
-                var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+                var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
                 for (int i = 1; i <= items; i++)
                 {
                     string name = Core.config.GetSetting("AdminLoadout", "item" + i + "_name");

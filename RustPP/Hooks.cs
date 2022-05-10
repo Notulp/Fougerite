@@ -28,7 +28,7 @@ namespace RustPP
         public static bool checkOwner(DeployableObject obj, Controllable controllable)
         {
             bool flag;
-            Fougerite.Player pl = Fougerite.Server.Cache[controllable.playerClient.userID];
+            var pl = Server.GetServer().GetCachePlayer(controllable.playerClient.userID);
             if (obj.ownerID == pl.UID)
             {
                 flag = true;

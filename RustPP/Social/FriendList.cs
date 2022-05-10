@@ -56,7 +56,7 @@
 
         public void OutputList(ref ConsoleSystem.Arg arg)
         {
-            var pl = Fougerite.Server.Cache[arg.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(arg.argUser.userID);
             List<string> onlineFriends = new List<string>();
             List<string> offlineFriends = new List<string>();
             foreach (Friend friend in this)

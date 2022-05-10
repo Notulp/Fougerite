@@ -13,7 +13,7 @@ namespace RustPP.Commands
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (ChatArguments.Length <= 1)
             {
                 pl.MessageFrom(Core.Name, "RemoveFlag Usage:  /unflag playerName flag1 flag2...");
@@ -116,7 +116,7 @@ namespace RustPP.Commands
 
         public void PartialNameRemoveFlags(ref ConsoleSystem.Arg Arguments, int id)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (id == 0)
             {
                 pl.MessageFrom(Core.Name, "Cancelled!");

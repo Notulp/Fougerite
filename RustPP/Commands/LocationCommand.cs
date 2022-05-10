@@ -8,7 +8,7 @@
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             string targetName = string.Join(" ", ChatArguments).Trim(new char[] { ' ', '"' });
             if (targetName.Equals(string.Empty) || targetName.Equals(Arguments.argUser.displayName))
             {

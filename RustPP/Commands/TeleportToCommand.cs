@@ -27,7 +27,7 @@ namespace RustPP.Commands
 
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (ChatArguments.Length == 3)
             {
                 float n, n2, n3;
@@ -107,7 +107,7 @@ namespace RustPP.Commands
 
         public void PartialNameTP(ref ConsoleSystem.Arg Arguments, int choice)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (tpWaitList.Contains(pl.UID))
             {
                 System.Collections.Generic.List<string> list =

@@ -29,7 +29,7 @@ namespace Fougerite
         /// PlayersCache or GetCachePlayer() if you need to use this.
         /// (We also can't change this to a ConcurrentDictionary because other old plugins may depend on this)
         /// </summary>
-        public static Dictionary<ulong, Player> Cache = new Dictionary<ulong, Player>();
+        public static IDictionary<ulong, Player> Cache = new Dictionary<ulong, Fougerite.Player>();
         public static IEnumerable<string> ForceCallForCommands = new List<string>();
 
 

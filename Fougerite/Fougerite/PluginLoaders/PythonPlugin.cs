@@ -4,6 +4,7 @@ using System.IO;
 using Fougerite.Caches;
 using Fougerite.Permissions;
 using IronPython.Hosting;
+using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 
 namespace Fougerite.PluginLoaders
@@ -37,7 +38,6 @@ namespace Fougerite.PluginLoaders
         {
             Type = PluginType.Python;
 
-
             Load(code);
         }
 
@@ -62,13 +62,14 @@ namespace Fougerite.PluginLoaders
         {
             try
             {
-                if (State == PluginState.Loaded && Globals.Contains(func))
+                object functionToCall = null;
+                if (State == PluginState.Loaded && CachedGlobals.TryGetValue(func, out functionToCall))
                 {
                     object result = null;
 
                     using (new Stopper(Type + " " + Name, func))
                     {
-                        result = Engine.Operations.InvokeMember(Class, func, args);
+                        result = Engine.Operations.Invoke(functionToCall, args);
                     }
 
                     return result;
@@ -113,12 +114,26 @@ namespace Fougerite.PluginLoaders
             Scope.SetVariable("SQLite", Fougerite.SQLiteConnector.GetInstance);
             Scope.SetVariable("PermissionSystem", PermissionSystem.GetPermissionSystem());
             Scope.SetVariable("PlayerCache", PlayerCache.GetPlayerCache());
-
+            
             try
             {
-                Engine.Execute(code, Scope);
+                ScriptSource source = Engine.CreateScriptSourceFromString(code, Path.GetFileName(RootDir.FullName), SourceCodeKind.Statements);
+                CompiledCode compiled = source.Compile();
+                compiled.Execute(Scope);
+                
                 Class = Engine.Operations.Invoke(Scope.GetVariable(Name));
                 Globals = Engine.Operations.GetMemberNames(Class);
+                
+                foreach (string name in Globals)
+                {
+                    object func;
+                    if (!Engine.Operations.TryGetMember(Class, name, out func) || !Engine.Operations.IsCallable(func))
+                    {
+                        continue;
+                    }
+
+                    CachedGlobals.Add(name, func);
+                }
 
                 object author = GetGlobalObject("__author__");
                 object about = GetGlobalObject("__about__");

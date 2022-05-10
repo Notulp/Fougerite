@@ -1,4 +1,5 @@
 using System.Collections;
+using Fougerite;
 using RustPP.Commands;
 
 namespace RustPP
@@ -7,7 +8,7 @@ namespace RustPP
     {
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            var pl = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var pl = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (ShareCommand.shared_doors.ContainsKey(pl.UID))
             {
                 ArrayList list = ShareCommand.shared_doors[pl.UID] as ArrayList;

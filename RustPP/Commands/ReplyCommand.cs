@@ -12,7 +12,7 @@
 
         public override void Execute(ref ConsoleSystem.Arg Arguments, ref string[] ChatArguments)
         {
-            Fougerite.Player sender = Fougerite.Server.Cache[Arguments.argUser.userID];
+            var sender = Server.GetServer().GetCachePlayer(Arguments.argUser.userID);
             if (ChatArguments.Length >= 1)
             {
                 if (this.replies.ContainsKey(sender.Name))

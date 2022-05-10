@@ -82,9 +82,9 @@ namespace Fougerite.PluginLoaders
                     .SetFunction("importClass", new importit(importClass));
                 Program = JintEngine.Compile(code, false);
 
-                Globals = (from statement in Program.Statements
-                    where statement.GetType() == typeof(FunctionDeclarationStatement)
-                    select ((FunctionDeclarationStatement) statement).Name).ToList<string>();
+                Globals = (Program.Statements
+                    .Where(statement => statement.GetType() == typeof(FunctionDeclarationStatement))
+                    .Select(statement => ((FunctionDeclarationStatement)statement).Name)).ToList();
 
                 Engine.Run(Program);
 

@@ -54,6 +54,12 @@ namespace Fougerite.PluginLoaders
         /// </summary>
         /// <value>The globals.</value>
         public IList<string> Globals { get; protected set; }
+        
+        /// <summary>
+        /// Global methods of the plugin along with their functions.
+        /// </summary>
+        /// <value>The globals.</value>
+        public Dictionary<string, object> CachedGlobals { get; protected set; }
 
         /// <summary>
         /// Dictionary that holds the timers.
@@ -96,6 +102,7 @@ namespace Fougerite.PluginLoaders
             Name = name;
             RootDir = rootdir;
             Globals = new List<string>();
+            CachedGlobals = new Dictionary<string, object>();
 
             Timers = new Dictionary<string, TimedEvent>();
             ParallelTimers = new List<TimedEvent>();
