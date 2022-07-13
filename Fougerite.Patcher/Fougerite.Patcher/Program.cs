@@ -7,7 +7,7 @@ namespace Fougerite.Patcher
 {
     internal class Program
     {
-        public const string Version = "1.8.9";
+        public const string Version = "1.9.0";
 
         private static void Main(string[] args)
         {
@@ -95,7 +95,8 @@ namespace Fougerite.Patcher
                 result = result && patcher.SecondPass();
             }
 
-            if (result) {
+            if (result) 
+            {
                 Logger.Log("The patch was applied successfully!");
             }
 
