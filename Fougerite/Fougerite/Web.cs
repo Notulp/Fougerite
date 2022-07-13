@@ -145,7 +145,7 @@ namespace Fougerite
         /// <param name="method"></param>
         /// <param name="inputBody"></param>
         /// <param name="additionalHeaders"></param>
-        /// <param name="contentType"></param>
+        /// <param name="contentType">For JSON format specify 'application/json'</param>
         /// <param name="timeout"></param>
         /// <param name="allowDecompression"></param>
         public void CreateAsyncHTTPRequest(string url, Action<int, string> callback, string method = "GET",
@@ -209,12 +209,40 @@ namespace Fougerite
             DoWithResponse(request, response =>
             {
                 string body = "Failed";
+                int responseCode = 200;
                 try
                 {
                     Stream stream = response.GetResponseStream();
                     if (stream != null)
                     {
                         body = new StreamReader(stream).ReadToEnd();
+                    }
+
+                    responseCode = (int)response.StatusCode;
+                }
+                catch (WebException ex)
+                {
+                    // Grab the response directly from the exception instead.
+                    if (ex.Response is HttpWebResponse httpWebResponse)
+                    {
+                        try
+                        {
+                            // Try to read
+                            Stream stream = httpWebResponse.GetResponseStream();
+                            if (stream != null)
+                            {
+                                using (StreamReader reader = new StreamReader(stream))
+                                {
+                                    body = reader.ReadToEnd();
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Ignore
+                        }
+                        
+                        responseCode = (int) httpWebResponse.StatusCode;
                     }
                 }
                 catch (Exception ex)
@@ -224,7 +252,7 @@ namespace Fougerite
 
                 try
                 {
-                    callback((int) response.StatusCode, body);
+                    callback(responseCode, body);
                 }
                 catch (Exception ex)
                 {
