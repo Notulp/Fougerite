@@ -3,321 +3,23 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using Facepunch;
-using Facepunch.MeshBatch;
 using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
 using Rust;
+using uLink;
+using Fougerite.Events;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System.Text.RegularExpressions;
+using Debug = UnityEngine.Debug;
 
 namespace Fougerite
 {
-    using uLink;
-    using Events;
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using System.Text.RegularExpressions;
-
-    public class Hooks
+    public partial class Hooks
     {
-        public static List<object> decayList = new List<object>();
-        public static Hashtable talkerTimers = new Hashtable();
-        public static bool ServerInitialized = false;
-
-        /// <summary>
-        /// This delegate runs when all plugins loaded. (First time)
-        /// </summary>
-        public static event AllPluginsLoadedDelegate OnAllPluginsLoaded;
-
-        /// <summary>
-        /// This delegate runs when a blueprint is being used.
-        /// </summary>
-        public static event BlueprintUseHandlerDelegate OnBlueprintUse;
-
-        /// <summary>
-        /// This delegate runs when a chat message is received.
-        /// </summary>
-        public static event ChatHandlerDelegate OnChat;
-
-        /// <summary>
-        /// This delegate runs when a chat message is received.
-        /// </summary>
-        public static event ChatRawHandlerDelegate OnChatRaw;
-
-        /// <summary>
-        /// This delegate runs when a command is executed.
-        /// </summary>
-        public static event CommandHandlerDelegate OnCommand;
-
-        /// <summary>
-        /// This delegate runs when a command is being executed
-        /// </summary>
-        public static event CommandRawHandlerDelegate OnCommandRaw;
-
-        /// <summary>
-        /// This delegate runs when a console message is received.
-        /// </summary>
-        [Obsolete("Use OnConsoleReceivedWithCancel", false)]
-        public static event ConsoleHandlerDelegate OnConsoleReceived;
-
-        /// <summary>
-        /// This delegate runs when a console message is received.
-        /// </summary>
-        public static event ConsoleHandlerWithCancelDelegate OnConsoleReceivedWithCancel;
-
-        /// <summary>
-        /// This delegate runs when a door is opened/closed.
-        /// </summary>
-        public static event DoorOpenHandlerDelegate OnDoorUse;
-
-        /// <summary>
-        /// This delegate runs when an entity is attacked by the default rust decay.
-        /// </summary>
-        public static event EntityDecayDelegate OnEntityDecay;
-
-        [Obsolete("Use OnEntityDeployedWithPlacer", false)]
-        public static event EntityDeployedDelegate OnEntityDeployed;
-
-        /// <summary>
-        /// This delegate runs when an Entity is placed on the ground.
-        /// </summary>
-        public static event EntityDeployedWithPlacerDelegate OnEntityDeployedWithPlacer;
-
-        /// <summary>
-        /// This delegate runs when an entity is damaged.
-        /// </summary>
-        public static event EntityHurtDelegate OnEntityHurt;
-
-        /// <summary>
-        /// This delegate runs when an entity is destroyed.
-        /// </summary>
-        public static event EntityDestroyedDelegate OnEntityDestroyed;
-
-        /// <summary>
-        /// This delegate runs when the item datablocks are loaded.
-        /// </summary>
-        public static event ItemsDatablocksLoaded OnItemsLoaded;
-
-        /// <summary>
-        /// This delegate runs when an AI is hurt.
-        /// </summary>
-        public static event HurtHandlerDelegate OnNPCHurt;
-
-        /// <summary>
-        /// This delegate runs when an AI is killed.
-        /// </summary>
-        public static event KillHandlerDelegate OnNPCKilled;
-
-        /// <summary>
-        /// This delegate runs when a player is connecting to the server.
-        /// </summary>
-        public static event ConnectionHandlerDelegate OnPlayerConnected;
-
-        /// <summary>
-        /// This delegate runs when a player disconnected from the server.
-        /// </summary>
-        public static event DisconnectionHandlerDelegate OnPlayerDisconnected;
-
-        /// <summary>
-        /// This delegate runs when a player is gathering from an animal or from a resource.
-        /// </summary>
-        public static event PlayerGatheringHandlerDelegate OnPlayerGathering;
-
-        /// <summary>
-        /// This delegate runs when a player is hurt.
-        /// </summary>
-        public static event HurtHandlerDelegate OnPlayerHurt;
-
-        /// <summary>
-        /// This delegate runs when a player is killed
-        /// </summary>
-        public static event KillHandlerDelegate OnPlayerKilled;
-
-        /// <summary>
-        /// This delegate runs when a player just spawned.
-        /// </summary>
-        public static event PlayerSpawnHandlerDelegate OnPlayerSpawned;
-
-        /// <summary>
-        /// This delegate runs when a player is about to spawn.
-        /// </summary>
-        public static event PlayerSpawnHandlerDelegate OnPlayerSpawning;
-
-        /// <summary>
-        /// This delegate runs when a plugin is loaded.
-        /// </summary>
-        public static event PluginInitHandlerDelegate OnPluginInit;
-
-        /// <summary>
-        /// This delegate runs when a player is teleported using Fougerite API.
-        /// </summary>
-        public static event TeleportDelegate OnPlayerTeleport;
-
-        /// <summary>
-        /// This delegate runs when the server started loading.
-        /// </summary>
-        public static event ServerInitDelegate OnServerInit;
-
-        /// <summary>
-        /// This delegate runs when the server is stopping.
-        /// </summary>
-        public static event ServerShutdownDelegate OnServerShutdown;
-
-        /// <summary>
-        /// This delegate runs when a player is talking through the microphone.
-        /// </summary>
-        public static event ShowTalkerDelegate OnShowTalker;
-
-        /// <summary>
-        /// This delegate runs when the LootTables are loaded.
-        /// </summary>
-        public static event LootTablesLoaded OnTablesLoaded;
-
-        /// <summary>
-        /// This delegate runs when all C# plugins loaded.
-        /// </summary>
-        public static event ModulesLoadedDelegate OnModulesLoaded;
-
-        [Obsolete("This method is no longer called since the rust api doesn't call It.", false)]
-        public static event RecieveNetworkDelegate OnRecieveNetwork;
-
-        /// <summary>
-        /// This delegate runs when a player starts crafting.
-        /// </summary>
-        public static event CraftingDelegate OnCrafting;
-
-        /// <summary>
-        /// This delegate runs when a resource object spawned.
-        /// </summary>
-        public static event ResourceSpawnDelegate OnResourceSpawned;
-
-        /// <summary>
-        /// This delegate runs when an item is removed from a specific inventory.
-        /// </summary>
-        public static event ItemRemovedDelegate OnItemRemoved;
-
-        /// <summary>
-        /// This delegate runs when an item is added to a specific inventory.
-        /// </summary>
-        public static event ItemAddedDelegate OnItemAdded;
-
-        /// <summary>
-        /// This delegate runs when an airdrop is called.
-        /// </summary>
-        public static event AirdropDelegate OnAirdropCalled;
-
-        //public static event AirdropCrateDroppedDelegate OnAirdropCrateDropped;
-        /// <summary>
-        /// This delegate runs when a player is kicked by steam.
-        /// </summary>
-        public static event SteamDenyDelegate OnSteamDeny;
-
-        /// <summary>
-        /// This delegate runs when a player is being approved.
-        /// </summary>
-        public static event PlayerApprovalDelegate OnPlayerApproval;
-
-        /// <summary>
-        /// This delegate runs when a player is moving. (Even if standing at one place)
-        /// </summary>
-        public static event PlayerMoveDelegate OnPlayerMove;
-
-        /// <summary>
-        /// This delegate runs when a player researched an item.
-        /// </summary>
-        public static event ResearchDelegate OnResearch;
-
-        /// <summary>
-        /// This delegate runs when the server is being saved.
-        /// </summary>
-        public static event ServerSavedDelegate OnServerSaved;
-
-        /// <summary>
-        /// This delegate runs when an item is picked up by a player.
-        /// </summary>
-        public static event ItemPickupDelegate OnItemPickup;
-
-        /// <summary>
-        /// This delegate runs when a player received fall damage.
-        /// </summary>
-        public static event FallDamageDelegate OnFallDamage;
-
-        /// <summary>
-        /// This delegate runs when a player is looting something.
-        /// </summary>
-        public static event LootEnterDelegate OnLootUse;
-
-        /// <summary>
-        /// This delegate runs when a player is shooting a weapon.
-        /// </summary>
-        public static event ShootEventDelegate OnShoot;
-
-        /// <summary>
-        /// This delegate runs when a player is shooting a shotgun.
-        /// </summary>
-        public static event ShotgunShootEventDelegate OnShotgunShoot;
-
-        /// <summary>
-        /// This delegate runs when a player is shooting a bow.
-        /// </summary>
-        public static event BowShootEventDelegate OnBowShoot;
-
-        /// <summary>
-        /// This delegate runs when a player throws a grenade.
-        /// </summary>
-        public static event GrenadeThrowEventDelegate OnGrenadeThrow;
-
-        /// <summary>
-        /// This delegate runs when a player got banned.
-        /// </summary>
-        public static event BanEventDelegate OnPlayerBan;
-
-        /// <summary>
-        /// This delegate runs when a player is using the repair bench.
-        /// </summary>
-        public static event RepairBenchEventDelegate OnRepairBench;
-
-        /// <summary>
-        /// This delegate runs when an item is being moved in an inventory to a different slot / inventory.
-        /// </summary>
-        public static event ItemMoveEventDelegate OnItemMove;
-
-        /// <summary>
-        /// This delegate runs when the ResourceSpawner loaded.
-        /// </summary>
-        public static event GenericSpawnerLoadDelegate OnGenericSpawnerLoad;
-
-        /// <summary>
-        /// This delegate runs when the server finished loading.
-        /// </summary>
-        public static event ServerLoadedDelegate OnServerLoaded;
-
-        /// <summary>
-        /// This delegate runs when a supply signal explodes at a position.
-        /// </summary>
-        public static event SupplySignalDelegate OnSupplySignalExpode;
-
-        /// <summary>
-        /// This delegate runs when a belt slot is used.
-        /// </summary>
-        public static event BeltUseDelegate OnBeltUse;
-
-        /// <summary>
-        /// This delegate runs when the logger functions are triggered.
-        /// </summary>
-        public static event LoggerDelegate OnLogger;
-
-        /// <summary>
-        /// This value returns if the server is shutting down.
-        /// </summary>
-        public static bool IsShuttingDown { get; set; }
-
-        public static readonly List<ulong> uLinkDCCache = new List<ulong>();
-
-        internal static Dictionary<string, Flood> FloodChecks = new Dictionary<string, Flood>();
-        internal static Dictionary<string, DateTime> FloodCooldown = new Dictionary<string, DateTime>();
-
         public static void AllPluginsLoaded()
         {
             try
@@ -788,7 +490,6 @@ namespace Fougerite
 
             return false;
         }
-
 
         public static bool ConsoleReceived(ref ConsoleSystem.Arg a)
         {
@@ -1390,19 +1091,7 @@ namespace Fougerite
             sw.Stop();
             if (sw.Elapsed.TotalSeconds > 0) Logger.LogSpeed("EntityHurtEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
         }*/
-
-        public static void hijack(string name)
-        {
-            if ((((name != "!Ng") && (name != ":rabbit_prefab_a")) &&
-                 ((name != ";res_woodpile") && (name != ";res_ore_1"))) &&
-                ((((((((((((((name != ";res_ore_2") & (name != ";res_ore_3")) & (name != ":stag_prefab")) &
-                           (name != ":boar_prefab")) & (name != ":chicken_prefab")) & (name != ":bear_prefab")) &
-                        (name != ":wolf_prefab")) & (name != ":mutant_bear")) & (name != ":mutant_wolf")) &
-                     (name != "AmmoLootBox")) & (name != "MedicalLootBox")) & (name != "BoxLoot")) &
-                  (name != "WeaponLootBox")) & (name != "SupplyCrate")))
-                Logger.LogDebug("Hijack: " + name);
-        }
-
+        
         public static ItemDataBlock[] ItemsLoaded(List<ItemDataBlock> items,
             Dictionary<string, int> stringDB, Dictionary<int, int> idDB)
         {
@@ -1483,13 +1172,14 @@ namespace Fougerite
             switch (result)
             {
                 case Inventory.AddExistingItemResult.CompletlyStacked:
+                {
                     inventory2.RemoveItem(item);
                     break;
-
+                }
                 case Inventory.AddExistingItemResult.Moved:
                     break;
-
                 case Inventory.AddExistingItemResult.PartiallyStacked:
+                {
                     pickup.UpdateItemInfo(item);
                     try
                     {
@@ -1504,8 +1194,9 @@ namespace Fougerite
                     }
 
                     return true;
-
+                }
                 case Inventory.AddExistingItemResult.Failed:
+                {
                     try
                     {
                         if (OnItemPickup != null)
@@ -1519,8 +1210,9 @@ namespace Fougerite
                     }
 
                     return false;
-
+                }
                 case Inventory.AddExistingItemResult.BadItemArgument:
+                {
                     pickup.RemoveThis();
                     try
                     {
@@ -1535,7 +1227,7 @@ namespace Fougerite
                     }
 
                     return false;
-
+                }
                 default:
                     throw new NotImplementedException();
             }
@@ -1673,6 +1365,7 @@ namespace Fougerite
             else
             {
                 cachedPlayer.Name = player.Name;
+                cachedPlayer.LastLogin = DateTime.Now;
                 // Sanity check, shouldn't happen unless user messes with file.
                 if (cachedPlayer.Aliases == null)
                 {
@@ -1793,6 +1486,12 @@ namespace Fougerite
             player.DisconnectTime = DateTime.UtcNow.Ticks;
             player.IsDisconnecting = true;
             
+            CachedPlayer cachedPlayer;
+            if (PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(uid, out cachedPlayer))
+            {
+                cachedPlayer.LastLogout = DateTime.Now;
+            }
+            
             // Remove the player from the current players
             Server.GetServer().RemovePlayer(uid);
 
@@ -1908,6 +1607,11 @@ namespace Fougerite
             try
             {
                 DeathEvent event2 = new DeathEvent(ref de);
+                if (event2.VictimIsPlayer && event2.Victim is Player victim)
+                {
+                    victim.justDied = true;
+                }
+                
                 flag = event2.DropItems;
                 if (OnPlayerKilled != null)
                     OnPlayerKilled(event2);
@@ -2039,21 +1743,6 @@ namespace Fougerite
             sw.Stop();
             if (sw.Elapsed.TotalSeconds > 0)
                 Logger.LogSpeed("TeleportEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
-        }
-
-        private static DateTime LasTime = DateTime.Now;
-
-        public static void RecieveNetwork(Metabolism m, float cal, float water, float rad, float anti, float temp,
-            float poison)
-        {
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime;
-            double diff = (now - then).TotalMinutes;
-            if (diff > 5)
-            {
-                LasTime = DateTime.Now;
-                Logger.LogWarning("[RecieveNetwork] A metabolism hack was prevented.");
-            }
         }
 
         public static void CraftingEvent(CraftingInventory inv, BlueprintDataBlock blueprint, int amount,
@@ -2480,9 +2169,7 @@ namespace Fougerite
                 return;
             }
 
-            string deny = "Auth failed: " + strReason + " - " + cc.UserName + " (" +
-                          cc.UserID.ToString() +
-                          ")";
+            string deny = "Auth failed: " + strReason + " - " + cc.UserName + " (" + cc.UserID + ")";
             ConsoleSystem.Print(deny, false);
             approval.Deny((uLink.NetworkConnectionError)errornum);
             ConnectionAcceptor.CloseConnection(cc);
@@ -2923,7 +2610,7 @@ namespace Fougerite
             lo._inventory.AddNetListener(lo._currentlyUsingPlayer);
             lo.SendCurrentLooter();
             lo.CancelInvokes();
-            lo.InvokeRepeating("RadialCheck", 0f, 10f);
+            lo.InvokeRepeating(nameof(LootableObject.RadialCheck), 0f, 10f);
 
             if (sw != null)
             {
@@ -3125,98 +2812,6 @@ namespace Fougerite
             return UseResponse.Fail_Vacancy;
         }
 
-
-        public static void RPCFix(Class48 c48, Class5 class5_0, uLink.NetworkPlayer networkPlayer_1)
-        {
-            Class56 class2 = c48.method_270(networkPlayer_1);
-            if (class2 != null)
-            {
-                c48.method_277(class5_0, class2);
-            }
-            else
-            {
-                if (IsShuttingDown)
-                {
-                    return;
-                }
-
-                object data = networkPlayer_1.GetLocalData();
-                if (data is NetUser user)
-                {
-                    ulong id = user.userID;
-                    if (uLinkDCCache.Contains(id))
-                    {
-                        return;
-                    }
-
-                    Logger.LogDebug("===Fougerite uLink===");
-                    Player player = Server.GetServer().GetCachePlayer(id);
-                    if (player != null)
-                    {
-                        Logger.LogDebug("[Fougerite uLink] Detected RPC Failing Player: " + player.Name + "-" +
-                                        player.SteamID + " Trying to kick...");
-                        if (player.IsOnline)
-                        {
-                            player.Disconnect(false);
-                            Logger.LogDebug("[Fougerite uLink] Should be kicked!");
-                            return; // Return to avoid the RPC Logging
-                        }
-
-                        Logger.LogDebug("[Fougerite uLink] Server says It's offline. Not touching.");
-                        uLinkDCCache.Add(player.UID);
-                    }
-                    else
-                    {
-                        Logger.LogDebug("[Fougerite uLink] Not existing in cache...");
-                        uLinkDCCache.Add(id);
-                    }
-                }
-                else
-                {
-                    Logger.LogDebug("===Fougerite uLink===");
-                    Logger.LogDebug("[Fougerite uLink] Not existing in cache... (2x0)");
-                }
-
-                Logger.LogDebug("[Fougerite uLink] Private RPC (internal RPC " + class5_0.enum0_0 + ")" +
-                                " was not sent because a connection to " + class5_0.networkPlayer_1 +
-                                " was not found!");
-                //NetworkLog.Error<string, string, uLink.NetworkPlayer, string>(NetworkLogFlags.BadMessage | NetworkLogFlags.RPC, "Private RPC ", (class5_0.method_11() ? class5_0.string_0 : ("(internal RPC " + class5_0.enum0_0 + ")")) + " was not sent because a connection to ", class5_0.networkPlayer_1, " was not found!");
-            }
-        }
-
-        public static void RPCCatch(object obj)
-        {
-            var info = obj as uLink.NetworkMessageInfo;
-            if (info == null)
-            {
-                return;
-            }
-
-            if (info.sender == uLink.NetworkPlayer.server)
-            {
-                return;
-            }
-
-            var netuser = info.sender.localData as NetUser;
-            if (netuser == null)
-            {
-                return;
-            }
-
-            Logger.LogWarning("[Fougerite uLink] RPC Message from " + netuser.displayName + "-" + netuser.userID +
-                              " triggered an exception. Kicking...");
-            if (netuser.connected)
-            {
-                netuser.Kick(NetError.Facepunch_Kick_Violation, true);
-            }
-        }
-
-        public static void uLinkCatch(Class0 instance)
-        {
-            string ip = ((IPEndPoint)(instance.endPoint_0)).Address.ToString();
-            Logger.Log("[uLink Ignore] Ignored Socket from: " + ip);
-        }
-
         public static Inventory.SlotOperationResult FGSlotOperation(Inventory inst, int fromSlot, Inventory toInventory,
             int toSlot, Inventory.SlotOperationsInfo info)
         {
@@ -3291,6 +2886,7 @@ namespace Fougerite
                 switch (failed)
                 {
                     case InventoryItem.MergeResult.Merged:
+                    {
                         ItemMoveEvent ime2 = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
                         try
                         {
@@ -3305,8 +2901,10 @@ namespace Fougerite
                         }
 
                         return Inventory.SlotOperationResult.Success_Stacked;
+                    }
 
                     case InventoryItem.MergeResult.Combined:
+                    {
                         ItemMoveEvent ime3 = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
                         try
                         {
@@ -3321,6 +2919,7 @@ namespace Fougerite
                         }
 
                         return Inventory.SlotOperationResult.Success_Combined;
+                    }
                 }
 
                 if (((byte)(SlotOperations.Move & info.SlotOperations)) == 4)
@@ -3381,7 +2980,7 @@ namespace Fougerite
                 return false;
             }
 
-            RepairEvent re = new RepairEvent(inst, ingredientInv);
+            Fougerite.Events.RepairEvent re = new Fougerite.Events.RepairEvent(inst, ingredientInv);
             try
             {
                 if (OnRepairBench != null)
@@ -3429,153 +3028,6 @@ namespace Fougerite
             repairItem.SetMaxCondition(repairItem.maxcondition - num5);
             repairItem.SetCondition(repairItem.maxcondition);
             return true;
-        }
-
-        public static void Action1BHook(ItemRepresentation itr, byte[] data, uLink.NetworkMessageInfo info)
-        {
-            if (data == null)
-            {
-                return;
-            }
-
-            if (itr == null)
-            {
-                return;
-            }
-
-            if (data.Length > 500)
-            {
-                return;
-            }
-
-            try
-            {
-                uLink.BitStream
-                    stream = new uLink.BitStream(data, false); // Can only read once from the BitStream, so we copy It.
-
-                Vector3 v = stream.ReadVector3();
-                Vector3 v2 = stream.ReadVector3();
-                if (v == null || v2 == null)
-                {
-                    Array.Clear(data, 0, data.Length);
-                    return;
-                }
-
-                if (float.IsNaN(v.x) || float.IsInfinity(v.x) || float.IsNaN(v.y) || float.IsInfinity(v.y)
-                    || float.IsNaN(v.z) || float.IsInfinity(v.z))
-                {
-                    Array.Clear(data, 0, data.Length);
-                    return;
-                }
-
-                if (float.IsNaN(v2.x) || float.IsInfinity(v2.x) || float.IsNaN(v2.y) || float.IsInfinity(v2.y)
-                    || float.IsNaN(v2.z) || float.IsInfinity(v2.z))
-                {
-                    Array.Clear(data, 0, data.Length);
-                    return;
-                }
-            }
-            catch
-            {
-                // ignore
-            }
-
-            try
-            {
-                uLink.BitStream copy = new uLink.BitStream(data, false);
-                itr.RunServerAction(1, copy, ref info);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("[Action1Error] Failed to call RunServerAction, Check logs.");
-                Logger.LogDebug("Error: " + ex);
-            }
-        }
-
-        internal static readonly Dictionary<ulong, int> ActionCooldown = new Dictionary<ulong, int>();
-
-        public static void Action1Hook(ItemRepresentation itr, uLink.BitStream stream, uLink.NetworkMessageInfo info)
-        {
-            if (stream._data == null)
-            {
-                return;
-            }
-
-            if (itr == null)
-            {
-                return;
-            }
-
-            if (ServerSaveHandler.ServerIsSaving)
-            {
-                if (itr.networkViewOwner != null)
-                {
-                    NetUser user = itr.networkViewOwner.GetLocalData() as NetUser;
-                    if (user != null)
-                    {
-                        Player player = Server.GetServer().FindPlayer(user.userID.ToString());
-                        if (player != null)
-                        {
-                            if (!ActionCooldown.ContainsKey(player.UID))
-                            {
-                                ActionCooldown[player.UID] = 1;
-                            }
-                            else
-                            {
-                                ActionCooldown[player.UID] = ActionCooldown[player.UID] + 1;
-                            }
-
-                            if (ActionCooldown[player.UID] < 3)
-                            {
-                                player.Message(Bootstrap.SaveNotification);
-                            }
-                        }
-                    }
-                }
-
-                return;
-            }
-
-            ActionCooldown.Clear();
-
-            uLink.BitStream
-                copy = new uLink.BitStream(stream._data,
-                    false); // Can only read once from the BitStream, so we copy It.
-            try
-            {
-                Vector3 v = copy.ReadVector3();
-                Vector3 v2 = copy.ReadVector3();
-                if (v == null || v2 == null)
-                {
-                    return;
-                }
-
-                if (float.IsNaN(v.x) || float.IsInfinity(v.x) || float.IsNaN(v.y) || float.IsInfinity(v.y)
-                    || float.IsNaN(v.z) || float.IsInfinity(v.z))
-                {
-                    return;
-                }
-
-                if (float.IsNaN(v2.x) || float.IsInfinity(v2.x) || float.IsNaN(v2.y) || float.IsInfinity(v2.y)
-                    || float.IsNaN(v2.z) || float.IsInfinity(v2.z))
-                {
-                    return;
-                }
-            }
-            catch
-            {
-                // Ignore
-            }
-
-            try
-            {
-                itr.RunServerAction(1, stream, ref info);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("[Action2Error] Failed to call RunServerAction, Check logs.");
-                Logger.LogDebug("Error: " + ex);
-            }
         }
 
         public static bool OnBanEventHandler(BanEvent be)
@@ -3719,8 +3171,6 @@ namespace Fougerite
             SupplyDropZone.CallAirDropAt(randompos);
         }
 
-        #region DataBlockFixes
-
         /*public static void DeployableItemDoAction1(DeployableItemDataBlock instance, uLink.BitStream stream, ItemRepresentation rep, ref uLink.NetworkMessageInfo info)
         {
             try
@@ -3767,38 +3217,8 @@ namespace Fougerite
                 Logger.LogError("DeployableItemDoAction1 Error: " + ex);
             }
         }*/
-
-        public static bool DeployableCheckHook(DeployableItemDataBlock instance, Ray ray, out Vector3 pos,
-            out Quaternion rot, out TransCarrier carrier)
-        {
-            DeployableItemDataBlock.DeployPlaceResults results;
-            Vector3 origin = ray.origin;
-            Vector3 direction = ray.direction;
-            if (float.IsNaN(origin.x) || float.IsInfinity(origin.x)
-                                      || float.IsNaN(origin.y) || float.IsInfinity(origin.y)
-                                      || float.IsNaN(origin.z) || float.IsInfinity(origin.z))
-            {
-                pos = Vector3.zero;
-                rot = Quaternion.identity;
-                carrier = null;
-                return false;
-            }
-
-            if (float.IsNaN(direction.x) || float.IsInfinity(direction.x)
-                                         || float.IsNaN(direction.y) || float.IsInfinity(direction.y)
-                                         || float.IsNaN(direction.z) || float.IsInfinity(direction.z))
-            {
-                pos = Vector3.zero;
-                rot = Quaternion.identity;
-                carrier = null;
-                return false;
-            }
-
-            instance.CheckPlacementResults(ray, out pos, out rot, out carrier, out results);
-            return results.Valid();
-        }
-
-
+        
+        
         public static void BulletWeaponDoAction1(BulletWeaponDataBlock instance, uLink.BitStream stream,
             ItemRepresentation rep, ref uLink.NetworkMessageInfo info)
         {
@@ -4008,217 +3428,7 @@ namespace Fougerite
                 }
             }
         }
-
-        public static void StructureComponentDoAction1(StructureComponentDataBlock instance, uLink.BitStream stream,
-            ItemRepresentation rep, ref uLink.NetworkMessageInfo info)
-        {
-            IStructureComponentItem item;
-            NetCull.VerifyRPC(ref info, false);
-            if (rep.Item<IStructureComponentItem>(out item) && (item.uses > 0))
-            {
-                StructureComponent structureToPlacePrefab = instance.structureToPlacePrefab;
-                Vector3 origin = stream.ReadVector3();
-                Vector3 direction = stream.ReadVector3();
-                Vector3 position = stream.ReadVector3();
-                Quaternion rotation = stream.ReadQuaternion();
-                uLink.NetworkViewID viewID = stream.ReadNetworkViewID();
-                if (viewID == null || float.IsNaN(viewID.id) || float.IsInfinity(viewID.id))
-                {
-                    return;
-                }
-
-                if (float.IsNaN(origin.x) || float.IsInfinity(origin.x) || float.IsNaN(origin.y) ||
-                    float.IsInfinity(origin.y)
-                    || float.IsNaN(origin.z) || float.IsInfinity(origin.z))
-                {
-                    return;
-                }
-
-                if (float.IsNaN(direction.x) || float.IsInfinity(direction.x) || float.IsNaN(direction.y) ||
-                    float.IsInfinity(direction.y)
-                    || float.IsNaN(direction.z) || float.IsInfinity(direction.z))
-                {
-                    return;
-                }
-
-                if (float.IsNaN(position.x) || float.IsInfinity(position.x) || float.IsNaN(position.y) ||
-                    float.IsInfinity(position.y)
-                    || float.IsNaN(position.z) || float.IsInfinity(position.z))
-                {
-                    return;
-                }
-
-                if (float.IsNaN(rotation.x) || float.IsInfinity(rotation.x) || float.IsNaN(rotation.y) ||
-                    float.IsInfinity(rotation.y)
-                    || float.IsNaN(rotation.z) || float.IsInfinity(rotation.z) || float.IsNaN(rotation.w) ||
-                    float.IsInfinity(rotation.w))
-                {
-                    return;
-                }
-
-                StructureMaster component = null;
-                if (viewID == uLink.NetworkViewID.unassigned)
-                {
-                    if (instance.MasterFromRay(new Ray(origin, direction)))
-                    {
-                        return;
-                    }
-
-                    if (structureToPlacePrefab.type != StructureComponent.StructureComponentType.Foundation)
-                    {
-                        //Debug.Log("ERROR, tried to place non foundation structure on terrain!");
-                    }
-                    else
-                    {
-                        component = NetCull.InstantiateClassic<StructureMaster>(
-                            Bundling.Load<StructureMaster>("content/structures/StructureMasterPrefab"), position,
-                            rotation, 0);
-                        component.SetupCreator(item.controllable);
-                    }
-                }
-                else
-                {
-                    component = uLink.NetworkView.Find(viewID).gameObject.GetComponent<StructureMaster>();
-                }
-
-                if (component == null)
-                {
-                    return;
-                    //Debug.Log("NO master, something seriously wrong");
-                }
-
-                if (instance._structureToPlace.CheckLocation(component, position, rotation) &&
-                    instance.CheckBlockers(position))
-                {
-                    StructureComponent component2 = NetCull
-                        .InstantiateStatic(instance.structureToPlaceName, position, rotation)
-                        .GetComponent<StructureComponent>();
-                    if (component2 != null)
-                    {
-#pragma warning disable 618
-                        component.AddStructureComponent(component2);
-#pragma warning restore 618
-                        int count = 1;
-                        EntityDeployed(component2, ref info);
-                        if (item.Consume(ref count))
-                        {
-                            item.inventory.RemoveItem(item.slot);
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void TorchDoAction1(TorchItemDataBlock instance, uLink.BitStream stream, ItemRepresentation rep,
-            ref uLink.NetworkMessageInfo info)
-        {
-            ITorchItem item;
-            NetCull.VerifyRPC(ref info, false);
-            if (rep.Item<ITorchItem>(out item) && item.ValidatePrimaryMessageTime(info.timestamp))
-            {
-                if (item.isLit)
-                {
-                    item.Extinguish();
-                }
-
-                rep.ActionStream(1, uLink.RPCMode.AllExceptOwner, stream);
-                Vector3 origin = stream.ReadVector3();
-                Vector3 forward = stream.ReadVector3();
-                if (float.IsNaN(origin.x) || float.IsInfinity(origin.x) || float.IsNaN(origin.y) ||
-                    float.IsInfinity(origin.y)
-                    || float.IsNaN(origin.z) || float.IsInfinity(origin.z))
-                {
-                    return;
-                }
-
-                if (float.IsNaN(forward.x) || float.IsInfinity(forward.x) || float.IsNaN(forward.y) ||
-                    float.IsInfinity(forward.y)
-                    || float.IsNaN(forward.z) || float.IsInfinity(forward.z))
-                {
-                    return;
-                }
-
-
-                instance.ThrowFlare(rep, origin, forward);
-                int count = 1;
-                if (item.Consume(ref count))
-                {
-                    item.inventory.RemoveItem(item.slot);
-                }
-            }
-        }
-
-        #endregion
-
-        public static void ResetHooks()
-        {
-            OnPluginInit = delegate { };
-            OnPlayerTeleport = delegate(Player param0, Vector3 param1, Vector3 param2) { };
-            OnChat = delegate(Player param0, ref ChatString param1) { };
-            OnChatRaw = delegate(ref ConsoleSystem.Arg param0) { };
-            OnCommand = delegate(Player param0, string param1, string[] param2) { };
-            OnCommandRaw = delegate(ref ConsoleSystem.Arg param0) { };
-            OnPlayerConnected = delegate(Player param0) { };
-            OnPlayerDisconnected = delegate(Player param0) { };
-            OnNPCKilled = delegate(DeathEvent param0) { };
-            OnNPCHurt = delegate(HurtEvent param0) { };
-            OnPlayerKilled = delegate(DeathEvent param0) { };
-            OnPlayerHurt = delegate(HurtEvent param0) { };
-            OnPlayerSpawned = delegate(Player param0, SpawnEvent param1) { };
-            OnPlayerSpawning = delegate(Player param0, SpawnEvent param1) { };
-            OnPlayerGathering = delegate(Player param0, GatherEvent param1) { };
-            OnEntityHurt = delegate(HurtEvent param0) { };
-            OnEntityDestroyed = delegate(DestroyEvent param0) { };
-            OnEntityDecay = delegate(DecayEvent param0) { };
-            OnEntityDeployed = delegate(Player param0, Entity param1) { };
-            OnEntityDeployedWithPlacer = delegate(Player param0, Entity param1, Player param2) { };
-            OnConsoleReceived = delegate(ref ConsoleSystem.Arg param0, bool param1) { };
-            OnConsoleReceivedWithCancel = delegate(ref ConsoleSystem.Arg param0, bool param1, ConsoleEvent ce) { };
-            OnBlueprintUse = delegate(Player param0, BPUseEvent param1) { };
-            OnDoorUse = delegate(Player param0, DoorEvent param1) { };
-            OnTablesLoaded = delegate(Dictionary<string, LootSpawnList> param0) { };
-            OnItemsLoaded = delegate(ItemsBlocks param0) { };
-            OnServerInit = delegate { };
-            OnServerShutdown = delegate { };
-            OnModulesLoaded = delegate { };
-            OnRecieveNetwork = delegate(Player param0, Metabolism param1, float param2, float param3,
-                float param4, float param5, float param6, float param7)
-            {
-            };
-            OnShowTalker = delegate(uLink.NetworkPlayer param0, Player param1) { };
-            OnCrafting = delegate(CraftingEvent param0) { };
-            OnResourceSpawned = delegate(ResourceTarget param0) { };
-            OnItemRemoved = delegate(InventoryModEvent param0) { };
-            OnItemAdded = delegate(InventoryModEvent param0) { };
-            OnAirdropCalled = delegate(Vector3 param0) { };
-            OnSteamDeny = delegate(SteamDenyEvent param0) { };
-            OnPlayerApproval = delegate(PlayerApprovalEvent param0) { };
-            OnPlayerMove = delegate(HumanController param0, Vector3 param1, int param2, ushort param3,
-                uLink.NetworkMessageInfo param4, Util.PlayerActions param5)
-            {
-            };
-            OnResearch = delegate(ResearchEvent param0) { };
-            OnServerSaved = delegate { };
-            OnItemPickup = delegate(ItemPickupEvent param0) { };
-            OnFallDamage = delegate(FallDamageEvent param0) { };
-            OnLootUse = delegate(LootStartEvent param0) { };
-            OnShoot = delegate(ShootEvent param0) { };
-            OnBowShoot = delegate(BowShootEvent param0) { };
-            OnShotgunShoot = delegate(ShotgunShootEvent param0) { };
-            OnGrenadeThrow = delegate(GrenadeThrowEvent param0) { };
-            OnPlayerBan = delegate(BanEvent param0) { };
-            OnRepairBench = delegate(RepairEvent param0) { };
-            OnItemMove = delegate(ItemMoveEvent param0) { };
-            OnGenericSpawnerLoad = delegate(GenericSpawner param0) { };
-            OnServerLoaded = delegate() { };
-            OnSupplySignalExpode = delegate(SupplySignalExplosionEvent param0) { };
-            OnBeltUse = delegate(BeltUseEvent param0) { };
-            OnLogger = delegate(LoggerEvent param0) { };
-            foreach (Player player in Server.GetServer().Players)
-            {
-                player.FixInventoryRef();
-            }
-        }
+        
 
         public static void ServerShutdown()
         {
@@ -4262,1073 +3472,5 @@ namespace Fougerite
             if (sw.Elapsed.TotalSeconds > 0)
                 Logger.LogSpeed("ServerStartedEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
         }
-
-        private static DateTime LasTime2 = DateTime.Now;
-
-        public static bool ConfirmVoice(VoiceCom com, byte[] data)
-        {
-            uLink.NetworkPlayer nplayer = com.networkViewOwner;
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime2;
-            double diff = (now - then).TotalSeconds;
-            if (data == null)
-            {
-                if (diff > 10)
-                {
-                    LasTime2 = DateTime.Now;
-                    Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[VoiceByteOverflown] Received null value. Possible Sender: " + player.Name +
-                                          " - " + player.SteamID + " - " + player.IP);
-                    }
-                    else
-                    {
-                        Logger.LogWarning("[VoiceByteOverflown] Received null value.");
-                    }
-                }
-
-                return false;
-            }
-
-            if (data.Length > 15000)
-            {
-                if (diff > 10)
-                {
-                    LasTime2 = DateTime.Now;
-                    Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
-                                          data.Length + " " + player.Name + " - " + player.SteamID + " - " + player.IP);
-                    }
-                    else
-                    {
-                        Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
-                                          data.Length);
-                    }
-                }
-
-                Array.Clear(data, 0, data.Length);
-                return false;
-            }
-
-            for (uint i = 0; i < data.Length;)
-            {
-                try
-                {
-                    uint conversion = (uint)BitConverter.ToInt32(data, (int)i);
-                    if (conversion > 10000)
-                    {
-                        if (diff > 10)
-                        {
-                            LasTime2 = DateTime.Now;
-                            Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
-                            if (player != null)
-                            {
-                                Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
-                                                  conversion + " " + player.Name + " - " + player.SteamID + " - " +
-                                                  player.IP);
-                            }
-                            else
-                            {
-                                Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
-                                                  conversion);
-                            }
-                        }
-
-                        Array.Clear(data, 0, data.Length);
-                        return false;
-                    }
-
-                    i += conversion + 6;
-                }
-                catch
-                {
-                    if (diff > 10)
-                    {
-                        LasTime2 = DateTime.Now;
-                        Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
-                        if (player != null)
-                        {
-                            Logger.LogWarning(
-                                "[VoiceByteOverflown] Seems like an error occured while reading the voice bytes. Someone is trying to send false packets? "
-                                + player.Name + " - " + player.SteamID + " - " + player.IP);
-                        }
-                        else
-                        {
-                            Logger.LogWarning(
-                                "[VoiceByteOverflown] Seems like an error occured while reading the voice bytes. Someone is trying to send false packets?");
-                        }
-                    }
-
-                    Array.Clear(data, 0, data.Length);
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static void ShowTalker(PlayerClient p, PlayerClient p2)
-        {
-            Stopwatch sw = null;
-            if (Logger.showSpeed)
-            {
-                sw = new Stopwatch();
-                sw.Start();
-            }
-
-            var pl = Server.GetServer().FindPlayer(p2.userID);
-            try
-            {
-                if (OnShowTalker != null)
-                    OnShowTalker(p.netPlayer, pl);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("ShowTalkerEvent Error: " + ex.ToString());
-            }
-
-            if (sw == null) return;
-            sw.Stop();
-            if (sw.Elapsed.TotalSeconds > 0)
-                Logger.LogSpeed("MicUseEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
-        }
-
-        private static DateTime LasTime11 = DateTime.Now;
-
-        public static void FallDamageCheck(FallDamage fd, float v)
-        {
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime11;
-            double diff = (now - then).TotalSeconds;
-            if (diff > 10)
-            {
-                Logger.LogWarning("[Legbreak RPC] Bypassed a legbreak RPC possibly sent by a hacker. Value: " + v);
-                LasTime11 = DateTime.Now;
-            }
-            //fd.SetLegInjury(v);
-        }
-
-        public static bool RegisterHook(ServerSave save)
-        {
-            if (ServerSaveHandler.ServerIsSaving)
-            {
-                // Return false if the registers already contain our save class. (Tell that we have already added it)
-                if (ServerSaveManager.Instances.registers.Contains(save))
-                {
-                    return false;
-                }
-
-                // If we already added It to our temp dictionary, then return false. (Tell that we have already added it)
-                if (ServerSaveHandler.UnProcessedSaves.ContainsKey(save))
-                {
-                    return false;
-                }
-
-                ServerSaveHandler.UnProcessedSaves.Add(save, 1);
-            }
-            else
-            {
-                if (!ServerSaveManager.Instances.registers.Add(save))
-                {
-                    return false;
-                }
-
-                ServerSaveManager.Instances.ordered.Add(save);
-            }
-
-            return true;
-        }
-
-        public static bool UnRegisterHook(ServerSave save)
-        {
-            if (ServerSaveHandler.ServerIsSaving)
-            {
-                // Return false if the registers doesn't contain our save class. (Tell that It doesn't exist)
-                if (!ServerSaveManager.Instances.registers.Contains(save))
-                {
-                    return false;
-                }
-
-                // If we have already added the value for later processing return false (Tell that It doesn't exist)
-                if (ServerSaveHandler.UnProcessedSaves.ContainsKey(save))
-                {
-                    return false;
-                }
-
-                ServerSaveHandler.UnProcessedSaves.Add(save, 2);
-            }
-            else
-            {
-                if (!ServerSaveManager.Instances.registers.Remove(save))
-                {
-                    return false;
-                }
-
-                ServerSaveManager.Instances.ordered.Remove(save);
-            }
-
-            return true;
-        }
-
-        internal static void ModulesLoaded()
-        {
-            Stopwatch sw = null;
-            if (Logger.showSpeed)
-            {
-                sw = new Stopwatch();
-                sw.Start();
-            }
-
-            try
-            {
-                if (OnModulesLoaded != null)
-                    OnModulesLoaded();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("ModulesLoadedEvent Error: " + ex.ToString());
-            }
-
-            if (sw == null) return;
-            sw.Stop();
-            if (sw.Elapsed.TotalSeconds > 0)
-                Logger.LogSpeed("ModulesLoadedEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
-        }
-
-        public static void TossBypass(InventoryHolder holder, uLink.BitStream stream, uLink.NetworkMessageInfo info)
-        {
-            if (info == null || info.sender == null)
-            {
-                return;
-            }
-
-            Inventory inventory = holder.inventory;
-            Facepunch.NetworkView networkView = holder.networkView;
-
-            if (networkView.owner != info.networkView.owner)
-            {
-                return;
-            }
-
-            if (networkView.owner != info.sender)
-            {
-                return;
-            }
-
-            int data;
-            try
-            {
-                data = (int)Inventory.RPCInteger(stream);
-            }
-            catch
-            {
-                return;
-            }
-
-            if (float.IsNaN(data) || float.IsInfinity(data) || data > 39)
-            {
-                return;
-            }
-
-            InventoryItem item;
-            if (inventory.collection.Get(data, out item))
-            {
-                DropHelper.DropItem(inventory, data);
-            }
-        }
-
-        public static void LoggerEvent(LoggerEventType type, string message)
-        {
-            try
-            {
-                if (OnLogger != null)
-                {
-                    LoggerEvent evt = new LoggerEvent(type, message);
-                    OnLogger(evt);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogErrorIgnore("LoggerEvent Error: " + ex.ToString(), null, true);
-            }
-        }
-
-        public static Dictionary<string, LootSpawnList> TablesLoaded(Dictionary<string, LootSpawnList> lists)
-        {
-            try
-            {
-                if (OnTablesLoaded != null)
-                    OnTablesLoaded(lists);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("TablesLoadedEvent Error: " + ex.ToString());
-            }
-
-            return lists;
-        }
-
-        private static DateTime LasTime3 = DateTime.Now;
-
-        public static void ITSPHook(Inventory instance, byte slotNumber, uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime3;
-            double diff = (now - then).TotalSeconds;
-            if (float.IsNaN(slotNumber) || float.IsInfinity(slotNumber) || slotNumber > 39)
-            {
-                if (diff > 10)
-                {
-                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[ITSP InvalidPacket] " + slotNumber
-                                                                  + " - " + player.Name + " - " + player.SteamID +
-                                                                  " - " + player.IP);
-                        Server.GetServer().BanPlayer(player, "Console", "Invalid ITSP Packet.");
-                    }
-
-                    LasTime3 = DateTime.Now;
-                }
-
-                return;
-            }
-
-            InventoryItem item;
-            if (instance.IsAnAuthorizedLooter(info.sender) && instance.collection.Get(slotNumber, out item))
-            {
-                instance.SplitStack(slotNumber);
-            }
-        }
-
-        private static DateTime LasTime4 = DateTime.Now;
-
-        public static void IACTHook(Inventory instance, byte itemIndex, byte action, uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime4;
-            double diff = (now - then).TotalSeconds;
-            if (float.IsNaN(itemIndex) || float.IsInfinity(itemIndex) || itemIndex > 39
-                || float.IsNaN(action) || float.IsInfinity(action) ||
-                !Enum.IsDefined(typeof(InventoryItem.MenuItem), action))
-            {
-                if (diff > 10)
-                {
-                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[IACT InvalidPacket] " + itemIndex + " - " + action
-                                          + " - " + player.Name + " - " + player.SteamID + " - " + player.IP);
-                        Server.GetServer().BanPlayer(player, "Console", "Invalid IACT Packet.");
-                    }
-
-                    LasTime4 = DateTime.Now;
-                }
-
-                return;
-            }
-
-            InventoryItem item;
-            if ((info.sender == instance.networkView.owner) && instance.collection.Get(itemIndex, out item))
-            {
-                item.OnMenuOption((InventoryItem.MenuItem)action);
-            }
-        }
-
-        private static bool CheckSenderIsNonOwningClient(Inventory instance, uLink.NetworkPlayer sender)
-        {
-            if (sender.isClient && (sender != instance.networkView.owner))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private static DateTime LasTime5 = DateTime.Now;
-
-        public static void IASTHook(Inventory instance, byte itemIndex, uLink.NetworkViewID itemRepID,
-            uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime5;
-            double diff = (now - then).TotalSeconds;
-            // Just to make sure.
-            if (float.IsNaN(itemIndex) || float.IsInfinity(itemIndex) || itemIndex > 39)
-            {
-                if (diff > 10)
-                {
-                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[IAST InvalidPacket] " + itemIndex + " - " + itemRepID
-                                          + " - " + player.Name + " - " + player.SteamID + " - " + player.IP);
-                        Server.GetServer().BanPlayer(player, "Console", "Invalid IAST Packet.");
-                    }
-
-                    LasTime5 = DateTime.Now;
-                }
-
-                return;
-            }
-
-            InventoryItem item;
-            if (!CheckSenderIsNonOwningClient(instance, info.sender) && instance.collection.Get(itemIndex, out item))
-            {
-                instance.SetActiveItemManually(itemIndex,
-                    !(itemRepID != uLink.NetworkViewID.unassigned)
-                        ? null
-                        : uLink.NetworkView.Find(itemRepID).GetComponent<ItemRepresentation>(),
-                    new uLink.NetworkViewID?(itemRepID));
-            }
-        }
-
-        public static void OC1Hook(Controllable instance, uLink.NetworkViewID rootViewID, uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            if (uLink.NetworkView.Find(rootViewID) != null)
-            {
-                instance.OverrideControlOfHandleRPC(rootViewID, rootViewID, ref info);
-            }
-        }
-
-        public static void OC2Hook(Controllable instance, uLink.NetworkViewID rootViewID,
-            uLink.NetworkViewID parentViewID, uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            if (uLink.NetworkView.Find(rootViewID) != null)
-            {
-                instance.OverrideControlOfHandleRPC(rootViewID, parentViewID, ref info);
-            }
-        }
-
-        public static void CLRHook(Controllable instance, uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            Controllable bt = instance.ch.bt;
-            Facepunch.NetworkView networkView = bt.networkView;
-
-            if ((networkView != null) && (networkView.viewID != uLink.NetworkViewID.unassigned))
-            {
-                NetCull.RemoveRPCsByName(networkView, "Controllable:RFH");
-                while (bt._sentRootControlCount > instance.ch.id)
-                {
-                    string view = Controllable.kClientSideRootNumberRPCName[bt._sentRootControlCount--];
-                    NetCull.RemoveRPCsByName(networkView, view);
-                }
-            }
-
-            instance.ch.Delete();
-            if (((bt != null) && ((bt.RT & 0xc00) == 0)) &&
-                ((networkView != null) && (networkView.viewID != uLink.NetworkViewID.unassigned)))
-            {
-                networkView.RPC<byte>("Controllable:RFH", uLink.RPCMode.OthersBuffered, (byte)bt._sentRootControlCount);
-            }
-
-            instance.SharedPostCLR();
-        }
-
-        public static void CLDHook(Controllable instance, uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            if (info.sender != instance.networkViewOwner)
-            {
-                return;
-            }
-
-            Controllable.Disconnect(instance);
-        }
-
-        private static DateTime LasTime6 = DateTime.Now;
-
-        public static void ISMVHook(Inventory instance, byte fromSlot, byte toSlot, uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime6;
-            double diff = (now - then).TotalSeconds;
-            if (float.IsNaN(fromSlot) || float.IsInfinity(fromSlot) || fromSlot > 39
-                || float.IsNaN(toSlot) || float.IsInfinity(toSlot) || toSlot > 39)
-            {
-                if (diff > 10)
-                {
-                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[ISMV InvalidPacket] " + fromSlot
-                                                                  + " - " + toSlot + " - " + player.Name + " - " +
-                                                                  player.SteamID + " - " + player.IP);
-                        Server.GetServer().BanPlayer(player, "Console", "Invalid ISMV Packet.");
-                    }
-
-                    LasTime6 = DateTime.Now;
-                }
-
-                return;
-            }
-
-            InventoryItem item;
-            if (instance.collection.Get(fromSlot, out item))
-            {
-                Inventory.SlotOperationResult message =
-                    instance.SlotOperation(fromSlot, toSlot, Inventory.SlotOperationsMove(info.sender));
-                if (((int)message) <= 0)
-                {
-                    Debug.LogWarning(message);
-                }
-            }
-        }
-
-        private static DateTime LasTime7 = DateTime.Now;
-
-        public static void ITMGHook(Inventory instance, NetEntityID toInvID, byte fromSlot, byte toSlot,
-            bool tryCombine, uLink.NetworkMessageInfo info)
-        {
-            if (info == null || toInvID == null)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime7;
-            double diff = (now - then).TotalSeconds;
-            if (float.IsNaN(fromSlot) || float.IsInfinity(fromSlot) || fromSlot > 39
-                || float.IsNaN(toSlot) || float.IsInfinity(toSlot) || toSlot > 39)
-            {
-                if (diff > 10)
-                {
-                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[ITMG InvalidPacket] " + fromSlot
-                                                                  + " - " + toSlot + " - " + player.Name + " - " +
-                                                                  player.SteamID + " - " + player.IP);
-                        Server.GetServer().BanPlayer(player, "Console", "Invalid ITMG Packet.");
-                    }
-
-                    LasTime7 = DateTime.Now;
-                }
-
-                return;
-            }
-
-            InventoryItem item;
-            if (instance.collection.Get(fromSlot, out item))
-            {
-                Inventory component = toInvID.GetComponent<Inventory>();
-                Inventory.SlotOperationResult message = instance.SlotOperation(fromSlot, component, toSlot,
-                    Inventory.SlotOperationsMerge(tryCombine, info.sender));
-                if (((int)message) <= 0)
-                {
-                    Debug.LogWarning(message);
-                }
-            }
-        }
-
-        private static DateTime LasTime8 = DateTime.Now;
-
-        public static void ITMVHook(Inventory instance, NetEntityID toInvID, byte fromSlot, byte toSlot,
-            uLink.NetworkMessageInfo info)
-        {
-            if (info == null || toInvID == null)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime8;
-            double diff = (now - then).TotalSeconds;
-            if (float.IsNaN(fromSlot) || float.IsInfinity(fromSlot) || fromSlot > 39
-                || float.IsNaN(toSlot) || float.IsInfinity(toSlot) || toSlot > 39)
-            {
-                if (diff > 10)
-                {
-                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[ITMV InvalidPacket] " + fromSlot
-                                                                  + " - " + toSlot + " - " + player.Name + " - " +
-                                                                  player.SteamID + " - " + player.IP);
-                        Server.GetServer().BanPlayer(player, "Console", "Invalid ITMV Packet.");
-                    }
-
-                    LasTime8 = DateTime.Now;
-                }
-
-                return;
-            }
-
-            InventoryItem item;
-            if (instance.collection.Get(fromSlot, out item))
-            {
-                Inventory component = toInvID.GetComponent<Inventory>();
-                Inventory.SlotOperationResult message = instance.SlotOperation(fromSlot, component, toSlot,
-                    Inventory.SlotOperationsMove(info.sender));
-                if (((int)message) <= 0)
-                {
-                    Debug.LogWarning(message);
-                }
-            }
-        }
-
-        private static DateTime LasTime9 = DateTime.Now;
-
-        public static void ITSMHook(Inventory instance, byte fromSlot, byte toSlot, bool tryCombine,
-            uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime9;
-            double diff = (now - then).TotalSeconds;
-            if (float.IsNaN(fromSlot) || float.IsInfinity(fromSlot) || fromSlot > 39
-                || float.IsNaN(toSlot) || float.IsInfinity(toSlot) || toSlot > 39)
-            {
-                if (diff > 10)
-                {
-                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[ITSM InvalidPacket] " + fromSlot
-                                                                  + " - " + toSlot + " - " + player.Name + " - " +
-                                                                  player.SteamID + " - " + player.IP);
-                        Server.GetServer().BanPlayer(player, "Console", "Invalid ITSM Packet.");
-                    }
-
-                    LasTime9 = DateTime.Now;
-                }
-
-                return;
-            }
-
-            InventoryItem item;
-            if (instance.collection.Get(fromSlot, out item))
-            {
-                Inventory.SlotOperationResult message = instance.SlotOperation(fromSlot, toSlot,
-                    Inventory.SlotOperationsMerge(tryCombine, info.sender));
-                if (((int)message) <= 0)
-                {
-                    Debug.LogWarning(message);
-                }
-            }
-        }
-
-        private static DateTime LasTime10 = DateTime.Now;
-
-        public static void SVUCHook(Inventory instance, byte cell, uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            DateTime now = DateTime.Now;
-            DateTime then = LasTime10;
-            double diff = (now - then).TotalSeconds;
-            if (float.IsNaN(cell) || float.IsInfinity(cell) || cell > 39)
-            {
-                if (diff > 10)
-                {
-                    Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
-                    if (player != null)
-                    {
-                        Logger.LogWarning("[SVUC InvalidPacket] " + cell
-                                                                  + " - " + player.Name + " - " + player.SteamID +
-                                                                  " - " + player.IP);
-                        Server.GetServer().BanPlayer(player, "Console", "Invalid SVUC Packet.");
-                    }
-
-                    LasTime10 = DateTime.Now;
-                }
-
-                return;
-            }
-
-            if (instance.IsAnAuthorizedLooter(info.sender, true, "reqinvcellupdate"))
-            {
-                instance.MarkSlotDirty(cell);
-            }
-        }
-
-
-        public static void CRFSHook(CraftingInventory instance, int amount, int blueprintUID,
-            uLink.NetworkMessageInfo info)
-        {
-            if (info == null)
-            {
-                return;
-            }
-
-            if (info.sender != instance.networkViewOwner)
-            {
-                return;
-            }
-
-            if (float.IsNaN(amount) || float.IsNaN(blueprintUID) || float.IsInfinity(amount) ||
-                float.IsInfinity(blueprintUID))
-            {
-                return;
-            }
-
-            if (float.IsNaN(info.timestampInMillis) || float.IsInfinity(info.timestampInMillis))
-            {
-                return;
-            }
-
-            BlueprintDataBlock bd = CraftingInventory.FindBlueprint(blueprintUID);
-            if (bd != null)
-            {
-                instance.StartCrafting(bd, amount, info.timestampInMillis);
-            }
-        }
-
-        private static NGC.Procedure Message(NGC instance, byte[] data, int offset, int length,
-            uLink.NetworkMessageInfo info)
-        {
-            try
-            {
-                int num4;
-                byte[] buffer;
-                int startIndex = offset;
-                int num2 = BitConverter.ToInt32(data, startIndex);
-                startIndex += 4;
-                int num3 = offset + length;
-                if (startIndex == num3)
-                {
-                    buffer = null;
-                    num4 = 0;
-                }
-                else
-                {
-                    num4 = num3 - startIndex;
-                    buffer = new byte[num4];
-                    int num5 = 0;
-                    do
-                    {
-                        byte val = data[startIndex++];
-                        buffer[num5++] = val;
-                    } while (startIndex < num3);
-                }
-
-                return instance.Message(num2, buffer, num4, info);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("Caught an NGC Error: " + ex);
-                // ignore
-            }
-
-            return null;
-        }
-
-        public static void CHook(NGC instance, byte[] data, uLink.NetworkMessageInfo info)
-        {
-            if (data.Length > 30000)
-            {
-                Array.Clear(data, 0, data.Length);
-                Logger.LogError("CHook Received: " + data.Length);
-                return;
-            }
-
-            NGC.Procedure procedure = Message(instance, data, 0, data.Length, info);
-            if (procedure != null && !procedure.Call())
-            {
-                if (procedure.view != null)
-                {
-                    Logger.LogWarning(
-                        "Did not call rpc " +
-                        procedure.view.prefab.installation.methods[procedure.message].method.Name + " for view " +
-                        procedure.view.name + " (entid:{procedure.view.id},msg:{procedure.message})", instance);
-                }
-                else if (NGC.log_nonexistant_ngc_errors)
-                {
-                    Logger.LogWarning(
-                        $"Did not call rpc to non existant view# {procedure.target}. ( message id was {procedure.message} )",
-                        instance);
-                }
-            }
-        }
-
-        public static bool AHook(NGC instance, byte[] data, uLink.NetworkMessageInfo info)
-        {
-            if (data.Length > 30000)
-            {
-                Array.Clear(data, 0, data.Length);
-                Logger.LogError("AHook Received: " + data.Length);
-                return false;
-            }
-
-            if (info.sender != uLink.NetworkPlayer.server)
-            {
-                Array.Clear(data, 0, data.Length);
-                Logger.LogError("AHook Received: " + data.Length + " Not server.");
-                return false;
-            }
-
-            return true;
-        }
-
-        public static bool InternalRPCCheck(Class5 class5)
-        {
-            string str;
-            try
-            {
-                str = class5.class56_0.ipendPoint_0.Address.ToString();
-            }
-            catch
-            {
-                return false;
-            }
-
-            if (!Server.GetServer().IsBannedIP(str))
-            {
-                try
-                {
-                    Class5.Enum0 num = (Class5.Enum0)class5.enum0_0;
-                    Enum8 num2 = class5.enum8_0;
-                    if (Enum.IsDefined(typeof(Class5.Enum0), num) && Enum.IsDefined(typeof(Enum8), num2))
-                    {
-                        return true;
-                    }
-                }
-                catch
-                {
-                    //ignore
-                }
-
-                Server.GetServer().BanPlayerIP(str, "1", "uLink AuthorizationCheck", "Fougerite");
-                Logger.LogWarning("[Fougerite uLinkInternalCheck] Hoax IP automatically banned, and rejected: " + str,
-                    null);
-            }
-
-            return false;
-        }
-
-        public static void uLinkAuthorizationCheck(Class48 class48, Class5 class5_0)
-        {
-            string str;
-            try
-            {
-                str = class5_0.class56_0.ipendPoint_0.Address.ToString();
-            }
-            catch
-            {
-                return;
-            }
-
-            if (!Server.GetServer().IsBannedIP(str))
-            {
-                NetworkLog.Debug<string, Class5>(NetworkLogFlags.RPC, "Server handling ", class5_0);
-                NetworkLog.Debug<string, string, string, Struct15>(NetworkLogFlags.Timestamp, "Server got message ",
-                    class5_0.string_0, " with timestamp ", class5_0.struct15_0);
-                if (class5_0.method_16())
-                {
-                    NetworkLog.Error<Class5, string>(NetworkLogFlags.BadMessage | NetworkLogFlags.RPC, class5_0,
-                        " is from another server and will be dropped!");
-                }
-                else
-                {
-                    if (!class5_0.method_15())
-                    {
-                        if (class48.bool_1)
-                        {
-                            Logger.LogWarning(
-                                "[Fougerite uLinkAuthorizationCheck] Hoax IP automatically banned, and rejected: " +
-                                str, null);
-                            Server.GetServer().BanPlayerIP(str, "1", "uLink AuthorizationCheck", "Fougerite");
-                            return;
-                        }
-
-                        class48.vmethod_35(new Class5(class48, class5_0));
-                    }
-                    else if (class5_0.method_1())
-                    {
-                        class48.method_281(class5_0);
-                        return;
-                    }
-
-                    if (class5_0.method_14())
-                    {
-                        class48.method_73(class5_0);
-                    }
-                }
-            }
-        }
-
-        public static void ActivateImmediatelyUncheckedHook(MeshBatchPhysicalOutput meshBatchPhysicalOutput)
-        {
-            if (meshBatchPhysicalOutput.FlaggedForActivation)
-            {
-                Facepunch.MeshBatch.Runtime.Sealed.MeshBatchPhysicalIntegration.Cancel(meshBatchPhysicalOutput);
-                meshBatchPhysicalOutput.FlaggedForActivation = false;
-            }
-            if (!meshBatchPhysicalOutput.Activated)
-            {
-                // This becomes null when the entity is destroyed on deployment before its activated
-                // thus causing null reference exception
-                if (meshBatchPhysicalOutput.GameObject == null)
-                {
-                    return;
-                }
-                meshBatchPhysicalOutput.Activated = true;
-                meshBatchPhysicalOutput.GameObject.SetActive(true);
-            }
-        }
-
-        public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
-
-        public delegate void ChatHandlerDelegate(Player player, ref ChatString text);
-
-        public delegate void ChatRawHandlerDelegate(ref ConsoleSystem.Arg arg);
-
-        public delegate void CommandHandlerDelegate(Player player, string cmd, string[] args);
-
-        public delegate void CommandRawHandlerDelegate(ref ConsoleSystem.Arg arg);
-
-        public delegate void ConnectionHandlerDelegate(Player player);
-
-        public delegate void ConsoleHandlerDelegate(ref ConsoleSystem.Arg arg, bool external);
-
-        public delegate void
-            ConsoleHandlerWithCancelDelegate(ref ConsoleSystem.Arg arg, bool external, ConsoleEvent ce);
-
-        public delegate void DisconnectionHandlerDelegate(Player player);
-
-        public delegate void DoorOpenHandlerDelegate(Player player, DoorEvent de);
-
-        public delegate void EntityDecayDelegate(DecayEvent de);
-
-        public delegate void EntityDeployedDelegate(Player player, Entity e);
-
-        public delegate void EntityDeployedWithPlacerDelegate(Player player, Entity e,
-            Player actualplacer);
-
-        public delegate void EntityHurtDelegate(HurtEvent he);
-
-        public delegate void EntityDestroyedDelegate(DestroyEvent de);
-
-        public delegate void HurtHandlerDelegate(HurtEvent he);
-
-        public delegate void ItemsDatablocksLoaded(ItemsBlocks items);
-
-        public delegate void KillHandlerDelegate(DeathEvent de);
-
-        public delegate void LootTablesLoaded(Dictionary<string, LootSpawnList> lists);
-
-        public delegate void PlayerGatheringHandlerDelegate(Player player, GatherEvent ge);
-
-        public delegate void PlayerSpawnHandlerDelegate(Player player, SpawnEvent se);
-
-        public delegate void ShowTalkerDelegate(uLink.NetworkPlayer player, Player p);
-
-        public delegate void PluginInitHandlerDelegate();
-
-        public delegate void TeleportDelegate(Player player, Vector3 from, Vector3 dest);
-
-        public delegate void ServerInitDelegate();
-
-        public delegate void ServerShutdownDelegate();
-
-        public delegate void ModulesLoadedDelegate();
-
-        public delegate void RecieveNetworkDelegate(Player player, Metabolism m, float cal, float water,
-            float rad, float anti, float temp, float poison);
-
-        public delegate void CraftingDelegate(CraftingEvent e);
-
-        public delegate void ResourceSpawnDelegate(ResourceTarget t);
-
-        public delegate void ItemRemovedDelegate(InventoryModEvent e);
-
-        public delegate void ItemAddedDelegate(InventoryModEvent e);
-
-        public delegate void AirdropDelegate(Vector3 v);
-
-        public delegate void SteamDenyDelegate(SteamDenyEvent sde);
-
-        public delegate void PlayerApprovalDelegate(PlayerApprovalEvent e);
-
-        public delegate void PlayerMoveDelegate(HumanController hc, Vector3 origin, int encoded, ushort stateFlags,
-            uLink.NetworkMessageInfo info, Util.PlayerActions action);
-
-        public delegate void ResearchDelegate(ResearchEvent re);
-
-        public delegate void ServerSavedDelegate(int Amount, double Seconds);
-
-        public delegate void ItemPickupDelegate(ItemPickupEvent itemPickupEvent);
-
-        public delegate void FallDamageDelegate(FallDamageEvent fallDamageEvent);
-
-        public delegate void LootEnterDelegate(LootStartEvent lootStartEvent);
-
-        public delegate void ShootEventDelegate(ShootEvent shootEvent);
-
-        public delegate void ShotgunShootEventDelegate(ShotgunShootEvent shootEvent);
-
-        public delegate void BowShootEventDelegate(BowShootEvent bowshootEvent);
-
-        public delegate void GrenadeThrowEventDelegate(GrenadeThrowEvent grenadeThrowEvent);
-
-        public delegate void BanEventDelegate(BanEvent banEvent);
-
-        public delegate void RepairBenchEventDelegate(RepairEvent repairEvent);
-
-        public delegate void ItemMoveEventDelegate(ItemMoveEvent itemMoveEvent);
-
-        public delegate void GenericSpawnerLoadDelegate(GenericSpawner genericSpawner);
-
-        public delegate void ServerLoadedDelegate();
-
-        public delegate void SupplySignalDelegate(SupplySignalExplosionEvent supplySignalExplosionEvent);
-
-        public delegate void AllPluginsLoadedDelegate();
-
-        public delegate void BeltUseDelegate(BeltUseEvent beltUseEvent);
-
-        public delegate void LoggerDelegate(LoggerEvent loggerEvent);
-
-        //public delegate void AirdropCrateDroppedDelegate(GameObject go);
     }
 }

@@ -2186,8 +2186,10 @@ namespace Fougerite.Patcher
             try
             {
                 bool flag = true;
+                
+                TypeDefinition serverInit = rustAssembly.MainModule.GetType("ServerInit");
 
-                if (rustAssembly.MainModule.GetType("Fougerite_Patched_FirstPass") != null)
+                if (serverInit.GetField("Fougerite_Patched_FirstPass") != null)
                 {
                     Logger.Log("Assembly-CSharp.dll is already patched, please use a clean library.");
                     return false;
@@ -2206,13 +2208,11 @@ namespace Fougerite.Patcher
                 try
                 {
                     TypeReference type = AssemblyDefinition.ReadAssembly("mscorlib.dll").MainModule.GetType("System.String");
-                    TypeDefinition item = new TypeDefinition("", "Fougerite_Patched_FirstPass", TypeAttributes.AnsiClass | TypeAttributes.Public);
-                    rustAssembly.MainModule.Types.Add(item);
                     TypeReference fieldType = rustAssembly.MainModule.Import(type);
-                    FieldDefinition definition3 = new FieldDefinition("Version", FieldAttributes.CompilerControlled | FieldAttributes.FamANDAssem | FieldAttributes.Family, fieldType);
+                    FieldDefinition definition3 = new FieldDefinition("Fougerite_Patched_FirstPass", FieldAttributes.CompilerControlled | FieldAttributes.FamANDAssem | FieldAttributes.Family, fieldType);
                     definition3.HasConstant = true;
                     definition3.Constant = Program.Version;
-                    rustAssembly.MainModule.GetType("Fougerite_Patched_FirstPass").Fields.Add(definition3);
+                    serverInit.Fields.Add(definition3);
                     rustAssembly.Write("Assembly-CSharp.dll");
                 }
                 catch (Exception ex)
@@ -2246,8 +2246,9 @@ namespace Fougerite.Patcher
                 hooksClass = fougeriteAssembly.MainModule.GetType("Fougerite.Hooks");
                 SaveHandlerClass = fougeriteAssembly.MainModule.GetType("Fougerite.ServerSaveHandler");
 
+                TypeDefinition serverInit = rustAssembly.MainModule.GetType("ServerInit");
 
-                if (rustAssembly.MainModule.GetType("Fougerite_Patched_SecondPass") != null)
+                if (serverInit.GetField("Fougerite_Patched_SecondPass") != null)
                 {
                     Logger.Log("Assembly-CSharp.dll is already patched, please use a clean library.");
                     return false;
@@ -2323,13 +2324,11 @@ namespace Fougerite.Patcher
                 try
                 {
                     TypeReference type = AssemblyDefinition.ReadAssembly("mscorlib.dll").MainModule.GetType("System.String");
-                    TypeDefinition item = new TypeDefinition("", "Fougerite_Patched_SecondPass", TypeAttributes.AnsiClass | TypeAttributes.Public);
-                    rustAssembly.MainModule.Types.Add(item);
                     TypeReference fieldType = rustAssembly.MainModule.Import(type);
-                    FieldDefinition definition3 = new FieldDefinition("Version", FieldAttributes.CompilerControlled | FieldAttributes.FamANDAssem | FieldAttributes.Family, fieldType);
+                    FieldDefinition definition3 = new FieldDefinition("Fougerite_Patched_SecondPass", FieldAttributes.CompilerControlled | FieldAttributes.FamANDAssem | FieldAttributes.Family, fieldType);
                     definition3.HasConstant = true;
                     definition3.Constant = Program.Version;
-                    rustAssembly.MainModule.GetType("Fougerite_Patched_SecondPass").Fields.Add(definition3);
+                    serverInit.Fields.Add(definition3);
                     rustAssembly.Write("Assembly-CSharp.dll");
                 }
                 catch (Exception ex)

@@ -67,6 +67,8 @@
     <Compile Include="Fougerite\Events\ShotgunShootEvent.cs" />
     <Compile Include="Fougerite\Events\SupplySignalExplosionEvent.cs" />
     <Compile Include="Fougerite\Flood.cs" />
+    <Compile Include="Fougerite\Hooks_Base.cs" />
+    <Compile Include="Fougerite\Hooks_RustFixes.cs" />
     <Compile Include="Fougerite\JsonAPI.cs" />
     <Compile Include="Fougerite\Loom.cs" />
     <Compile Include="Fougerite\MySQLConnector.cs" />

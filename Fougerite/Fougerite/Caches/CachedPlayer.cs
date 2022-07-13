@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -30,6 +31,27 @@ namespace Fougerite.Caches
         /// </summary>
         [JsonProperty]
         public List<string> IPAddresses
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// The last login date of the player.
+        /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? LastLogin
+        {
+            get;
+            set;
+        }
+        
+        /// <summary>
+        /// The last logout date of the player.
+        /// Can be null.
+        /// </summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? LastLogout
         {
             get;
             set;

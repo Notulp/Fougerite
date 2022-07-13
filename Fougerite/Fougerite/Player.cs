@@ -20,8 +20,7 @@ namespace Fougerite
         private readonly double connectedAtSeconds;
         private long disconnecttime = -1;
         private PlayerInv inv;
-        private bool invError;
-        private bool justDied;
+        internal bool justDied;
         private PlayerClient ourPlayer;
         private readonly ulong uid;
         private string name;
@@ -50,7 +49,6 @@ namespace Fougerite
             this.uid = client.netUser.userID;
             this.name = client.netUser.displayName;
             this.ipaddr = client.netPlayer.externalIP;
-            this.FixInventoryRef();
             this._CommandCancelList = new List<string>();
             this._ConsoleCommandCancelList = new List<string>();
             this._lastpost = Vector3.zero;
@@ -187,7 +185,6 @@ namespace Fougerite
             this.connectedAt = DateTime.UtcNow.Ticks;
             this.name = user.displayName;
             this.ipaddr = user.networkPlayer.externalIP;
-            this.FixInventoryRef();
         }
 
         public void OnDisconnect()
@@ -370,30 +367,6 @@ namespace Fougerite
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// This is an inventory reference fix that fougerite uses.
-        /// </summary>
-        public void FixInventoryRef()
-        {
-            Hooks.OnPlayerKilled += new Hooks.KillHandlerDelegate(this.Hooks_OnPlayerKilled);
-        }
-
-        private void Hooks_OnPlayerKilled(DeathEvent de)
-        {
-            try
-            {
-                Fougerite.Player victim = de.Victim as Fougerite.Player;
-                if (victim.UID == this.UID)
-                {
-                    this.justDied = true;
-                }
-            }
-            catch
-            {
-                this.invError = true;
-            }
         }
 
         /// <summary>
@@ -1108,10 +1081,9 @@ namespace Fougerite
             {
                 if (this.IsOnline)
                 {
-                    if (this.invError || this.justDied)
+                    if (this.justDied)
                     {
                         this.inv = new PlayerInv(this);
-                        this.invError = false;
                         this.justDied = false;
                     }
 

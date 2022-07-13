@@ -1,33 +1,34 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Facepunch.MeshBatch;
+using IronPython.Runtime.Types;
+using UnityEngine;
+using String = Facepunch.Utility.String;
 
 namespace Fougerite
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Reflection;
-    using System.Runtime.InteropServices;
-    using System.Runtime.Serialization.Formatters.Binary;
-    using System.Text.RegularExpressions;
-    using UnityEngine;
-
     /// <summary>
     /// This class contains some useful methods.
     /// </summary>
     public class Util
     {
-        private readonly Dictionary<string, System.Type> typeCache = new Dictionary<string, System.Type>();
+        private readonly Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
         private static Util util;
-        
+
         /// <summary>
         /// All unstackable item names in rust legacy.
         /// </summary>
-        public static readonly string[] UStackable = new string[]
+        public static readonly string[] UStackable =
         {
             "Spike Wall", "Large Spike Wall", "Wood Gate",
             "Wood Gateway", "Wood Shelter", "Bed", "Workbench", "Furnace", "Repair Bench",
@@ -74,7 +75,7 @@ namespace Fougerite
         }
 
         [DllImport("kernel32")]
-        public extern static ulong GetTickCount64();
+        public static extern ulong GetTickCount64();
 
         /// <summary>
         /// Sends a console message to everyone.
@@ -83,17 +84,27 @@ namespace Fougerite
         /// <param name="adminOnly"></param>
         public void ConsoleLog(string str, [Optional, DefaultParameterValue(false)] bool adminOnly)
         {
-            try {
-                foreach (Fougerite.Player player in Fougerite.Server.GetServer().Players)
+            try
+            {
+                foreach (Player player in Server.GetServer().Players)
                 {
                     if (!player.IsOnline) return;
-                    if (!adminOnly) {
-                        ConsoleNetworker.singleton.networkView.RPC<string>("CL_ConsoleMessage", player.PlayerClient.netPlayer, str);
-                    } else if (player.Admin) {
-                        ConsoleNetworker.singleton.networkView.RPC<string>("CL_ConsoleMessage", player.PlayerClient.netPlayer, str);
+                    if (!adminOnly)
+                    {
+                        ConsoleNetworker.singleton.networkView.RPC("CL_ConsoleMessage", player.PlayerClient.netPlayer,
+                            str);
+                    }
+                    else if (player.Admin)
+                    {
+                        ConsoleNetworker.singleton.networkView.RPC("CL_ConsoleMessage", player.PlayerClient.netPlayer,
+                            str);
                     }
                 }
-            } catch { }
+            }
+            catch
+            {
+                // Ignore?
+            }
         }
 
         /// <summary>
@@ -104,13 +115,17 @@ namespace Fougerite
         /// <returns></returns>
         public object CreateArrayInstance(string name, int size)
         {
-            System.Type type;
-            if (!this.TryFindType(name.Replace('.', '+'), out type)) {
+            Type type;
+            if (!TryFindType(name.Replace('.', '+'), out type))
+            {
                 return null;
             }
-            if (type.BaseType.Name == "ScriptableObject") {
+
+            if (type.BaseType?.Name == "ScriptableObject")
+            {
                 return ScriptableObject.CreateInstance(name);
             }
+
             return Array.CreateInstance(type, size);
         }
 
@@ -122,13 +137,17 @@ namespace Fougerite
         /// <returns></returns>
         public object CreateInstance(string name, params object[] args)
         {
-            System.Type type;
-            if (!this.TryFindType(name.Replace('.', '+'), out type)) {
+            Type type;
+            if (!TryFindType(name.Replace('.', '+'), out type))
+            {
                 return null;
             }
-            if (type.BaseType.Name == "ScriptableObject") {
+
+            if (type.BaseType?.Name == "ScriptableObject")
+            {
                 return ScriptableObject.CreateInstance(name);
             }
+
             return Activator.CreateInstance(type, args);
         }
 
@@ -189,7 +208,7 @@ namespace Fougerite
                 return Vector2.zero;
             }
         }
-        
+
         /// <summary>
         /// Tries to parse a string to Vector3
         /// </summary>
@@ -249,16 +268,20 @@ namespace Fougerite
         /// <returns></returns>
         public static string GetRootFolder()
         {
-            return Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)));
+            return Path.GetDirectoryName(
+                Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)));
         }
-        
+
         /// <summary>
         /// Gets the filepath to rust_server_Data folder.
         /// </summary>
         /// <returns></returns>
         public static string GetServerFolder()
         {
-            return Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))), "rust_server_Data");
+            return Path.Combine(
+                Path.GetDirectoryName(
+                    Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))),
+                "rust_server_Data");
         }
 
         /// <summary>
@@ -268,7 +291,7 @@ namespace Fougerite
         /// <returns></returns>
         public string[] GetQuotedArgs(string s)
         {
-            return Facepunch.Utility.String.SplitQuotesStrings(s.Trim('\\'));
+            return String.SplitQuotesStrings(s.Trim('\\'));
         }
 
         /// <summary>
@@ -279,13 +302,16 @@ namespace Fougerite
         /// <returns></returns>
         public object GetStaticField(string className, string field)
         {
-            System.Type type;
-            if (this.TryFindType(className.Replace('.', '+'), out type)) {
+            Type type;
+            if (TryFindType(className.Replace('.', '+'), out type))
+            {
                 FieldInfo info = type.GetField(field, BindingFlags.Public | BindingFlags.Static);
-                if (info != null) {
+                if (info != null)
+                {
                     return info.GetValue(null);
                 }
             }
+
             return null;
         }
 
@@ -295,9 +321,11 @@ namespace Fougerite
         /// <returns></returns>
         public static Util GetUtil()
         {
-            if (util == null) {
+            if (util == null)
+            {
                 util = new Util();
             }
+
             return util;
         }
 
@@ -328,12 +356,13 @@ namespace Fougerite
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public Ray GetEyesRay(Fougerite.Player player)
+        public Ray GetEyesRay(Player player)
         {
             if (player.Character == null)
             {
                 return new Ray();
             }
+
             Vector3 position = player.Character.transform.position;
             Vector3 direction = player.Character.eyesRay.direction;
             position.y += player.Character.stateFlags.crouch ? 1f : 1.85f;
@@ -352,6 +381,7 @@ namespace Fougerite
             {
                 info = new FileInfo(autoSavePath);
             }
+
             if ((info == null) || (info.Length == 0L))
             {
                 for (int i = 0; i < 20; i++)
@@ -363,6 +393,7 @@ namespace Fougerite
                     }
                 }
             }
+
             return null;
         }
 
@@ -384,6 +415,7 @@ namespace Fougerite
             {
                 return null;
             }
+
             IDMain main = flag ? instance.idMain : IDBase.GetMain(hit.collider);
             point = hit.point;
             return ((main != null) ? main.gameObject : hit.collider.gameObject);
@@ -395,16 +427,17 @@ namespace Fougerite
         /// <param name="player"></param>
         /// <param name="layerMask"></param>
         /// <returns></returns>
-        public GameObject GetLookObject(Fougerite.Player player, int layerMask = -1)
+        public GameObject GetLookObject(Player player, int layerMask = -1)
         {
             if (player.Character == null)
             {
                 return null;
             }
+
             Vector3 position = player.Character.transform.position;
             Vector3 direction = player.Character.eyesRay.direction;
             position.y += player.Character.stateFlags.crouch ? 1f : 1.85f;
-            return GetLookObject(new Ray(position, direction), 300f, -1);
+            return GetLookObject(new Ray(position, direction));
         }
 
         /// <summary>
@@ -434,10 +467,12 @@ namespace Fougerite
             bool flag;
             MeshBatchInstance instance;
             point = Vector3.zero;
-            if (!Facepunch.MeshBatch.MeshBatchPhysics.Raycast(ray, out hit, distance, layerMask, out flag, out instance))
+            if (!Facepunch.MeshBatch.MeshBatchPhysics.Raycast(ray, out hit, distance, layerMask, out flag,
+                    out instance))
             {
                 return null;
             }
+
             IDMain main = flag ? instance.idMain : IDBase.GetMain(hit.collider);
             point = hit.point;
             return ((main != null) ? main.gameObject : hit.collider.gameObject);
@@ -448,12 +483,13 @@ namespace Fougerite
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public Ray GetLookRay(Fougerite.Player player)
+        public Ray GetLookRay(Player player)
         {
             if (player.Character == null)
             {
                 return new Ray();
             }
+
             Vector3 position = player.Character.transform.position;
             Vector3 direction = player.Character.eyesRay.direction;
             position.y += player.Character.stateFlags.crouch ? 0.85f : 1.65f;
@@ -472,8 +508,8 @@ namespace Fougerite
             }
             catch
             {
-                return new Hashtable(); 
-            }            
+                return new Hashtable();
+            }
         }
 
         public static void HashtableToFile(Hashtable ht, string path)
@@ -496,7 +532,7 @@ namespace Fougerite
                             if (y != null)
                             {
                                 Type z = y.GetType();
-                                if (z.ToString() == "IronPython.Runtime.Types.BuiltinFunction")
+                                if (z == typeof(BuiltinFunction))
                                 {
                                     if (!keys.Contains(y)) keys.Add(y);
                                     Logger.LogDebug("[DataStore] " + x + " - " + y +
@@ -508,10 +544,11 @@ namespace Fougerite
                                                     " is not serializable. Saving skipped for It.");
                                     if (!keys.Contains(y)) keys.Add(y);
                                 }
+
                                 if (hashtable[y] != null)
                                 {
                                     Type z2 = hashtable[y].GetType();
-                                    if (z2.ToString() == "IronPython.Runtime.Types.BuiltinFunction")
+                                    if (z2 == typeof(BuiltinFunction))
                                     {
                                         if (!keys.Contains(y)) keys.Add(y);
                                         Logger.LogDebug("[DataStore] " + x + " - " + y +
@@ -534,6 +571,7 @@ namespace Fougerite
                 Logger.LogError("[DataStore] Failed to search for not serializable values!");
                 Logger.LogDebug("[DataStore] Error: " + ex);
             }
+
             try
             {
                 // Running through table names
@@ -559,6 +597,7 @@ namespace Fougerite
                 Logger.LogError("[DataStore] Failed to remove not serializable values!");
                 Logger.LogDebug("[DataStore] Error: " + ex);
             }
+
             try
             {
                 using (FileStream stream = new FileStream(path, FileMode.Create))
@@ -580,25 +619,32 @@ namespace Fougerite
         /// <param name="p"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public Vector3 Infront(Fougerite.Player p, float length)
+        public Vector3 Infront(Player p, float length)
         {
-            return (p.PlayerClient.controllable.transform.position + ((Vector3)(p.PlayerClient.controllable.transform.forward * length)));
+            Transform transform = p.PlayerClient.controllable.transform;
+            return (transform.position + transform.forward * length);
         }
 
         public object InvokeStatic(string className, string method, object[] args)
         {
-            System.Type type;
-            if (!this.TryFindType(className.Replace('.', '+'), out type)) {
+            Type type;
+            if (!TryFindType(className.Replace('.', '+'), out type))
+            {
                 return null;
             }
+
             MethodInfo info = type.GetMethod(method, BindingFlags.Static);
-            if (info == null) {
+            if (info == null)
+            {
                 return null;
             }
-            if (info.ReturnType == typeof(void)) {
+
+            if (info.ReturnType == typeof(void))
+            {
                 info.Invoke(null, args);
                 return true;
             }
+
             return info.Invoke(null, args);
         }
 
@@ -618,73 +664,79 @@ namespace Fougerite
 
         public Match Regex(string input, string match)
         {
-            return new System.Text.RegularExpressions.Regex(input).Match(match);
+            return new Regex(input).Match(match);
         }
 
         public Quaternion RotateX(Quaternion q, float angle)
         {
-            return (q *= Quaternion.Euler(angle, 0f, 0f));
+            return (q * Quaternion.Euler(angle, 0f, 0f));
         }
 
         public Quaternion RotateY(Quaternion q, float angle)
         {
-            return (q *= Quaternion.Euler(0f, angle, 0f));
+            return (q * Quaternion.Euler(0f, angle, 0f));
         }
 
         public Quaternion RotateZ(Quaternion q, float angle)
         {
-            return (q *= Quaternion.Euler(0f, 0f, angle));
+            return (q * Quaternion.Euler(0f, 0f, angle));
         }
 
-        [System.Obsolete("Use the Player class's message system instead.", false)]
+        [Obsolete("Use the Player class's message system instead.", false)]
         public static void say(uLink.NetworkPlayer player, string playername, string arg)
         {
-            Fougerite.Player pl = Fougerite.Player.FindByNetworkPlayer(player);
+            Player pl = Player.FindByNetworkPlayer(player);
             if (pl == null) return;
             if (!pl.IsOnline) return;
             if (!string.IsNullOrEmpty(arg) && !string.IsNullOrEmpty(playername) && player != null)
                 ConsoleNetworker.SendClientCommand(player, "chat.add " + playername + " " + arg);
         }
 
-        [System.Obsolete("Use the Server class's broadcast methods instead.", false)]
+        [Obsolete("Use the Server class's broadcast methods instead.", false)]
         public static void sayAll(string customName, string arg)
         {
-            ConsoleNetworker.Broadcast("chat.add " + Facepunch.Utility.String.QuoteSafe(customName) + " " + Facepunch.Utility.String.QuoteSafe(arg));
+            ConsoleNetworker.Broadcast("chat.add " + String.QuoteSafe(customName) + " " + String.QuoteSafe(arg));
         }
 
-        [System.Obsolete("Use the Server class's broadcast methods instead.", false)]
+        [Obsolete("Use the Server class's broadcast methods instead.", false)]
         public static void sayAll(string arg)
         {
             if (!string.IsNullOrEmpty(arg))
-                ConsoleNetworker.Broadcast("chat.add " + Facepunch.Utility.String.QuoteSafe(Fougerite.Server.GetServer().server_message_name) + " " + Facepunch.Utility.String.QuoteSafe(arg));
+                ConsoleNetworker.Broadcast("chat.add " + String.QuoteSafe(Server.GetServer().server_message_name) +
+                                           " " + String.QuoteSafe(arg));
         }
 
-        [System.Obsolete("Use the Player class's message system instead.", false)]
+        [Obsolete("Use the Player class's message system instead.", false)]
         public static void sayUser(uLink.NetworkPlayer player, string arg)
         {
-            Fougerite.Player pl = Fougerite.Player.FindByNetworkPlayer(player);
+            Player pl = Player.FindByNetworkPlayer(player);
             if (pl == null) return;
             if (!pl.IsOnline) return;
             if (!string.IsNullOrEmpty(arg) && player != null)
-                ConsoleNetworker.SendClientCommand(player, "chat.add " + Facepunch.Utility.String.QuoteSafe(Fougerite.Server.GetServer().server_message_name) + " " + Facepunch.Utility.String.QuoteSafe(arg));
+                ConsoleNetworker.SendClientCommand(player,
+                    "chat.add " + String.QuoteSafe(Server.GetServer().server_message_name) + " " +
+                    String.QuoteSafe(arg));
         }
 
-        [System.Obsolete("Use the Player class's message system instead.", false)]
+        [Obsolete("Use the Player class's message system instead.", false)]
         public static void sayUser(uLink.NetworkPlayer player, string customName, string arg)
         {
-            Fougerite.Player pl = Fougerite.Player.FindByNetworkPlayer(player);
+            Player pl = Player.FindByNetworkPlayer(player);
             if (pl == null) return;
             if (!pl.IsOnline) return;
             if (!string.IsNullOrEmpty(arg) && !string.IsNullOrEmpty(customName) && player != null)
-                ConsoleNetworker.SendClientCommand(player, "chat.add " + Facepunch.Utility.String.QuoteSafe(customName) + " " + Facepunch.Utility.String.QuoteSafe(arg));
+                ConsoleNetworker.SendClientCommand(player,
+                    "chat.add " + String.QuoteSafe(customName) + " " + String.QuoteSafe(arg));
         }
 
         public void SetStaticField(string className, string field, object val)
         {
-            System.Type type;
-            if (this.TryFindType(className.Replace('.', '+'), out type)) {
+            Type type;
+            if (TryFindType(className.Replace('.', '+'), out type))
+            {
                 FieldInfo info = type.GetField(field, BindingFlags.Public | BindingFlags.Static);
-                if (info != null) {
+                if (info != null)
+                {
                     info.SetValue(null, Convert.ChangeType(val, info.FieldType));
                 }
             }
@@ -700,7 +752,8 @@ namespace Fougerite
         {
             if (string.IsNullOrEmpty(s) || partLength <= 0) yield return null;
 
-            for (var i = 0; i < s.Length; i += partLength) yield return s.Substring(i, Math.Min(partLength, s.Length - i));
+            for (var i = 0; i < s.Length; i += partLength)
+                yield return s.Substring(i, Math.Min(partLength, s.Length - i));
         }
 
         public TimeSpan ConvertToTime(long ticks)
@@ -715,19 +768,25 @@ namespace Fougerite
         /// <param name="typeName"></param>
         /// <param name="t"></param>
         /// <returns></returns>
-        public bool TryFindType(string typeName, out System.Type t)
+        public bool TryFindType(string typeName, out Type t)
         {
-            lock (this.typeCache) {
-                if (!this.typeCache.TryGetValue(typeName, out t)) {
-                    foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()) {
+            lock (typeCache)
+            {
+                if (!typeCache.TryGetValue(typeName, out t))
+                {
+                    foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+                    {
                         t = assembly.GetType(typeName);
-                        if (t != null) {
+                        if (t != null)
+                        {
                             break;
                         }
                     }
-                    this.typeCache[typeName] = t;
+
+                    typeCache[typeName] = t;
                 }
             }
+
             return (t != null);
         }
 
@@ -737,14 +796,14 @@ namespace Fougerite
         /// <param name="typeName"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public System.Type TryFindReturnType(string typeName)
+        public Type TryFindReturnType(string typeName)
         {
-            System.Type t;
-            if (this.TryFindType(typeName, out t))
+            Type t;
+            if (TryFindType(typeName, out t))
                 return t;
             throw new Exception("Type not found " + typeName);
         }
-        
+
         /// <summary>
         /// Deep Clones the specified object.
         /// </summary>
@@ -764,14 +823,22 @@ namespace Fougerite
 
         public bool ContainsString(string str, string key)
         {
-            if (str.Contains(key)) { return true; }
+            if (str.Contains(key))
+            {
+                return true;
+            }
+
             return false;
         }
 
         public ItemDataBlock ConvertNameToData(string name)
         {
             ItemDataBlock byName = DatablockDictionary.GetByName(name);
-            if (byName != null) {return byName;}
+            if (byName != null)
+            {
+                return byName;
+            }
+
             return null;
         }
 
@@ -780,59 +847,64 @@ namespace Fougerite
             return DatablockDictionary.All.OfType<BlueprintDataBlock>().FirstOrDefault(obj => obj.resultItem == item);
         }
 
-        [System.Obsolete("Use FindDeployableAt", false)]
+        [Obsolete("Use FindDeployableAt", false)]
         public Entity FindChestAt(Vector3 givenPosition, float dist = 1f, bool forceupdate = false)
         {
             return FindDeployableAt(givenPosition, dist, forceupdate);
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindDeployableAt(Vector3 givenPosition, float dist = 1f, bool forceupdate = false)
         {
             foreach (var x in World.GetWorld().DeployableObjects(forceupdate))
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) return x;
             }
+
             return null;
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindDoorAt(Vector3 givenPosition, float dist = 2f, bool forceupdate = false)
         {
             foreach (var x in World.GetWorld().BasicDoors(forceupdate))
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) return x;
             }
+
             return null;
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindStructureAt(Vector3 givenPosition, float dist = 1f, bool forceupdate = false)
         {
             foreach (var x in World.GetWorld().StructureComponents(forceupdate))
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) return x;
             }
+
             return null;
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindLootableAt(Vector3 givenPosition, float dist = 1f)
         {
             foreach (var x in World.GetWorld().LootableObjects)
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) return x;
             }
+
             return null;
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindEntityAt(Vector3 givenPosition, float dist = 1f)
         {
             foreach (var x in World.GetWorld().Entities)
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) return x;
             }
+
             return null;
         }
 
@@ -849,6 +921,7 @@ namespace Fougerite
             {
                 return null;
             }
+
             Collider closest = array[0];
             if (array.Length > 1)
             {
@@ -866,26 +939,32 @@ namespace Fougerite
             {
                 return new Entity(closest.gameObject.GetComponent<StructureMaster>());
             }
+
             if (closest.gameObject.GetComponent<StructureComponent>())
             {
                 return new Entity(closest.gameObject.GetComponent<StructureComponent>());
             }
+
             if (closest.gameObject.GetComponent<DeployableObject>())
             {
                 return new Entity(closest.gameObject.GetComponent<DeployableObject>());
             }
+
             if (closest.gameObject.GetComponent<LootableObject>())
             {
                 return new Entity(closest.gameObject.GetComponent<LootableObject>());
             }
+
             if (closest.gameObject.GetComponent<SupplyCrate>())
             {
                 return new Entity(closest.gameObject.GetComponent<SupplyCrate>());
             }
+
             if (closest.gameObject.GetComponent<ResourceTarget>())
             {
                 return new Entity(closest.gameObject.GetComponent<ResourceTarget>());
             }
+
             return null;
         }
 
@@ -926,9 +1005,10 @@ namespace Fougerite
                     list.Add(new Entity(x.gameObject.GetComponent<ResourceTarget>()));
                 }
             }
+
             return list;
         }
-        
+
         /// <summary>
         /// Finds the closest object to the given position.
         /// </summary>
@@ -942,6 +1022,7 @@ namespace Fougerite
             {
                 return null;
             }
+
             Collider closest = array[0];
             if (array.Length > 1)
             {
@@ -954,9 +1035,11 @@ namespace Fougerite
                     }
                 }
             }
-            return closest.gameObject; // Specific Entities can be converted to Entity, see the Entity class's constructor. (Example: It doesn't handle BasicDoor.)
+
+            return
+                closest.gameObject; // Specific Entities can be converted to Entity, see the Entity class's constructor. (Example: It doesn't handle BasicDoor.)
         }
-        
+
         /// <summary>
         /// Find the closest objects that are within the specified range.
         /// </summary>
@@ -970,7 +1053,7 @@ namespace Fougerite
         }
 
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindDeployablesAround(Vector3 givenPosition, float dist = 100f, bool forceupdate = false)
         {
             List<Entity> l = new List<Entity>();
@@ -978,10 +1061,11 @@ namespace Fougerite
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) l.Add(x);
             }
+
             return l;
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindDoorsAround(Vector3 givenPosition, float dist = 100f, bool forceupdate = false)
         {
             List<Entity> l = new List<Entity>();
@@ -989,10 +1073,11 @@ namespace Fougerite
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) l.Add(x);
             }
+
             return l;
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindStructuresAround(Vector3 givenPosition, float dist = 100f, bool forceupdate = false)
         {
             List<Entity> l = new List<Entity>();
@@ -1000,10 +1085,11 @@ namespace Fougerite
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) l.Add(x);
             }
+
             return l;
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindLootablesAround(Vector3 givenPosition, float dist = 100f)
         {
             List<Entity> l = new List<Entity>();
@@ -1011,10 +1097,11 @@ namespace Fougerite
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) l.Add(x);
             }
+
             return l;
         }
 
-        [System.Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
+        [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindEntitiesAround(Vector3 givenPosition, float dist = 100f)
         {
             List<Entity> l = new List<Entity>();
@@ -1022,28 +1109,29 @@ namespace Fougerite
             {
                 if (Vector3.Distance(x.Location, givenPosition) <= dist) l.Add(x);
             }
+
             return l;
         }
 
-        [System.Obsolete("Use FindEntity", false)]
+        [Obsolete("Use FindEntity", false)]
         public Entity GetEntityatCoords(Vector3 givenPosition)
         {
             return FindEntityAt(givenPosition);
         }
 
-        [System.Obsolete("Use FindEntity", false)]
+        [Obsolete("Use FindEntity", false)]
         public Entity GetEntityatCoords(float x, float y, float z)
         {
             return FindEntityAt(new Vector3(x, y, z));
         }
 
-        [System.Obsolete("Use FindDoorAt", false)]
+        [Obsolete("Use FindDoorAt", false)]
         public Entity GetDooratCoords(Vector3 givenPosition)
         {
             return FindDoorAt(givenPosition);
         }
 
-        [System.Obsolete("Use FindDoorAt", false)]
+        [Obsolete("Use FindDoorAt", false)]
         public Entity GetDooratCoords(float x, float y, float z)
         {
             return FindDoorAt(new Vector3(x, y, z));
@@ -1060,7 +1148,7 @@ namespace Fougerite
         {
             return SuperFastHashUInt16Hack.Hash(input);
         }
-        
+
         /// <summary>
         /// Returns the integer hash of the byte array input using the
         /// 'superfasthash' algorithm.
@@ -1103,7 +1191,7 @@ namespace Fougerite
         {
             return SHA1Hash(Encoding.UTF8.GetBytes(input));
         }
-        
+
         /// <summary>
         /// Returns the sha256 hash of the given input.
         /// </summary>
@@ -1124,7 +1212,7 @@ namespace Fougerite
                 return sb.ToString();
             }
         }
-        
+
         /// <summary>
         /// Returns the sha256 hash of the given input.
         /// </summary>
@@ -1134,7 +1222,7 @@ namespace Fougerite
         {
             return SHA256Hash(Encoding.UTF8.GetBytes(input));
         }
-        
+
         /// <summary>
         /// Returns the md5 hash of the given input.
         /// </summary>
@@ -1154,7 +1242,7 @@ namespace Fougerite
                 return sb.ToString();
             }
         }
-        
+
         /// <summary>
         /// Returns the md5 hash of the given input.
         /// </summary>
@@ -1175,7 +1263,7 @@ namespace Fougerite
         public object GetInstanceField(Type type, object instance, string fieldName)
         {
             BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-                | BindingFlags.Static;
+                                     | BindingFlags.Static;
             try
             {
                 FieldInfo field = type.GetField(fieldName, bindFlags);
@@ -1184,7 +1272,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Reflection] Failed to get value of " + fieldName + "! " + ex.ToString());
+                Logger.LogError("[Reflection] Failed to get value of " + fieldName + "! " + ex);
                 return null;
             }
         }
@@ -1199,7 +1287,7 @@ namespace Fougerite
         public void SetInstanceField(Type type, object instance, string fieldName, object val)
         {
             BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-                | BindingFlags.Static;
+                                     | BindingFlags.Static;
             try
             {
                 FieldInfo field = type.GetField(fieldName, bindFlags);
@@ -1207,10 +1295,10 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Reflection] Failed to set value of " + fieldName + "! " + ex.ToString());
+                Logger.LogError("[Reflection] Failed to set value of " + fieldName + "! " + ex);
             }
         }
-        
+
         /// <summary>
         /// Determines if any invalid XML 1.0 characters exist within the string,
         /// and if so it returns a new string with the invalid chars removed, else 
@@ -1254,13 +1342,13 @@ namespace Fougerite
         /// <param name="startIndex">Start index.</param>
         public int IndexOfFirstInvalidXMLChar(string s, int startIndex = 0)
         {
-            if (!string.IsNullOrEmpty(s) && startIndex < s.Length) 
+            if (!string.IsNullOrEmpty(s) && startIndex < s.Length)
             {
                 if (startIndex < 0)
                 {
                     startIndex = 0;
                 }
-                
+
                 int len = s.Length;
 
                 for (int i = startIndex; i < len; i++)
@@ -1271,6 +1359,7 @@ namespace Fougerite
                     }
                 }
             }
+
             return -1;
         }
 
@@ -1310,34 +1399,22 @@ namespace Fougerite
 
         public int MainThreadID
         {
-            get
-            {
-                return Bootstrap.CurrentThread.ManagedThreadId;
-            }
+            get { return Bootstrap.CurrentThread.ManagedThreadId; }
         }
 
         public Thread MainThread
         {
-            get
-            {
-                return Bootstrap.CurrentThread;
-            }
+            get { return Bootstrap.CurrentThread; }
         }
 
         public Thread CurrentWorkingThread
         {
-            get
-            {
-                return Thread.CurrentThread;
-            }
+            get { return Thread.CurrentThread; }
         }
 
         public int CurrentWorkingThreadID
         {
-            get
-            {
-                return Thread.CurrentThread.ManagedThreadId;
-            }
+            get { return Thread.CurrentThread.ManagedThreadId; }
         }
     }
 }

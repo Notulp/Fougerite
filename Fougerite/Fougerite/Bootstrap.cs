@@ -16,7 +16,7 @@ namespace Fougerite
         /// <summary>
         /// Returns the Current Fougerite Version
         /// </summary>
-        public const string Version = "1.8.1";
+        public const string Version = "1.8.2";
         /// <summary>
         /// This value decides wheather we should remove the player classes from the cache upon disconnect.
         /// </summary>

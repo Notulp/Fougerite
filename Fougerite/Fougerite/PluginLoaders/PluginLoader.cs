@@ -209,8 +209,7 @@
                                 plugin.OnPlayerConnected;
                             break;
                         case "On_PlayerDisconnected":
-                            Hooks.OnPlayerDisconnected +=
-                                plugin.OnPlayerDisconnected;
+                            Hooks.OnPlayerDisconnected += plugin.OnPlayerDisconnected;
                             break;
                         case "On_PlayerKilled":
                             Hooks.OnPlayerKilled += plugin.OnPlayerKilled;
