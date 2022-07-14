@@ -13,7 +13,7 @@ namespace Fougerite
     public class DataStore
     {
         public Hashtable datastore = new Hashtable();
-        private static DataStore instance;
+        private static DataStore _instance;
         public static string PATH = Path.Combine(Config.GetPublicFolder(), "FougeriteDatastore.ds");
 
         /// <summary>
@@ -22,47 +22,48 @@ namespace Fougerite
         /// <returns></returns>
         public static DataStore GetInstance()
         {
-            if (instance == null)
+            if (_instance == null)
             {
-                instance = new DataStore();
+                _instance = new DataStore();
             }
-            return instance;
+            return _instance;
         }
 
         private object StringifyIfVector3(object keyorval)
         {
             if (keyorval == null)
-                return keyorval;
-
+                return null;
+            
             try
             {
-                if (typeof(Vector3).Equals(keyorval.GetType()))
+                if (keyorval is Vector3 vector3)
                 {
                     return "Vector3," +
-                    ((Vector3)keyorval).x.ToString("G9") + "," +
-                    ((Vector3)keyorval).y.ToString("G9") + "," +
-                    ((Vector3)keyorval).z.ToString("G9");
+                           vector3.x.ToString("G9") + "," +
+                           vector3.y.ToString("G9") + "," +
+                           vector3.z.ToString("G9");
                 }
             }
             catch
             {
                 //Logger.LogException(ex);
             }
-            return keyorval;
+
+            return null;
         }
 
         private object ParseIfVector3String(object keyorval)
         {
             if (keyorval == null)
-                return keyorval;
+                return null;
 
             try
             {
-                if (typeof(string).Equals(keyorval.GetType()))
+                if (keyorval is string s)
                 {
-                    if ((keyorval as string).StartsWith("Vector3,", StringComparison.Ordinal))
+                    if (s.StartsWith("Vector3,", StringComparison.Ordinal))
                     {
-                        string[] v3array = (keyorval as string).Split(',');
+                        string[] v3array = s.Split(',');
                         Vector3 parse = new Vector3(Single.Parse(v3array[1]),
                                             Single.Parse(v3array[2]),
                                             Single.Parse(v3array[3]));
@@ -74,6 +75,7 @@ namespace Fougerite
             {
                 //Logger.LogException(ex);
             }
+            
             return keyorval;
         }
 
@@ -104,7 +106,7 @@ namespace Fougerite
                         }
                         catch
                         {
-                            
+                            // Ignore
                         }
                     } 
                     var t = ht[setting].GetType();
@@ -116,7 +118,7 @@ namespace Fougerite
                         }
                         catch
                         {
-                            
+                            // Ignore
                         }
                     } else
                     {
@@ -144,19 +146,24 @@ namespace Fougerite
                     if (float.TryParse(setting, out valuef))
                     {
                         Add(section, key, valuef);
-                    } else if (int.TryParse(setting, out valuei))
+                    }
+                    else if (int.TryParse(setting, out valuei))
                     {
                         Add(section, key, valuei);
-                    } else if (ini.GetBoolSetting(section, key))
+                    }
+                    else if (ini.GetBoolSetting(section, key))
                     {
                         Add(section, key, true);
-                    } else if (setting.Equals("False", StringComparison.InvariantCultureIgnoreCase))
+                    }
+                    else if (setting.Equals("False", StringComparison.InvariantCultureIgnoreCase))
                     {
                         Add(section, key, false);
-                    } else if (setting == "__NullReference__")
+                    }
+                    else if (setting == "__NullReference__")
                     {
                         Add(section, key, null);
-                    } else
+                    }
+                    else
                     {
                         Add(section, key, ini.GetSetting(section, key));
                     }
