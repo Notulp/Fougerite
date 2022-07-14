@@ -22,8 +22,8 @@ namespace Fougerite
     /// </summary>
     public class Util
     {
-        private readonly Dictionary<string, Type> typeCache = new Dictionary<string, Type>();
-        private static Util util;
+        private readonly Dictionary<string, Type> _typeCache = new Dictionary<string, Type>();
+        private static Util _util;
 
         /// <summary>
         /// All unstackable item names in rust legacy.
@@ -321,12 +321,12 @@ namespace Fougerite
         /// <returns></returns>
         public static Util GetUtil()
         {
-            if (util == null)
+            if (_util == null)
             {
-                util = new Util();
+                _util = new Util();
             }
 
-            return util;
+            return _util;
         }
 
         /// <summary>
@@ -770,9 +770,9 @@ namespace Fougerite
         /// <returns></returns>
         public bool TryFindType(string typeName, out Type t)
         {
-            lock (typeCache)
+            lock (_typeCache)
             {
-                if (!typeCache.TryGetValue(typeName, out t))
+                if (!_typeCache.TryGetValue(typeName, out t))
                 {
                     foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
                     {
@@ -783,7 +783,7 @@ namespace Fougerite
                         }
                     }
 
-                    typeCache[typeName] = t;
+                    _typeCache[typeName] = t;
                 }
             }
 
@@ -798,9 +798,9 @@ namespace Fougerite
         /// <exception cref="Exception"></exception>
         public Type TryFindReturnType(string typeName)
         {
-            Type t;
-            if (TryFindType(typeName, out t))
+            if (TryFindType(typeName, out Type t))
                 return t;
+            
             throw new Exception("Type not found " + typeName);
         }
 
@@ -1262,19 +1262,22 @@ namespace Fougerite
         /// <returns></returns>
         public object GetInstanceField(Type type, object instance, string fieldName)
         {
-            BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-                                     | BindingFlags.Static;
+            BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             try
             {
                 FieldInfo field = type.GetField(fieldName, bindFlags);
-                object v = field.GetValue(instance);
-                return v;
+                if (field != null)
+                {
+                    object v = field.GetValue(instance);
+                    return v;
+                }
             }
             catch (Exception ex)
             {
                 Logger.LogError("[Reflection] Failed to get value of " + fieldName + "! " + ex);
-                return null;
             }
+            
+            return null;
         }
 
         /// <summary>
@@ -1286,12 +1289,12 @@ namespace Fougerite
         /// <param name="val"></param>
         public void SetInstanceField(Type type, object instance, string fieldName, object val)
         {
-            BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
-                                     | BindingFlags.Static;
+            BindingFlags bindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             try
             {
                 FieldInfo field = type.GetField(fieldName, bindFlags);
-                field.SetValue(instance, val);
+                if (field != null) 
+                    field.SetValue(instance, val);
             }
             catch (Exception ex)
             {
