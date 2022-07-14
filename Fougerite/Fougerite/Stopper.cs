@@ -6,28 +6,28 @@ namespace Fougerite
 {
     public class Stopper : CountedInstance, IDisposable
     {
-        private readonly string Type;
-        private readonly string Method;
-        private readonly long WarnTimeMS;
-        private readonly Stopwatch stopper;
+        private readonly string _type;
+        private readonly string _method;
+        private readonly long _warnTimeMS;
+        private readonly Stopwatch _stopper;
 
         public Stopper(string type, string method, float warnSecs = 0.1f)
         {
-            Type = type;
-            Method = method;
-            WarnTimeMS = (long)(warnSecs * 1000);
-            stopper = Stopwatch.StartNew();
+            _type = type;
+            _method = method;
+            _warnTimeMS = (long)(warnSecs * 1000);
+            _stopper = Stopwatch.StartNew();
         }
 
         void IDisposable.Dispose()
         {
-
-            if (stopper.ElapsedMilliseconds > WarnTimeMS) {
+            if (_stopper.ElapsedMilliseconds > _warnTimeMS) 
+            {
                 Logger.LogWarning(string.Format("[{0}.{1}] Took: {2}s ({3}ms)",
-                    Type,
-                    Method,
-                    stopper.Elapsed.Seconds,
-                    stopper.ElapsedMilliseconds
+                    _type,
+                    _method,
+                    _stopper.Elapsed.Seconds,
+                    _stopper.ElapsedMilliseconds
                 ));
             }
         }

@@ -1282,15 +1282,15 @@ namespace Fougerite.Patcher
             iLProcessor.InsertBefore(GetRandomTargetPos.Body.Instructions[Position], Instruction.Create(OpCodes.Ldloc_0));
 
 
-            /*TypeDefinition SupplyDropPlane = rustAssembly.MainModule.GetType("SupplyDropPlane");
+            TypeDefinition SupplyDropPlane = rustAssembly.MainModule.GetType("SupplyDropPlane");
             MethodDefinition DropCrate = SupplyDropPlane.GetMethod("DropCrate");
-            this.CloneMethod(DropCrate);
-            Position = DropCrate.Body.Instructions.Count - 1;
             method = hooksClass.GetMethod("AirdropCrateDropped");
+            
             iLProcessor = DropCrate.Body.GetILProcessor();
-            iLProcessor.InsertBefore(DropCrate.Body.Instructions[Position],
-                Instruction.Create(OpCodes.Callvirt, this.rustAssembly.MainModule.Import(method)));
-            iLProcessor.InsertBefore(DropCrate.Body.Instructions[Position], Instruction.Create(OpCodes.Ldloc_1));*/
+            iLProcessor.Body.Instructions.Clear();
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Callvirt, this.rustAssembly.MainModule.Import(method)));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         }
 
         private void ClientConnectionPatch()

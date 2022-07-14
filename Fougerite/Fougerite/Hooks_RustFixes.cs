@@ -147,32 +147,6 @@ namespace Fougerite
             return true;
         }
 
-        public static void ShowTalker(PlayerClient p, PlayerClient p2)
-        {
-            Stopwatch sw = null;
-            if (Logger.showSpeed)
-            {
-                sw = new Stopwatch();
-                sw.Start();
-            }
-
-            var pl = Server.GetServer().FindPlayer(p2.userID);
-            try
-            {
-                if (OnShowTalker != null)
-                    OnShowTalker(p.netPlayer, pl);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("ShowTalkerEvent Error: " + ex.ToString());
-            }
-
-            if (sw == null) return;
-            sw.Stop();
-            if (sw.Elapsed.TotalSeconds > 0)
-                Logger.LogSpeed("MicUseEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
-        }
-
         public static void FallDamageCheck(FallDamage fd, float v)
         {
             double diff = CalculateDiff(ref _lasTime11);

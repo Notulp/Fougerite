@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Fougerite.Concurrent;
 using Fougerite.Events;
 using UnityEngine;
 
@@ -8,9 +9,12 @@ namespace Fougerite
 {
     public partial class Hooks
     {
-        public static List<object> decayList = new List<object>();
+        public static ConcurrentList<object> decayList = new ConcurrentList<object>();
         public static Hashtable talkerTimers = new Hashtable();
         public static bool ServerInitialized = false;
+        public static readonly List<ulong> uLinkDCCache = new List<ulong>();
+        internal static Dictionary<string, Flood> FloodChecks = new Dictionary<string, Flood>();
+        internal static Dictionary<string, DateTime> FloodCooldown = new Dictionary<string, DateTime>();
 
         /// <summary>
         /// This delegate runs when all plugins loaded. (First time)
@@ -194,7 +198,11 @@ namespace Fougerite
         /// </summary>
         public static event AirdropDelegate OnAirdropCalled;
 
-        //public static event AirdropCrateDroppedDelegate OnAirdropCrateDropped;
+        /// <summary>
+        /// This delegate runs when the crate is created from the airdrop.
+        /// </summary>
+        public static event AirdropCrateDroppedDelegate OnAirdropCrateDropped;
+        
         /// <summary>
         /// This delegate runs when a player is kicked by steam.
         /// </summary>
@@ -300,75 +308,69 @@ namespace Fougerite
         /// </summary>
         public static bool IsShuttingDown { get; set; }
 
-        public static readonly List<ulong> uLinkDCCache = new List<ulong>();
-
-        internal static Dictionary<string, Flood> FloodChecks = new Dictionary<string, Flood>();
-        internal static Dictionary<string, DateTime> FloodCooldown = new Dictionary<string, DateTime>();
-        
         public static void ResetHooks()
         {
             OnPluginInit = delegate { };
-            OnPlayerTeleport = delegate(Player param0, Vector3 param1, Vector3 param2) { };
-            OnChat = delegate(Player param0, ref ChatString param1) { };
-            OnChatRaw = delegate(ref ConsoleSystem.Arg param0) { };
-            OnCommand = delegate(Player param0, string param1, string[] param2) { };
-            OnCommandRaw = delegate(ref ConsoleSystem.Arg param0) { };
-            OnPlayerConnected = delegate(Player param0) { };
-            OnPlayerDisconnected = delegate(Player param0) { };
-            OnNPCKilled = delegate(DeathEvent param0) { };
-            OnNPCHurt = delegate(HurtEvent param0) { };
-            OnPlayerKilled = delegate(DeathEvent param0) { };
-            OnPlayerHurt = delegate(HurtEvent param0) { };
-            OnPlayerSpawned = delegate(Player param0, SpawnEvent param1) { };
-            OnPlayerSpawning = delegate(Player param0, SpawnEvent param1) { };
-            OnPlayerGathering = delegate(Player param0, GatherEvent param1) { };
-            OnEntityHurt = delegate(HurtEvent param0) { };
-            OnEntityDestroyed = delegate(DestroyEvent param0) { };
-            OnEntityDecay = delegate(DecayEvent param0) { };
-            OnEntityDeployed = delegate(Player param0, Entity param1) { };
-            OnEntityDeployedWithPlacer = delegate(Player param0, Entity param1, Player param2) { };
-            OnConsoleReceived = delegate(ref ConsoleSystem.Arg param0, bool param1) { };
-            OnConsoleReceivedWithCancel = delegate(ref ConsoleSystem.Arg param0, bool param1, ConsoleEvent ce) { };
-            OnBlueprintUse = delegate(Player param0, BPUseEvent param1) { };
-            OnDoorUse = delegate(Player param0, DoorEvent param1) { };
-            OnTablesLoaded = delegate(Dictionary<string, LootSpawnList> param0) { };
-            OnItemsLoaded = delegate(ItemsBlocks param0) { };
+            OnPlayerTeleport = delegate { };
+            OnChat = delegate { };
+            OnChatRaw = delegate { };
+            OnCommand = delegate { };
+            OnCommandRaw = delegate { };
+            OnPlayerConnected = delegate { };
+            OnPlayerDisconnected = delegate { };
+            OnNPCKilled = delegate { };
+            OnNPCHurt = delegate { };
+            OnPlayerKilled = delegate { };
+            OnPlayerHurt = delegate { };
+            OnPlayerSpawned = delegate { };
+            OnPlayerSpawning = delegate { };
+            OnPlayerGathering = delegate { };
+            OnEntityHurt = delegate { };
+            OnEntityDestroyed = delegate { };
+            OnEntityDecay = delegate { };
+            OnEntityDeployed = delegate { };
+            OnEntityDeployedWithPlacer = delegate { };
+            OnConsoleReceived = delegate { };
+            OnConsoleReceivedWithCancel = delegate { };
+            OnBlueprintUse = delegate { };
+            OnDoorUse = delegate { };
+            OnTablesLoaded = delegate { };
+            OnItemsLoaded = delegate { };
             OnServerInit = delegate { };
             OnServerShutdown = delegate { };
             OnModulesLoaded = delegate { };
-            OnRecieveNetwork = delegate(Player param0, Metabolism param1, float param2, float param3,
-                float param4, float param5, float param6, float param7)
+            OnRecieveNetwork = delegate
             {
             };
-            OnShowTalker = delegate(uLink.NetworkPlayer param0, Player param1) { };
-            OnCrafting = delegate(CraftingEvent param0) { };
-            OnResourceSpawned = delegate(ResourceTarget param0) { };
-            OnItemRemoved = delegate(InventoryModEvent param0) { };
-            OnItemAdded = delegate(InventoryModEvent param0) { };
-            OnAirdropCalled = delegate(Vector3 param0) { };
-            OnSteamDeny = delegate(SteamDenyEvent param0) { };
-            OnPlayerApproval = delegate(PlayerApprovalEvent param0) { };
-            OnPlayerMove = delegate(HumanController param0, Vector3 param1, int param2, ushort param3,
-                uLink.NetworkMessageInfo param4, Util.PlayerActions param5)
+            OnShowTalker = delegate { };
+            OnCrafting = delegate { };
+            OnResourceSpawned = delegate { };
+            OnItemRemoved = delegate { };
+            OnItemAdded = delegate { };
+            OnAirdropCalled = delegate { };
+            OnSteamDeny = delegate { };
+            OnPlayerApproval = delegate { };
+            OnPlayerMove = delegate
             {
             };
-            OnResearch = delegate(ResearchEvent param0) { };
+            OnResearch = delegate { };
             OnServerSaved = delegate { };
-            OnItemPickup = delegate(ItemPickupEvent param0) { };
-            OnFallDamage = delegate(FallDamageEvent param0) { };
-            OnLootUse = delegate(LootStartEvent param0) { };
-            OnShoot = delegate(ShootEvent param0) { };
-            OnBowShoot = delegate(BowShootEvent param0) { };
-            OnShotgunShoot = delegate(ShotgunShootEvent param0) { };
-            OnGrenadeThrow = delegate(GrenadeThrowEvent param0) { };
-            OnPlayerBan = delegate(BanEvent param0) { };
-            OnRepairBench = delegate(Fougerite.Events.RepairEvent param0) { };
-            OnItemMove = delegate(ItemMoveEvent param0) { };
-            OnGenericSpawnerLoad = delegate(GenericSpawner param0) { };
-            OnServerLoaded = delegate() { };
-            OnSupplySignalExpode = delegate(SupplySignalExplosionEvent param0) { };
-            OnBeltUse = delegate(BeltUseEvent param0) { };
-            OnLogger = delegate(LoggerEvent param0) { };
+            OnItemPickup = delegate { };
+            OnFallDamage = delegate { };
+            OnLootUse = delegate { };
+            OnShoot = delegate { };
+            OnBowShoot = delegate { };
+            OnShotgunShoot = delegate { };
+            OnGrenadeThrow = delegate { };
+            OnPlayerBan = delegate { };
+            OnRepairBench = delegate { };
+            OnItemMove = delegate { };
+            OnGenericSpawnerLoad = delegate { };
+            OnServerLoaded = delegate { };
+            OnSupplySignalExpode = delegate { };
+            OnBeltUse = delegate { };
+            OnLogger = delegate { };
+            OnAirdropCrateDropped = delegate { };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -483,6 +485,6 @@ namespace Fougerite
 
         public delegate void LoggerDelegate(LoggerEvent loggerEvent);
 
-        //public delegate void AirdropCrateDroppedDelegate(GameObject go);
+        public delegate void AirdropCrateDroppedDelegate(SupplyDropPlane plane, Entity supplyCrate);
     }
 }

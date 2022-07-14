@@ -1475,15 +1475,12 @@ namespace Fougerite
             {
                 if (this.IsOnline)
                 {
-                    
-                    return this.Structures.Any(e =>
-                        (e.Object as StructureMaster).containedBounds.Contains(this.Location));
+                    return this.Structures.Any(e => e.Object is StructureMaster master && master.containedBounds.Contains(this.Location));
                 }
 
                 if (this.Sleeper != null)
                 {
-                    return this.Structures.Any(e =>
-                        (e.Object as StructureMaster).containedBounds.Contains(this.Sleeper.Location));
+                    return this.Structures.Any(e => e.Object is StructureMaster master && master.containedBounds.Contains(this.Sleeper.Location));
                 }
 
                 return false;
