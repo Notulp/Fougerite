@@ -185,7 +185,7 @@ namespace Fougerite
                 this.GetObject<StructureMaster>().SetupCreator(p.PlayerClient.controllable);
             else if (this.IsStructure())
             {
-                foreach (var st in GetLinkedStructs())
+                foreach (Entity st in GetLinkedStructs())
                 {
                     if (st.GetObject<StructureMaster>() != null)
                     {
@@ -307,7 +307,12 @@ namespace Fougerite
         /// <returns></returns>
         public T GetObject<T>()
         {
-            return (T)this.Object;
+            if (Object is T objectType)
+            {
+                return objectType;
+            }
+
+            return default(T);
         }
 
         public TakeDamage GetTakeDamage()
