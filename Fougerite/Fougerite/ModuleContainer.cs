@@ -1,8 +1,7 @@
-﻿
+﻿using System;
 
 namespace Fougerite
 {
-    using System;
     public class ModuleContainer : IDisposable
     {
         public Module Plugin

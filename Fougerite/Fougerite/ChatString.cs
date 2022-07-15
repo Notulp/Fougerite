@@ -1,7 +1,7 @@
-﻿namespace Fougerite
-{
-    using System;
+﻿using System;
 
+namespace Fougerite
+{
     /// <summary>
     /// Basically On_Chat event's argument.
     /// </summary>

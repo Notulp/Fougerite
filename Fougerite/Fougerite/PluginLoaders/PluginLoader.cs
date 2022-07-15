@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
 
     public class PluginLoader : Singleton<PluginLoader>, ISingleton
     {

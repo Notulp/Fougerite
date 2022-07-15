@@ -1,6 +1,4 @@
 using System.Linq;
-using Fougerite.Events;
-using InventoryExtensions;
 using UnityEngine;
 
 namespace Fougerite

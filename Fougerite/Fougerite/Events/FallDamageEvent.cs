@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Fougerite.Events
+﻿namespace Fougerite.Events
 {
     /// <summary>
     /// This class is created when the player suffers fall damage.

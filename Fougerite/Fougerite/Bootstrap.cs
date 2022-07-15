@@ -1,4 +1,7 @@
-
+using System;
+using System.IO;
+using UnityEngine;
+using System.Threading;
 using System.Collections.Generic;
 using Fougerite.Caches;
 using Fougerite.Permissions;
@@ -6,11 +9,6 @@ using Fougerite.PluginLoaders;
 
 namespace Fougerite
 {
-    using System;
-    using System.IO;
-    using UnityEngine;
-    using System.Threading;
-
     public class Bootstrap : Facepunch.MonoBehaviour
     {
         /// <summary>

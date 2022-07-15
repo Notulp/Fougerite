@@ -1,8 +1,7 @@
-﻿
+﻿using UnityEngine;
+
 namespace Fougerite
 {
-    using UnityEngine;
-
     public class NPC
     {
         private Character _char;
@@ -37,14 +36,8 @@ namespace Fougerite
         /// </summary>
         public Character Character
         {
-            get
-            {
-                return this._char;
-            }
-            set
-            {
-                this._char = value;
-            }
+            get { return this._char; }
+            set { this._char = value; }
         }
 
         /// <summary>
@@ -52,14 +45,8 @@ namespace Fougerite
         /// </summary>
         public float Health
         {
-            get
-            {
-                return this._char.health;
-            }
-            set
-            {
-                this._char.takeDamage.health = value;
-            }
+            get { return this._char.health; }
+            set { this._char.takeDamage.health = value; }
         }
 
         /// <summary>
@@ -69,7 +56,9 @@ namespace Fougerite
         {
             get
             {
-                return this._char.name.Contains("_A(Clone)") ? this._char.name.Replace("_A(Clone)", "") : this._char.name.Replace("(Clone)", "");
+                return this._char.name.Contains("_A(Clone)")
+                    ? this._char.name.Replace("_A(Clone)", "")
+                    : this._char.name.Replace("(Clone)", "");
             }
         }
 

@@ -1,12 +1,12 @@
-﻿namespace Fougerite
-{
-    using Facepunch;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using UnityEngine;
+﻿using Facepunch;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
 
+namespace Fougerite
+{
     /// <summary>
     /// Mostly containing functions that can modify the environment.
     /// See below.

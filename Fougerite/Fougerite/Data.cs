@@ -1,8 +1,8 @@
-﻿namespace Fougerite
-{
-    using System;
-    using System.Collections;
+﻿using System;
+using System.Collections;
 
+namespace Fougerite
+{
     public class Data
     {
         public System.Collections.Generic.List<string> chat_history = new System.Collections.Generic.List<string>();

@@ -1,15 +1,13 @@
-﻿
+﻿using System;
+using RustPP;
+using RustPP.Commands;
+using RustPP.Permissions;
+using RustPP.Social;
+using System.Collections.Generic;
 using Fougerite.Permissions;
 
 namespace Fougerite
 {
-    using System;
-    using RustPP;
-    using RustPP.Commands;
-    using RustPP.Permissions;
-    using RustPP.Social;
-    using System.Collections.Generic;
-
     /// <summary>
     /// The existence of this class should have never happened.
     /// It creates a vice-versa link to Rust++.

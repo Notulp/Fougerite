@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using Facepunch.Clocks.Counters;
 using Google.ProtocolBuffers.Serialization;
 using RustProto;
 using RustProto.Helpers;
 using UnityEngine;
-using Avatar = RustProto.Avatar;
 using Debug = UnityEngine.Debug;
 
 namespace Fougerite

@@ -1,9 +1,7 @@
 ﻿using System.Linq;
-using RustProto;
 
 namespace Fougerite
 {
-
     public class PlayerItem
     {
         private Inventory internalInv;

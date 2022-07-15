@@ -2,7 +2,6 @@ using System.Linq;
 
 namespace Fougerite
 {
-
     /// <summary>
     /// Represents an Entity inventory.
     /// </summary>

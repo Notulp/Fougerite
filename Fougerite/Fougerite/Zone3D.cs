@@ -1,9 +1,9 @@
-﻿namespace Fougerite
-{
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
+namespace Fougerite
+{
     public class Zone3D
     {
         private List<Vector2> _points;

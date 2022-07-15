@@ -1,11 +1,10 @@
-﻿
+﻿using System.Linq;
+using System.Collections.Generic;
+using UnityEngine;
 using Fougerite.Caches;
 
 namespace Fougerite
 {
-    using System.Linq;
-    using System.Collections.Generic;
-    using UnityEngine;
 
     /// <summary>
     /// Represents an object on the server. This class is an extended API for easier / safer use.

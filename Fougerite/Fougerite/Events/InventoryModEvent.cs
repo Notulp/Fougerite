@@ -1,6 +1,4 @@
 ﻿
-using System.Timers;
-
 namespace Fougerite.Events
 {
     /// <summary>

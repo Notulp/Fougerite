@@ -1,7 +1,7 @@
-﻿namespace Fougerite
-{
-    using System;
+﻿using System;
 
+namespace Fougerite
+{
     /// <summary>
     /// Represents a Fougerite C# plugin.
     /// </summary>

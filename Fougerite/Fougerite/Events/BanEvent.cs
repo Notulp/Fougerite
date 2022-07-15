@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Fougerite.Events
+﻿namespace Fougerite.Events
 {
     /// <summary>
     /// The ban type of the event.

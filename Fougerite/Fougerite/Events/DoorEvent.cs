@@ -1,8 +1,5 @@
 ﻿namespace Fougerite.Events
 {
-    using Fougerite;
-    using System;
-
     /// <summary>
     /// This class is created when a door is opened or closed.
     /// </summary>

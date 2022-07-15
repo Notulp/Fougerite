@@ -2,7 +2,6 @@
 
 namespace Fougerite
 {
-
     public class PlayerInv
     {
         private PlayerItem[] _armorItems;

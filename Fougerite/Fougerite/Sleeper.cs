@@ -1,9 +1,9 @@
 ﻿
 using Fougerite.Caches;
+using UnityEngine;
 
 namespace Fougerite
 {
-    using UnityEngine;
     /// <summary>
     /// This class represents a sleeping player.
     /// </summary>

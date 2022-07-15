@@ -1,12 +1,11 @@
-﻿
+﻿using System;
+using System.Collections;
+using System.IO;
+using UnityEngine;
+using System.Collections.Generic;
+
 namespace Fougerite
 {
-    using System;
-    using System.Collections;
-    using System.IO;
-    using UnityEngine;
-    using System.Collections.Generic;
-
     /// <summary>
     /// Local DataStore that is capable to store most of the objects, such as vectors, ulong, string, int, float, etc.
     /// </summary>

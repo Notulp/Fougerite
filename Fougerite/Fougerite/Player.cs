@@ -1,15 +1,13 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Linq;
+using System.Timers;
+using System.Collections.Generic;
+using UnityEngine;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Fougerite
 {
-    using Fougerite.Events;
-    using System;
-    using System.Linq;
-    using System.Timers;
-    using System.Collections.Generic;
-    using UnityEngine;
-
     /// <summary>
     /// Represents an ONLINE player.
     /// </summary>

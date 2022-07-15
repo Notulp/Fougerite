@@ -1,11 +1,10 @@
 ﻿using System;
+using System.IO;
+using System.Text.RegularExpressions;
+using UnityEngine;
 
 namespace Fougerite
 {
-    using System.IO;
-    using System.Text.RegularExpressions;
-    using UnityEngine;
-
     public class Config
     {
         public static IniParser FougeriteDirectoryConfig;

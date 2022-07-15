@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using Fougerite.Events;
+﻿using Fougerite.Events;
 
 namespace Fougerite
 {
