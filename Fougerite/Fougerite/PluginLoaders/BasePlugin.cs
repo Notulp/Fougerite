@@ -684,17 +684,17 @@ namespace Fougerite.PluginLoaders
 
         public void OnAllPluginsLoaded()
         {
-            this.Invoke("On_AllPluginsLoaded", new object[0]);
+            this.Invoke("On_AllPluginsLoaded");
         }
 
         public void OnBlueprintUse(Fougerite.Player player, BPUseEvent evt)
         {
-            this.Invoke("On_BlueprintUse", new object[] {player, evt});
+            this.Invoke("On_BlueprintUse", player, evt);
         }
 
         public void OnChat(Fougerite.Player player, ref ChatString text)
         {
-            this.Invoke("On_Chat", new object[] {player, text});
+            this.Invoke("On_Chat", player, text);
         }
 
         public void OnCommand(Fougerite.Player player, string command, string[] args)
@@ -705,7 +705,7 @@ namespace Fougerite.PluginLoaders
                 return;
             }
 
-            this.Invoke("On_Command", new object[] {player, command, args});
+            this.Invoke("On_Command", player, command, args);
         }
 
         public void OnConsole(ref ConsoleSystem.Arg arg, bool external)
@@ -716,12 +716,12 @@ namespace Fougerite.PluginLoaders
             {
                 Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(arg.argUser.userID);
                 arg.ReplyWith(player.Name + " executed: " + clss + "." + func);
-                this.Invoke("On_Console", new object[] {player, arg});
+                this.Invoke("On_Console", player, arg);
             }
             else
             {
                 arg.ReplyWith("Rcon: " + clss + "." + func);
-                this.Invoke("On_Console", new object[] {null, arg});
+                this.Invoke("On_Console", null, arg);
             }
         }
         
@@ -733,30 +733,30 @@ namespace Fougerite.PluginLoaders
             {
                 Fougerite.Player player = Fougerite.Server.GetServer().FindPlayer(arg.argUser.userID);
                 arg.ReplyWith(player.Name + " executed: " + clss + "." + func);
-                this.Invoke("On_ConsoleWithCancel", new object[] {player, arg, consoleEvent});
+                this.Invoke("On_ConsoleWithCancel", player, arg, consoleEvent);
             }
             else
             {
                 arg.ReplyWith("Rcon: " + clss + "." + func);
-                this.Invoke("On_ConsoleWithCancel", new object[] {null, arg, consoleEvent});
+                this.Invoke("On_ConsoleWithCancel", null, arg, consoleEvent);
             }
         }
 
         public void OnDoorUse(Fougerite.Player player, DoorEvent evt)
         {
-            this.Invoke("On_DoorUse", new object[] {player, evt});
+            this.Invoke("On_DoorUse", player, evt);
         }
 
         public void OnEntityDecay(DecayEvent evt)
         {
-            this.Invoke("On_EntityDecay", new object[] {evt});
+            this.Invoke("On_EntityDecay", evt);
         }
 
         public void OnEntityDeployed(Fougerite.Player player, Entity entity, Fougerite.Player actualplacer)
         {
             try
             {
-                this.Invoke("On_EntityDeployed", new object[] {player, entity, actualplacer});
+                this.Invoke("On_EntityDeployed", player, entity, actualplacer);
             }
             catch (Exception ex)
             {
@@ -766,172 +766,172 @@ namespace Fougerite.PluginLoaders
 
         public void OnEntityDestroyed(DestroyEvent evt)
         {
-            this.Invoke("On_EntityDestroyed", new object[] {evt});
+            this.Invoke("On_EntityDestroyed", evt);
         }
 
         public void OnEntityHurt(HurtEvent evt)
         {
-            this.Invoke("On_EntityHurt", new object[] {evt});
+            this.Invoke("On_EntityHurt", evt);
         }
 
         public void OnItemsLoaded(ItemsBlocks items)
         {
-            this.Invoke("On_ItemsLoaded", new object[] {items});
+            this.Invoke("On_ItemsLoaded", items);
         }
 
         public void OnNPCHurt(HurtEvent evt)
         {
-            this.Invoke("On_NPCHurt", new object[] {evt});
+            this.Invoke("On_NPCHurt", evt);
         }
 
         public void OnNPCKilled(DeathEvent evt)
         {
-            this.Invoke("On_NPCKilled", new object[] {evt});
+            this.Invoke("On_NPCKilled", evt);
         }
 
         public void OnPlayerConnected(Fougerite.Player player)
         {
-            this.Invoke("On_PlayerConnected", new object[] {player});
+            this.Invoke("On_PlayerConnected", player);
         }
 
         public void OnPlayerDisconnected(Fougerite.Player player)
         {
-            this.Invoke("On_PlayerDisconnected", new object[] {player});
+            this.Invoke("On_PlayerDisconnected", player);
         }
 
         public void OnPlayerGathering(Fougerite.Player player, GatherEvent evt)
         {
-            this.Invoke("On_PlayerGathering", new object[] {player, evt});
+            this.Invoke("On_PlayerGathering", player, evt);
         }
 
         public void OnPlayerHurt(HurtEvent evt)
         {
-            this.Invoke("On_PlayerHurt", new object[] {evt});
+            this.Invoke("On_PlayerHurt", evt);
         }
 
         public void OnPlayerKilled(DeathEvent evt)
         {
-            this.Invoke("On_PlayerKilled", new object[] {evt});
+            this.Invoke("On_PlayerKilled", evt);
         }
 
         public void OnPlayerTeleport(Fougerite.Player player, Vector3 from, Vector3 dest)
         {
-            this.Invoke("On_PlayerTeleport", new object[] {player, from, dest});
+            this.Invoke("On_PlayerTeleport", player, from, dest);
         }
 
         public void OnPlayerSpawn(Fougerite.Player player, SpawnEvent evt)
         {
-            this.Invoke("On_PlayerSpawning", new object[] {player, evt});
+            this.Invoke("On_PlayerSpawning", player, evt);
         }
 
         public void OnPlayerSpawned(Fougerite.Player player, SpawnEvent evt)
         {
-            this.Invoke("On_PlayerSpawned", new object[] {player, evt});
+            this.Invoke("On_PlayerSpawned", player, evt);
         }
 
         public void OnResearch(ResearchEvent evt)
         {
-            this.Invoke("On_Research", new object[] {evt});
+            this.Invoke("On_Research", evt);
         }
 
         public void OnServerInit()
         {
-            this.Invoke("On_ServerInit", new object[0]);
+            this.Invoke("On_ServerInit");
         }
 
         public void OnServerShutdown()
         {
-            this.Invoke("On_ServerShutdown", new object[0]);
+            this.Invoke("On_ServerShutdown");
         }
 
         public void OnServerSaved(int amount, double seconds)
         {
-            this.Invoke("On_ServerSaved", new object[] {amount, seconds});
+            this.Invoke("On_ServerSaved", amount, seconds);
         }
 
         public void OnCrafting(CraftingEvent e)
         {
-            this.Invoke("On_Crafting", new object[] {e});
+            this.Invoke("On_Crafting", e);
         }
 
         public void OnResourceSpawned(ResourceTarget t)
         {
-            this.Invoke("On_ResourceSpawn", new object[] {t});
+            this.Invoke("On_ResourceSpawn", t);
         }
 
         public void OnItemAdded(InventoryModEvent e)
         {
-            this.Invoke("On_ItemAdded", new object[] {e});
+            this.Invoke("On_ItemAdded", e);
         }
 
         public void OnItemRemoved(InventoryModEvent e)
         {
-            this.Invoke("On_ItemRemoved", new object[] {e});
+            this.Invoke("On_ItemRemoved", e);
         }
 
         public void OnItemPickup(ItemPickupEvent e)
         {
-            this.Invoke("On_ItemPickup", new object[] {e});
+            this.Invoke("On_ItemPickup", e);
         }
 
         public void OnFallDamage(FallDamageEvent e)
         {
-            this.Invoke("On_FallDamage", new object[] {e});
+            this.Invoke("On_FallDamage", e);
         }
 
         public void OnAirdrop(Vector3 v)
         {
-            this.Invoke("On_Airdrop", new object[] {v});
+            this.Invoke("On_Airdrop", v);
         }
 
-        /*public void OnAirdropCrateDropped(GameObject go)
+        public void OnAirdropCrateDropped(SupplyDropPlane plane, Entity supplyCrate)
         {
-            this.Invoke("On_AirdropCrateDropped", new object[] { go });
-        }*/
+            this.Invoke("On_AirdropCrateDropped", plane, supplyCrate);
+        }
 
         public void OnSteamDeny(SteamDenyEvent e)
         {
-            this.Invoke("On_SteamDeny", new object[] {e});
+            this.Invoke("On_SteamDeny", e);
         }
 
         public void OnPlayerApproval(PlayerApprovalEvent e)
         {
-            this.Invoke("On_PlayerApproval", new object[] {e});
+            this.Invoke("On_PlayerApproval", e);
         }
 
         public void OnPluginShutdown()
         {
-            this.Invoke("On_PluginShutdown", new object[0]);
+            this.Invoke("On_PluginShutdown");
         }
 
         public void OnShowTalker(uLink.NetworkPlayer np, Fougerite.Player player)
         {
-            this.Invoke("On_VoiceChat", new object[] {np, player});
+            this.Invoke("On_VoiceChat", np, player);
         }
 
         public void OnLootUse(LootStartEvent le)
         {
-            this.Invoke("On_LootUse", new object[] {le});
+            this.Invoke("On_LootUse", le);
         }
 
         public void OnBanEvent(BanEvent be)
         {
-            this.Invoke("On_PlayerBan", new object[] {be});
+            this.Invoke("On_PlayerBan", be);
         }
 
         public void OnRepairBench(Fougerite.Events.RepairEvent be)
         {
-            this.Invoke("On_RepairBench", new object[] {be});
+            this.Invoke("On_RepairBench", be);
         }
 
         public void OnItemMove(ItemMoveEvent be)
         {
-            this.Invoke("On_ItemMove", new object[] {be});
+            this.Invoke("On_ItemMove", be);
         }
 
         public void OnGenericSpawnLoad(GenericSpawner gs)
         {
-            this.Invoke("On_GenericSpawnLoad", new object[] {gs});
+            this.Invoke("On_GenericSpawnLoad", gs);
         }
 
         public void OnServerLoaded()
@@ -941,28 +941,28 @@ namespace Fougerite.PluginLoaders
 
         public void OnSupplySignalExploded(SupplySignalExplosionEvent evt)
         {
-            this.Invoke("On_SupplySignalExploded", new object[] {evt});
+            this.Invoke("On_SupplySignalExploded", evt);
         }
 
         public void OnPlayerMove(HumanController hc, Vector3 v, int p, ushort p2,
             uLink.NetworkMessageInfo networkMessageInfo, Util.PlayerActions action)
         {
-            this.Invoke("On_PlayerMove", new object[] {hc, v, p, p2, networkMessageInfo, action});
+            this.Invoke("On_PlayerMove", hc, v, p, p2, networkMessageInfo, action);
         }
 
         public void OnBeltUse(BeltUseEvent ev)
         {
-            this.Invoke("On_BeltUse", new object[] {ev});
+            this.Invoke("On_BeltUse", ev);
         }
 
         public void OnLogger(LoggerEvent ev)
         {
-            this.Invoke("On_Logger", new object[] {ev});
+            this.Invoke("On_Logger", ev);
         }
 
         public void OnGrenade(GrenadeThrowEvent ev)
         {
-            this.Invoke("On_GrenadeThrow", new object[] {ev});
+            this.Invoke("On_GrenadeThrow", ev);
         }
     }
 }
