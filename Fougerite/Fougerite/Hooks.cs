@@ -1939,7 +1939,7 @@ namespace Fougerite
                 obj.rigidbody.centerOfMass = new Vector3(0f, -1.5f, 0f);
                 obj.rigidbody.AddForceAtPosition(-forward * 50f, obj.transform.position - new Vector3(0f, 1f, 0f));
 
-                Entity entity = new Entity(obj);
+                Entity entity = new Entity(obj.GetComponent<SupplyCrate>());
 
                 try
                 {
