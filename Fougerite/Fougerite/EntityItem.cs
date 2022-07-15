@@ -8,14 +8,14 @@ namespace Fougerite
 	/// </summary>
     public class EntityItem
     {
-        private readonly Inventory internalInv;
-		private readonly int internalSlot;
+        private readonly Inventory _internalInv;
+		private readonly int _internalSlot;
 		//internal const string PrefabName = ";drop_lootsack"; Dynamic cannot be used with this.
 
         public EntityItem(Inventory inv, int slot)
 		{
-			this.internalInv = inv;
-			this.internalSlot = slot;
+			this._internalInv = inv;
+			this._internalSlot = slot;
 		}
 
 	    /// <summary>
@@ -34,7 +34,7 @@ namespace Fougerite
 				CharacterItemDropPrefabTrait trait = new Character().GetTrait<CharacterItemDropPrefabTrait>();
 				
 				ItemPickup dropped = null;
-				Vector3 position = internalInv.transform.localPosition;
+				Vector3 position = _internalInv.transform.localPosition;
 				// Try making the positions random, instead of letting the objects stuck into together.
 				position.x += UnityEngine.Random.Range(0f, 0.85f);
 				position.y += UnityEngine.Random.Range(0.75f, 1f);
@@ -53,7 +53,7 @@ namespace Fougerite
 					return null;
 				}
 
-				internalInv.RemoveItem(item);
+				_internalInv.RemoveItem(item);
 				//internalInv.MarkSlotDirty(Slot);
 				return dropped;
 				//DropHelper.DropItem(this.internalInv, this.Slot);
@@ -65,7 +65,7 @@ namespace Fougerite
 		private IInventoryItem GetItemRef()
 		{
 			IInventoryItem item;
-			this.internalInv.GetItem(this.internalSlot, out item);
+			this._internalInv.GetItem(this._internalSlot, out item);
 			return item;
 		}
 
@@ -74,7 +74,7 @@ namespace Fougerite
 		/// </summary>
 		public Inventory Inventory
 		{
-			get { return this.internalInv; }
+			get { return this._internalInv; }
 		}
 
 	    /// <summary>
@@ -142,7 +142,7 @@ namespace Fougerite
 				{
 					return this.RInventoryItem.slot;
 				}
-				return this.internalSlot;
+				return this._internalSlot;
 			}
 		}
 

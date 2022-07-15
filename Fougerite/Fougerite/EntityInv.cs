@@ -7,13 +7,13 @@ namespace Fougerite
     /// </summary>
     public class EntityInv
     {
-        private readonly Fougerite.Entity entity;
+        private readonly Fougerite.Entity _entity;
         private readonly EntityItem[] _items;
         private readonly Inventory _inv;
 
         public EntityInv(Inventory inv, Entity ent)
         {
-            this.entity = ent;
+            this._entity = ent;
             this._inv = inv;
 
             this._items = new EntityItem[inv.slotCount];
@@ -82,7 +82,7 @@ namespace Fougerite
         {
             get
             {
-                return this.entity;
+                return this._entity;
             }
         }
 
@@ -150,16 +150,15 @@ namespace Fougerite
                         this.AddItem(item.Name, (item.UsesLeft - amount));
                         return;
                     }
-                    else if (item.UsesLeft == amount)
+                    
+                    if (item.UsesLeft == amount)
                     {
                         this._inv.RemoveItem(item.RInventoryItem);
                         return;
                     }
-                    else
-                    {
-                        this._inv.RemoveItem(item.RInventoryItem);
-                        amount -= item.UsesLeft;
-                    }
+                    
+                    this._inv.RemoveItem(item.RInventoryItem);
+                    amount -= item.UsesLeft;
                 }    
             }
         }

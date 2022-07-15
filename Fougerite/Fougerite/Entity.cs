@@ -5,7 +5,6 @@ using Fougerite.Caches;
 
 namespace Fougerite
 {
-
     /// <summary>
     /// Represents an object on the server. This class is an extended API for easier / safer use.
     /// </summary>
@@ -26,49 +25,52 @@ namespace Fougerite
             this._obj = Obj;
             if (this.IsStructureMaster())
             {
-                this._ownerid = (Obj as StructureMaster).ownerID;
-                this._creatorid = (Obj as StructureMaster).creatorID;
+                this._ownerid = ((StructureMaster)Obj).ownerID;
+                this._creatorid = ((StructureMaster)Obj).creatorID;
                 this._name = "Structure Master";
             }
 
             if (this.IsStructure())
             {
                 StructureComponent comp = Obj as StructureComponent;
-
                 if (comp != null && comp._master != null)
                 {
                     this._ownerid = comp._master.ownerID;
                     this._creatorid = comp._master.creatorID;
-                }
-                string clone = this.GetObject<StructureComponent>().ToString();
-                var index = clone.IndexOf("(Clone)");
-                this._name = clone.Substring(0, index);
-            }
-            if (this.IsDeployableObject())
-            {
-                DeployableObject dobj = Obj as DeployableObject;
-                this._ownerid = dobj.ownerID;
-                this._creatorid = dobj.creatorID;
-                string clone = this.GetObject<DeployableObject>().ToString();
-                if (clone.Contains("Barricade"))
-                {
-                    this._name = "Wood Barricade";
-                }
-                else
-                {
+                    string clone = comp.ToString();
                     var index = clone.IndexOf("(Clone)");
                     this._name = clone.Substring(0, index);
                 }
+            }
 
-                var inventory = dobj.GetComponent<Inventory>();
-                if (inventory != null)
+            if (this.IsDeployableObject())
+            {
+                DeployableObject dobj = Obj as DeployableObject;
+                if (dobj != null)
                 {
-                    this.hasInventory = true;
-                    this.inv = new EntityInv(inventory, this);
-                }
-                else
-                {
-                    this.hasInventory = false;
+                    this._ownerid = dobj.ownerID;
+                    this._creatorid = dobj.creatorID;
+                    string clone = dobj.ToString();
+                    if (clone.Contains("Barricade"))
+                    {
+                        this._name = "Wood Barricade";
+                    }
+                    else
+                    {
+                        var index = clone.IndexOf("(Clone)");
+                        this._name = clone.Substring(0, index);
+                    }
+
+                    var inventory = dobj.GetComponent<Inventory>();
+                    if (inventory != null)
+                    {
+                        this.hasInventory = true;
+                        this.inv = new EntityInv(inventory, this);
+                    }
+                    else
+                    {
+                        this.hasInventory = false;
+                    }
                 }
             }
             else if (this.IsLootableObject())
@@ -76,16 +78,19 @@ namespace Fougerite
                 this._ownerid = 76561198095992578UL;
                 this._creatorid = 76561198095992578UL;
                 var loot = Obj as LootableObject;
-                this._name = loot.name;
-                var inventory = loot._inventory;
-                if (inventory != null)
+                if (loot != null)
                 {
-                    this.hasInventory = true;
-                    this.inv = new EntityInv(inventory, this);
-                }
-                else
-                {
-                    this.hasInventory = false;
+                    this._name = loot.name;
+                    var inventory = loot._inventory;
+                    if (inventory != null)
+                    {
+                        this.hasInventory = true;
+                        this.inv = new EntityInv(inventory, this);
+                    }
+                    else
+                    {
+                        this.hasInventory = false;
+                    }
                 }
             }
             else if (this.IsSupplyCrate())
@@ -94,20 +99,23 @@ namespace Fougerite
                 this._creatorid = 76561198095992578UL;
                 this._name = "Supply Crate";
                 var crate = Obj as SupplyCrate;
-                var inventory = crate.lootableObject._inventory;
-                if (inventory != null)
+                if (crate != null)
                 {
-                    this.hasInventory = true;
-                    this.inv = new EntityInv(inventory, this);
-                }
-                else
-                {
-                    this.hasInventory = false;
+                    var inventory = crate.lootableObject._inventory;
+                    if (inventory != null)
+                    {
+                        this.hasInventory = true;
+                        this.inv = new EntityInv(inventory, this);
+                    }
+                    else
+                    {
+                        this.hasInventory = false;
+                    }
                 }
             }
             else if (IsResourceTarget())
             {
-                var x = (ResourceTarget) Obj;
+                var x = (ResourceTarget)Obj;
                 this._ownerid = 76561198095992578UL;
                 this._creatorid = 76561198095992578UL;
                 this._name = x.name;
@@ -120,7 +128,7 @@ namespace Fougerite
 
             Player ownerCache = Server.GetServer().GetCachePlayer(_ownerid);
             CachedPlayer cachedPlayerOwner;
-            
+
             if (ownerCache != null)
             {
                 this._ownername = ownerCache.Name;
@@ -143,7 +151,7 @@ namespace Fougerite
 
             Player creatorCache = Server.GetServer().GetCachePlayer(_creatorid);
             CachedPlayer cachedPlayerCreator;
-            
+
             if (creatorCache != null)
             {
                 this._creatorname = creatorCache.Name;
@@ -171,7 +179,7 @@ namespace Fougerite
         /// <param name="p"></param>
         public void ChangeOwner(Fougerite.Player p)
         {
-            if (this.IsDeployableObject() && !(bool)(this.Object as DeployableObject).GetComponent<SleepingAvatar>())
+            if (this.IsDeployableObject() && !(bool)(this.Object as DeployableObject)?.GetComponent<SleepingAvatar>())
                 this.GetObject<DeployableObject>().SetupCreator(p.PlayerClient.controllable);
             else if (this.IsStructureMaster())
                 this.GetObject<StructureMaster>().SetupCreator(p.PlayerClient.controllable);
@@ -197,32 +205,38 @@ namespace Fougerite
             {
                 return;
             }
+
             if (this.IsDeployableObject())
             {
                 try
                 {
                     this.GetObject<DeployableObject>().OnKilled();
-                } catch
+                }
+                catch
                 {
                     TryNetCullDestroy();
                 }
-            } else if (this.IsStructure())
+            }
+            else if (this.IsStructure())
             {
-                DestroyStructure(this.GetObject<StructureComponent>());                
-            } else if (this.IsStructureMaster())
+                DestroyStructure(this.GetObject<StructureComponent>());
+            }
+            else if (this.IsStructureMaster())
             {
                 HashSet<StructureComponent> components = this.GetObject<StructureMaster>()._structureComponents;
                 foreach (StructureComponent comp in components)
                     DestroyStructure(comp);
 
-                try 
+                try
                 {
                     this.GetObject<StructureMaster>().OnDestroy();
-                } catch
+                }
+                catch
                 {
                     TryNetCullDestroy();
                 }
             }
+
             IsDestroyed = true;
         }
 
@@ -254,7 +268,8 @@ namespace Fougerite
                 comp._master.RemoveComponent(comp);
                 comp._master = null;
                 comp.StartCoroutine("DelayedKill");
-            } catch
+            }
+            catch
             {
                 NetCull.Destroy(comp.networkViewID);
             }
@@ -273,6 +288,7 @@ namespace Fougerite
                 list.Add(this);
                 return list;
             }
+
             foreach (StructureComponent component in obj._master._structureComponents)
             {
                 if (component != this.Object as StructureComponent)
@@ -280,6 +296,7 @@ namespace Fougerite
                     list.Add(new Entity(component));
                 }
             }
+
             return list;
         }
 
@@ -299,10 +316,12 @@ namespace Fougerite
             {
                 return this.GetObject<DeployableObject>().GetComponent<TakeDamage>();
             }
+
             if (this.IsStructure())
             {
                 return this.GetObject<StructureComponent>().GetComponent<TakeDamage>();
             }
+
             return null;
         }
 
@@ -315,9 +334,10 @@ namespace Fougerite
             {
                 if (IsResourceTarget())
                 {
-                    var x = (ResourceTarget) _obj;
+                    var x = (ResourceTarget)_obj;
                     return x;
                 }
+
                 return null;
             }
         }
@@ -341,7 +361,7 @@ namespace Fougerite
             BasicDoor str = this.Object as BasicDoor;
             return str != null;
         }
-        
+
         /// <summary>
         /// Checks if the object is a LootableObject
         /// </summary>
@@ -489,10 +509,7 @@ namespace Fougerite
         /// </summary>
         public string OwnerID
         {
-            get
-            {
-                return this._ownerid.ToString();
-            }
+            get { return this._ownerid.ToString(); }
         }
 
         /// <summary>
@@ -500,10 +517,7 @@ namespace Fougerite
         /// </summary>
         public ulong UOwnerID
         {
-            get
-            {
-                return this._ownerid;
-            }
+            get { return this._ownerid; }
         }
 
         /// <summary>
@@ -511,21 +525,15 @@ namespace Fougerite
         /// </summary>
         public string CreatorID
         {
-            get
-            {
-                return this._creatorid.ToString();
-            }
+            get { return this._creatorid.ToString(); }
         }
-        
+
         /// <summary>
         /// Returns the OwnerID as a ulong
         /// </summary>
         public ulong UCreatorID
         {
-            get
-            {
-                return this._creatorid;
-            }
+            get { return this._creatorid; }
         }
 
         /// <summary>
@@ -539,15 +547,19 @@ namespace Fougerite
                 {
                     return this.GetObject<DeployableObject>().GetComponent<TakeDamage>().health;
                 }
+
                 if (this.IsStructure())
                 {
                     return this.GetObject<StructureComponent>().GetComponent<TakeDamage>().health;
                 }
+
                 if (this.IsStructureMaster())
                 {
-                    float sum = this.GetObject<StructureMaster>()._structureComponents.Sum<StructureComponent>(s => s.GetComponent<TakeDamage>().health);
+                    float sum = this.GetObject<StructureMaster>()._structureComponents
+                        .Sum<StructureComponent>(s => s.GetComponent<TakeDamage>().health);
                     return sum;
                 }
+
                 return 0f;
             }
             set
@@ -560,6 +572,7 @@ namespace Fougerite
                 {
                     this.GetObject<StructureComponent>().GetComponent<TakeDamage>().health = value;
                 }
+
                 this.UpdateHealth();
             }
         }
@@ -575,15 +588,19 @@ namespace Fougerite
                 {
                     return this.GetObject<DeployableObject>().GetComponent<TakeDamage>().maxHealth;
                 }
+
                 if (this.IsStructure())
                 {
                     return this.GetObject<StructureComponent>().GetComponent<TakeDamage>().maxHealth;
                 }
+
                 if (this.IsStructureMaster())
                 {
-                    float sum = this.GetObject<StructureMaster>()._structureComponents.Sum<StructureComponent>(s => s.GetComponent<TakeDamage>().maxHealth);
+                    float sum = this.GetObject<StructureMaster>()._structureComponents
+                        .Sum<StructureComponent>(s => s.GetComponent<TakeDamage>().maxHealth);
                     return sum;
                 }
+
                 return 0f;
             }
         }
@@ -599,10 +616,12 @@ namespace Fougerite
                 {
                     return this.GetObject<DeployableObject>().GetInstanceID();
                 }
+
                 if (this.IsStructure())
                 {
                     return this.GetObject<StructureComponent>().GetInstanceID();
                 }
+
                 return 0;
             }
         }
@@ -625,10 +644,7 @@ namespace Fougerite
         /// </summary>
         public string Name
         {
-            get
-            {
-                return this._name;
-            }
+            get { return this._name; }
         }
 
         /// <summary>
@@ -636,10 +652,7 @@ namespace Fougerite
         /// </summary>
         public object Object
         {
-            get
-            {
-                return this._obj;
-            }
+            get { return this._obj; }
         }
 
         /// <summary>
@@ -647,10 +660,7 @@ namespace Fougerite
         /// </summary>
         public Fougerite.Player Owner
         {
-            get
-            {
-                return Fougerite.Player.FindByGameID(this.OwnerID);
-            }
+            get { return Fougerite.Player.FindByGameID(this.OwnerID); }
         }
 
         /// <summary>
@@ -705,10 +715,7 @@ namespace Fougerite
         /// </summary>
         public float X
         {
-            get
-            {
-                return this.Location.x;
-            }
+            get { return this.Location.x; }
         }
 
         /// <summary>
@@ -716,10 +723,7 @@ namespace Fougerite
         /// </summary>
         public float Y
         {
-            get
-            {
-                return this.Location.y;
-            }
+            get { return this.Location.y; }
         }
 
         /// <summary>
@@ -727,10 +731,7 @@ namespace Fougerite
         /// </summary>
         public float Z
         {
-            get
-            {
-                return this.Location.z;
-            }
+            get { return this.Location.z; }
         }
     }
 }
