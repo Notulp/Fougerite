@@ -199,6 +199,11 @@ namespace Fougerite
         public static event AirdropDelegate OnAirdropCalled;
 
         /// <summary>
+        /// This delegate runs when a supplydropplane is created.
+        /// </summary>
+        public static event SupplyDropPlaneCreatedDelegate OnSupplyDropPlaneCreated;
+
+        /// <summary>
         /// This delegate runs when the crate is created from the airdrop.
         /// </summary>
         public static event AirdropCrateDroppedDelegate OnAirdropCrateDropped;
@@ -371,6 +376,7 @@ namespace Fougerite
             OnBeltUse = delegate { };
             OnLogger = delegate { };
             OnAirdropCrateDropped = delegate { };
+            OnSupplyDropPlaneCreated = delegate {  };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -486,5 +492,7 @@ namespace Fougerite
         public delegate void LoggerDelegate(LoggerEvent loggerEvent);
 
         public delegate void AirdropCrateDroppedDelegate(SupplyDropPlane plane, Entity supplyCrate);
+
+        public delegate void SupplyDropPlaneCreatedDelegate(SupplyDropPlane plane);
     }
 }

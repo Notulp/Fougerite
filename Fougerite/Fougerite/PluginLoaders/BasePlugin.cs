@@ -964,5 +964,10 @@ namespace Fougerite.PluginLoaders
         {
             this.Invoke("On_GrenadeThrow", ev);
         }
+
+        public void OnSupplyDropPlaneCreated(SupplyDropPlane plane)
+        {
+            this.Invoke("On_SupplyDropPlaneCreated", plane);
+        }
     }
 }

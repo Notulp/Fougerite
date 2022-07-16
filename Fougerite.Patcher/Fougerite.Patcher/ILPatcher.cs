@@ -1291,6 +1291,24 @@ namespace Fougerite.Patcher
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Callvirt, this.rustAssembly.MainModule.Import(method)));
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            MethodDefinition SupplyDropPlaneConstructor = null;
+            foreach (var x in SupplyDropPlane.GetConstructors())
+            {
+                if (x.IsConstructor && x.Parameters.Count == 1)
+                {
+                    SupplyDropPlaneConstructor = x;
+                    break;
+                }
+            }
+            
+            Position = SupplyDropPlaneConstructor.Body.Instructions.Count - 1;
+
+            method = hooksClass.GetMethod("SupplyDropPlaneCreated");
+            iLProcessor = SupplyDropPlaneConstructor.Body.GetILProcessor();
+            iLProcessor.InsertBefore(SupplyDropPlaneConstructor.Body.Instructions[Position],
+                Instruction.Create(OpCodes.Callvirt, this.rustAssembly.MainModule.Import(method)));
+            iLProcessor.InsertBefore(SupplyDropPlaneConstructor.Body.Instructions[Position], Instruction.Create(OpCodes.Ldarg_0));
         }
 
         private void ClientConnectionPatch()

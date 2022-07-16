@@ -66,7 +66,8 @@
             "On_Logger",
             "On_GrenadeThrow",
             "On_ConsoleWithCancel",
-            "On_AirdropCrateDropped"
+            "On_AirdropCrateDropped",
+            "On_SupplyDropPlaneCreated"
         };
 
         public void Initialize()
@@ -332,6 +333,9 @@
                         case "On_GrenadeThrow":
                             Hooks.OnGrenadeThrow += plugin.OnGrenade;
                             break;
+                        case "On_SupplyDropPlaneCreated":
+                            Hooks.OnSupplyDropPlaneCreated += plugin.OnSupplyDropPlaneCreated;
+                            break;
                     }
                 }
             }
@@ -505,6 +509,9 @@
                             break;
                         case "On_GrenadeThrow":
                             Hooks.OnGrenadeThrow -= plugin.OnGrenade;
+                            break;
+                        case "On_SupplyDropPlaneCreated":
+                            Hooks.OnSupplyDropPlaneCreated -= plugin.OnSupplyDropPlaneCreated;
                             break;
                     }
                 }

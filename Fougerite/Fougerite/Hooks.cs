@@ -1927,6 +1927,24 @@ namespace Fougerite
             }
         }
 
+        public static void SupplyDropPlaneCreated(SupplyDropPlane plane)
+        {
+            using (new Stopper(nameof(Hooks), nameof(SupplyDropPlaneCreated)))
+            {
+                try
+                {
+                    if (OnSupplyDropPlaneCreated != null)
+                    {
+                        OnSupplyDropPlaneCreated(plane);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("SupplyDropPlaneCreated Error: " + ex);
+                }
+            }
+        }
+
         public static void AirdropCrateDropped(SupplyDropPlane plane)
         {
             using (new Stopper(nameof(Hooks), nameof(AirdropCrateDropped)))
