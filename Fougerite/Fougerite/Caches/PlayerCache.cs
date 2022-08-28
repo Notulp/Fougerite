@@ -10,6 +10,11 @@ namespace Fougerite.Caches
     public class PlayerCache
     {
         private static PlayerCache _playerCache;
+
+        private PlayerCache()
+        {
+            
+        }
         
         /// <summary>
         /// This is a Serialized Cache where we store all the history of connected players.
@@ -17,13 +22,11 @@ namespace Fougerite.Caches
         /// since server startup.
         /// It can be extended to do basically anything.
         /// </summary>
-        public ConcurrentDictionary<ulong, CachedPlayer> CachedPlayers { get; set; } =
-            new ConcurrentDictionary<ulong, CachedPlayer>();
-
-        private PlayerCache()
+        public ConcurrentDictionary<ulong, CachedPlayer> CachedPlayers
         {
-            
-        }
+            get;
+            set;
+        } = new ConcurrentDictionary<ulong, CachedPlayer>();
 
         /// <summary>
         /// Get the instance.

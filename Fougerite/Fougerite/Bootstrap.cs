@@ -1,28 +1,29 @@
 using System;
-using System.IO;
-using UnityEngine;
-using System.Threading;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
+using UnityEngine;
+using MonoBehaviour = Facepunch.MonoBehaviour;
 
 namespace Fougerite
 {
-    public class Bootstrap : Facepunch.MonoBehaviour
+    public class Bootstrap : MonoBehaviour
     {
         /// <summary>
         /// Returns the Current Fougerite Version
         /// </summary>
-        public const string Version = "1.8.2";
+        public const string Version = "1.8.3";
         /// <summary>
         /// This value decides wheather we should remove the player classes from the cache upon disconnect.
         /// </summary>
-        public static bool CR = false;
+        public static bool CR;
         /// <summary>
         /// This value decides wheater we should ban a player for sending invalid packets.
         /// </summary>
-        public static bool BI = false;
+        public static bool BI;
         /// <summary>
         /// This value decides wheather we should ban a player for Craft hacking.
         /// </summary>
@@ -50,7 +51,7 @@ namespace Fougerite
         /// <summary>
         /// Send additional RPCPackets of the chat for the clients? (This is recommended for RustBuster Servers only.)
         /// </summary>
-        public static bool RPCChat = false;
+        public static bool RPCChat;
         /// <summary>
         /// Specify the client side's RPC method.
         /// </summary>
@@ -77,44 +78,44 @@ namespace Fougerite
 
         public void Awake()
         {
-            UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
+            DontDestroyOnLoad(gameObject);
         }
 
         public bool ApplyOptions()
         {
             // look for the string 'false' to disable.  **not a bool check**
-            if (Fougerite.Config.GetValue("Fougerite", "enabled") == "false") 
+            if (Config.GetValue("Fougerite", "enabled") == "false") 
             {
                 Debug.Log("Fougerite is disabled. No modules loaded. No hooks called.");
                 return false;
             }
-            if (Fougerite.Config.GetValue("Fougerite", "RemovePlayersFromCache") != null)
+            if (Config.GetValue("Fougerite", "RemovePlayersFromCache") != null)
             {
-                CR = Fougerite.Config.GetBoolValue("Fougerite", "RemovePlayersFromCache");
+                CR = Config.GetBoolValue("Fougerite", "RemovePlayersFromCache");
             }
-            if (Fougerite.Config.GetValue("Fougerite", "BanOnInvalidPacket") != null)
+            if (Config.GetValue("Fougerite", "BanOnInvalidPacket") != null)
             {
-                BI = Fougerite.Config.GetBoolValue("Fougerite", "BanOnInvalidPacket");
+                BI = Config.GetBoolValue("Fougerite", "BanOnInvalidPacket");
             }
-            if (Fougerite.Config.GetValue("Fougerite", "AutoBanCraft") != null)
+            if (Config.GetValue("Fougerite", "AutoBanCraft") != null)
             {
-                AutoBanCraft = Fougerite.Config.GetBoolValue("Fougerite", "AutoBanCraft");
+                AutoBanCraft = Config.GetBoolValue("Fougerite", "AutoBanCraft");
             }
-            if (Fougerite.Config.GetValue("Fougerite", "SaveNotification") != null)
+            if (Config.GetValue("Fougerite", "SaveNotification") != null)
             {
-                SaveNotification = Fougerite.Config.GetValue("Fougerite", "SaveNotification");
+                SaveNotification = Config.GetValue("Fougerite", "SaveNotification");
             }
-            if (Fougerite.Config.GetValue("Fougerite", "RustChat") != null)
+            if (Config.GetValue("Fougerite", "RustChat") != null)
             {
-                RustChat = Fougerite.Config.GetBoolValue("Fougerite", "RustChat");
+                RustChat = Config.GetBoolValue("Fougerite", "RustChat");
             }
-            if (Fougerite.Config.GetValue("Fougerite", "RPCChat") != null)
+            if (Config.GetValue("Fougerite", "RPCChat") != null)
             {
-                RPCChat = Fougerite.Config.GetBoolValue("Fougerite", "RPCChat");
+                RPCChat = Config.GetBoolValue("Fougerite", "RPCChat");
             }
-            if (Fougerite.Config.GetValue("Fougerite", "RPCChatMethod") != null)
+            if (Config.GetValue("Fougerite", "RPCChatMethod") != null)
             {
-                RPCChatMethod = Fougerite.Config.GetValue("Fougerite", "RPCChatMethod");
+                RPCChatMethod = Config.GetValue("Fougerite", "RPCChatMethod");
             }
 
             if (!RustChat)
@@ -122,20 +123,20 @@ namespace Fougerite
                 Logger.LogWarning("[RustChat] The default Rust Chat is disabled for the Player.Message methods.");
             }
             
-            if (Fougerite.Config.GetValue("Fougerite", "FloodConnections") != null)
+            if (Config.GetValue("Fougerite", "FloodConnections") != null)
             {
                 int v;
-                int.TryParse(Fougerite.Config.GetValue("Fougerite", "FloodConnections"), out v);
+                int.TryParse(Config.GetValue("Fougerite", "FloodConnections"), out v);
                 if (v <= 0)
                 {
                     v = 2;
                 }
                 FloodConnections = v + 1;
             }
-            if (Fougerite.Config.GetValue("Fougerite", "SaveTime") != null)
+            if (Config.GetValue("Fougerite", "SaveTime") != null)
             {
                 int v;
-                int.TryParse(Fougerite.Config.GetValue("Fougerite", "SaveTime"), out v);
+                int.TryParse(Config.GetValue("Fougerite", "SaveTime"), out v);
                 if (v <= 0)
                 {
                     v = 10;
@@ -146,10 +147,10 @@ namespace Fougerite
             {
                 ServerSaveHandler.ServerSaveTime = 10;
             }
-            if (Fougerite.Config.GetValue("Fougerite", "SaveCopies") != null)
+            if (Config.GetValue("Fougerite", "SaveCopies") != null)
             {
                 int v;
-                int.TryParse(Fougerite.Config.GetValue("Fougerite", "SaveCopies"), out v);
+                int.TryParse(Config.GetValue("Fougerite", "SaveCopies"), out v);
                 if (v <= 4)
                 {
                     v = 5;
@@ -160,20 +161,20 @@ namespace Fougerite
             {
                 ServerSaveHandler.SaveCopies = 5;
             }
-            if (Fougerite.Config.GetValue("Fougerite", "StopServerOnSaveFail") != null)
+            if (Config.GetValue("Fougerite", "StopServerOnSaveFail") != null)
             {
                 bool v = false;
-                bool.TryParse(Fougerite.Config.GetValue("Fougerite", "StopServerOnSaveFail"), out v);
+                bool.TryParse(Config.GetValue("Fougerite", "StopServerOnSaveFail"), out v);
                 ServerSaveHandler.StopServerOnSaveFail = v;
             }
             else
             {
                 ServerSaveHandler.StopServerOnSaveFail = false;
             }
-            if (Fougerite.Config.GetValue("Fougerite", "CrucialSavePoint") != null)
+            if (Config.GetValue("Fougerite", "CrucialSavePoint") != null)
             {
                 int v = 2;
-                int.TryParse(Fougerite.Config.GetValue("Fougerite", "CrucialSavePoint"), out v);
+                int.TryParse(Config.GetValue("Fougerite", "CrucialSavePoint"), out v);
                 ServerSaveHandler.CrucialSavePoint = v;
             }
             else
@@ -201,31 +202,31 @@ namespace Fougerite
             // Remove the default rust saving methods.
             save.autosavetime = int.MaxValue;
             
-            if (!Fougerite.Config.GetBoolValue("Fougerite", "deployabledecay") && !Fougerite.Config.GetBoolValue("Fougerite", "decay"))
+            if (!Config.GetBoolValue("Fougerite", "deployabledecay") && !Config.GetBoolValue("Fougerite", "decay"))
             {
                 decay.decaytickrate = float.MaxValue / 2;
                 decay.deploy_maxhealth_sec = float.MaxValue;
                 decay.maxperframe = -1;
                 decay.maxtestperframe = -1;
             }
-            if (!Fougerite.Config.GetBoolValue("Fougerite", "structuredecay") && !Fougerite.Config.GetBoolValue("Fougerite", "decay"))
+            if (!Config.GetBoolValue("Fougerite", "structuredecay") && !Config.GetBoolValue("Fougerite", "decay"))
             {
                 structure.maxframeattempt = -1;
                 structure.framelimit = -1;
                 structure.minpercentdmg = float.MaxValue;
             }
-            if (Fougerite.Config.GetValue("Fougerite", "EnableDefaultRustDecay") != null)
+            if (Config.GetValue("Fougerite", "EnableDefaultRustDecay") != null)
             {
-                EnableDefaultRustDecay = Fougerite.Config.GetBoolValue("Fougerite", "EnableDefaultRustDecay");
+                EnableDefaultRustDecay = Config.GetBoolValue("Fougerite", "EnableDefaultRustDecay");
             }
             else
             {
-                NetCull.Callbacks.beforeEveryUpdate += new NetCull.UpdateFunctor(EnvDecay.Callbacks.RunDecayThink);
+                NetCull.Callbacks.beforeEveryUpdate += EnvDecay.Callbacks.RunDecayThink;
                 Logger.LogWarning("[RustDecay] The default Rust Decay is enabled. (Config option not found)");
             }
             if (EnableDefaultRustDecay)
             {
-                NetCull.Callbacks.beforeEveryUpdate += new NetCull.UpdateFunctor(EnvDecay.Callbacks.RunDecayThink);
+                NetCull.Callbacks.beforeEveryUpdate += EnvDecay.Callbacks.RunDecayThink;
                 Logger.LogWarning("[RustDecay] The default Rust Decay is enabled.");
             }
             else
@@ -286,8 +287,8 @@ namespace Fougerite
                 PythonPluginLoader.GetInstance();
                 JavaScriptPluginLoader.GetInstance();
                 LuaPluginLoader.GetInstance();
-                Fougerite.Hooks.ServerStarted();
-                Fougerite.ShutdownCatcher.Hook();
+                Hooks.ServerStarted();
+                ShutdownCatcher.Hook();
             }
         }
     }

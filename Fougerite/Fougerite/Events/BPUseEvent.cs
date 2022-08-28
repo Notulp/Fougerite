@@ -5,15 +5,15 @@
     /// </summary>
     public class BPUseEvent
     {
-        private BlueprintDataBlock _bdb;
+        private readonly BlueprintDataBlock _bdb;
         private bool _cancel;
         private readonly IBlueprintItem _item;
 
         public BPUseEvent(BlueprintDataBlock bdb, IBlueprintItem item)
         {
-            this.DataBlock = bdb;
-            this.Cancel = false;
-            this._item = item;
+            _bdb = bdb;
+            Cancel = false;
+            _item = item;
         }
 
         /// <summary>
@@ -23,11 +23,11 @@
         {
             get
             {
-                return this._cancel;
+                return _cancel;
             }
             set
             {
-                this._cancel = value;
+                _cancel = value;
             }
         }
 
@@ -38,11 +38,7 @@
         {
             get
             {
-                return this._bdb;
-            }
-            set
-            {
-                this._bdb = value;
+                return _bdb;
             }
         }
 
@@ -53,7 +49,7 @@
         {
             get
             {
-                return this._item;
+                return _item;
             }
         }
 
@@ -64,7 +60,7 @@
         {
             get
             {
-                return this._bdb.resultItem.name;
+                return _bdb.resultItem.name;
             }
         }
     }

@@ -220,31 +220,6 @@ namespace Fougerite
             return true;
         }
 
-        internal static void ModulesLoaded()
-        {
-            Stopwatch sw = null;
-            if (Logger.showSpeed)
-            {
-                sw = new Stopwatch();
-                sw.Start();
-            }
-
-            try
-            {
-                if (OnModulesLoaded != null)
-                    OnModulesLoaded();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError("ModulesLoadedEvent Error: " + ex.ToString());
-            }
-
-            if (sw == null) return;
-            sw.Stop();
-            if (sw.Elapsed.TotalSeconds > 0)
-                Logger.LogSpeed("ModulesLoadedEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
-        }
-
         public static void TossBypass(InventoryHolder holder, uLink.BitStream stream, uLink.NetworkMessageInfo info)
         {
             if (info == null || info.sender == null)

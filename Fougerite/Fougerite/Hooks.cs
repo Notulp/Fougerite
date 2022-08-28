@@ -53,7 +53,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("BluePrintUseEvent Error: " + ex.ToString());
+                            Logger.LogError("BluePrintUseEvent Error: " + ex);
                         }
                     }
 
@@ -109,7 +109,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("ChatRawEvent Error: " + ex.ToString());
+                        Logger.LogError("ChatRawEvent Error: " + ex);
                     }
                 }
 
@@ -125,8 +125,7 @@ namespace Fougerite
                     Player player = Server.GetServer().FindPlayer(arg.argUser.playerClient.userID);
                     if (command == "fougerite")
                     {
-                        player.Message(
-                            "[color #00FFFF]This Server is running Fougerite V[color yellow]" + Bootstrap.Version);
+                        player.Message("[color #00FFFF]This Server is running Fougerite V[color yellow]" + Bootstrap.Version);
                         player.Message("[color green]Fougerite Team: www.fougerite.com");
                         player.Message("[color #0C86AE]Pluton Team: www.pluton-team.org");
                     }
@@ -148,7 +147,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("CommandEvent Error: " + ex.ToString());
+                            Logger.LogError("CommandEvent Error: " + ex);
                         }
                     }
                 }
@@ -165,7 +164,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("ChatEvent Error: " + ex.ToString());
+                        Logger.LogError("ChatEvent Error: " + ex);
                     }
 
                     if (string.IsNullOrEmpty(chatstr.NewText) || chatstr.NewText.Length == 0)
@@ -691,7 +690,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("DoorUseEvent Error: " + ex.ToString());
+                        Logger.LogError("DoorUseEvent Error: " + ex);
                     }
                 }
 
@@ -716,7 +715,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("EntityDecayEvent Error: " + ex.ToString());
+                        Logger.LogError("EntityDecayEvent Error: " + ex);
                     }
 
                     if (decayList.Contains(entity))
@@ -755,7 +754,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("EntityDeployedEvent Error: " + ex.ToString());
+                    Logger.LogError("EntityDeployedEvent Error: " + ex);
                 }
 
                 try
@@ -765,7 +764,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("EntityDeployedWithPlacerEvent Error: " + ex.ToString());
+                    Logger.LogError("EntityDeployedWithPlacerEvent Error: " + ex);
                 }
 
             }
@@ -856,7 +855,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("NPCHurtEvent Error: " + ex.ToString());
+                            Logger.LogError("NPCHurtEvent Error: " + ex);
                         }
 
                         switch (e.status)
@@ -1086,7 +1085,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("DataBlockLoadEvent Error: " + ex.ToString());
+                    Logger.LogError("DataBlockLoadEvent Error: " + ex);
                 }
 
                 int num = 0;
@@ -1443,7 +1442,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PlayerDisconnectedEvent Error " + ex.ToString());
+                    Logger.LogError("PlayerDisconnectedEvent Error " + ex);
                 }
 
                 Logger.LogDebug("User Disconnected: " + player.Name + " (" + player.SteamID + ")" + " (" + player.IP +
@@ -1597,7 +1596,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PluginInitEvent Error: " + ex.ToString());
+                    Logger.LogError("PluginInitEvent Error: " + ex);
                 }
             }
         }
@@ -1615,7 +1614,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("TeleportEvent Error: " + ex.ToString());
+                    Logger.LogError("TeleportEvent Error: " + ex);
                 }
             }
         }
@@ -1635,7 +1634,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("CraftingEvent Error: " + ex.ToString());
+                    Logger.LogError("CraftingEvent Error: " + ex);
                 }
             }
         }
@@ -1707,7 +1706,6 @@ namespace Fougerite
         {
             using (new Stopper(nameof(Hooks), nameof(GrenadeEvent)))
             {
-
                 IHandGrenadeItem item;
                 bool proceed = true;
                 try
@@ -2111,14 +2109,14 @@ namespace Fougerite
                     }
                     else if (BanList.Contains(uid))
                     {
-                        Debug.Log((object)("Rejecting client (" + uid.ToString() + "in banlist)"));
+                        Debug.Log((object)("Rejecting client (" + uid + "in banlist)"));
                         approval.Deny(uLink.NetworkConnectionError.ConnectionBanned);
                     }
                     else if (srv.IsBannedID(uid.ToString()) || srv.IsBannedIP(ip))
                     {
                         if (!srv.IsBannedIP(ip))
                         {
-                            srv.BanPlayerIP(ip, name, "IP is not banned-" + uid.ToString(), "Console");
+                            srv.BanPlayerIP(ip, name, "IP is not banned-" + uid, "Console");
                             Logger.LogDebug("[FougeriteBan] Detected banned ID, but IP is not banned: "
                                             + name + " - " + ip + " - " + uid);
                         }
@@ -2178,8 +2176,7 @@ namespace Fougerite
                             return;
                         }
 
-                        Debug.Log((object)("Denying entry to " + uid.ToString() +
-                                           " because they're already connected"));
+                        Logger.Log("Denying entry to " + uid + " because they're already connected");
                         approval.Deny(uLink.NetworkConnectionError.AlreadyConnectedToAnotherServer);
                     }
                     else if (FloodCooldown.ContainsKey(ip))
@@ -2323,7 +2320,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ResearchItem Error: " + ex.ToString());
+                    Logger.LogError("ResearchItem Error: " + ex);
                 }
 
                 if (!researchEvent.Cancelled)
@@ -3226,7 +3223,6 @@ namespace Fougerite
                 }
             }
         }
-        
 
         public static void ServerShutdown()
         {
@@ -3238,37 +3234,52 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("ServerShutdownEvent Error: " + ex.ToString());
+                Logger.LogError("ServerShutdownEvent Error: " + ex);
             }
 
             World.GetWorld().ServerSaveHandler.ManualSave();
         }
+        
+        internal static void ModulesLoaded()
+        {
+            using (new Stopper(nameof(Hooks), nameof(ModulesLoaded)))
+            {
+                try
+                {
+                    if (OnModulesLoaded != null)
+                        OnModulesLoaded();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("ModulesLoadedEvent Error: " + ex);
+                }
+            }
+        }
 
         public static void ServerStarted()
         {
-            Stopwatch sw = null;
-            if (Logger.showSpeed)
+            using (new Stopper(nameof(Hooks), nameof(ServerStarted)))
             {
-                sw = new Stopwatch();
-                sw.Start();
-            }
+                try
+                {
+                    DataStore.GetInstance().Load();
+                    Server.GetServer().UpdateBanlist();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("ServerInitEvent Critical Error: " + ex);
+                }
 
-            DataStore.GetInstance().Load();
-            Server.GetServer().UpdateBanlist();
-            try
-            {
-                if (OnServerInit != null)
-                    OnServerInit();
+                try
+                {
+                    if (OnServerInit != null)
+                        OnServerInit();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError("ServerInitEvent Error: " + ex);
+                }
             }
-            catch (Exception ex)
-            {
-                Logger.LogError("ServerInitEvent Error: " + ex.ToString());
-            }
-
-            if (sw == null) return;
-            sw.Stop();
-            if (sw.Elapsed.TotalSeconds > 0)
-                Logger.LogSpeed("ServerStartedEvent Speed: " + Math.Round(sw.Elapsed.TotalSeconds) + " secs");
         }
     }
 }

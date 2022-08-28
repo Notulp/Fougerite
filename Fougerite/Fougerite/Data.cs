@@ -7,9 +7,9 @@ namespace Fougerite
     {
         public System.Collections.Generic.List<string> chat_history = new System.Collections.Generic.List<string>();
         public System.Collections.Generic.List<string> chat_history_username = new System.Collections.Generic.List<string>();
-        private static Fougerite.Data data;
-        private static DataStore ds = DataStore.GetInstance();
-        public Hashtable Fougerite_shared_data = new Hashtable();
+        private static Data _data;
+        private static readonly DataStore DS = DataStore.GetInstance();
+        public readonly Hashtable Fougerite_shared_data = new Hashtable();
 
         [Obsolete("Modules hosting plugins will manage plugin config files", false)]
         public static Hashtable inifiles = new Hashtable();
@@ -17,7 +17,7 @@ namespace Fougerite
         [Obsolete("Replaced with DataStore.Add", false)]
         public void AddTableValue(string tablename, object key, object val)
         {
-            ds.Add(tablename, key, val);
+            DS.Add(tablename, key, val);
         }
 
         [Obsolete("Modules hosting plugins will manage plugin config files", false)]
@@ -26,18 +26,20 @@ namespace Fougerite
             return null;
         }
 
-        public static Fougerite.Data GetData()
+        public static Data GetData()
         {
-            if (data == null)
+            if (_data == null)
             {
-                data = new Fougerite.Data();
+                _data = new Data();
             }
-            return data;
+
+            return _data;
         }
 
+        [Obsolete("Replaced with DataStore.Get", false)]
         public object GetTableValue(string tablename, object key)
         {
-            return ds.Get(tablename, key);
+            return DS.Get(tablename, key);
         }
 
         [Obsolete("Modules hosting plugins will manage plugin config files", false)]

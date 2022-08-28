@@ -22,7 +22,6 @@ namespace Fougerite
         private static bool showErrors = false;
         private static bool showException = false;
         internal static bool showRPC = false;
-        internal static bool showSpeed = false;
 
         public static void Init()
         {
@@ -31,7 +30,6 @@ namespace Fougerite
                 showDebug = Config.GetBoolValue("Logging", "debug");
                 showErrors = Config.GetBoolValue("Logging", "error");
                 showException = Config.GetBoolValue("Logging", "exception");
-                showSpeed = Config.GetBoolValue("Logging", "speed");
                 showRPC = Config.GetBoolValue("Logging", "rpctracer");
                 Debug.Log(showRPC.ToString());
             }
@@ -163,19 +161,7 @@ namespace Fougerite
                 Debug.LogException(ex);
             }
             
-            Hooks.LoggerEvent(LoggerEventType.LogSpeed, Message);
-        }
-
-        public static void LogSpeed(string Message)
-        {
-            if (!showSpeed) { return;}
-            Message = "[Hook Speed] " + Message;
-            Message = "[" + DateTime.Now + "] " + Message;
-            SpeedLogWriter = new System.IO.StreamWriter(Path.Combine(LogsFolder, "HookSpeed.log"), true);
-            SpeedLogWriter.WriteLine(Message);
-            SpeedLogWriter.Close();
-            
-            Hooks.LoggerEvent(LoggerEventType.LogSpeed, Message);
+            Hooks.LoggerEvent(LoggerEventType.LogRPC, Message);
         }
 
         public static void LogWarning(string Message, UnityEngine.Object Context = null)

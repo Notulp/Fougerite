@@ -1,9 +1,12 @@
+using System;
+
 namespace Fougerite.Events
 {
     public enum LoggerEventType
     {
         Log,
         LogRPC,
+        [Obsolete("LogSpeed is no longer used in this event.", false)]
         LogSpeed,
         LogError,
         LogException,

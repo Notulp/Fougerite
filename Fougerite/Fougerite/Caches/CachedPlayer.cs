@@ -24,7 +24,7 @@ namespace Fougerite.Caches
         {
             get;
             set;
-        }
+        } = new List<string>();
 
         /// <summary>
         /// Contains all the IPs used by this player.
@@ -34,7 +34,7 @@ namespace Fougerite.Caches
         {
             get;
             set;
-        }
+        } = new List<string>();
 
         /// <summary>
         /// The last login date of the player.

@@ -325,8 +325,7 @@ namespace Fougerite.Concurrent
             int ms = (int)timeout.TotalMilliseconds;
 
             if (ms < -1)
-                throw new ArgumentOutOfRangeException("timeout",
-                    "Number must be either non-negative or -1");
+                throw new ArgumentOutOfRangeException(nameof(timeout), "Number must be either non-negative or -1");
             return ms;
         }
     }
