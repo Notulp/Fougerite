@@ -7,13 +7,13 @@ namespace Fougerite
     /// </summary>
     public class ChatString
     {
-        private string ntext;
-        private string origText;
-        private bool _cancelled = false;
+        private string _ntext;
+        private readonly string _origText;
+        private bool _cancelled;
 
         public ChatString(string str)
         {
-            this.ntext = this.origText = str;
+            _ntext = _origText = str;
         }
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Fougerite
         {
             get
             {
-                return origText;
+                return _origText;
             }
         }
 
@@ -34,7 +34,7 @@ namespace Fougerite
         {
             get
             {
-                return ntext;
+                return _ntext;
             }
             set
             {
@@ -46,11 +46,11 @@ namespace Fougerite
                 if (string.IsNullOrEmpty(value))
                 {
                     _cancelled = true;
-                    ntext = "          ";
+                    _ntext = "          ";
                 }
                 else
                 {
-                    ntext = value;
+                    _ntext = value;
                 }
             }
         }
@@ -62,12 +62,12 @@ namespace Fougerite
         /// <returns>Returns true / false based on the outcome.</returns>
         public bool Contains(string str)
         {
-            return this.origText.Contains(str);
+            return _origText.Contains(str);
         }
 
         public static implicit operator string(ChatString cs)
         {
-            return cs.origText;
+            return cs._origText;
         }
 
         public static implicit operator ChatString(string str)
@@ -83,7 +83,7 @@ namespace Fougerite
         /// <returns>Returns the new string.</returns>
         public string Replace(string find, string replacement)
         {
-            return this.origText.Replace(find, replacement);
+            return _origText.Replace(find, replacement);
         }
 
         /// <summary>
@@ -94,13 +94,13 @@ namespace Fougerite
         /// <returns>Returns the new string.</returns>
         public string Substring(int start, int length)
         {
-            return this.origText.Substring(start, length);
+            return _origText.Substring(start, length);
         }
 
         [Obsolete("Use OriginalMessage instead", false)]
         public override string ToString()
         {
-            return this.origText;
+            return _origText;
         }
     }
 }

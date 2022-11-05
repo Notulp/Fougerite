@@ -1,9 +1,11 @@
-﻿using Facepunch;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Facepunch;
 using UnityEngine;
+using Object = UnityEngine.Object;
+using Random = System.Random;
 
 namespace Fougerite
 {
@@ -13,19 +15,18 @@ namespace Fougerite
     /// </summary>
     public class World
     {
-        private static World world;
+        private static World _world;
         public Dictionary<string, Zone3D> zones;
         public readonly Dictionary<string, double> cache = new Dictionary<string, double>();
-        private List<Entity> deployables = new List<Entity>();
-        private List<Entity> doors = new List<Entity>();
-        private List<Entity> structurems = new List<Entity>();
-        private List<Entity> structures = new List<Entity>();
+        private List<Entity> _deployables = new List<Entity>();
+        private List<Entity> _doors = new List<Entity>();
+        private List<Entity> _structurems = new List<Entity>();
+        private List<Entity> _structures = new List<Entity>();
         public int CacheUpdateTime = 120;
-
 
         public World()
         {
-            this.zones = new Dictionary<string, Zone3D>();
+            zones = new Dictionary<string, Zone3D>();
         }
 
         /// <summary>
@@ -43,11 +44,11 @@ namespace Fougerite
         /// <returns></returns>
         public static World GetWorld()
         {
-            if (world == null)
+            if (_world == null)
             {
-                world = new World();
+                _world = new World();
             }
-            return world;
+            return _world;
         }
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace Fougerite
         /// </summary>
         public void Airdrop()
         {
-            this.Airdrop(1);
+            Airdrop(1);
         }
 
         /// <summary>
@@ -95,33 +96,33 @@ namespace Fougerite
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(float x, float y, float z)
         {
-            this.AirdropAt(x, y, z, 1);
+            AirdropAt(x, y, z, 1);
         }
 
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(float x, float y, float z, int rep)
         {
             Vector3 target = new Vector3(x, y, z);
-            this.AirdropAt(target, rep);
+            AirdropAt(target, rep);
         }
 
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
-        public void AirdropAtPlayer(Fougerite.Player p)
+        public void AirdropAtPlayer(Player p)
         {
-            this.AirdropAt(p.X, p.Y, p.Z, 1);
+            AirdropAt(p.X, p.Y, p.Z, 1);
         }
 
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
-        public void AirdropAtPlayer(Fougerite.Player p, int rep)
+        public void AirdropAtPlayer(Player p, int rep)
         {
-            this.AirdropAt(p.X, p.Y, p.Z, rep);
+            AirdropAt(p.X, p.Y, p.Z, rep);
         }
 
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(Vector3 target, int rep = 1)
         {
             Vector3 original = target;
-            System.Random rand = new System.Random();
+            Random rand = new Random();
             int r, reset;
             r = reset = 20;
             for (int i = 0; i < rep; i++)
@@ -148,7 +149,7 @@ namespace Fougerite
         /// <param name="rep"></param>
         public void AirdropAtOriginal(float x, float y, float z, int rep = 1)
         {
-            this.AirdropAtOriginal(new Vector3(x, y, z), rep);
+            AirdropAtOriginal(new Vector3(x, y, z), rep);
         }
 
         /// <summary>
@@ -156,9 +157,9 @@ namespace Fougerite
         /// </summary>
         /// <param name="p"></param>
         /// <param name="rep"></param>
-        public void AirdropAtOriginal(Fougerite.Player p, int rep = 1)
+        public void AirdropAtOriginal(Player p, int rep = 1)
         {
-            this.AirdropAtOriginal(p.Location, rep);
+            AirdropAtOriginal(p.Location, rep);
         }
 
         /// <summary>
@@ -186,51 +187,52 @@ namespace Fougerite
         /// </summary>
         public void Blocks()
         {
+            string blocksPath = Util.GetAbsoluteFilePath("BlocksData.txt");
             foreach (ItemDataBlock block in DatablockDictionary.All)
             {
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Name: " + block.name + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "ID: " + block.uniqueID + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Flags: " + block._itemFlags.ToString() + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Max Condition: " + block._maxCondition + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Loose Condition: " + block.doesLoseCondition + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Max Uses: " + block._maxUses + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Mins Uses (Display): " + block._minUsesForDisplay + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Spawn Uses Max: " + block._spawnUsesMax + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Spawn Uses Min: " + block._spawnUsesMin + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Splittable: " + block._splittable + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Category: " + block.category.ToString() + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Combinations:\n");
+                File.AppendAllText(blocksPath, "Name: " + block.name + "\n");
+                File.AppendAllText(blocksPath, "ID: " + block.uniqueID + "\n");
+                File.AppendAllText(blocksPath, "Flags: " + block._itemFlags + "\n");
+                File.AppendAllText(blocksPath, "Max Condition: " + block._maxCondition + "\n");
+                File.AppendAllText(blocksPath, "Loose Condition: " + block.doesLoseCondition + "\n");
+                File.AppendAllText(blocksPath, "Max Uses: " + block._maxUses + "\n");
+                File.AppendAllText(blocksPath, "Mins Uses (Display): " + block._minUsesForDisplay + "\n");
+                File.AppendAllText(blocksPath, "Spawn Uses Max: " + block._spawnUsesMax + "\n");
+                File.AppendAllText(blocksPath, "Spawn Uses Min: " + block._spawnUsesMin + "\n");
+                File.AppendAllText(blocksPath, "Splittable: " + block._splittable + "\n");
+                File.AppendAllText(blocksPath, "Category: " + block.category + "\n");
+                File.AppendAllText(blocksPath, "Combinations:\n");
                 foreach (ItemDataBlock.CombineRecipe recipe in block.Combinations)
                 {
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "\t" + recipe.ToString() + "\n");
+                    File.AppendAllText(blocksPath, "\t" + recipe + "\n");
                 }
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Icon: " + block.icon + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "IsRecycleable: " + block.isRecycleable + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "IsRepairable: " + block.isRepairable + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "IsResearchable: " + block.isResearchable + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Description: " + block.itemDescriptionOverride + "\n");
+                File.AppendAllText(blocksPath, "Icon: " + block.icon + "\n");
+                File.AppendAllText(blocksPath, "IsRecycleable: " + block.isRecycleable + "\n");
+                File.AppendAllText(blocksPath, "IsRepairable: " + block.isRepairable + "\n");
+                File.AppendAllText(blocksPath, "IsResearchable: " + block.isResearchable + "\n");
+                File.AppendAllText(blocksPath, "Description: " + block.itemDescriptionOverride + "\n");
                 if (block is BulletWeaponDataBlock)
                 {
                     BulletWeaponDataBlock block2 = (BulletWeaponDataBlock)block;
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Min Damage: " + block2.damageMin + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Max Damage: " + block2.damageMax + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Ammo: " + block2.ammoType.ToString() + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Recoil Duration: " + block2.recoilDuration + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "RecoilPitch Min: " + block2.recoilPitchMin + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "RecoilPitch Max: " + block2.recoilPitchMax + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "RecoilYawn Min: " + block2.recoilYawMin + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "RecoilYawn Max: " + block2.recoilYawMax + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Bullet Range: " + block2.bulletRange + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Sway: " + block2.aimSway + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "SwaySpeed: " + block2.aimSwaySpeed + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Aim Sensitivity: " + block2.aimSensitivtyPercent + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "FireRate: " + block2.fireRate + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "FireRate Secondary: " + block2.fireRateSecondary + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Max Clip Ammo: " + block2.maxClipAmmo + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Reload Duration: " + block2.reloadDuration + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "Attachment Point: " + block2.attachmentPoint + "\n");
+                    File.AppendAllText(blocksPath, "Min Damage: " + block2.damageMin + "\n");
+                    File.AppendAllText(blocksPath, "Max Damage: " + block2.damageMax + "\n");
+                    File.AppendAllText(blocksPath, "Ammo: " + block2.ammoType + "\n");
+                    File.AppendAllText(blocksPath, "Recoil Duration: " + block2.recoilDuration + "\n");
+                    File.AppendAllText(blocksPath, "RecoilPitch Min: " + block2.recoilPitchMin + "\n");
+                    File.AppendAllText(blocksPath, "RecoilPitch Max: " + block2.recoilPitchMax + "\n");
+                    File.AppendAllText(blocksPath, "RecoilYawn Min: " + block2.recoilYawMin + "\n");
+                    File.AppendAllText(blocksPath, "RecoilYawn Max: " + block2.recoilYawMax + "\n");
+                    File.AppendAllText(blocksPath, "Bullet Range: " + block2.bulletRange + "\n");
+                    File.AppendAllText(blocksPath, "Sway: " + block2.aimSway + "\n");
+                    File.AppendAllText(blocksPath, "SwaySpeed: " + block2.aimSwaySpeed + "\n");
+                    File.AppendAllText(blocksPath, "Aim Sensitivity: " + block2.aimSensitivtyPercent + "\n");
+                    File.AppendAllText(blocksPath, "FireRate: " + block2.fireRate + "\n");
+                    File.AppendAllText(blocksPath, "FireRate Secondary: " + block2.fireRateSecondary + "\n");
+                    File.AppendAllText(blocksPath, "Max Clip Ammo: " + block2.maxClipAmmo + "\n");
+                    File.AppendAllText(blocksPath, "Reload Duration: " + block2.reloadDuration + "\n");
+                    File.AppendAllText(blocksPath, "Attachment Point: " + block2.attachmentPoint + "\n");
                 }
-                File.AppendAllText(Util.GetAbsoluteFilePath("BlocksData.txt"), "------------------------------------------------------------\n\n");
+                File.AppendAllText(blocksPath, "------------------------------------------------------------\n\n");
             }
         }
 
@@ -241,9 +243,9 @@ namespace Fougerite
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public StructureMaster CreateSM(Fougerite.Player p)
+        public StructureMaster CreateSM(Player p)
         {
-            return this.CreateSM(p, p.X, p.Y, p.Z, p.PlayerClient.transform.rotation);
+            return CreateSM(p, p.X, p.Y, p.Z, p.PlayerClient.transform.rotation);
         }
 
         /// <summary>
@@ -257,9 +259,9 @@ namespace Fougerite
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        public StructureMaster CreateSM(Fougerite.Player p, float x, float y, float z)
+        public StructureMaster CreateSM(Player p, float x, float y, float z)
         {
-            return this.CreateSM(p, x, y, z, Quaternion.identity);
+            return CreateSM(p, x, y, z, Quaternion.identity);
         }
         
         /// <summary>
@@ -274,7 +276,7 @@ namespace Fougerite
         /// <param name="z"></param>
         /// <param name="rot"></param>
         /// <returns></returns>
-        public StructureMaster CreateSM(Fougerite.Player p, float x, float y, float z, Quaternion rot)
+        public StructureMaster CreateSM(Player p, float x, float y, float z, Quaternion rot)
         {
             StructureMaster master = NetCull.InstantiateClassic<StructureMaster>(Bundling.Load<StructureMaster>("content/structures/StructureMasterPrefab"), new Vector3(x, y, z), rot, 0);
             master.SetupCreator(p.PlayerClient.controllable);
@@ -300,7 +302,7 @@ namespace Fougerite
         public float GetGround(float x, float z)
         {
             Vector3 above = new Vector3(x, 2000f, z);
-            return (float)((RaycastHit)Physics.RaycastAll(above, Vector3.down, 2000f)[0]).point.y;
+            return Physics.RaycastAll(above, Vector3.down, 2000f)[0].point.y;
         }
 
         /// <summary>
@@ -311,7 +313,7 @@ namespace Fougerite
         public float GetGround(Vector3 target)
         {
             Vector3 above = new Vector3(target.x, 2000f, target.z);
-            return (float)((RaycastHit)Physics.RaycastAll(above, Vector3.down, 2000f)[0]).point.y;
+            return Physics.RaycastAll(above, Vector3.down, 2000f)[0].point.y;
         }
 
         /// <summary>
@@ -399,7 +401,7 @@ namespace Fougerite
                     File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Amount Min: " + entry.amountMin + "\n");
                     File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Amount Max: " + entry.amountMax + "\n");
                     File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Weight: " + entry.weight + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Object: " + entry.obj.ToString() + "\n\n");
+                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Object: " + entry.obj + "\n\n");
                 }
             }
         }
@@ -445,7 +447,7 @@ namespace Fougerite
         /// <returns></returns>
         public object Spawn(string prefab, Vector3 location)
         {
-            return this.Spawn(prefab, location, 1);
+            return Spawn(prefab, location, 1);
         }
 
         /// <summary>
@@ -457,7 +459,7 @@ namespace Fougerite
         /// <returns></returns>
         public object Spawn(string prefab, Vector3 location, int rep)
         {
-            return this.Spawn(prefab, location, Quaternion.identity, rep);
+            return Spawn(prefab, location, Quaternion.identity, rep);
         }
 
         /// <summary>
@@ -470,7 +472,7 @@ namespace Fougerite
         /// <returns></returns>
         public object Spawn(string prefab, float x, float y, float z)
         {
-            return this.Spawn(prefab, new Vector3(x, y, z), 1);
+            return Spawn(prefab, new Vector3(x, y, z), 1);
         }
 
         /// <summary>
@@ -529,7 +531,7 @@ namespace Fougerite
             }
             catch (Exception e)
             {
-                Logger.LogError("SpawnEntity error: " + e.ToString());
+                Logger.LogError("SpawnEntity error: " + e);
             }
             return obj2;
         }
@@ -588,7 +590,7 @@ namespace Fougerite
             }
             catch (Exception e)
             {
-                Logger.LogError("Spawn error: " + e.ToString());
+                Logger.LogError("Spawn error: " + e);
             }
             return obj2;
         }
@@ -604,7 +606,7 @@ namespace Fougerite
         /// <returns></returns>
         public object Spawn(string prefab, float x, float y, float z, int rep)
         {
-            return this.Spawn(prefab, new Vector3(x, y, z), Quaternion.identity, rep);
+            return Spawn(prefab, new Vector3(x, y, z), Quaternion.identity, rep);
         }
 
         /// <summary>
@@ -618,7 +620,7 @@ namespace Fougerite
         /// <returns></returns>
         public object Spawn(string prefab, float x, float y, float z, Quaternion rot)
         {
-            return this.Spawn(prefab, new Vector3(x, y, z), rot, 1);
+            return Spawn(prefab, new Vector3(x, y, z), rot, 1);
         }
 
         /// <summary>
@@ -633,7 +635,7 @@ namespace Fougerite
         /// <returns></returns>
         public object Spawn(string prefab, float x, float y, float z, Quaternion rot, int rep)
         {
-            return this.Spawn(prefab, new Vector3(x, y, z), rot, rep);
+            return Spawn(prefab, new Vector3(x, y, z), rot, rep);
         }
 
         /// <summary>
@@ -642,9 +644,9 @@ namespace Fougerite
         /// <param name="prefab"></param>
         /// <param name="p"></param>
         /// <returns></returns>
-        public object SpawnAtPlayer(string prefab, Fougerite.Player p)
+        public object SpawnAtPlayer(string prefab, Player p)
         {
-            return this.Spawn(prefab, p.Location, p.PlayerClient.transform.rotation, 1);
+            return Spawn(prefab, p.Location, p.PlayerClient.transform.rotation, 1);
         }
         
         /// <summary>
@@ -654,9 +656,9 @@ namespace Fougerite
         /// <param name="p"></param>
         /// <param name="rep"></param>
         /// <returns></returns>
-        public object SpawnAtPlayer(string prefab, Fougerite.Player p, int rep)
+        public object SpawnAtPlayer(string prefab, Player p, int rep)
         {
-            return this.Spawn(prefab, p.Location, p.PlayerClient.transform.rotation, rep);
+            return Spawn(prefab, p.Location, p.PlayerClient.transform.rotation, rep);
         }
 
         /// <summary>
@@ -676,33 +678,33 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[Fougerite BasicDoors] Some plugin is calling World.BasicDoors in a Thread/Timer. This is dangerous, and may cause crashes.");
                 }
-                if (!this.cache.ContainsKey("BasicDoor") || forceupdate || this.doors.Count == 0)
+                if (!cache.ContainsKey("BasicDoor") || forceupdate || _doors.Count == 0)
                 {
-                    this.cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                    IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<BasicDoor>()
+                    cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                    IEnumerable<Entity> source = from s in Object.FindObjectsOfType<BasicDoor>()
                         select new Entity(s);
-                    this.doors = source.ToList();
+                    _doors = source.ToList();
                 }
-                else if (this.cache.ContainsKey("BasicDoor"))
+                else if (cache.ContainsKey("BasicDoor"))
                 {
-                    double num = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds - this.cache["BasicDoor"];
-                    if (num >= this.CacheUpdateTime || double.IsNaN(num) || num <= 0)
+                    double num = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds - cache["BasicDoor"];
+                    if (num >= CacheUpdateTime || double.IsNaN(num) || num <= 0)
                     {
-                        this.cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                        IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<BasicDoor>()
+                        cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                        IEnumerable<Entity> source = from s in Object.FindObjectsOfType<BasicDoor>()
                             select new Entity(s);
-                        this.doors = source.ToList();
+                        _doors = source.ToList();
                     }
                 }
             }
             catch
             {
-                this.cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<BasicDoor>()
+                cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                IEnumerable<Entity> source = from s in Object.FindObjectsOfType<BasicDoor>()
                                              select new Entity(s);
-                this.doors = source.ToList();
+                _doors = source.ToList();
             }
-            return this.doors;
+            return _doors;
         }
 
         public IEnumerable<Entity> DeployableObjects(bool forceupdate = false)
@@ -713,33 +715,33 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[Fougerite DeployableObjects] Some plugin is calling World.DeployableObjects in a Thread/Timer. This is dangerous, and may cause crashes.");
                 }
-                if (!this.cache.ContainsKey("DeployableObject") || forceupdate || this.deployables.Count == 0)
+                if (!cache.ContainsKey("DeployableObject") || forceupdate || _deployables.Count == 0)
                 {
-                    this.cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                    IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<DeployableObject>()
+                    cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                    IEnumerable<Entity> source = from s in Object.FindObjectsOfType<DeployableObject>()
                         select new Entity(s);
-                    this.deployables = source.ToList();
+                    _deployables = source.ToList();
                 }
-                else if (this.cache.ContainsKey("DeployableObject"))
+                else if (cache.ContainsKey("DeployableObject"))
                 {
-                    double num = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds - this.cache["DeployableObject"];
-                    if (num >= this.CacheUpdateTime || double.IsNaN(num) || num <= 0)
+                    double num = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds - cache["DeployableObject"];
+                    if (num >= CacheUpdateTime || double.IsNaN(num) || num <= 0)
                     {
-                        this.cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                        IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<DeployableObject>()
+                        cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                        IEnumerable<Entity> source = from s in Object.FindObjectsOfType<DeployableObject>()
                             select new Entity(s);
-                        this.deployables = source.ToList();
+                        _deployables = source.ToList();
                     }
                 }
             }
             catch
             {
-                this.cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<DeployableObject>()
+                cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                IEnumerable<Entity> source = from s in Object.FindObjectsOfType<DeployableObject>()
                                              select new Entity(s);
-                this.deployables = source.ToList();
+                _deployables = source.ToList();
             }
-            return this.deployables;
+            return _deployables;
         }
 
         public IEnumerable<Entity> StructureComponents(bool forceupdate = false)
@@ -750,35 +752,35 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[Fougerite StructureComponents] Some plugin is calling World.StructureComponents in a Thread/Timer. This is dangerous, and may cause crashes.");
                 }
-                if (!this.cache.ContainsKey("StructureComponent") || forceupdate || this.structures.Count == 0)
+                if (!cache.ContainsKey("StructureComponent") || forceupdate || _structures.Count == 0)
                 {
-                    this.cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                    IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<StructureComponent>()
+                    cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                    IEnumerable<Entity> source = from s in Object.FindObjectsOfType<StructureComponent>()
                         select new Entity(s);
-                    this.structures = source.ToList();
+                    _structures = source.ToList();
                 }
-                else if (this.cache.ContainsKey("StructureComponent"))
+                else if (cache.ContainsKey("StructureComponent"))
                 {
-                    double num = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds - this.cache["StructureComponent"];
-                    if (num >= this.CacheUpdateTime || double.IsNaN(num) || num <= 0)
+                    double num = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds - cache["StructureComponent"];
+                    if (num >= CacheUpdateTime || double.IsNaN(num) || num <= 0)
                     {
-                        this.cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                        cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
                         IEnumerable<Entity> source =
-                            from s in UnityEngine.Object.FindObjectsOfType<StructureComponent>()
+                            from s in Object.FindObjectsOfType<StructureComponent>()
                             select new Entity(s);
-                        this.structures = source.ToList();
+                        _structures = source.ToList();
                     }
                 }
             }
             catch
             {
-                this.cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
                 IEnumerable<Entity> source =
-                    from s in UnityEngine.Object.FindObjectsOfType<StructureComponent>()
+                    from s in Object.FindObjectsOfType<StructureComponent>()
                     select new Entity(s);
-                this.structures = source.ToList();
+                _structures = source.ToList();
             }
-            return this.structures;
+            return _structures;
         }
 
         public IEnumerable<Entity> StructureMasters(bool forceupdate = false)
@@ -789,33 +791,33 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[Fougerite StructureMasters] Some plugin is calling World.StructureMasters in a Thread/Timer. This is dangerous, and may cause crashes.");
                 }
-                if (!this.cache.ContainsKey("StructureMaster") || forceupdate || this.structurems.Count == 0)
+                if (!cache.ContainsKey("StructureMaster") || forceupdate || _structurems.Count == 0)
                 {
-                    this.cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                    cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
                     IEnumerable<Entity> source = from s in StructureMaster.AllStructures
                         select new Entity(s);
-                    this.structurems = source.ToList();
+                    _structurems = source.ToList();
                 }
-                else if (this.cache.ContainsKey("StructureMaster"))
+                else if (cache.ContainsKey("StructureMaster"))
                 {
-                    double num = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds - this.cache["StructureMaster"];
-                    if (num >= this.CacheUpdateTime || double.IsNaN(num) || num <= 0)
+                    double num = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds - cache["StructureMaster"];
+                    if (num >= CacheUpdateTime || double.IsNaN(num) || num <= 0)
                     {
-                        this.cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                        cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
                         IEnumerable<Entity> source = from s in StructureMaster.AllStructures
                             select new Entity(s);
-                        this.structurems = source.ToList();
+                        _structurems = source.ToList();
                     }
                 }
             }
             catch
             {
-                this.cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
+                cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
                 IEnumerable<Entity> source = from s in StructureMaster.AllStructures
                                              select new Entity(s);
-                this.structurems = source.ToList();
+                _structurems = source.ToList();
             }
-            return this.structurems;
+            return _structurems;
         }
 
         /// <summary>
@@ -831,7 +833,7 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[Fougerite LootableObjects] Some plugin is calling World.LootableObjects in a Thread/Timer. This is dangerous, and may cause crashes.");
                 }
-                IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<LootableObject>()
+                IEnumerable<Entity> source = from s in Object.FindObjectsOfType<LootableObject>()
                                              select new Entity(s);
                 return source.ToList();
             }
@@ -850,7 +852,7 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[Fougerite SupplyCrates] Some plugin is calling World.SupplyCrates in a Thread/Timer. This is dangerous, and may cause crashes.");
                 }
-                IEnumerable<Entity> source = from s in UnityEngine.Object.FindObjectsOfType<SupplyCrate>()
+                IEnumerable<Entity> source = from s in Object.FindObjectsOfType<SupplyCrate>()
                                              select new Entity(s);
                 return source.ToList();
             }
@@ -871,9 +873,9 @@ namespace Fougerite
                     {
                         Logger.LogWarning("[Fougerite Entities] Some plugin is calling World.Entities in a Thread/Timer. This is dangerous, and may cause crashes.");
                     }
-                    var structs = UnityEngine.Object.FindObjectsOfType<StructureComponent>();
-                    var deployables = UnityEngine.Object.FindObjectsOfType<DeployableObject>();
-                    var crates = UnityEngine.Object.FindObjectsOfType<SupplyCrate>();
+                    var structs = Object.FindObjectsOfType<StructureComponent>();
+                    var deployables = Object.FindObjectsOfType<DeployableObject>();
+                    var crates = Object.FindObjectsOfType<SupplyCrate>();
                     IEnumerable<Entity> component = structs.Select(x => new Entity(x)).ToList();
                     IEnumerable<Entity> deployable = deployables.Select(x => new Entity(x)).ToList();
                     IEnumerable<Entity> supplydrop = crates.Select(x => new Entity(x)).ToList();

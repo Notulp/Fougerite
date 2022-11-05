@@ -197,10 +197,9 @@ namespace Fougerite
             try
             {
                 s = s.Replace("(", "").Replace(")", "").Replace(" ", "");
-                var spl = s.Split(',');
-                float f1, f2;
-                float.TryParse(spl[0], out f1);
-                float.TryParse(spl[1], out f2);
+                string[] spl = s.Split(',');
+                float.TryParse(spl[0], out float f1);
+                float.TryParse(spl[1], out float f2);
                 return new Vector2(f1, f2);
             }
             catch
@@ -219,11 +218,10 @@ namespace Fougerite
             try
             {
                 s = s.Replace("(", "").Replace(")", "").Replace(" ", "");
-                var spl = s.Split(',');
-                float f1, f2, f3;
-                float.TryParse(spl[0], out f1);
-                float.TryParse(spl[1], out f2);
-                float.TryParse(spl[2], out f3);
+                string[] spl = s.Split(',');
+                float.TryParse(spl[0], out float f1);
+                float.TryParse(spl[1], out float f2);
+                float.TryParse(spl[2], out float f3);
                 return new Vector3(f1, f2, f3);
             }
             catch
@@ -519,14 +517,13 @@ namespace Fougerite
             try
             {
                 // Running Through Table Names
-                foreach (var x in storage.Keys)
+                foreach (object x in storage.Keys)
                 {
                     // Getting the keys and values
-                    Hashtable hashtable = storage[x] as Hashtable;
-                    if (hashtable != null)
+                    if (storage[x] is Hashtable hashtable)
                     {
                         // Running through keys
-                        foreach (var y in hashtable.Keys)
+                        foreach (object y in hashtable.Keys)
                         {
                             // Getting value
                             if (y != null)
@@ -575,13 +572,12 @@ namespace Fougerite
             try
             {
                 // Running through table names
-                foreach (var x in storage.Keys)
+                foreach (object x in storage.Keys)
                 {
                     // Getting Keys and Values
-                    Hashtable hashtable = storage[x] as Hashtable;
-                    if (hashtable != null)
+                    if (storage[x] is Hashtable hashtable)
                     {
-                        foreach (var y in keys)
+                        foreach (object y in keys)
                         {
                             if (hashtable.ContainsKey(y))
                             {
@@ -977,8 +973,8 @@ namespace Fougerite
         public List<Entity> FindEntitysAroundFast(Vector3 givenPosition, float dist = 1f)
         {
             Collider[] array = Facepunch.MeshBatch.MeshBatchPhysics.OverlapSphere(givenPosition, dist);
-            List<Entity> list = new List<Entity>();
-            foreach (var x in array)
+            List<Entity> list = new List<Entity>(array.Length);
+            foreach (Collider x in array)
             {
                 if (x.gameObject.GetComponent<StructureMaster>())
                 {
@@ -1036,8 +1032,7 @@ namespace Fougerite
                 }
             }
 
-            return
-                closest.gameObject; // Specific Entities can be converted to Entity, see the Entity class's constructor. (Example: It doesn't handle BasicDoor.)
+            return closest.gameObject; // Specific Entities can be converted to Entity, see the Entity class's constructor. (Example: It doesn't handle BasicDoor.)
         }
 
         /// <summary>
@@ -1049,7 +1044,9 @@ namespace Fougerite
         public List<GameObject> FindObjectsAroundFast(Vector3 givenPosition, float dist = 1f)
         {
             Collider[] array = Facepunch.MeshBatch.MeshBatchPhysics.OverlapSphere(givenPosition, dist);
-            return array.Select(x => x.gameObject).ToList();
+            List<GameObject> list = new List<GameObject>(array.Length);
+            list.AddRange(array.Select(x => x.gameObject));
+            return list;
         }
 
 
