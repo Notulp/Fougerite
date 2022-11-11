@@ -2008,24 +2008,7 @@ namespace Fougerite
             {
                 try
                 {
-                    UnityEngine.Object[] obj = UnityEngine.Object.FindObjectsOfType(typeof(GameObject));
-                    GameObject[] objArray = null;
-                    if (obj is GameObject[] objects)
-                    {
-                        objArray = objects;
-                    }
-                    else
-                    {
-                        Logger.LogWarning("[uLink Failure] Array was not GameObject?!");
-                    }
-
-                    if (objArray == null)
-                    {
-                        Logger.LogWarning(
-                            "[uLink Failure] Something bad happened during the disconnection... Report this.");
-                        return;
-                    }
-
+                    GameObject[] objArray = (GameObject[]) UnityEngine.Object.FindObjectsOfType(typeof(GameObject));
                     if (NetworkPlayer is uLink.NetworkPlayer np)
                     {
                         object data = np.GetLocalData();

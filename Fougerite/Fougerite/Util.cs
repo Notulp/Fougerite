@@ -746,10 +746,30 @@ namespace Fougerite
         /// <returns></returns>
         public IEnumerable<string> SplitInParts(string s, int partLength)
         {
-            if (string.IsNullOrEmpty(s) || partLength <= 0) yield return null;
+            if (string.IsNullOrEmpty(s) || partLength <= 0) 
+                yield return null;
 
             for (var i = 0; i < s.Length; i += partLength)
                 yield return s.Substring(i, Math.Min(partLength, s.Length - i));
+        }
+        
+        /// <summary>
+        /// Splits the string to the specified amount of parts.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="partLength"></param>
+        /// <returns></returns>
+        public List<string> SplitInPartsLs(string s, int partLength)
+        {
+            List<string> data = new List<string>();
+            
+            if (string.IsNullOrEmpty(s) || partLength <= 0) 
+                return data;
+            
+            for (var i = 0; i < s.Length; i += partLength)
+                data.Add(s.Substring(i, Math.Min(partLength, s.Length - i)));
+
+            return data;
         }
 
         public TimeSpan ConvertToTime(long ticks)
