@@ -16,7 +16,10 @@ namespace Fougerite.Events
             _grenade = gr;
             _pos = pos;
         }
-
+        
+        /// <summary>
+        /// Returns whether the event was cancelled.
+        /// </summary>
         public bool Cancelled
         {
             get { return _cancel; }

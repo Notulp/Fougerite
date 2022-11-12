@@ -20,13 +20,13 @@ namespace Fougerite.Events
         public PlayerApprovalEvent(ConnectionAcceptor ca, NetworkPlayerApproval approval, ClientConnection cc, 
             bool AboutToDeny, ulong steamid, string ip, string name)
         {
-            this._ca = ca;
-            this._cc = cc;
-            this._approval = approval;
-            this._deny = AboutToDeny;
-            this._steamid = steamid;
-            this._ip = ip;
-            this._name = name;
+            _ca = ca;
+            _cc = cc;
+            _approval = approval;
+            _deny = AboutToDeny;
+            _steamid = steamid;
+            _ip = ip;
+            _name = name;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Fougerite.Events
         {
             get
             {
-                Fougerite.Player pl = Fougerite.Server.GetServer().FindPlayer(_cc.UserID);
+                Player pl = Server.GetServer().FindPlayer(_cc.UserID);
                 if (pl != null)
                 {
                     return pl.IsOnline;

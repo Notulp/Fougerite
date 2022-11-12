@@ -15,22 +15,22 @@
 
         public GatherEvent(ResourceTarget r, ItemDataBlock db, int qty)
         {
-            this.res = r;
-            this._qty = qty;
-            this._item = db.name;
-            this._type = "Tree";
-            this.dataBlock = db;
-            this.Override = false;
+            res = r;
+            _qty = qty;
+            _item = db.name;
+            _type = "Tree";
+            dataBlock = db;
+            Override = false;
         }
 
         public GatherEvent(ResourceTarget r, ResourceGivePair gp, int qty)
         {
-            this.res = r;
-            this._qty = qty;
-            this._item = gp.ResourceItemDataBlock.name;
-            this._type = this.res.type.ToString();
-            this.resourceGivePair = gp;
-            this.Override = false;
+            res = r;
+            _qty = qty;
+            _item = gp.ResourceItemDataBlock.name;
+            _type = res.type.ToString();
+            resourceGivePair = gp;
+            Override = false;
         }
 
         /// <summary>
@@ -40,7 +40,7 @@
         {
             get
             {
-                return this.res.GetTotalResLeft();
+                return res.GetTotalResLeft();
             }
         }
 
@@ -51,11 +51,11 @@
         {
             get
             {
-                return this._item;
+                return _item;
             }
             set
             {
-                this._item = value;
+                _item = value;
             }
         }
 
@@ -66,11 +66,11 @@
         {
             get
             {
-                return this._over;
+                return _over;
             }
             set
             {
-                this._over = value;
+                _over = value;
             }
         }
 
@@ -81,7 +81,7 @@
         {
             get
             {
-                return this.res.GetPercentFull();
+                return res.GetPercentFull();
             }
         }
 
@@ -92,11 +92,11 @@
         {
             get
             {
-                return this._qty;
+                return _qty;
             }
             set
             {
-                this._qty = value;
+                _qty = value;
             }
         }
 
@@ -107,7 +107,7 @@
         {
             get
             {
-                return this._type;
+                return _type;
             }
         }
 
@@ -118,7 +118,7 @@
         {
             get
             {
-                return this.res;
+                return res;
             }
         }
 
@@ -129,7 +129,7 @@
         {
             get
             {
-                return this.dataBlock;
+                return dataBlock;
             }
         }
 
@@ -140,7 +140,7 @@
         {
             get
             {
-                return this.resourceGivePair;
+                return resourceGivePair;
             }
         }
     }

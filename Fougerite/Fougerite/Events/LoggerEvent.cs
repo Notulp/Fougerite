@@ -26,6 +26,9 @@ namespace Fougerite.Events
             _type = type;
         }
 
+        /// <summary>
+        /// Returns the type of the log event.
+        /// </summary>
         public LoggerEventType Type
         {
             get
@@ -34,6 +37,9 @@ namespace Fougerite.Events
             }
         }
 
+        /// <summary>
+        /// Returns the message of the log event.
+        /// </summary>
         public string Message
         {
             get

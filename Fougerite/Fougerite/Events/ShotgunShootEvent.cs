@@ -17,7 +17,7 @@ namespace Fougerite.Events
     public class ShotgunShootEvent
     {
         private readonly ShotgunDataBlock _bw;
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
         private readonly ItemRepresentation _ir;
         private readonly uLink.NetworkMessageInfo _unmi;
         private readonly IBulletWeaponItem _ibw;
@@ -34,7 +34,7 @@ namespace Fougerite.Events
         public ShotgunShootEvent(ShotgunDataBlock bw, ItemRepresentation ir, uLink.NetworkMessageInfo ui, IBulletWeaponItem ibw, int pellets, ShotgunEventType type)
         {
             TakeDamage local = ibw.inventory.GetLocal<TakeDamage>();
-            _player = Fougerite.Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
+            _player = Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
             _bw = bw;
             _ir = ir;
             _ibw = ibw;
@@ -54,7 +54,7 @@ namespace Fougerite.Events
             IDRemoteBodyPart part, bool flag, bool flag2, bool flag3, BodyPart part2, Vector3 vector, Vector3 vector2)
         {
             TakeDamage local = ibw.inventory.GetLocal<TakeDamage>();
-            _player = Fougerite.Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
+            _player = Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
             _bw = bw;
             _ir = ir;
             _ibw = ibw;
@@ -93,15 +93,15 @@ namespace Fougerite.Events
         /// </summary>
         public IBulletWeaponItem IBulletWeaponItem
         {
-            get { return this._ibw; }
+            get { return _ibw; }
         }
 
         /// <summary>
         /// The player who shoots the gun.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
-            get { return this._player; }
+            get { return _player; }
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Fougerite.Events
         /// </summary>
         public ShotgunDataBlock ShotgunDataBlock
         {
-            get { return this._bw; }
+            get { return _bw; }
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Fougerite.Events
         /// </summary>
         public ItemRepresentation ItemRepresentation
         {
-            get { return this._ir; }
+            get { return _ir; }
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Fougerite.Events
         /// </summary>
         public uLink.NetworkMessageInfo NetworkMessageInfo
         {
-            get { return this._unmi; }
+            get { return _unmi; }
         }
         
         /// <summary>

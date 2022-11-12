@@ -6,7 +6,7 @@
     public class BowShootEvent
     {
         private readonly BowWeaponDataBlock _bw;
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
         private readonly ItemRepresentation _ir;
         private readonly uLink.NetworkMessageInfo _unmi;
         private readonly IBowWeaponItem _ibw;
@@ -14,7 +14,7 @@
         public BowShootEvent(BowWeaponDataBlock bw, ItemRepresentation ir, uLink.NetworkMessageInfo ui, IBowWeaponItem ibw)
         {
             TakeDamage local = ibw.inventory.GetLocal<TakeDamage>();
-            _player = Fougerite.Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
+            _player = Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
             _bw = bw;
             _ibw = ibw;
             _ir = ir;
@@ -34,15 +34,15 @@
         /// </summary>
         public IBowWeaponItem IBowWeaponItem
         {
-            get { return this._ibw; }
+            get { return _ibw; }
         }
 
         /// <summary>
         /// Gets the player who is shooting.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
-            get { return this._player; }
+            get { return _player; }
         }
 
         /// <summary>
@@ -50,7 +50,7 @@
         /// </summary>
         public BowWeaponDataBlock BowWeaponDataBlock
         {
-            get { return this._bw; }
+            get { return _bw; }
         }
 
         /// <summary>
@@ -58,7 +58,7 @@
         /// </summary>
         public ItemRepresentation ItemRepresentation
         {
-            get { return this._ir; }
+            get { return _ir; }
         }
 
         /// <summary>
@@ -66,7 +66,7 @@
         /// </summary>
         public uLink.NetworkMessageInfo NetworkMessageInfo
         {
-            get { return this._unmi; }
+            get { return _unmi; }
         }
     }
 }

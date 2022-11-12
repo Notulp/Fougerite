@@ -7,18 +7,18 @@ namespace Fougerite
     /// </summary>
     public class EntityInv
     {
-        private readonly Fougerite.Entity _entity;
+        private readonly Entity _entity;
         private readonly EntityItem[] _items;
         private readonly Inventory _inv;
 
         public EntityInv(Inventory inv, Entity ent)
         {
-            this._entity = ent;
-            this._inv = inv;
+            _entity = ent;
+            _inv = inv;
 
-            this._items = new EntityItem[inv.slotCount];
+            _items = new EntityItem[inv.slotCount];
             for (var i = 0; i < inv.slotCount; i++)
-                this._items[i] = new EntityItem(this._inv, i);
+                _items[i] = new EntityItem(_inv, i);
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Fougerite
         /// <param name="name">Name of the item.</param>
         public void AddItem(string name)
         {
-            this.AddItem(name, 1);
+            AddItem(name, 1);
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Fougerite
         public void AddItem(string name, int amount)
         {
             ItemDataBlock item = DatablockDictionary.GetByName(name);
-            this._inv.AddItemAmount (item, amount);
+            _inv.AddItemAmount (item, amount);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Fougerite
         /// <param name="slot">The slot number of the Chest / Stash. Large: 1-35, Medium: 1-11, Stash: 1-3</param>
         public void AddItemTo(string name, int slot)
         {
-            this.AddItemTo(name, slot, 1);
+            AddItemTo(name, slot, 1);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Fougerite
             if (byName != null)
             {
                 Inventory.Slot.Kind place = Inventory.Slot.Kind.Default;
-                this._inv.AddItemSomehow(byName, new Inventory.Slot.Kind?(place), slot, amount);
+                _inv.AddItemSomehow(byName, new Inventory.Slot.Kind?(place), slot, amount);
             }
         }
 
@@ -72,26 +72,26 @@ namespace Fougerite
         /// </summary>
         public void ClearAll()
         {
-            this._inv.Clear();
+            _inv.Clear();
         }
         
         /// <summary>
         /// Gets entity by the Inventory.
         /// </summary>
-        public Fougerite.Entity Entity
+        public Entity Entity
         {
             get
             {
-                return this._entity;
+                return _entity;
             }
         }
 
         private int GetFreeSlots ()
         {
             int num = 0;
-            for (int i = 0; i < this._inv.slotCount; i++)
+            for (int i = 0; i < _inv.slotCount; i++)
             {
-                if (this._inv.IsSlotFree(i))
+                if (_inv.IsSlotFree(i))
                 {
                     num++;
                 }
@@ -108,7 +108,7 @@ namespace Fougerite
         public bool HasItem(string name, int amount = 1)
         {
             int num = 0;
-            foreach (EntityItem item in this.Items)
+            foreach (EntityItem item in Items)
             {
                 if (item.Name == name)
                 {
@@ -130,7 +130,7 @@ namespace Fougerite
         /// <param name="s2"></param>
         public void MoveItem(int s1, int s2)
         {
-            this._inv.MoveItemAtSlotToEmptySlot(this._inv, s1, s2);
+            _inv.MoveItemAtSlotToEmptySlot(_inv, s1, s2);
         }
 
         /// <summary>
@@ -140,24 +140,24 @@ namespace Fougerite
         /// <param name="amount"></param>
         public void RemoveItem (string name, int amount = 1)
         {
-            foreach (EntityItem item in this.Items)
+            foreach (EntityItem item in Items)
             {
                 if (item.Name == name)
                 {
                     if (item.UsesLeft > amount)
                     {
-                        this._inv.RemoveItem(item.RInventoryItem);
-                        this.AddItem(item.Name, (item.UsesLeft - amount));
+                        _inv.RemoveItem(item.RInventoryItem);
+                        AddItem(item.Name, (item.UsesLeft - amount));
                         return;
                     }
                     
                     if (item.UsesLeft == amount)
                     {
-                        this._inv.RemoveItem(item.RInventoryItem);
+                        _inv.RemoveItem(item.RInventoryItem);
                         return;
                     }
                     
-                    this._inv.RemoveItem(item.RInventoryItem);
+                    _inv.RemoveItem(item.RInventoryItem);
                     amount -= item.UsesLeft;
                 }    
             }
@@ -170,16 +170,16 @@ namespace Fougerite
         /// <param name="amount"></param>
         public void RemoveItem (int slot, int amount = 1)
         {
-            EntityItem item = this.Items [slot];
+            EntityItem item = Items [slot];
             if (item == null)
                 return;
             if (item.UsesLeft > amount)
             {
-                this._inv.RemoveItem (item.RInventoryItem);
-                this.AddItem (item.Name, (item.UsesLeft - amount));
+                _inv.RemoveItem (item.RInventoryItem);
+                AddItem (item.Name, (item.UsesLeft - amount));
                 return;
             }
-            this._inv.RemoveItem (item.RInventoryItem);
+            _inv.RemoveItem (item.RInventoryItem);
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Fougerite
         {
             get
             {
-                return this.GetFreeSlots();
+                return GetFreeSlots();
             }
         }
 
@@ -200,7 +200,7 @@ namespace Fougerite
         {
             get
             {
-                return this._inv.slotCount;
+                return _inv.slotCount;
             }
         }
 
@@ -211,7 +211,7 @@ namespace Fougerite
         {
             get
             {
-                return this._inv;
+                return _inv;
             }
         }
 
@@ -222,7 +222,7 @@ namespace Fougerite
         {
             get
             {
-                return this._items;
+                return _items;
             }
         }
     }

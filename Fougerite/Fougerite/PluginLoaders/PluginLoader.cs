@@ -89,7 +89,7 @@
 
             if (plugin.State != PluginState.Loaded)
             {
-                Logger.LogError("[PluginLoader] Failed to initalize " + plugin.Name + ".");
+                Logger.LogError($"[PluginLoader] Failed to initalize {plugin.Name}.");
                 return;
             }
 

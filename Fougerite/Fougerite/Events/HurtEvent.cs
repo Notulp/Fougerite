@@ -12,7 +12,7 @@
         private object _attacker;
         private DamageEvent _de;
         private bool _decay;
-        private Fougerite.Entity _ent;
+        private Entity _ent;
         private object _victim;
         private string _weapon;
         private WeaponImpact _wi;
@@ -31,53 +31,53 @@
             //Logger.LogDebug(string.Format("[DamageEvent] {0}", d.ToString()));
             try
             {
-                this._sleeper = false;
-                this.DamageEvent = d;
-                this.WeaponData = null;
-                this.IsDecay = false;
-                this._status = d.status;
+                _sleeper = false;
+                DamageEvent = d;
+                WeaponData = null;
+                IsDecay = false;
+                _status = d.status;
                 string weaponName = "Unknown";
                 if (d.victim.idMain is DeployableObject deployableObject)
                 {
                     if (d.victim.id.ToString().ToLower().Contains("sleeping"))
                     {
-                        this._sleeper = true;
-                        this.Victim = new Sleeper(deployableObject);
+                        _sleeper = true;
+                        Victim = new Sleeper(deployableObject);
                     }
                     else
                     {
-                        this.Victim = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
-                        this._ent = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
-                        this._entityvictim = true;
+                        Victim = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
+                        _ent = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
+                        _entityvictim = true;
                     }
-                    this._playervictim = false;
+                    _playervictim = false;
                 }
                 else if (d.victim.idMain is StructureComponent)
                 {
-                    this.Victim = new Entity(d.victim.idMain.GetComponent<StructureComponent>());
-                    this._ent = new Entity(d.victim.idMain.GetComponent<StructureComponent>());
-                    this._playervictim = false;
-                    this._entityvictim = true;
-                    this._entityvictim = true;
+                    Victim = new Entity(d.victim.idMain.GetComponent<StructureComponent>());
+                    _ent = new Entity(d.victim.idMain.GetComponent<StructureComponent>());
+                    _playervictim = false;
+                    _entityvictim = true;
+                    _entityvictim = true;
                 }
                 else if (d.victim.id is SpikeWall)
                 {
-                    this._playerattacker = false;
-                    this.Victim = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
-                    this._ent = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
-                    this._entityvictim = true;
+                    _playerattacker = false;
+                    Victim = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
+                    _ent = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
+                    _entityvictim = true;
                 }
                 else if (d.victim.client != null)
                 {
                     Player temp = Server.GetServer().GetCachePlayer(d.victim.client.userID);
-                    this.Victim = temp ?? Fougerite.Player.FindByPlayerClient(d.victim.client);
-                    this._playervictim = true;
+                    Victim = temp ?? Player.FindByPlayerClient(d.victim.client);
+                    _playervictim = true;
                 }
                 else if (d.victim.character != null)
                 {
-                    this.Victim = new NPC(d.victim.character);
-                    this._npcvictim = true;
-                    this._playervictim = false;
+                    Victim = new NPC(d.victim.character);
+                    _npcvictim = true;
+                    _playervictim = false;
                 }
                 
                 
@@ -85,33 +85,33 @@
                 {
                     if (d.victim.client != null)
                     {
-                        weaponName = this.DamageType;
-                        this._playerattacker = false;
-                        this.Attacker = null;
+                        weaponName = DamageType;
+                        _playerattacker = false;
+                        Attacker = null;
                     }
                 }
                 else if (d.attacker.id is SpikeWall)
                 {
-                    this._playerattacker = false;
-                    this.Attacker = new Entity(d.attacker.idMain.GetComponent<DeployableObject>());
-                    this._entityattacker = true;
+                    _playerattacker = false;
+                    Attacker = new Entity(d.attacker.idMain.GetComponent<DeployableObject>());
+                    _entityattacker = true;
                     weaponName = d.attacker.id.ToString().Contains("Large") ? "Large Spike Wall" : "Spike Wall";
                 }
                 else if (d.attacker.id is SupplyCrate)
                 {
-                    this._playerattacker = false;
-                    this.Attacker = new Entity(d.attacker.idMain.gameObject);
-                    this._entityattacker = true;
+                    _playerattacker = false;
+                    Attacker = new Entity(d.attacker.idMain.gameObject);
+                    _entityattacker = true;
                     weaponName = "Supply Crate";
                 }
                 else if (d.attacker.id is Metabolism && d.victim.id is Metabolism)
                 {
                     // This here looks pretty sus, I assume attacker is always null here, but I don't dare to change It.
                     Player temp = Server.GetServer().GetCachePlayer(d.attacker.client.userID);
-                    this.Attacker = temp ?? Fougerite.Player.FindByPlayerClient(d.attacker.client);
-                    this._playerattacker = false;
-                    this._metabolismattacker = true;
-                    this.Victim = this.Attacker;
+                    Attacker = temp ?? Player.FindByPlayerClient(d.attacker.client);
+                    _playerattacker = false;
+                    _metabolismattacker = true;
+                    Victim = Attacker;
                     ICollection<string> list = new List<string>();
                     
                     if (Victim is Player vic)
@@ -139,21 +139,21 @@
 
                     if (list.Contains("Bleeding"))
                     {
-                        if (this.DamageType != "Unknown" && !list.Contains(this.DamageType))
-                            list.Add(this.DamageType);
+                        if (DamageType != "Unknown" && !list.Contains(DamageType))
+                            list.Add(DamageType);
                     }
-                    weaponName = list.Count > 0 ? string.Format("Self ({0})", string.Join(",", list.ToArray())) : this.DamageType;
+                    weaponName = list.Count > 0 ? $"Self ({string.Join(",", list.ToArray())})" : DamageType;
                 }
                 else if (d.attacker.client != null)
                 {
                     Player temp = Server.GetServer().GetCachePlayer(d.attacker.client.userID);
-                    this.Attacker = temp ?? Fougerite.Player.FindByPlayerClient(d.attacker.client);
+                    Attacker = temp ?? Player.FindByPlayerClient(d.attacker.client);
 
-                    this._playerattacker = true;
+                    _playerattacker = true;
                     if (d.extraData != null)
                     {
                         WeaponImpact extraData = d.extraData as WeaponImpact;
-                        this.WeaponData = extraData;
+                        WeaponData = extraData;
                         if (extraData != null && extraData.dataBlock != null)
                         {
                             weaponName = extraData.dataBlock.name;
@@ -175,11 +175,11 @@
                         }
                         if (d.victim.client != null)
                         {
-                            if (!d.attacker.IsDifferentPlayer(d.victim.client) && !(this.Victim is Entity))
+                            if (!d.attacker.IsDifferentPlayer(d.victim.client) && !(Victim is Entity))
                             {
                                 weaponName = "Fall Damage";
                             }
-                            else if (!d.attacker.IsDifferentPlayer(d.victim.client) && (this.Victim is Entity))
+                            else if (!d.attacker.IsDifferentPlayer(d.victim.client) && (Victim is Entity))
                             {
                                 weaponName = "Hunting Bow";
                             }
@@ -188,13 +188,13 @@
                 }
                 else if (d.attacker.character != null)
                 {
-                    this.Attacker = new NPC(d.attacker.character);
-                    this._playerattacker = false;
-                    this._npcattacker = true;
-                    var temp = (NPC) this.Attacker;
-                    weaponName = string.Format("{0} Claw", temp.Name);
+                    Attacker = new NPC(d.attacker.character);
+                    _playerattacker = false;
+                    _npcattacker = true;
+                    var temp = (NPC) Attacker;
+                    weaponName = $"{temp.Name} Claw";
                 }
-                this.WeaponName = weaponName;
+                WeaponName = weaponName;
             }
             catch (Exception ex)
             {
@@ -202,10 +202,10 @@
             }
         }
 
-        public HurtEvent(ref DamageEvent d, Fougerite.Entity en)
+        public HurtEvent(ref DamageEvent d, Entity en)
             : this(ref d)
         {
-            this.Entity = en;
+            Entity = en;
         }
 
         /// <summary>
@@ -215,11 +215,11 @@
         {
             get
             {
-                return this._attacker;
+                return _attacker;
             }
             set
             {
-                this._attacker = value;
+                _attacker = value;
             }
         }
 
@@ -228,15 +228,15 @@
         /// </summary>
         public LifeStatus LifeStatus
         {
-            get { return this._status; }
+            get { return _status; }
         }
 
-        [System.Obsolete("Sleeper is deprecated, please use VictimIsSleeper instead.")]
+        [Obsolete("Sleeper is deprecated, please use VictimIsSleeper instead.")]
         public bool Sleeper
         {
             get
             {
-                return this._sleeper;
+                return _sleeper;
             }
         }
 
@@ -247,7 +247,7 @@
         {
             get
             {
-                return this._sleeper;
+                return _sleeper;
             }
         }
 
@@ -258,11 +258,11 @@
         {
             get
             {
-                return this._de.amount;
+                return _de.amount;
             }
             set
             {
-                this._de.amount = value;
+                _de.amount = value;
             }
         }
 
@@ -273,11 +273,11 @@
         {
             get
             {
-                return this._de;
+                return _de;
             }
             set
             {
-                this._de = value;
+                _de = value;
             }
         }
 
@@ -289,7 +289,7 @@
             get
             {
                 string str = "Unknown";
-                switch (((int)this.DamageEvent.damageTypes))
+                switch (((int)DamageEvent.damageTypes))
                 {
                     case 0:
                         return "Bleeding";
@@ -325,15 +325,15 @@
         /// <summary>
         /// This grabs the Victim as an Entity. Null if the Victim is not an Entity. Use HurtEvent.Victim though.
         /// </summary>
-        public Fougerite.Entity Entity
+        public Entity Entity
         {
             get
             {
-                return this._ent;
+                return _ent;
             }
             set
             {
-                this._ent = value;
+                _ent = value;
             }
         }
 
@@ -344,11 +344,11 @@
         {
             get
             {
-                return this._decay;
+                return _decay;
             }
             set
             {
-                this._decay = value;
+                _decay = value;
             }
         }
 
@@ -359,11 +359,11 @@
         {
             get
             {
-                return this._victim;
+                return _victim;
             }
             set
             {
-                this._victim = value;
+                _victim = value;
             }
         }
 
@@ -374,11 +374,11 @@
         {
             get
             {
-                return this._wi;
+                return _wi;
             }
             set
             {
-                this._wi = value;
+                _wi = value;
             }
         }
 
@@ -389,11 +389,11 @@
         {
             get
             {
-                return this._weapon;
+                return _weapon;
             }
             set
             {
-                this._weapon = value;
+                _weapon = value;
             }
         }
 
@@ -404,7 +404,7 @@
         {
             get
             {
-                return this._playervictim;
+                return _playervictim;
             }       
         }
 
@@ -415,7 +415,7 @@
         {
             get
             {
-                return this._entityvictim;
+                return _entityvictim;
             }
         }
 
@@ -426,7 +426,7 @@
         {
             get
             {
-                return this._npcvictim;
+                return _npcvictim;
             }
         }
 
@@ -437,7 +437,7 @@
         {
             get
             {
-                return this._playerattacker;
+                return _playerattacker;
             }
         }
 
@@ -448,7 +448,7 @@
         {
             get
             {
-                return this._entityattacker;
+                return _entityattacker;
             }
         }
 
@@ -459,7 +459,7 @@
         {
             get
             {
-                return this._metabolismattacker;
+                return _metabolismattacker;
             }
         }
 
@@ -470,7 +470,7 @@
         {
             get
             {
-                return this._npcattacker;
+                return _npcattacker;
             }
         }
     }

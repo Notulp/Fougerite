@@ -8,7 +8,7 @@ namespace Fougerite
         {
             foreach (ItemDataBlock block in items)
             {
-                base.Add(block);
+                Add(block);
             }
         }
 

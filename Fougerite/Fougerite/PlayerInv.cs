@@ -8,13 +8,13 @@ namespace Fougerite
         private PlayerItem[] _barItems;
         private Inventory _inv;
         private PlayerItem[] _items;
-        private Fougerite.Player player;
+        private Player player;
 
-        public PlayerInv(Fougerite.Player player)
+        public PlayerInv(Player player)
         {
             this.player = player;
-            this._inv = player.PlayerClient.controllable.GetComponent<Inventory>();
-            this.InitItems();
+            _inv = player.PlayerClient.controllable.GetComponent<Inventory>();
+            InitItems();
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Fougerite
         /// <param name="name"></param>
         public void AddItem(string name)
         {
-            this.AddItem(name, 1);
+            AddItem(name, 1);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Fougerite
             string[] strArray = new string[] { name, amount.ToString() };
             ConsoleSystem.Arg arg = new ConsoleSystem.Arg("");
             arg.Args = strArray;
-            arg.SetUser(this.player.PlayerClient.netUser);
+            arg.SetUser(player.PlayerClient.netUser);
             inv.give(ref arg);
         }
 
@@ -68,7 +68,7 @@ namespace Fougerite
         /// <param name="slot"></param>
         public void AddItemTo(string name, int slot)
         {
-            this.AddItemTo(name, slot, 1);
+            AddItemTo(name, slot, 1);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Fougerite
                 {
                     belt = Inventory.Slot.Kind.Armor;
                 }
-                this._inv.AddItemSomehow(byName, new Inventory.Slot.Kind?(belt), slot, amount);
+                _inv.AddItemSomehow(byName, new Inventory.Slot.Kind?(belt), slot, amount);
             }
         }
 
@@ -100,13 +100,13 @@ namespace Fougerite
         /// </summary>
         public void Clear()
         {
-            foreach (PlayerItem item in this.Items)
+            foreach (PlayerItem item in Items)
             {
-                this._inv.RemoveItem(item.RInventoryItem);
+                _inv.RemoveItem(item.RInventoryItem);
             }
-            foreach (PlayerItem item2 in this.BarItems)
+            foreach (PlayerItem item2 in BarItems)
             {
-                this._inv.RemoveItem(item2.RInventoryItem);
+                _inv.RemoveItem(item2.RInventoryItem);
             }
         }
 
@@ -115,7 +115,7 @@ namespace Fougerite
         /// </summary>
         public void ClearAll()
         {
-            this._inv.Clear();
+            _inv.Clear();
         }
         
         /// <summary>
@@ -123,9 +123,9 @@ namespace Fougerite
         /// </summary>
         public void ClearArmor()
         {
-            foreach (PlayerItem item in this.ArmorItems)
+            foreach (PlayerItem item in ArmorItems)
             {
-                this._inv.RemoveItem(item.RInventoryItem);
+                _inv.RemoveItem(item.RInventoryItem);
             }
         }
 
@@ -134,9 +134,9 @@ namespace Fougerite
         /// </summary>
         public void ClearBar()
         {
-            foreach (PlayerItem item in this.BarItems)
+            foreach (PlayerItem item in BarItems)
             {
-                this._inv.RemoveItem(item.RInventoryItem);
+                _inv.RemoveItem(item.RInventoryItem);
             }
         }
 
@@ -145,7 +145,7 @@ namespace Fougerite
         /// </summary>
         public void DropAll()
         {
-            DropHelper.DropInventoryContents(this.InternalInventory);
+            DropHelper.DropInventoryContents(InternalInventory);
         }
         
         /// <summary>
@@ -154,7 +154,7 @@ namespace Fougerite
         /// <param name="pi"></param>
         public void DropItem(PlayerItem pi)
         {
-            DropHelper.DropItem(this.InternalInventory, pi.Slot);
+            DropHelper.DropItem(InternalInventory, pi.Slot);
         }
 
         /// <summary>
@@ -163,15 +163,15 @@ namespace Fougerite
         /// <param name="slot"></param>
         public void DropItem(int slot)
         {
-            DropHelper.DropItem(this.InternalInventory, slot);
+            DropHelper.DropItem(InternalInventory, slot);
         }
 
         private int GetFreeSlots()
         {
             int num = 0;
-            for (int i = 0; i < (this._inv.slotCount - 4); i++)
+            for (int i = 0; i < (_inv.slotCount - 4); i++)
             {
-                if (this._inv.IsSlotFree(i))
+                if (_inv.IsSlotFree(i))
                 {
                     num++;
                 }
@@ -186,7 +186,7 @@ namespace Fougerite
         /// <returns></returns>
         public bool HasItem(string name)
         {
-            return this.HasItem(name, 1);
+            return HasItem(name, 1);
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace Fougerite
         public bool HasItem(string name, int number)
         {
             int num = 0;
-            foreach (PlayerItem item in this.Items)
+            foreach (PlayerItem item in Items)
             {
                 if (item.Name == name)
                 {
@@ -214,7 +214,7 @@ namespace Fougerite
                     num += item.UsesLeft;
                 }
             }
-            foreach (PlayerItem item2 in this.BarItems)
+            foreach (PlayerItem item2 in BarItems)
             {
                 if (item2.Name == name)
                 {
@@ -230,7 +230,7 @@ namespace Fougerite
                     num += item2.UsesLeft;
                 }
             }
-            foreach (PlayerItem item3 in this.ArmorItems)
+            foreach (PlayerItem item3 in ArmorItems)
             {
                 if (item3.Name == name)
                 {
@@ -251,22 +251,22 @@ namespace Fougerite
 
         private void InitItems()
         {
-            this.Items = new PlayerItem[30];
-            this.ArmorItems = new PlayerItem[4];
-            this.BarItems = new PlayerItem[6];
-            for (int i = 0; i < this._inv.slotCount; i++)
+            Items = new PlayerItem[30];
+            ArmorItems = new PlayerItem[4];
+            BarItems = new PlayerItem[6];
+            for (int i = 0; i < _inv.slotCount; i++)
             {
                 if (i < 30)
                 {
-                    this.Items[i] = new PlayerItem(ref this._inv, i);
+                    Items[i] = new PlayerItem(ref _inv, i);
                 }
                 else if (i < 0x24)
                 {
-                    this.BarItems[i - 30] = new PlayerItem(ref this._inv, i);
+                    BarItems[i - 30] = new PlayerItem(ref _inv, i);
                 }
                 else if (i < 40)
                 {
-                    this.ArmorItems[i - 0x24] = new PlayerItem(ref this._inv, i);
+                    ArmorItems[i - 0x24] = new PlayerItem(ref _inv, i);
                 }
             }
         }
@@ -278,7 +278,7 @@ namespace Fougerite
         /// <param name="s2"></param>
         public void MoveItem(int s1, int s2)
         {
-            this._inv.MoveItemAtSlotToEmptySlot(this._inv, s1, s2);
+            _inv.MoveItemAtSlotToEmptySlot(_inv, s1, s2);
         }
 
         /// <summary>
@@ -287,27 +287,27 @@ namespace Fougerite
         /// <param name="pi"></param>
         public void RemoveItem(PlayerItem pi)
         {
-            foreach (PlayerItem item in this.Items)
+            foreach (PlayerItem item in Items)
             {
                 if (item == pi)
                 {
-                    this._inv.RemoveItem(pi.RInventoryItem);
+                    _inv.RemoveItem(pi.RInventoryItem);
                     return;
                 }
             }
-            foreach (PlayerItem item2 in this.ArmorItems)
+            foreach (PlayerItem item2 in ArmorItems)
             {
                 if (item2 == pi)
                 {
-                    this._inv.RemoveItem(pi.RInventoryItem);
+                    _inv.RemoveItem(pi.RInventoryItem);
                     return;
                 }
             }
-            foreach (PlayerItem item3 in this.BarItems)
+            foreach (PlayerItem item3 in BarItems)
             {
                 if (item3 == pi)
                 {
-                    this._inv.RemoveItem(pi.RInventoryItem);
+                    _inv.RemoveItem(pi.RInventoryItem);
                     break;
                 }
             }
@@ -319,7 +319,7 @@ namespace Fougerite
         /// <param name="slot"></param>
         public void RemoveItem(int slot)
         {
-            this._inv.RemoveItem(slot);
+            _inv.RemoveItem(slot);
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace Fougerite
         public void RemoveItem(int slot, int number)
         {
             int qty = number;
-            foreach (PlayerItem item in this.Items)
+            foreach (PlayerItem item in Items)
             {
                 if (item.Slot == slot)
                 {
@@ -345,7 +345,7 @@ namespace Fougerite
                     {
                         qty = 0;
                     }
-                    this._inv.RemoveItem(item.Slot);
+                    _inv.RemoveItem(item.Slot);
                     if (qty == 0)
                     {
                         break;
@@ -354,7 +354,7 @@ namespace Fougerite
             }
             if (qty != 0)
             {
-                foreach (PlayerItem item2 in this.ArmorItems)
+                foreach (PlayerItem item2 in ArmorItems)
                 {
                     if (item2.Slot == slot)
                     {
@@ -369,7 +369,7 @@ namespace Fougerite
                         {
                             qty = 0;
                         }
-                        this._inv.RemoveItem(item2.Slot);
+                        _inv.RemoveItem(item2.Slot);
                         if (qty == 0)
                         {
                             break;
@@ -378,7 +378,7 @@ namespace Fougerite
                 }
                 if (qty != 0)
                 {
-                    foreach (PlayerItem item3 in this.BarItems)
+                    foreach (PlayerItem item3 in BarItems)
                     {
                         if (item3.Slot == slot)
                         {
@@ -393,7 +393,7 @@ namespace Fougerite
                             {
                                 qty = 0;
                             }
-                            this._inv.RemoveItem(item3.Slot);
+                            _inv.RemoveItem(item3.Slot);
                             if (qty == 0)
                             {
                                 return;
@@ -412,7 +412,7 @@ namespace Fougerite
         public void RemoveItem(string name, int number = 1)
         {
             int qty = number;
-            foreach (PlayerItem item in this.Items)
+            foreach (PlayerItem item in Items)
             {
                 if (item.Name == name)
                 {
@@ -427,7 +427,7 @@ namespace Fougerite
                     {
                         qty = 0;
                     }
-                    this._inv.RemoveItem(item.Slot);
+                    _inv.RemoveItem(item.Slot);
                     if (qty == 0)
                     {
                         break;
@@ -436,7 +436,7 @@ namespace Fougerite
             }
             if (qty != 0)
             {
-                foreach (PlayerItem item2 in this.ArmorItems)
+                foreach (PlayerItem item2 in ArmorItems)
                 {
                     if (item2.Name == name)
                     {
@@ -451,7 +451,7 @@ namespace Fougerite
                         {
                             qty = 0;
                         }
-                        this._inv.RemoveItem(item2.Slot);
+                        _inv.RemoveItem(item2.Slot);
                         if (qty == 0)
                         {
                             break;
@@ -460,7 +460,7 @@ namespace Fougerite
                 }
                 if (qty != 0)
                 {
-                    foreach (PlayerItem item3 in this.BarItems)
+                    foreach (PlayerItem item3 in BarItems)
                     {
                         if (item3.Name == name)
                         {
@@ -475,7 +475,7 @@ namespace Fougerite
                             {
                                 qty = 0;
                             }
-                            this._inv.RemoveItem(item3.Slot);
+                            _inv.RemoveItem(item3.Slot);
                             if (qty == 0)
                             {
                                 return;
@@ -492,7 +492,7 @@ namespace Fougerite
         /// <param name="name"></param>
         public void RemoveItemAll(string name)
         {
-            this.RemoveItem(name, 0x1869f);
+            RemoveItem(name, 0x1869f);
         }
 
         /// <summary>
@@ -502,11 +502,11 @@ namespace Fougerite
         {
             get
             {
-                return this._armorItems;
+                return _armorItems;
             }
             set
             {
-                this._armorItems = value;
+                _armorItems = value;
             }
         }
 
@@ -517,11 +517,11 @@ namespace Fougerite
         {
             get
             {
-                return this._barItems;
+                return _barItems;
             }
             set
             {
-                this._barItems = value;
+                _barItems = value;
             }
         }
 
@@ -532,7 +532,7 @@ namespace Fougerite
         {
             get
             {
-                return this.GetFreeSlots();
+                return GetFreeSlots();
             }
         }
 
@@ -543,11 +543,11 @@ namespace Fougerite
         {
             get
             {
-                return this._inv;
+                return _inv;
             }
             set
             {
-                this._inv = value;
+                _inv = value;
             }
         }
 
@@ -558,11 +558,11 @@ namespace Fougerite
         {
             get
             {
-                return this._items;
+                return _items;
             }
             set
             {
-                this._items = value;
+                _items = value;
             }
         }
     }

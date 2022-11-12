@@ -11,16 +11,16 @@ public class IniParser
     private string iniFilePath;
     private Hashtable keyPairs = new Hashtable();
     public string Name;
-    private System.Collections.Generic.List<SectionPair> tmpList = new System.Collections.Generic.List<SectionPair>();
+    private List<SectionPair> tmpList = new List<SectionPair>();
     private Thread _t;
 
     public IniParser(string iniPath)
     {
         string str2 = null;
-        this.iniFilePath = iniPath;
-        this.Name = Path.GetFileNameWithoutExtension(iniPath);
+        iniFilePath = iniPath;
+        Name = Path.GetFileNameWithoutExtension(iniPath);
 
-        if (!File.Exists(iniPath)) throw new FileNotFoundException("Unable to locate " + iniPath);
+        if (!File.Exists(iniPath)) throw new FileNotFoundException($"Unable to locate {iniPath}");
 
         try
         {
@@ -38,7 +38,7 @@ public class IniParser
                         SectionPair pair;
 
                         if (str.StartsWith(";"))
-                            str = str.Replace("=", "%eq%") + @"=%comment%";
+                            str = $@"{str.Replace("=", "%eq%")}=%comment%";
 
                         string[] strArray = str.Split(new char[] {'='}, 2);
                         string str3 = null;
@@ -54,12 +54,12 @@ public class IniParser
                         }
                         try
                         {
-                            this.keyPairs.Add(pair, str3);
-                            this.tmpList.Add(pair);
+                            keyPairs.Add(pair, str3);
+                            tmpList.Add(pair);
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("Failed adding" + pair + "|" + str3 + " at " + iniFilePath + " Exception: " + ex);
+                            Logger.LogError($"Failed adding{pair}|{str3} at {iniFilePath} Exception: {ex}");
                         }
                     }
                 }
@@ -67,7 +67,7 @@ public class IniParser
         }
         catch (Exception ex)
         {
-            Logger.LogError("Error at " + iniFilePath + " Exception: " + ex);
+            Logger.LogError($"Error at {iniFilePath} Exception: {ex}");
         }
     }
 
@@ -78,7 +78,7 @@ public class IniParser
 
     public void AddSetting(string sectionName, string settingName)
     {
-        this.AddSetting(sectionName, settingName, string.Empty);
+        AddSetting(sectionName, settingName, string.Empty);
     }
 
     public void AddSetting(string sectionName, string settingName, string settingValue)
@@ -89,21 +89,21 @@ public class IniParser
         if (settingValue == null)
             settingValue = string.Empty;
 
-        if (this.keyPairs.ContainsKey(pair))
+        if (keyPairs.ContainsKey(pair))
         {
-            this.keyPairs.Remove(pair);
+            keyPairs.Remove(pair);
         }
-        if (this.tmpList.Contains(pair))
+        if (tmpList.Contains(pair))
         {
-            this.tmpList.Remove(pair);
+            tmpList.Remove(pair);
         }
-        this.keyPairs.Add(pair, settingValue);
-        this.tmpList.Add(pair);
+        keyPairs.Add(pair, settingValue);
+        tmpList.Add(pair);
     }
 
     public int Count()
     {
-        return this.Sections.Length;
+        return Sections.Length;
     }
 
     public void DeleteSetting(string sectionName, string settingName)
@@ -111,17 +111,17 @@ public class IniParser
         SectionPair pair;
         pair.Section = sectionName;
         pair.Key = settingName;
-        if (this.keyPairs.ContainsKey(pair))
+        if (keyPairs.ContainsKey(pair))
         {
-            this.keyPairs.Remove(pair);
-            this.tmpList.Remove(pair);
+            keyPairs.Remove(pair);
+            tmpList.Remove(pair);
         }
     }
 
     public string[] EnumSection(string sectionName)
     {
         List<string> list = new List<string>();
-        foreach (SectionPair pair in this.tmpList)
+        foreach (SectionPair pair in tmpList)
         {
             if (pair.Key.StartsWith(";"))
                 continue;
@@ -139,7 +139,7 @@ public class IniParser
         get
         {
             List<string> list = new List<string>();
-            foreach (SectionPair pair in this.tmpList)
+            foreach (SectionPair pair in tmpList)
             {
                 if (!list.Contains(pair.Section))
                 {
@@ -155,31 +155,31 @@ public class IniParser
         SectionPair pair;
         pair.Section = sectionName;
         pair.Key = settingName;
-        return (string)this.keyPairs[pair];
+        return (string)keyPairs[pair];
     }
 
     public bool GetBoolSetting(string sectionName, string settingName)
     {
         bool val;
-        bool.TryParse(this.GetSetting(sectionName, settingName), out val);
+        bool.TryParse(GetSetting(sectionName, settingName), out val);
         return val == true;
     }
 
     public bool isCommandOn(string cmdName)
     {
-        return this.GetBoolSetting("Commands", cmdName);
+        return GetBoolSetting("Commands", cmdName);
     }
 
     public void Save()
     {
-        var fi = new FileInfo(this.iniFilePath);
+        var fi = new FileInfo(iniFilePath);
         float mega = (fi.Length / 1024f) / 1024f;
         if (mega <= 0.6)
         {
-            this.SaveSettings(this.iniFilePath);
+            SaveSettings(iniFilePath);
             return;
         }
-        _t = new Thread(() => this.SaveSettings(this.iniFilePath));
+        _t = new Thread(() => SaveSettings(iniFilePath));
         _t.Start();
     }
 
@@ -188,7 +188,7 @@ public class IniParser
         ArrayList list = new ArrayList();
         string str = "";
         string str2 = "";
-        foreach (SectionPair pair in this.tmpList)
+        foreach (SectionPair pair in tmpList)
         {
             if (!list.Contains(pair.Section))
             {
@@ -197,23 +197,23 @@ public class IniParser
         }
         foreach (string str3 in list)
         {
-            str2 = str2 + "[" + str3 + "]\r\n";
-            foreach (SectionPair pair2 in this.tmpList)
+            str2 = $"{str2}[{str3}]\r\n";
+            foreach (SectionPair pair2 in tmpList)
             {
                 if (pair2.Section == str3)
                 {
-                    str = (string)this.keyPairs[pair2];
+                    str = (string)keyPairs[pair2];
                     if (str != null) {
                         if (str == "%comment%") {
                             str = "";
                         } else {
-                            str = "=" + str;
+                            str = $"={str}";
                         }
                     }
-                    str2 = str2 + pair2.Key.Replace("%eq%", "=") + str + "\r\n";
+                    str2 = $"{str2}{pair2.Key.Replace("%eq%", "=")}{str}\r\n";
                 }
             }
-            str2 = str2 + "\r\n";
+            str2 = $"{str2}\r\n";
         }
 
         using (TextWriter writer = new StreamWriter(newFilePath))
@@ -228,9 +228,9 @@ public class IniParser
         if (string.IsNullOrEmpty(value))
             value = string.Empty;
 
-        if (this.keyPairs.ContainsKey(pair))
+        if (keyPairs.ContainsKey(pair))
         {
-            this.keyPairs[pair] = value;
+            keyPairs[pair] = value;
         }
     }
 
@@ -239,12 +239,12 @@ public class IniParser
         SectionPair pair;
         pair.Section = sectionName;
         pair.Key = settingName;
-        return this.keyPairs.Contains(pair);
+        return keyPairs.Contains(pair);
     }
 
     public bool ContainsValue(string valueName)
     {
-        return this.keyPairs.ContainsValue(valueName);
+        return keyPairs.ContainsValue(valueName);
     }
 
     [StructLayout(LayoutKind.Sequential)]

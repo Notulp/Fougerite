@@ -7,12 +7,12 @@
     public class DecayEvent
     {
         private float _dmg;
-        private Fougerite.Entity _ent;
+        private Entity _ent;
 
-        public DecayEvent(Fougerite.Entity en, ref float dmg)
+        public DecayEvent(Entity en, ref float dmg)
         {
-            this.Entity = en;
-            this.DamageAmount = dmg;
+            Entity = en;
+            DamageAmount = dmg;
         }
 
         /// <summary>
@@ -22,26 +22,26 @@
         {
             get
             {
-                return this._dmg;
+                return _dmg;
             }
             set
             {
-                this._dmg = value;
+                _dmg = value;
             }
         }
 
         /// <summary>
         /// Gets the Entity that the decay is running on.
         /// </summary>
-        public Fougerite.Entity Entity
+        public Entity Entity
         {
             get
             {
-                return this._ent;
+                return _ent;
             }
             set
             {
-                this._ent = value;
+                _ent = value;
             }
         }
     }

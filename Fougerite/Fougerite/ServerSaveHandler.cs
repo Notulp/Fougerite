@@ -159,21 +159,21 @@ namespace Fougerite
 
                 if (!path.EndsWith(".sav"))
                 {
-                    path = path + ".sav";
+                    path += ".sav";
                 }
 
                 if (ServerSaveManager._loading)
                 {
-                    Logger.LogError("[Fougerite WorldSave] Currently loading, aborting save to " + path);
+                    Logger.LogError($"[Fougerite WorldSave] Currently loading, aborting save to {path}");
                 }
                 else
                 {
-                    Debug.Log("Saving to '" + path + "'");
+                    Debug.Log($"Saving to '{path}'");
                     if (!ServerSaveManager._loadedOnce)
                     {
                         if (File.Exists(path))
                         {
-                            string[] textArray1 = new string[]
+                            string[] textArray1 =
                             {
                                 path, ".", ServerSaveManager.DateTimeFileString(File.GetLastWriteTime(path)), ".",
                                 ServerSaveManager.DateTimeFileString(DateTime.Now), ".bak"
@@ -181,8 +181,7 @@ namespace Fougerite
                             string destFileName = string.Concat(textArray1);
                             File.Copy(path, destFileName);
                             Logger.LogError(
-                                "A save file exists at target path, but it was never loaded!\n\tbacked up:" +
-                                Path.GetFullPath(destFileName));
+                                $"A save file exists at target path, but it was never loaded!\n\tbacked up:{Path.GetFullPath(destFileName)}");
                         }
 
                         ServerSaveManager._loadedOnce = true;
@@ -197,13 +196,13 @@ namespace Fougerite
                     
 
                     BackgroundWorker BGW = new BackgroundWorker();
-                    BGW.DoWork += new DoWorkEventHandler(SaveServer);
+                    BGW.DoWork += SaveServer;
                     BGW.RunWorkerAsync();
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogError("[ServerSaveHandler Error1] " + ex);
+                Logger.LogError($"[ServerSaveHandler Error1] {ex}");
             }
         }
         
@@ -233,16 +232,16 @@ namespace Fougerite
 
                 if (!path.EndsWith(".sav"))
                 {
-                    path = path + ".sav";
+                    path = $"{path}.sav";
                 }
 
                 if (ServerSaveManager._loading)
                 {
-                    Logger.LogError("[Fougerite WorldSave] Currently loading, aborting save to " + path);
+                    Logger.LogError($"[Fougerite WorldSave] Currently loading, aborting save to {path}");
                 }
                 else
                 {
-                    Debug.Log("Saving to '" + path + "'");
+                    Debug.Log($"Saving to '{path}'");
                     if (!ServerSaveManager._loadedOnce)
                     {
                         if (File.Exists(path))
@@ -255,8 +254,7 @@ namespace Fougerite
                             string destFileName = string.Concat(textArray1);
                             File.Copy(path, destFileName);
                             Logger.LogError(
-                                "A save file exists at target path, but it was never loaded!\n\tbacked up:" +
-                                Path.GetFullPath(destFileName));
+                                $"A save file exists at target path, but it was never loaded!\n\tbacked up:{Path.GetFullPath(destFileName)}");
                         }
 
                         ServerSaveManager._loadedOnce = true;
@@ -274,7 +272,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[ServerSaveHandler Error2] " + ex);
+                Logger.LogError($"[ServerSaveHandler Error2] {ex}");
             }
         }
         
@@ -302,21 +300,21 @@ namespace Fougerite
 
                 if (!path.EndsWith(".sav"))
                 {
-                    path = path + ".sav";
+                    path += ".sav";
                 }
 
                 if (ServerSaveManager._loading)
                 {
-                    Logger.LogError("[Fougerite WorldSave] Currently loading, aborting save to " + path);
+                    Logger.LogError($"[Fougerite WorldSave] Currently loading, aborting save to {path}");
                 }
                 else
                 {
-                    Debug.Log("Saving to '" + path + "'");
+                    Debug.Log($"Saving to '{path}'");
                     if (!ServerSaveManager._loadedOnce)
                     {
                         if (File.Exists(path))
                         {
-                            string[] textArray1 = new string[]
+                            string[] textArray1 =
                             {
                                 path, ".", ServerSaveManager.DateTimeFileString(File.GetLastWriteTime(path)), ".",
                                 ServerSaveManager.DateTimeFileString(DateTime.Now), ".bak"
@@ -324,8 +322,7 @@ namespace Fougerite
                             string destFileName = string.Concat(textArray1);
                             File.Copy(path, destFileName);
                             Logger.LogError(
-                                "A save file exists at target path, but it was never loaded!\n\tbacked up:" +
-                                Path.GetFullPath(destFileName));
+                                $"A save file exists at target path, but it was never loaded!\n\tbacked up:{Path.GetFullPath(destFileName)}");
                         }
 
                         ServerSaveManager._loadedOnce = true;
@@ -347,13 +344,13 @@ namespace Fougerite
                     
 
                     BackgroundWorker BGW = new BackgroundWorker();
-                    BGW.DoWork += new DoWorkEventHandler(SaveServerManualWithoutInvoke);
+                    BGW.DoWork += SaveServerManualWithoutInvoke;
                     BGW.RunWorkerAsync();
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogError("[ServerSaveHandler Error1] " + ex);
+                Logger.LogError($"[ServerSaveHandler Error1] {ex}");
             }
         }
         
@@ -371,7 +368,7 @@ namespace Fougerite
                 int num = fsave.SceneObjectCount + fsave.InstanceObjectCount;
                 if (save.friendly)
                 {
-                    using (FileStream stream = File.Open(path + ".json", FileMode.Create, FileAccess.Write))
+                    using (FileStream stream = File.Open($"{path}.json", FileMode.Create, FileAccess.Write))
                     {
                         JsonFormatWriter writer = JsonFormatWriter.CreateInstance(stream);
                         writer.Formatted();
@@ -380,34 +377,34 @@ namespace Fougerite
                 }
 
                 SystemTimestamp timestamp5 = timestamp4 = SystemTimestamp.Restart;
-                using (FileStream stream2 = File.Open(path + ".new", FileMode.Create, FileAccess.Write))
+                using (FileStream stream2 = File.Open($"{path}.new", FileMode.Create, FileAccess.Write))
                 {
                     fsave.WriteTo(stream2);
                     stream2.Flush();
                 }
 
                 timestamp4.Stop();
-                if (File.Exists(path + ".old." + (SaveCopies + 1)))
+                if (File.Exists($"{path}.old.{(SaveCopies + 1)}"))
                 {
-                    File.Delete(path + ".old." + (SaveCopies + 1));
+                    File.Delete($"{path}.old.{(SaveCopies + 1)}");
                 }
 
                 for (int i = SaveCopies; i >= 0; i--)
                 {
-                    if (File.Exists(path + ".old." + i))
+                    if (File.Exists($"{path}.old.{i}"))
                     {
-                        File.Move(path + ".old." + i, path + ".old." + (i + 1));
+                        File.Move($"{path}.old.{i}", $"{path}.old.{(i + 1)}");
                     }
                 }
 
                 if (File.Exists(path))
                 {
-                    File.Move(path, path + ".old.0");
+                    File.Move(path, $"{path}.old.0");
                 }
 
-                if (File.Exists(path + ".new"))
+                if (File.Exists($"{path}.new"))
                 {
-                    File.Move(path + ".new", path);
+                    File.Move($"{path}.new", path);
                 }
 
                 timestamp5.Stop();
@@ -481,11 +478,11 @@ namespace Fougerite
                         }
                         catch (KeyNotFoundException ex)
                         {
-                            Logger.LogError("[RegisterHook KeyNotFoundException] " + ex);
+                            Logger.LogError($"[RegisterHook KeyNotFoundException] {ex}");
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("[RegisterHook Error] " + ex);
+                            Logger.LogError($"[RegisterHook Error] {ex}");
                         }
                     }
 
@@ -497,7 +494,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[ServerSaveHandler Error] " + ex);
+                Logger.LogError($"[ServerSaveHandler Error] {ex}");
                 ServerIsSaving = false;
                 LastSaveTime = DateTime.Now;
                 NextServerSaveTime = LastSaveTime.AddMinutes(ServerSaveTime);
@@ -531,7 +528,7 @@ namespace Fougerite
                 int num = fsave.SceneObjectCount + fsave.InstanceObjectCount;
                 if (save.friendly)
                 {
-                    using (FileStream stream = File.Open(path + ".json", FileMode.Create, FileAccess.Write))
+                    using (FileStream stream = File.Open($"{path}.json", FileMode.Create, FileAccess.Write))
                     {
                         JsonFormatWriter writer = JsonFormatWriter.CreateInstance(stream);
                         writer.Formatted();
@@ -540,34 +537,34 @@ namespace Fougerite
                 }
 
                 SystemTimestamp timestamp5 = timestamp4 = SystemTimestamp.Restart;
-                using (FileStream stream2 = File.Open(path + ".new", FileMode.Create, FileAccess.Write))
+                using (FileStream stream2 = File.Open($"{path}.new", FileMode.Create, FileAccess.Write))
                 {
                     fsave.WriteTo(stream2);
                     stream2.Flush();
                 }
 
                 timestamp4.Stop();
-                if (File.Exists(path + ".old." + (SaveCopies + 1)))
+                if (File.Exists($"{path}.old.{(SaveCopies + 1)}"))
                 {
-                    File.Delete(path + ".old." + (SaveCopies + 1));
+                    File.Delete($"{path}.old.{(SaveCopies + 1)}");
                 }
 
                 for (int i = SaveCopies; i >= 0; i--)
                 {
-                    if (File.Exists(path + ".old." + i))
+                    if (File.Exists($"{path}.old.{i}"))
                     {
-                        File.Move(path + ".old." + i, path + ".old." + (i + 1));
+                        File.Move($"{path}.old.{i}", $"{path}.old.{(i + 1)}");
                     }
                 }
 
                 if (File.Exists(path))
                 {
-                    File.Move(path, path + ".old.0");
+                    File.Move(path, $"{path}.old.0");
                 }
 
-                if (File.Exists(path + ".new"))
+                if (File.Exists($"{path}.new"))
                 {
-                    File.Move(path + ".new", path);
+                    File.Move($"{path}.new", path);
                 }
                 timestamp5.Stop();
                 restart.Stop();
@@ -575,8 +572,7 @@ namespace Fougerite
                 if (Hooks.IsShuttingDown)
                 {
                     ServerIsSaving = false;
-                    Logger.Log(string.Concat(new object[]
-                        {" Saved ", num, " Object(s). Took ", restart.ElapsedSeconds, " seconds."}));
+                    Logger.Log($" Saved {num} Object(s). Took {restart.ElapsedSeconds} seconds.");
                     return;
                 }
 
@@ -584,7 +580,7 @@ namespace Fougerite
                 {
                     if (save.profile)
                     {
-                        object[] args = new object[]
+                        object[] args =
                         {
                             num, timestamp2.ElapsedSeconds,
                             timestamp2.ElapsedSeconds / restart.ElapsedSeconds, timestamp3.ElapsedSeconds,
@@ -599,8 +595,7 @@ namespace Fougerite
                     }
                     else
                     {
-                        Logger.Log(string.Concat(new object[]
-                            {" Saved ", num, " Object(s). Took ", restart.ElapsedSeconds, " seconds."}));
+                        Logger.Log($" Saved {num} Object(s). Took {restart.ElapsedSeconds} seconds.");
                     }
 
                     Hooks.OnServerSaveEvent(num, restart.ElapsedSeconds);
@@ -639,11 +634,11 @@ namespace Fougerite
                         }
                         catch (KeyNotFoundException ex)
                         {
-                            Logger.LogError("[RegisterHook KeyNotFoundException] " + ex);
+                            Logger.LogError($"[RegisterHook KeyNotFoundException] {ex}");
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("[RegisterHook Error] " + ex);
+                            Logger.LogError($"[RegisterHook Error] {ex}");
                         }
                     }
 
@@ -655,7 +650,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[ServerSaveHandler Error 0x2] " + ex);
+                Logger.LogError($"[ServerSaveHandler Error 0x2] {ex}");
                 ServerIsSaving = false;
                 LastSaveTime = DateTime.Now;
                 NextServerSaveTime = LastSaveTime.AddMinutes(ServerSaveTime);
@@ -707,7 +702,8 @@ namespace Fougerite
                 for (int i = 0; i < count; i++)
                 {
                     // Ensure check, since the list can change during save.
-                    if (ServerSaveManager.Instances.All.Count <= i) break;
+                    if (ServerSaveManager.Instances.All.Count <= i) 
+                        break;
                     
                     ServerSave save2 = ServerSaveManager.Instances.All[i];
                     if (save2 != null)

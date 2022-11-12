@@ -10,13 +10,13 @@ namespace Fougerite.Permissions
         {
             get;
             set;
-        }
+        } = new List<PermissionPlayer>();
 
         [JsonProperty]
         public List<PermissionGroup> PermissionGroups
         {
             get;
             set;
-        }
+        } = new List<PermissionGroup>();
     }
 }

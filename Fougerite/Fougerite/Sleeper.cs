@@ -9,20 +9,20 @@ namespace Fougerite
     /// </summary>
     public class Sleeper
     {
-        private DeployableObject _sleeper;
-        private ulong _uid;
-        private int _instanceid;
-        private string _name;
-        public bool IsDestroyed = false;
+        private readonly DeployableObject _sleeper;
+        private readonly ulong _uid;
+        private readonly int _instanceid;
+        private readonly string _name;
+        public bool IsDestroyed;
 
         public Sleeper(DeployableObject obj)
         {
-            this._sleeper = obj;
-            this._instanceid = this._sleeper.GetInstanceID();
-            this._uid = this._sleeper.ownerID;
+            _sleeper = obj;
+            _instanceid = _sleeper.GetInstanceID();
+            _uid = _sleeper.ownerID;
             CachedPlayer cachedPlayer;
             bool success = PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(UID, out cachedPlayer);
-            this._name = success ? cachedPlayer.Name : this._sleeper.ownerName;
+            _name = success ? cachedPlayer.Name : _sleeper.ownerName;
         }
 
         /// <summary>
@@ -32,18 +32,18 @@ namespace Fougerite
         {
             get
             {
-                return this._sleeper.GetComponent<TakeDamage>().health;
+                return _sleeper.GetComponent<TakeDamage>().health;
             }
             set
             {
-                this._sleeper.GetComponent<TakeDamage>().health = value;
-                this.UpdateHealth();
+                _sleeper.GetComponent<TakeDamage>().health = value;
+                UpdateHealth();
             }
         }
 
         public void UpdateHealth()
         {
-            this._sleeper.UpdateClientHealth();
+            _sleeper.UpdateClientHealth();
         }
 
         /// <summary>
@@ -55,9 +55,10 @@ namespace Fougerite
             {
                 return;
             }
+            
             try
             {
-                this._sleeper.OnKilled();
+                _sleeper.OnKilled();
             }
             catch
             {
@@ -70,9 +71,12 @@ namespace Fougerite
         {
             try
             {
-                NetCull.Destroy(this._sleeper.networkViewID);
+                NetCull.Destroy(_sleeper.networkViewID);
             }
-            catch { }
+            catch
+            {
+                // Ignore.
+            }
         }
 
         /// <summary>
@@ -80,7 +84,7 @@ namespace Fougerite
         /// </summary>
         public DeployableObject Object
         {
-            get { return this._sleeper; }
+            get { return _sleeper; }
         }
 
         /// <summary>
@@ -96,7 +100,7 @@ namespace Fougerite
         /// </summary>
         public string OwnerID
         {
-            get { return this._uid.ToString(); }
+            get { return _uid.ToString(); }
         }
 
         /// <summary>
@@ -104,7 +108,7 @@ namespace Fougerite
         /// </summary>
         public string SteamID
         {
-            get { return this._uid.ToString(); }
+            get { return _uid.ToString(); }
         }
 
         /// <summary>
@@ -112,7 +116,7 @@ namespace Fougerite
         /// </summary>
         public ulong UID
         {
-            get { return this._uid; }
+            get { return _uid; }
         }
 
         /// <summary>
@@ -120,7 +124,7 @@ namespace Fougerite
         /// </summary>
         public string OwnerName
         {
-            get { return this._sleeper.ownerName; }
+            get { return _sleeper.ownerName; }
         }
 
         /// <summary>
@@ -128,7 +132,7 @@ namespace Fougerite
         /// </summary>
         public Vector3 Location
         {
-            get { return this._sleeper.transform.position; }
+            get { return _sleeper.transform.position; }
         }
 
         /// <summary>
@@ -136,7 +140,7 @@ namespace Fougerite
         /// </summary>
         public float X
         {
-            get { return this._sleeper.transform.position.x; }
+            get { return _sleeper.transform.position.x; }
         }
 
         /// <summary>
@@ -144,7 +148,7 @@ namespace Fougerite
         /// </summary>
         public float Y
         {
-            get { return this._sleeper.transform.position.y; }
+            get { return _sleeper.transform.position.y; }
         }
 
         /// <summary>
@@ -152,7 +156,7 @@ namespace Fougerite
         /// </summary>
         public float Z
         {
-            get { return this._sleeper.transform.position.z; }
+            get { return _sleeper.transform.position.z; }
         }
 
         /// <summary>
@@ -162,7 +166,7 @@ namespace Fougerite
         {
             get
             {
-                return this._instanceid;
+                return _instanceid;
             }
         }
     }

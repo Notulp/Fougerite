@@ -15,11 +15,11 @@
 
         public SpawnEvent(Vector3 pos, bool camp)
         {
-            this._atCamp = camp;
-            this._x = pos.x;
-            this._y = pos.y;
-            this._z = pos.z;
-            this._orig = pos;
+            _atCamp = camp;
+            _x = pos.x;
+            _y = pos.y;
+            _z = pos.z;
+            _orig = pos;
         }
 
         /// <summary>
@@ -29,7 +29,7 @@
         {
             get
             {
-                return this._atCamp;
+                return _atCamp;
             }
         }
 
@@ -40,13 +40,13 @@
         {
             get
             {
-                return this._orig;
+                return _orig;
             }
             set
             {
-                this._x = value.x;
-                this._y = value.y;
-                this._z = value.z;
+                _x = value.x;
+                _y = value.y;
+                _z = value.z;
             }
         }
 
@@ -57,11 +57,11 @@
         {
             get
             {
-                return this._x;
+                return _x;
             }
             set
             {
-                this._x = value;
+                _x = value;
             }
         }
 
@@ -72,11 +72,11 @@
         {
             get
             {
-                return this._y;
+                return _y;
             }
             set
             {
-                this._y = value;
+                _y = value;
             }
         }
         
@@ -87,11 +87,11 @@
         {
             get
             {
-                return this._z;
+                return _z;
             }
             set
             {
-                this._z = value;
+                _z = value;
             }
         }
     }

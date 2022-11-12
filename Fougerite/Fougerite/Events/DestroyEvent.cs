@@ -50,7 +50,7 @@
 				else if (strType.Contains("Wolf"))
 					weaponName = "Wolf Claw";
 				else if (d.attacker.id.Equals(d.victim.id))
-					weaponName = string.Format("Self ({0})", DamageType);
+					weaponName = $"Self ({DamageType})";
 				else
 					weaponName = "Hunting Bow";
 			}

@@ -10,7 +10,7 @@
         private readonly int _fslot;
         private readonly int _tslot;
         private readonly Inventory.SlotOperationsInfo _iinfo;
-        private readonly Fougerite.Player _pl;
+        private readonly Player _pl;
 
         public ItemMoveEvent(Inventory inst, int fromSlot, Inventory toInventory, int toSlot, Inventory.SlotOperationsInfo info)
         {
@@ -28,7 +28,7 @@
                         NetUser user = netplayer.GetLocalData() as NetUser;
                         if (user != null)
                         {
-                            _pl = Fougerite.Server.GetServer().FindPlayer(user.userID);
+                            _pl = Server.GetServer().FindPlayer(user.userID);
                             break;
                         }
                     }
@@ -43,7 +43,7 @@
         /// <summary>
         /// Gets the player of the event if possible.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
             get { return _pl; }
         }

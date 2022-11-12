@@ -9,7 +9,7 @@ namespace Fougerite.Events
     {
         private Dictionary<string, object> _args;
         private string _name;
-        private System.Timers.Timer _timer;
+        private Timer _timer;
         private long lastTick;
         private int _elapsedCount;
 
@@ -18,18 +18,18 @@ namespace Fougerite.Events
         
         public TimedEvent(string name, double interval, bool autoreset = false)
         {
-            this._name = name;
-            this._timer = new Timer();
-            this._timer.Interval = interval;
-            this._timer.Elapsed += new ElapsedEventHandler(this._timer_Elapsed);
-            this._elapsedCount = 0;
-            this._timer.AutoReset = autoreset;
+            _name = name;
+            _timer = new Timer();
+            _timer.Interval = interval;
+            _timer.Elapsed += new ElapsedEventHandler(_timer_Elapsed);
+            _elapsedCount = 0;
+            _timer.AutoReset = autoreset;
         }
 
         public TimedEvent(string name, double interval, bool autoreset, Dictionary<string, object> args)
             : this(name, interval)
         {
-            this._timer.AutoReset = autoreset;
+            _timer.AutoReset = autoreset;
             _args = args;
         }
 
@@ -37,55 +37,55 @@ namespace Fougerite.Events
         {
             try
             {
-                if (this.OnFire != null)
+                if (OnFire != null)
                 {
-                    this.OnFire(this);
+                    OnFire(this);
                 }
-                this.lastTick = DateTime.UtcNow.Ticks;
-                this._elapsedCount += 1;
+                lastTick = DateTime.UtcNow.Ticks;
+                _elapsedCount += 1;
             }
             catch (Exception ex)
             {
-                Logger.LogError("Error occured at timer: " + this.Name + " Error: " + ex.ToString());
-                this.Stop();
+                Logger.LogError($"Error occured at timer: {Name} Error: {ex}");
+                Stop();
                 Logger.LogDebug("Trying to restart timer.");
-                this.Start();
+                Start();
                 Logger.LogDebug("Restarted!");
             }
         }
 
         public void Start()
         {
-            this._timer.Start();
-            this.lastTick = DateTime.UtcNow.Ticks;
+            _timer.Start();
+            lastTick = DateTime.UtcNow.Ticks;
         }
 
         public void Stop()
         {
-            this._timer.Stop();
+            _timer.Stop();
         }
 
         public void Kill()
         {
             Stop();
-            this._timer.Dispose();
+            _timer.Dispose();
         }
 
         public bool AutoReset
         {
-            get { return this._timer.AutoReset; }
-            set { this._timer.AutoReset = value; }
+            get { return _timer.AutoReset; }
+            set { _timer.AutoReset = value; }
         }
 
         public Dictionary<string, object> Args
         {
             get
             {
-                return this._args;
+                return _args;
             }
             set
             {
-                this._args = value;
+                _args = value;
             }
         }
 
@@ -94,11 +94,11 @@ namespace Fougerite.Events
         {
             get
             {
-                return this._timer.Interval;
+                return _timer.Interval;
             }
             set
             {
-                this._timer.Interval = value;
+                _timer.Interval = value;
             }
         }
 
@@ -106,11 +106,11 @@ namespace Fougerite.Events
         {
             get
             {
-                return this._name;
+                return _name;
             }
             set
             {
-                this._name = value;
+                _name = value;
             }
         }
 
@@ -118,7 +118,7 @@ namespace Fougerite.Events
         {
             get
             {
-                return (this.Interval - ((DateTime.UtcNow.Ticks - this.lastTick) / 0x2710L));
+                return (Interval - ((DateTime.UtcNow.Ticks - lastTick) / 0x2710L));
             }
         }
         
@@ -126,7 +126,7 @@ namespace Fougerite.Events
         {
             get
             {
-                return this._elapsedCount;
+                return _elapsedCount;
             }
         }
     }

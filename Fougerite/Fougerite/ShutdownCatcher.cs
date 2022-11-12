@@ -9,11 +9,10 @@ namespace Fougerite
     {
         [DllImport("Kernel32")]
         private static extern bool SetConsoleCtrlHandler(EventHandler handler, bool add);
-
         private delegate bool EventHandler(CtrlType sig);
-        static EventHandler _handler;
+        private static EventHandler _handler;
 
-        enum CtrlType
+        internal enum CtrlType
         {
             CTRL_C_EVENT = 0,
             CTRL_BREAK_EVENT = 1,
@@ -39,7 +38,7 @@ namespace Fougerite
 
         internal static void Hook()
         {
-            _handler += new EventHandler(Handler);
+            _handler += Handler;
             SetConsoleCtrlHandler(_handler, true);
         }
 

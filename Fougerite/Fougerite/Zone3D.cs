@@ -13,10 +13,10 @@ namespace Fougerite
 
         public Zone3D(string name)
         {
-            this.PVP = true;
-            this.Protected = false;
-            this.tmpPoints = new List<Entity>();
-            this.Points = new List<Vector2>();
+            PVP = true;
+            Protected = false;
+            tmpPoints = new List<Entity>();
+            Points = new List<Vector2>();
             Dictionary<string, Zone3D> zones = World.GetWorld().zones;
             if (!zones.ContainsKey(name))
                 zones.Add(name, this);
@@ -24,23 +24,23 @@ namespace Fougerite
 
         public bool Contains(Entity en)
         {
-            return this.Contains(en.Location);
+            return Contains(en.Location);
         }
 
-        public bool Contains(Fougerite.Player p)
+        public bool Contains(Player p)
         {
-            return this.Contains(p.Location);
+            return Contains(p.Location);
         }
 
         public bool Contains(Vector3 v)
         {
             Vector2 vector = new Vector2(v.x, v.z);
-            int num = this.Points.Count - 1;
+            int num = Points.Count - 1;
             bool flag = false;
             int num2 = 0;
-            while (num2 < this.Points.Count)
+            while (num2 < Points.Count)
             {
-                if ((((this.Points[num2].y <= vector.y) && (vector.y < this.Points[num].y)) || ((this.Points[num].y <= vector.y) && (vector.y < this.Points[num2].y))) && (vector.x < ((((this.Points[num].x - this.Points[num2].x) * (vector.y - this.Points[num2].y)) / (this.Points[num].y - this.Points[num2].y)) + this.Points[num2].x)))
+                if ((((Points[num2].y <= vector.y) && (vector.y < Points[num].y)) || ((Points[num].y <= vector.y) && (vector.y < Points[num2].y))) && (vector.x < ((((Points[num].x - Points[num2].x) * (vector.y - Points[num2].y)) / (Points[num].y - Points[num2].y)) + Points[num2].x)))
                 {
                     flag = !flag;
                 }
@@ -67,7 +67,7 @@ namespace Fougerite
             return null;
         }
 
-        public static Zone3D GlobalContains(Fougerite.Player p)
+        public static Zone3D GlobalContains(Player p)
         {
             Dictionary<string, Zone3D> zones = World.GetWorld().zones;
             foreach (Zone3D zone in zones.Values)
@@ -82,35 +82,35 @@ namespace Fougerite
 
         public void HideMarkers()
         {
-            foreach (Entity entity in this.tmpPoints)
+            foreach (Entity entity in tmpPoints)
             {
                 Util.GetUtil().DestroyObject((entity.Object as StructureComponent).gameObject);
             }
-            this.tmpPoints.Clear();
+            tmpPoints.Clear();
         }
 
         public void Mark(Vector2 v)
         {
-            this.Points.Add(v);
+            Points.Add(v);
         }
 
         public void Mark(float x, float y)
         {
-            this.Points.Add(new Vector2(x, y));
+            Points.Add(new Vector2(x, y));
         }
 
         public void ShowMarkers()
         {
-            this.HideMarkers();
+            HideMarkers();
             try
             {
-                foreach (Vector2 vector in this.Points)
+                foreach (Vector2 vector in Points)
                 {
                     float ground = World.GetWorld().GetGround(vector.x, vector.y);
                     Vector3 location = new Vector3(vector.x, ground, vector.y);
                     object o = World.GetWorld().Spawn(";struct_metal_pillar", location);
                     Entity item = new Entity(o);
-                    this.tmpPoints.Add(item);
+                    tmpPoints.Add(item);
                 }
             }
             catch (Exception e)
@@ -131,11 +131,11 @@ namespace Fougerite
         {
             get
             {
-                return this._points;
+                return _points;
             }
             set
             {
-                this._points = value;
+                _points = value;
             }
         }
 
@@ -143,11 +143,11 @@ namespace Fougerite
         {
             get
             {
-                return this._protected;
+                return _protected;
             }
             set
             {
-                this._protected = value;
+                _protected = value;
             }
         }
 
@@ -155,11 +155,11 @@ namespace Fougerite
         {
             get
             {
-                return this._pvp;
+                return _pvp;
             }
             set
             {
-                this._pvp = value;
+                _pvp = value;
             }
         }
     }

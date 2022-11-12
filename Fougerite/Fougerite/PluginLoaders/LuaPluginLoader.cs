@@ -54,20 +54,20 @@ namespace Fougerite.PluginLoaders
         {
             if (Bootstrap.IgnoredPlugins.Contains(name.ToLower()))
             {
-                Logger.LogDebug("[LUAPluginLoader] Ignoring plugin " + name + ".");
+                Logger.LogDebug($"[LUAPluginLoader] Ignoring plugin {name}.");
                 return;
             }
             
-            Logger.LogDebug("[LUAPluginLoader] Loading plugin " + name + ".");
+            Logger.LogDebug($"[LUAPluginLoader] Loading plugin {name}.");
 
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
-                Logger.LogError("[LUAPluginLoader] " + name + " plugin is already loaded.");
-                throw new InvalidOperationException("[LUAPluginLoader] " + name + " plugin is already loaded.");
+                Logger.LogError($"[LUAPluginLoader] {name} plugin is already loaded.");
+                throw new InvalidOperationException($"[LUAPluginLoader] {name} plugin is already loaded.");
             }
 
             if (PluginLoader.GetInstance().CurrentlyLoadingPlugins.Contains(name)) {
-                Logger.LogWarning(name + " plugin is already being loaded. Returning.");
+                Logger.LogWarning($"{name} plugin is already being loaded. Returning.");
                 return;
             }
 
@@ -83,7 +83,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                Logger.Log("[LUAPluginLoader] " + name + " plugin could not be loaded.");
+                Logger.Log($"[LUAPluginLoader] {name} plugin could not be loaded.");
                 Logger.LogException(ex);
                 if (PluginLoader.GetInstance().CurrentlyLoadingPlugins.Contains(name)) {
                     PluginLoader.GetInstance().CurrentlyLoadingPlugins.Remove(name);
@@ -93,7 +93,7 @@ namespace Fougerite.PluginLoaders
 
         public void LoadPlugins()
         {
-            if (Fougerite.Config.GetBoolValue("Engines", "EnableLua"))
+            if (Config.GetBoolValue("Engines", "EnableLua"))
             {
                 foreach (string name in GetPluginNames())
                     LoadPlugin(name);
@@ -130,7 +130,7 @@ namespace Fougerite.PluginLoaders
 
         public void UnloadPlugin(string name)
         {
-            Logger.LogDebug("[LUAPluginLoader] Unloading " + name + " plugin.");
+            Logger.LogDebug($"[LUAPluginLoader] Unloading {name} plugin.");
 
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
@@ -150,12 +150,12 @@ namespace Fougerite.PluginLoaders
                     PluginLoader.GetInstance().Plugins.Remove(name);
                 }
 
-                Logger.LogDebug("[LUAPluginLoader] " + name + " plugin was unloaded successfuly.");
+                Logger.LogDebug($"[LUAPluginLoader] {name} plugin was unloaded successfuly.");
             }
             else
             {
-                Logger.LogError("[LUAPluginLoader] Can't unload " + name + ". Plugin is not loaded.");
-                throw new InvalidOperationException("[LUAPluginLoader] Can't unload " + name + ". Plugin is not loaded.");
+                Logger.LogError($"[LUAPluginLoader] Can't unload {name}. Plugin is not loaded.");
+                throw new InvalidOperationException($"[LUAPluginLoader] Can't unload {name}. Plugin is not loaded.");
             }
         }
 
@@ -183,7 +183,7 @@ namespace Fougerite.PluginLoaders
 
         public bool CheckDependencies()
         {
-            return Fougerite.Config.GetBoolValue("Engines", "EnableLua");
+            return Config.GetBoolValue("Engines", "EnableLua");
         }
     }
 }

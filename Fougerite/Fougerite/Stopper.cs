@@ -23,12 +23,8 @@ namespace Fougerite
         {
             if (_stopper.ElapsedMilliseconds > _warnTimeMS) 
             {
-                Logger.LogWarning(string.Format("[Stopper.{0}.{1}] Took: {2}s ({3}ms)",
-                    _type,
-                    _method,
-                    _stopper.Elapsed.Seconds,
-                    _stopper.ElapsedMilliseconds
-                ));
+                Logger.LogWarning(
+                    $"[Stopper.{_type}.{_method}] Took: {_stopper.Elapsed.Seconds}s ({_stopper.ElapsedMilliseconds}ms)");
             }
         }
     }

@@ -17,13 +17,13 @@ namespace Fougerite.Permissions
         {
             get;
             set;
-        }
+        } = new List<string>();
 
         [JsonProperty]
         public List<string> Groups
         {
             get;
             set;
-        }
+        } = new List<string>();
     }
 }

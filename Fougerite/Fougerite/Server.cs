@@ -28,7 +28,7 @@ namespace Fougerite
         /// PlayersCache or GetCachePlayer() if you need to use this.
         /// (We also can't change this to a ConcurrentDictionary because other old plugins may depend on this)
         /// </summary>
-        public static IDictionary<ulong, Player> Cache = new Dictionary<ulong, Fougerite.Player>();
+        public static IDictionary<ulong, Player> Cache = new Dictionary<ulong, Player>();
         public static IEnumerable<string> ForceCallForCommands = new List<string>();
 
 
@@ -72,15 +72,15 @@ namespace Fougerite
             
             if (player.IsOnline && !player.IsDisconnecting)
             {
-                player.Message(red + " " + reason);
-                player.Message(red + " Banned by: " + Banner);
+                player.Message($"{red} {reason}");
+                player.Message($"{red} Banned by: {Banner}");
                 player.Disconnect();
             }
             if (Sender != null)
             {
-                Sender.Message("You banned " + player.Name);
-                Sender.Message("Player's IP: " + player.IP);
-                Sender.Message("Player's ID: " + player.SteamID);
+                Sender.Message($"You banned {player.Name}");
+                Sender.Message($"Player's IP: {player.IP}");
+                Sender.Message($"Player's ID: {player.SteamID}");
             }
             if (!AnnounceToServer)
             {
@@ -89,14 +89,14 @@ namespace Fougerite
                              pl.Admin || pl.Moderator || PermissionSystem.GetPermissionSystem().PlayerHasPermission(pl, "bansystem.notification")))
 #pragma warning restore CS0618
                 {
-                    pl.Message(red + player.Name + white + " was banned by: " + green + Banner);
-                    pl.Message(red + " Reason: " + reason);
+                    pl.Message($"{red}{player.Name}{white} was banned by: {green}{Banner}");
+                    pl.Message($"{red} Reason: {reason}");
                 }
             }
             else
             {
-                Broadcast(red + player.Name + white + " was banned by: " + green + Banner);
-                Broadcast(red + " Reason: " + reason);
+                Broadcast($"{red}{player.Name}{white} was banned by: {green}{Banner}");
+                Broadcast($"{red} Reason: {reason}");
             }
             BanPlayerIPandID(player.IP, player.SteamID, player.Name, reason, Banner);
         }
@@ -105,10 +105,10 @@ namespace Fougerite
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(ip, id, name, reason, adminname));
             if (cancel) { return; }
-            File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"), "[" + DateTime.Now.ToShortDateString() + " "
-                + DateTime.Now.ToString("HH:mm:ss") + "] " + name + "|" + ip + "|" + adminname + "|" + reason + "\r\n");
-            File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"), "[" + DateTime.Now.ToShortDateString()
-                + " " + DateTime.Now.ToString("HH:mm:ss") + "] " + name + "|" + id + "|" + adminname + "|" + reason + "\r\n");
+
+            string banLogPath = Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log");
+            File.AppendAllText(banLogPath, $"[{DateTime.Now.ToShortDateString()} {DateTime.Now:HH:mm:ss}] {name}|{ip}|{adminname}|{reason}\r\n");
+            File.AppendAllText(banLogPath, $"[{DateTime.Now.ToShortDateString()} {DateTime.Now:HH:mm:ss}] {name}|{id}|{adminname}|{reason}\r\n");
             DataStore.GetInstance().Add("Ips", ip, name);
             DataStore.GetInstance().Add("Ids", id, name);
         }
@@ -117,8 +117,8 @@ namespace Fougerite
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(ip, name, reason, adminname, false));
             if (cancel) { return; }
-            File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"), "[" + DateTime.Now.ToShortDateString() + " "
-                + DateTime.Now.ToString("HH:mm:ss") + "] " + name + "|" + ip + "|" + adminname + "|" + reason + "\r\n");
+            File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"),
+                $"[{DateTime.Now.ToShortDateString()} {DateTime.Now:HH:mm:ss}] {name}|{ip}|{adminname}|{reason}\r\n");
             DataStore.GetInstance().Add("Ips", ip, name);
         }
 
@@ -126,8 +126,9 @@ namespace Fougerite
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(id, name, reason, adminname, true));
             if (cancel) { return; }
-            File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"), "[" + DateTime.Now.ToShortDateString()
-                + " " + DateTime.Now.ToString("HH:mm:ss") + "] " + name + "|" + id + "|" + adminname + "|" + reason + "\r\n");
+            
+            File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"),
+                $"[{DateTime.Now.ToShortDateString()} {DateTime.Now:HH:mm:ss}] {name}|{id}|{adminname}|{reason}\r\n");
             DataStore.GetInstance().Add("Ids", id, name);
         }
 
@@ -150,7 +151,7 @@ namespace Fougerite
             string white = "[color #FFFFFF]";
             if (ids.Count == 0 && ips.Count == 0)
             {
-                if (Sender != null) { Sender.Message(red + "Couldn't find any names matching with " + name); }
+                if (Sender != null) { Sender.Message($"{red}Couldn't find any names matching with {name}"); }
                 return false;
             }
 #pragma warning disable CS0618
@@ -158,8 +159,8 @@ namespace Fougerite
                          pl.Admin || pl.Moderator ||PermissionSystem.GetPermissionSystem().PlayerHasPermission(pl, "bansystem.notification")))
 #pragma warning restore CS0618
             {
-                pl.Message(red + name + white + " was unbanned by: "
-                           + green + UnBanner + white + " Different matches: " + ids.Count);
+                pl.Message(
+                    $"{red}{name}{white} was unbanned by: {green}{UnBanner}{white} Different matches: {ids.Count}");
             }
             if (ips.Count > 0)
             {

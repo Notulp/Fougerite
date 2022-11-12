@@ -10,7 +10,7 @@
         public DeathEvent(ref DamageEvent d)
             : base(ref d)
         {
-            this._drop = true;
+            _drop = true;
         }
 
         /// <summary>
@@ -20,11 +20,11 @@
         {
             get
             {
-                return this._drop;
+                return _drop;
             }
             set
             {
-                this._drop = value;
+                _drop = value;
             }
         }
     }

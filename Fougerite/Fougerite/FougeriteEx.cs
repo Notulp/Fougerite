@@ -169,14 +169,14 @@ public static class FougeriteEx
 
         string key = self.Replace("Research Kit 1", "Research Kit");
         if (BlueprintNames.ContainsKey(key))
-            return string.Format("{0} {1}", key, BlueprintNames[key]);
+            return $"{key} {BlueprintNames[key]}";
 
         return self;
     }
 
     public static string MatchItemName(this string self)
     {
-        Logger.LogDebug(string.Format("[MatchItemName] self={0}", self));
+        Logger.LogDebug($"[MatchItemName] self={self}");
         if (self.Length == 0)
             return self;
 
@@ -212,11 +212,11 @@ public static class FougeriteEx
         var enumerable = queryName as IList<string> ?? queryName.ToList();
         if (enumerable.FirstOrDefault() == null || enumerable.Count() == 0)
         {
-            Logger.LogError(string.Format("[MatchItemName] self={0} matches=NULL", self));
+            Logger.LogError($"[MatchItemName] self={self} matches=NULL");
             return self;
         }
 
-        Logger.LogDebug(string.Format("[MatchItemName] matches={0}", string.Join(", ", enumerable.ToArray())));
+        Logger.LogDebug($"[MatchItemName] matches={string.Join(", ", enumerable.ToArray())}");
 
         if (self.HasBPTerm())
             return enumerable.First().Blueprint();

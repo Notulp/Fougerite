@@ -10,12 +10,12 @@
         private readonly FallDamage _fd;
         private readonly bool _flag;
         private readonly bool _flag2;
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
 
         public FallDamageEvent(FallDamage fd, float speed, float num, bool flag, bool flag2)
         {
             _fd = fd;
-            _player = Fougerite.Server.GetServer().FindPlayer(fd.idMain.netUser.userID);
+            _player = Server.GetServer().FindPlayer(fd.idMain.netUser.userID);
             _fallspeed = speed;
             _num = num;
             _flag = flag;
@@ -25,7 +25,7 @@
         /// <summary>
         /// Gets the player of the event.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
             get { return _player; }
         }

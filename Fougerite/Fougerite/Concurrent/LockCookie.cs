@@ -35,9 +35,9 @@ namespace Fougerite.Concurrent
 
         public bool Equals(LockCookie obj)
         {
-            if (this.ThreadId == obj.ThreadId &&
-                this.ReaderLocks == obj.ReaderLocks &&
-                this.WriterLocks == obj.WriterLocks)
+            if (ThreadId == obj.ThreadId &&
+                ReaderLocks == obj.ReaderLocks &&
+                WriterLocks == obj.WriterLocks)
             {
                 return (true);
             }

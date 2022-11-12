@@ -9,10 +9,11 @@ using System.Linq;
 namespace Fougerite
 {
     [XmlRoot("Dictionary")]
+    [Obsolete("Back in the days JSON wasn't really a thing, don't use XML.", false)]
     public class SerializableDictionary<KT, VT> : Dictionary<KT, VT>, IXmlSerializable
     {
         public SerializableDictionary()
-        { 
+        {
         }
 
         public SerializableDictionary(SerializationInfo info, StreamingContext context) : base(info, context)
@@ -24,7 +25,7 @@ namespace Fougerite
         }
 
         public void WriteXml(XmlWriter writer)
-        { 
+        {
             for (int i = 0; i < Keys.Count; i++)
             {
                 KT key = Keys.ElementAt(i);
@@ -41,6 +42,7 @@ namespace Fougerite
                     writer.WriteAttributeString(string.Empty, "type", string.Empty, value.GetType().FullName);
                     new XmlSerializer(value.GetType()).Serialize(writer, value);
                 }
+
                 writer.WriteEndElement();
                 writer.WriteEndElement();
             }
@@ -71,12 +73,14 @@ namespace Fougerite
                             reader.Read();
                             Add(key, (VT)new XmlSerializer(valuetype).Deserialize(reader));
                             reader.ReadEndElement();
-                        } else
+                        }
+                        else
                         {
                             Add(key, default(VT));
                             reader.Skip();
                         }
                     }
+
                     reader.ReadEndElement();
                     reader.MoveToContent();
                 }
@@ -85,7 +89,7 @@ namespace Fougerite
 
         public XmlSchema GetSchema()
         {
-            return null; 
+            return null;
         }
     }
 }

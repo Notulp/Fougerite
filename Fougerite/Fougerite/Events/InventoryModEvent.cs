@@ -9,7 +9,7 @@ namespace Fougerite.Events
         private readonly Inventory _inventory;
         private readonly int _slot;
         private readonly IInventoryItem _item;
-        private readonly Fougerite.Player _player = null;
+        private readonly Player _player = null;
         private readonly NetUser _netuser = null;
         private readonly uLink.NetworkPlayer _netplayer;
         private readonly string _etype;
@@ -18,10 +18,10 @@ namespace Fougerite.Events
 
         public InventoryModEvent(Inventory inventory, int slot, IInventoryItem item, string type)
         {
-            this._inventory = inventory;
-            this._slot = slot;
-            this._item = item;
-            this._etype = type;
+            _inventory = inventory;
+            _slot = slot;
+            _item = item;
+            _etype = type;
             if (inventory._netListeners != null) // This is null when Rust is filling up the boxes with loot.
             {
                 foreach (uLink.NetworkPlayer netplayer in inventory._netListeners)
@@ -32,7 +32,7 @@ namespace Fougerite.Events
                         if (user != null)
                         {
                             _netuser = user;
-                            _player = Fougerite.Server.GetServer().FindPlayer(_netuser.userID);
+                            _player = Server.GetServer().FindPlayer(_netuser.userID);
                             _netplayer = netplayer;
                             break;
                         }
@@ -43,7 +43,7 @@ namespace Fougerite.Events
                     }
                 }
             }
-            this._finventory = new FInventory(_inventory);
+            _finventory = new FInventory(_inventory);
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Fougerite.Events
         /// <summary>
         /// Gets the player if possible. Returns null if the causer of this event is not a player.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
             get { return _player; }
         }

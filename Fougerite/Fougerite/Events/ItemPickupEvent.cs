@@ -11,7 +11,7 @@
     /// </summary>
     public class ItemPickupEvent
     {
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
         private readonly IInventoryItem _item;
         private readonly Inventory _inv;
         private bool _cancelled;
@@ -20,7 +20,7 @@
 
         public ItemPickupEvent(Controllable controllable, IInventoryItem item, Inventory local, Inventory.AddExistingItemResult result, PickupEventType type)
         {
-            _player = Fougerite.Server.GetServer().FindPlayer(controllable.netUser.userID);
+            _player = Server.GetServer().FindPlayer(controllable.netUser.userID);
             _item = item;
             _inv = local;
             _result = result;
@@ -30,7 +30,7 @@
         /// <summary>
         /// The player who is picking the item up.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
             get { return _player; }
         }

@@ -8,7 +8,7 @@ namespace Fougerite
 
         public NPC(Character c)
         {
-            this._char = c;
+            _char = c;
         }
 
         /// <summary>
@@ -18,8 +18,8 @@ namespace Fougerite
         {
             if (Character.alive)
             {
-                this.Character.Signal_ServerCharacterDeath();
-                this.Character.SendMessage("OnKilled", new DamageEvent(), SendMessageOptions.DontRequireReceiver);
+                Character.Signal_ServerCharacterDeath();
+                Character.SendMessage("OnKilled", new DamageEvent(), SendMessageOptions.DontRequireReceiver);
             }
         }
 
@@ -28,7 +28,7 @@ namespace Fougerite
         /// </summary>
         public bool IsAlive
         {
-            get { return this.Character.alive; }
+            get { return Character.alive; }
         }
 
         /// <summary>
@@ -36,8 +36,8 @@ namespace Fougerite
         /// </summary>
         public Character Character
         {
-            get { return this._char; }
-            set { this._char = value; }
+            get { return _char; }
+            set { _char = value; }
         }
 
         /// <summary>
@@ -45,8 +45,8 @@ namespace Fougerite
         /// </summary>
         public float Health
         {
-            get { return this._char.health; }
-            set { this._char.takeDamage.health = value; }
+            get { return _char.health; }
+            set { _char.takeDamage.health = value; }
         }
 
         /// <summary>
@@ -56,9 +56,9 @@ namespace Fougerite
         {
             get
             {
-                return this._char.name.Contains("_A(Clone)")
-                    ? this._char.name.Replace("_A(Clone)", "")
-                    : this._char.name.Replace("(Clone)", "");
+                return _char.name.Contains("_A(Clone)")
+                    ? _char.name.Replace("_A(Clone)", "")
+                    : _char.name.Replace("(Clone)", "");
             }
         }
 
@@ -67,7 +67,7 @@ namespace Fougerite
         /// </summary>
         public Vector3 Location
         {
-            get { return this._char.transform.position; }
+            get { return _char.transform.position; }
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Fougerite
         /// </summary>
         public float X
         {
-            get { return this._char.transform.position.x; }
+            get { return _char.transform.position.x; }
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Fougerite
         /// </summary>
         public float Y
         {
-            get { return this._char.transform.position.y; }
+            get { return _char.transform.position.y; }
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace Fougerite
         /// </summary>
         public float Z
         {
-            get { return this._char.transform.position.z; }
+            get { return _char.transform.position.z; }
         }
     }
 }

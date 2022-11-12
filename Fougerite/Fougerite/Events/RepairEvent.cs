@@ -7,7 +7,7 @@
     {
         private readonly Inventory _inv;
         private readonly RepairBench _rb;
-        private readonly Fougerite.Player _pl;
+        private readonly Player _pl;
         internal bool _cancel;
 
         public RepairEvent(RepairBench rb, Inventory inv)
@@ -17,14 +17,14 @@
             var netUser = _inv.GetComponent<Character>().netUser;
             if (netUser != null)
             {
-                _pl = Fougerite.Server.GetServer().FindPlayer(netUser.userID);
+                _pl = Server.GetServer().FindPlayer(netUser.userID);
             }
         }
 
         /// <summary>
         /// Player who is performing the repair.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
             get
             {

@@ -42,7 +42,7 @@ namespace Fougerite.PluginLoaders
                 {
                     object result = (object) null;
 
-                    using (new Stopper(Type + " " + Name, func))
+                    using (new Stopper($"{Type} {Name}", func))
                     {
                         result = Engine.CallMethod(func, args);
                     }
@@ -52,7 +52,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                string fileinfo = ("[Error] Failed to invoke: " + string.Format("{0}<{1}>.{2}()", Name, Type, func) + Environment.NewLine);
+                string fileinfo = ("[Error] Failed to invoke: " + $"{Name}<{Type}>.{func}()" + Environment.NewLine);
                 HasErrors = true;
                 if (ex is TargetInvocationException)
                 {
@@ -73,7 +73,7 @@ namespace Fougerite.PluginLoaders
             try
             {
                 byte[] bin = File.ReadAllBytes(code);
-                FileInfo FileInfo = new FileInfo(Path.Combine(RootDir.FullName, this.Name + ".dll"));
+                FileInfo FileInfo = new FileInfo(Path.Combine(RootDir.FullName, $"{Name}.dll"));
                 //LoadReferences();
 
 
@@ -82,36 +82,37 @@ namespace Fougerite.PluginLoaders
                 {
                     if (!Type.IsSubclassOf(typeof(Module)) || !Type.IsPublic || Type.IsAbstract)
                         continue;
-                    Logger.LogDebug("[Modules] Checked " + Type.FullName);
+                    Logger.LogDebug($"[Modules] Checked {Type.FullName}");
                     
 
                     Module PluginInstance = null;
                     try
                     {
                         PluginInstance = (Module) Activator.CreateInstance(Type);
-                        PluginInstance.ModuleFolder = Path.Combine(Util.GetRootFolder(), "Save\\" + this.Name);
+                        PluginInstance.ModuleFolder = Path.Combine(Util.GetRootFolder(), $"Save\\{Name}");
                         
                         if (Config.GetValue("Modules", PluginInstance.Name) != null)
                         {
-                            PluginInstance.ModuleFolder = Path.Combine(Util.GetRootFolder(), "Save\\" + Config.GetValue("Modules", this.Name)
-                                .TrimStart(new char[] {'\\', '/'}).Trim());
+                            PluginInstance.ModuleFolder = Path.Combine(Util.GetRootFolder(),
+                                $"Save\\{Config.GetValue("Modules", Name).TrimStart('\\', '/').Trim()}");
                         }
 
-                        this.Author = PluginInstance.Author;
-                        this.About = PluginInstance.Description;
-                        this.Version = PluginInstance.Version.ToString();
+                        Author = PluginInstance.Author;
+                        About = PluginInstance.Description;
+                        Version = PluginInstance.Version.ToString();
                         
                         if (!Directory.Exists(PluginInstance.ModuleFolder))
                         {
                             Directory.CreateDirectory(PluginInstance.ModuleFolder);
                         }
                         
-                        Logger.LogDebug("[Modules] Instance created: " + Type.FullName);
+                        Logger.LogDebug($"[Modules] Instance created: {Type.FullName}");
                     }
                     catch (Exception ex)
                     {
                         // Broken plugins better stop the entire server init.
-                        Logger.LogError(string.Format("[Modules] Could not create an instance of plugin class \"{0}\". {1}", Type.FullName, ex));
+                        Logger.LogError(
+                            $"[Modules] Could not create an instance of plugin class \"{Type.FullName}\". {ex}");
                     }
                     
                     if (PluginInstance != null)
@@ -121,7 +122,7 @@ namespace Fougerite.PluginLoaders
                         ModuleManager.Modules.Add(Container);
                         #pragma warning restore 618
                         Engine = PluginInstance;
-                        Logger.LogDebug("[Modules] Module added: " + FileInfo.Name);
+                        Logger.LogDebug($"[Modules] Module added: {FileInfo.Name}");
                         Globals = (from method in Type.GetMethods()
                             select method.Name).ToList<string>();
                         break;

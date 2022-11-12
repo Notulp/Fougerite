@@ -10,29 +10,30 @@ namespace Fougerite.Events
         private readonly BlueprintDataBlock _block;
         private readonly int _amount;
         private readonly ulong _startTime;
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
         private readonly bool _legit = true;
         private readonly NetUser _user;
         private bool _cancelled = false;
 
         public CraftingEvent(CraftingInventory inv, BlueprintDataBlock blueprint, int amount, ulong startTime)
         {
-            this._inv = inv;
-            this._block = blueprint;
-            this._amount = amount;
-            this._startTime = startTime;
+            _inv = inv;
+            _block = blueprint;
+            _amount = amount;
+            _startTime = startTime;
             var netUser = inv.GetComponent<Character>().netUser;
-            this._player = Fougerite.Server.GetServer().FindPlayer(netUser.userID);
-            this._user = netUser;
+            _player = Server.GetServer().FindPlayer(netUser.userID);
+            _user = netUser;
             if (!_player.HasBlueprint(blueprint))
             {
                 _legit = false;
                 Cancel();
-                Logger.LogWarning("[CraftingHack] Detected: " + _player.Name + " | " + _player.SteamID + " | " + _player.IP + " | " + blueprint.name);
-                Fougerite.Server.GetServer().Broadcast("CraftingHack Detected: " + _player.Name);
+                Logger.LogWarning(
+                    $"[CraftingHack] Detected: {_player.Name} | {_player.SteamID} | {_player.IP} | {blueprint.name}");
+                Server.GetServer().Broadcast($"CraftingHack Detected: {_player.Name}");
                 if (Bootstrap.AutoBanCraft)
                 {
-                    Fougerite.Server.GetServer().BanPlayer(_player, "Console", "CraftingHack");
+                    Server.GetServer().BanPlayer(_player, "Console", "CraftingHack");
                 }
             }
         }
@@ -48,7 +49,7 @@ namespace Fougerite.Events
         /// <summary>
         /// Returns the player who is crafting.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
             get { return _player; }
         }
@@ -76,7 +77,7 @@ namespace Fougerite.Events
         {
             if (_cancelled) return;
             _cancelled = true;
-            this._inv.CancelCrafting();
+            _inv.CancelCrafting();
         }
 
         /// <summary>

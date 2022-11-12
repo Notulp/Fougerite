@@ -53,21 +53,21 @@ namespace Fougerite.PluginLoaders
         {
             if (Bootstrap.IgnoredPlugins.Contains(name.ToLower()))
             {
-                Logger.LogDebug("[JSPluginLoader] Ignoring plugin " + name + ".");
+                Logger.LogDebug($"[JSPluginLoader] Ignoring plugin {name}.");
                 return;
             }
             
-            Logger.LogDebug("[JSPluginLoader] Loading plugin " + name + ".");
+            Logger.LogDebug($"[JSPluginLoader] Loading plugin {name}.");
 
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
-                Logger.LogError("[JSPluginLoader] " + name + " plugin is already loaded.");
-                throw new InvalidOperationException("[JSPluginLoader] " + name + " plugin is already loaded.");
+                Logger.LogError($"[JSPluginLoader] {name} plugin is already loaded.");
+                throw new InvalidOperationException($"[JSPluginLoader] {name} plugin is already loaded.");
             }
 
             if (PluginLoader.GetInstance().CurrentlyLoadingPlugins.Contains(name))
             {
-                Logger.LogWarning(name + " plugin is already being loaded. Returning.");
+                Logger.LogWarning($"{name} plugin is already being loaded. Returning.");
                 return;
             }
 
@@ -84,7 +84,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Error] Failed to load JavaScript plugin: " + ex);
+                Logger.LogError($"[Error] Failed to load JavaScript plugin: {ex}");
                 if (PluginLoader.GetInstance().CurrentlyLoadingPlugins.Contains(name))
                 {
                     PluginLoader.GetInstance().CurrentlyLoadingPlugins.Remove(name);
@@ -94,7 +94,7 @@ namespace Fougerite.PluginLoaders
 
         public void LoadPlugins()
         {
-            if (Fougerite.Config.GetBoolValue("Engines", "EnableJavaScript"))
+            if (Config.GetBoolValue("Engines", "EnableJavaScript"))
             {
                 foreach (string name in GetPluginNames())
                     LoadPlugin(name);
@@ -131,7 +131,7 @@ namespace Fougerite.PluginLoaders
 
         public void UnloadPlugin(string name)
         {
-            Logger.LogDebug("[JSPluginLoader] Unloading " + name + " plugin.");
+            Logger.LogDebug($"[JSPluginLoader] Unloading {name} plugin.");
 
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
@@ -150,13 +150,12 @@ namespace Fougerite.PluginLoaders
                     PluginLoader.GetInstance().Plugins.Remove(name);
                 }
 
-                Logger.LogDebug("[JSPluginLoader] " + name + " plugin was unloaded successfuly.");
+                Logger.LogDebug($"[JSPluginLoader] {name} plugin was unloaded successfuly.");
             }
             else
             {
-                Logger.LogError("[JSPluginLoader] Can't unload " + name + ". Plugin is not loaded.");
-                throw new InvalidOperationException("[JSPluginLoader] Can't unload " + name +
-                                                    ". Plugin is not loaded.");
+                Logger.LogError($"[JSPluginLoader] Can't unload {name}. Plugin is not loaded.");
+                throw new InvalidOperationException($"[JSPluginLoader] Can't unload {name}. Plugin is not loaded.");
             }
         }
 
@@ -180,7 +179,7 @@ namespace Fougerite.PluginLoaders
 
         public bool CheckDependencies()
         {
-            return Fougerite.Config.GetBoolValue("Engines", "EnableJavaScript");
+            return Config.GetBoolValue("Engines", "EnableJavaScript");
         }
     }
 }

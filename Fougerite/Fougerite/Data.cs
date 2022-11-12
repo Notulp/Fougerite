@@ -9,6 +9,7 @@ namespace Fougerite
         public System.Collections.Generic.List<string> chat_history_username = new System.Collections.Generic.List<string>();
         private static Data _data;
         private static readonly DataStore DS = DataStore.GetInstance();
+        [Obsolete("Use DataStore", false)]
         public readonly Hashtable Fougerite_shared_data = new Hashtable();
 
         [Obsolete("Modules hosting plugins will manage plugin config files", false)]

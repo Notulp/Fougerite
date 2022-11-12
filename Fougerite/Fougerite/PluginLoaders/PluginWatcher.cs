@@ -42,7 +42,7 @@ namespace Fougerite.PluginLoaders
         public PluginTypeWatcher(PluginType type, string filter, string custompath)
         {
             Type = type;
-            Watcher = new FileSystemWatcher(custompath, "*" + filter);
+            Watcher = new FileSystemWatcher(custompath, $"*{filter}");
             Watcher.EnableRaisingEvents = true;
             Watcher.IncludeSubdirectories = true;
             Watcher.Changed += OnPluginChanged;
@@ -51,7 +51,7 @@ namespace Fougerite.PluginLoaders
 
         public override string ToString()
         {
-            return string.Format("PluginTypeWatcher<{0}>", Type);
+            return $"PluginTypeWatcher<{Type}>";
         }
 
         private bool TryLoadPlugin(string name, PluginType type)
@@ -68,7 +68,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                Fougerite.Logger.LogError("[PluginWatcher] Error: " + ex);
+                Logger.LogError($"[PluginWatcher] Error: {ex}");
                 return false;
             }
         }
@@ -87,13 +87,13 @@ namespace Fougerite.PluginLoaders
             {
                 if (!TryLoadPlugin(filename, Type))
                 {
-                    Fougerite.Logger.Log(string.Format("[PluginWatcher] Couldn't load: {0}{3}{1}.{2}", dir, filename,
+                    Logger.Log(string.Format("[PluginWatcher] Couldn't load: {0}{3}{1}.{2}", dir, filename,
                         Type, Path.DirectorySeparatorChar));
                 }
                 else
                 {
                     Loom.QueueOnMainThread(() => {
-                        Logger.Log("[PluginWatcher] Detected new plugin " + filename);
+                        Logger.Log($"[PluginWatcher] Detected new plugin {filename}");
                     });
                 }
             }
@@ -113,13 +113,13 @@ namespace Fougerite.PluginLoaders
                 {
                     if (!TryLoadPlugin(filename, Type))
                     {
-                        Fougerite.Logger.Log(string.Format("[PluginWatcher] Couldn't load: {0}{3}{1}.{2}", dir,
+                        Logger.Log(string.Format("[PluginWatcher] Couldn't load: {0}{3}{1}.{2}", dir,
                             filename, Type, Path.DirectorySeparatorChar));
                     }
                     else
                     {
                         Loom.QueueOnMainThread(() => {
-                            Logger.Log("[PluginWatcher] Reloaded plugin " + filename);
+                            Logger.Log($"[PluginWatcher] Reloaded plugin {filename}");
                         });
                     }
                 }
@@ -128,13 +128,13 @@ namespace Fougerite.PluginLoaders
             {
                 if (!TryLoadPlugin(dir, Type))
                 {
-                    Fougerite.Logger.Log(string.Format("[PluginWatcher] Couldn't load: {0}{3}{1}.{2}", dir, filename,
+                    Logger.Log(string.Format("[PluginWatcher] Couldn't load: {0}{3}{1}.{2}", dir, filename,
                         Type, Path.DirectorySeparatorChar));
                 }
                 else
                 {
                     Loom.QueueOnMainThread(() => {
-                        Logger.Log("[PluginWatcher] Reloaded plugin " + filename);
+                        Logger.Log($"[PluginWatcher] Reloaded plugin {filename}");
                     });
                 }
             }

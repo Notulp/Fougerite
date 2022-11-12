@@ -8,21 +8,21 @@ namespace Fougerite.Events
     public class ResearchEvent
     {
         private readonly IInventoryItem _item;
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
         private bool _cancelled;
 
         public ResearchEvent(IInventoryItem item)
         {
-            this._item = item;
-            this._player = Fougerite.Server.GetServer().FindPlayer(item.character.netUser.userID);
+            _item = item;
+            _player = Server.GetServer().FindPlayer(item.character.netUser.userID);
         }
 
         /// <summary>
         /// The player who does the research
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
-            get { return this._player; }
+            get { return _player; }
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Fougerite.Events
         /// </summary>
         public IInventoryItem Item
         {
-            get { return this._item; }
+            get { return _item; }
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Fougerite.Events
         /// </summary>
         public ItemDataBlock ItemDataBlock
         {
-            get { return this._item.datablock; }
+            get { return _item.datablock; }
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Fougerite.Events
         /// </summary>
         public string ItemName 
         {
-            get { return this._item.datablock.name; }
+            get { return _item.datablock.name; }
         }
         
         /// <summary>
@@ -54,7 +54,7 @@ namespace Fougerite.Events
         /// </summary>
         public bool Cancelled 
         {
-            get { return this._cancelled; }
+            get { return _cancelled; }
         }
 
         /// <summary>

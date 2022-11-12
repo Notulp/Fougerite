@@ -35,7 +35,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Debug.LogError("Failed to parse logging values: " + ex);
+                Debug.LogError($"Failed to parse logging values: {ex}");
             }
 
             try
@@ -60,7 +60,8 @@ namespace Fougerite
                     RPCLogWriter.LogWriter.Close();
 
                 RPCLogWriter.DateTime = DateTime.Now.ToString("dd_MM_yyyy");
-                RPCLogWriter.LogWriter = new StreamWriter(Path.Combine(LogsFolder, string.Format("RPCTracer_{0}.log", RPCLogWriter.DateTime)), true);
+                RPCLogWriter.LogWriter = new StreamWriter(Path.Combine(LogsFolder,
+                    $"RPCTracer_{RPCLogWriter.DateTime}.log"), true);
                 RPCLogWriter.LogWriter.AutoFlush = true;
             }
             catch (Exception ex)
@@ -77,7 +78,7 @@ namespace Fougerite
                     LogWriter.LogWriter.Close();
 
                 LogWriter.DateTime = DateTime.Now.ToString("dd_MM_yyyy");
-                LogWriter.LogWriter = new StreamWriter(Path.Combine(LogsFolder, string.Format("Log_{0}.log", LogWriter.DateTime)), true);
+                LogWriter.LogWriter = new StreamWriter(Path.Combine(LogsFolder, $"Log_{LogWriter.DateTime}.log"), true);
                 LogWriter.LogWriter.AutoFlush = true;
             }
             catch (Exception ex)
@@ -94,7 +95,7 @@ namespace Fougerite
                     ChatWriter.LogWriter.Close();
 
                 ChatWriter.DateTime = DateTime.Now.ToString("dd_MM_yyyy");
-                ChatWriter.LogWriter = new StreamWriter(Path.Combine(LogsFolder, string.Format("Chat_{0}.log", ChatWriter.DateTime)), true);
+                ChatWriter.LogWriter = new StreamWriter(Path.Combine(LogsFolder, $"Chat_{ChatWriter.DateTime}.log"), true);
                 ChatWriter.LogWriter.AutoFlush = true;
             }
             catch (Exception ex)
@@ -105,7 +106,7 @@ namespace Fougerite
         
         private static string LogFormat(string Text)
         {
-            Text = "[" + DateTime.Now + "] " + Text;
+            Text = $"[{DateTime.Now}] {Text}";
             return Text;
         }
 
@@ -140,7 +141,7 @@ namespace Fougerite
         public static void Log(string Message, UnityEngine.Object Context = null)
         {
             Debug.Log(Message, Context);
-            Message = "[Console] " + Message;
+            Message = $"[Console] {Message}";
             WriteLog(Message);
             
             Hooks.LoggerEvent(LoggerEventType.Log, Message);
@@ -153,7 +154,7 @@ namespace Fougerite
             {
                 if (RPCLogWriter.DateTime != DateTime.Now.ToString("dd_MM_yyyy"))
                     RPCTracerInit();
-                Message = "[RPC Debug] " + Message;
+                Message = $"[RPC Debug] {Message}";
                 RPCLogWriter.LogWriter.WriteLine(LogFormat(Message));
             }
             catch (Exception ex)
@@ -167,7 +168,7 @@ namespace Fougerite
         public static void LogWarning(string Message, UnityEngine.Object Context = null)
         {
             Debug.LogWarning(Message, Context);
-            Message = "[Warning] " + Message;
+            Message = $"[Warning] {Message}";
             WriteLog(Message);
             
             Hooks.LoggerEvent(LoggerEventType.LogWarning, Message);
@@ -177,7 +178,7 @@ namespace Fougerite
         {
             if (showErrors)
                 Debug.LogError(Message, Context);
-            Message = "[Error] " + Message;
+            Message = $"[Error] {Message}";
             WriteLog(Message);
             
             Hooks.LoggerEvent(LoggerEventType.LogError, Message);
@@ -187,7 +188,7 @@ namespace Fougerite
         {
             if (showErrors)
                 Debug.LogError(Message, Context);
-            Message = "[Error] " + Message;
+            Message = $"[Error] {Message}";
             WriteLog(Message);
 
             if (!IgnoreHook)
@@ -207,10 +208,10 @@ namespace Fougerite
             {
                 var declaringType = stackTrace.GetFrame(i).GetMethod().DeclaringType;
                 if (declaringType != null)
-                    Trace += declaringType.Name + "->" + stackTrace.GetFrame(i).GetMethod().Name + " | ";
+                    Trace += $"{declaringType.Name}->{stackTrace.GetFrame(i).GetMethod().Name} | ";
             }
 
-            string Message = "[Exception] [ " + Trace + "]\r\n" + Ex.ToString();
+            string Message = $"[Exception] [ {Trace}]\r\n{Ex}";
             WriteLog(Message);
             
             Hooks.LoggerEvent(LoggerEventType.LogException, Message);
@@ -219,8 +220,8 @@ namespace Fougerite
         public static void LogDebug(string Message, UnityEngine.Object Context = null)
         {
             if (showDebug)
-                Debug.Log("[DEBUG] " + Message, Context);
-            Message = "[Debug] " + Message;
+                Debug.Log($"[DEBUG] {Message}", Context);
+            Message = $"[Debug] {Message}";
             WriteLog(Message);
             
             Hooks.LoggerEvent(LoggerEventType.LogDebug, Message);
@@ -228,7 +229,7 @@ namespace Fougerite
 
         public static void ChatLog(string Sender, string Message)
         {
-            Message = "[CHAT] " + Sender + ": " + Message;
+            Message = $"[CHAT] {Sender}: {Message}";
             Debug.Log(Message);
             WriteChat(Message);
             

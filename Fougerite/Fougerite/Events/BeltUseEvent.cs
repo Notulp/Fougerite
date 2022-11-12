@@ -4,7 +4,7 @@ namespace Fougerite.Events
     {
         private readonly InventoryHolder _holder;
         private readonly int _belt;
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
         private bool _bypass = false;
         private bool _cancelled = false;
         
@@ -14,7 +14,7 @@ namespace Fougerite.Events
             _belt = belt;
             if (holder.netUser != null)
             {
-                _player = Fougerite.Server.GetServer().FindPlayer(holder.netUser.userID);
+                _player = Server.GetServer().FindPlayer(holder.netUser.userID);
             }
         }
 
@@ -31,7 +31,7 @@ namespace Fougerite.Events
             get { return _holder; }
         }
 
-        public Fougerite.Player Player
+        public Player Player
         {
             get { return _player; }
         }

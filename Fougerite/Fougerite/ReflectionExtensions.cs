@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -13,12 +14,12 @@ namespace Fougerite
             var metInf = GetMethodInfo(obj, methodName);
 
             if (metInf == null)
-                throw new Exception(String.Format("Couldn't find method '{0}' using reflection.", methodName));
+                throw new Exception($"Couldn't find method '{methodName}' using reflection.");
 
             if (metInf is MethodInfo methodInfo)
                 return methodInfo.Invoke(obj, args);
 
-            return (object)null;
+            return null;
         }
 
         public static object CallMethodOnBase(this object obj, string methodName, params object[] args)
@@ -58,23 +59,22 @@ namespace Fougerite
                 returnType = method.ReturnType;
             }
 
-            var type = obj.GetType();
-            var dynamicMethod = new DynamicMethod("", returnType,
-                new Type[] { type, typeof(Object) }, type);
+            Type type = obj.GetType();
+            DynamicMethod dynamicMethod = new DynamicMethod("", returnType, new[] { type, typeof(Object) }, type);
 
             var iLGenerator = dynamicMethod.GetILGenerator();
             iLGenerator.Emit(OpCodes.Ldarg_0);
 
             for (var i = 0; i < parameters.Length; i++)
             {
-                var parameter = parameters[i];
+                ParameterInfo parameter = parameters[i];
 
                 iLGenerator.Emit(OpCodes.Ldarg_1);
 
                 iLGenerator.Emit(OpCodes.Ldc_I4_S, i);
                 iLGenerator.Emit(OpCodes.Ldelem_Ref);
 
-                var parameterType = parameter.ParameterType;
+                Type parameterType = parameter.ParameterType;
                 if (parameterType.IsPrimitive)
                 {
                     iLGenerator.Emit(OpCodes.Unbox_Any, parameterType);
@@ -96,16 +96,16 @@ namespace Fougerite
 
         public static object GetFieldValue(this object obj, string fieldName)
         {
-            var memInf = GetFieldInfo(obj, fieldName);
+            MemberInfo memInf = GetFieldInfo(obj, fieldName);
 
             if (memInf == null)
-                throw new Exception(string.Format("Couldn't find field '{0}' using reflection.", fieldName));
+                throw new Exception($"Couldn't find field '{fieldName}' using reflection.");
 
-            if (memInf is System.Reflection.PropertyInfo)
-                return memInf.As<System.Reflection.PropertyInfo>().GetValue(obj, null);
+            if (memInf is PropertyInfo propertyInfo)
+                return propertyInfo.GetValue(obj, null);
 
-            if (memInf is System.Reflection.FieldInfo)
-                return memInf.As<System.Reflection.FieldInfo>().GetValue(obj);
+            if (memInf is FieldInfo fieldInfo)
+                return fieldInfo.GetValue(obj);
 
             throw new Exception();
         }
@@ -122,17 +122,17 @@ namespace Fougerite
 
         public static void SetFieldValue(this object obj, string fieldName, object newValue)
         {
-            var memInf = GetFieldInfo(obj, fieldName);
+            MemberInfo memInf = GetFieldInfo(obj, fieldName);
 
             if (memInf == null)
-                throw new Exception(string.Format("Couldn't find field '{0}' using reflection.", fieldName));
+                throw new Exception($"Couldn't find field '{fieldName}' using reflection.");
 
-            if (memInf is System.Reflection.PropertyInfo)
-                memInf.As<System.Reflection.PropertyInfo>().SetValue(obj, newValue, null);
-            else if (memInf is System.Reflection.FieldInfo)
-                memInf.As<System.Reflection.FieldInfo>().SetValue(obj, newValue);
+            if (memInf is PropertyInfo propertyInfo)
+                propertyInfo.SetValue(obj, newValue, null);
+            else if (memInf is FieldInfo fieldInfo)
+                fieldInfo.SetValue(obj, newValue);
             else
-                throw new System.Exception();
+                throw new Exception();
         }
 
         private static MethodInfo GetMethodInfo(Type classType, string methodName)
@@ -149,24 +149,24 @@ namespace Fougerite
 
         private static MemberInfo GetFieldInfo(Type objType, string fieldName)
         {
-            var prps = new List<System.Reflection.PropertyInfo>();
+            List<PropertyInfo> prps = new List<PropertyInfo>();
 
             prps.Add(objType.GetProperty(fieldName,
                 BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy |
                 BindingFlags.Static));
 
-            prps = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(prps, i => !ReferenceEquals(i, null)));
+            prps = prps.Where(i => !ReferenceEquals(i, null)).ToList();
 
             if (prps.Count != 0)
                 return prps[0];
 
-            var flds = new System.Collections.Generic.List<System.Reflection.FieldInfo>();
+            List<FieldInfo> flds = new List<FieldInfo>();
 
             flds.Add(objType.GetField(fieldName,
                 BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy |
                 BindingFlags.Static));
 
-            flds = System.Linq.Enumerable.ToList(System.Linq.Enumerable.Where(flds, i => !ReferenceEquals(i, null)));
+            flds = flds.Where(i => !ReferenceEquals(i, null)).ToList();
 
             if (flds.Count != 0)
                 return flds[0];
@@ -191,7 +191,7 @@ namespace Fougerite
             var metInf = GetMethodInfo(classType, methodName);
 
             if (metInf == null)
-                throw new Exception(string.Format("Couldn't find method '{0}' using reflection.", methodName));
+                throw new Exception($"Couldn't find method '{methodName}' using reflection.");
 
             if (metInf is MethodInfo methodInfo)
             {
@@ -201,39 +201,33 @@ namespace Fougerite
 
         public static object GetStaticFieldValue(this Type classType, string fieldName)
         {
-            var memInf = GetFieldInfo(classType, fieldName);
+            MemberInfo memInf = GetFieldInfo(classType, fieldName);
 
             if (memInf == null)
-                throw new Exception(string.Format("Couldn't find field '{0}' using reflection.", fieldName));
+                throw new Exception($"Couldn't find field '{fieldName}' using reflection.");
 
-            if (memInf is System.Reflection.PropertyInfo)
-                return memInf.As<System.Reflection.PropertyInfo>().GetValue(null, null);
+            if (memInf is PropertyInfo propertyInfo)
+                return propertyInfo.GetValue(null, null);
 
-            if (memInf is System.Reflection.FieldInfo)
-                return memInf.As<System.Reflection.FieldInfo>().GetValue(null);
+            if (memInf is FieldInfo fieldInfo)
+                return fieldInfo.GetValue(null);
 
             throw new Exception();
         }
 
         public static void SetFieldValueValue(this Type classType, string fieldName, object newValue)
         {
-            var memInf = GetFieldInfo(classType, fieldName);
+            MemberInfo memInf = GetFieldInfo(classType, fieldName);
 
             if (memInf == null)
-                throw new Exception(string.Format("Couldn't find field '{0}' using reflection.", fieldName));
+                throw new Exception($"Couldn't find field '{fieldName}' using reflection.");
 
-            if (memInf is System.Reflection.PropertyInfo)
-                memInf.As<System.Reflection.PropertyInfo>().SetValue(null, newValue, null);
-            else if (memInf is System.Reflection.FieldInfo)
-                memInf.As<System.Reflection.FieldInfo>().SetValue(null, newValue);
+            if (memInf is PropertyInfo propertyInfo)
+                propertyInfo.SetValue(null, newValue, null);
+            else if (memInf is FieldInfo fieldInfo)
+                fieldInfo.SetValue(null, newValue);
             else
-                throw new System.Exception();
-        }
-
-        [System.Diagnostics.DebuggerHidden]
-        private static T As<T>(this object obj)
-        {
-            return (T)obj;
+                throw new Exception();
         }
     }
 }

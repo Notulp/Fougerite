@@ -10,14 +10,14 @@ namespace Fougerite
     public class SQLiteConnector
     {
         private static SQLiteConnector _inst;
-        public string SQLitePath = Directory.GetCurrentDirectory() + "\\Save\\FougeriteSQL.sqlite";
+        public string SQLitePath = $"{Directory.GetCurrentDirectory()}\\Save\\FougeriteSQL.sqlite";
         private SQLiteConnection _dbConnection;
 
         internal void Setup()
         {
             try
             {
-                string extDir = Directory.GetCurrentDirectory() + "\\rust_server_Data\\Managed";
+                string extDir = $"{Directory.GetCurrentDirectory()}\\rust_server_Data\\Managed";
                 File.WriteAllText(Path.Combine(extDir, "System.Data.SQLite.dll.config"), $"<configuration>\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x86\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86\" />\n<dllmap dll=\"sqlite3\" target=\"{extDir}\\x64\\libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86-64\" />\n</configuration>");
                 if (!File.Exists(SQLitePath))
                 {
@@ -26,7 +26,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[SQLiteConnector] Failed: " + ex);
+                Logger.LogError($"[SQLiteConnector] Failed: {ex}");
             }
         }
 
@@ -38,7 +38,7 @@ namespace Fougerite
         /// <returns></returns>
         public SQLiteConnection Connect(string extraarguments = ";Version=3;New=False;Compress=True;Foreign Keys=True;")
         {
-            _dbConnection = new SQLiteConnection("Data Source=" + SQLitePath + extraarguments);
+            _dbConnection = new SQLiteConnection($"Data Source={SQLitePath}{extraarguments}");
             return _dbConnection;
         }
 

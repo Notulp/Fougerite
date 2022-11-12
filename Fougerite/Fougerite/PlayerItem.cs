@@ -4,8 +4,8 @@ namespace Fougerite
 {
     public class PlayerItem
     {
-        private Inventory internalInv;
-        private int internalSlot;
+        private readonly Inventory internalInv;
+        private readonly int internalSlot;
 
         public PlayerItem()
         {
@@ -13,8 +13,8 @@ namespace Fougerite
 
         public PlayerItem(ref Inventory inv, int slot)
         {
-            this.internalInv = inv;
-            this.internalSlot = slot;
+            internalInv = inv;
+            internalSlot = slot;
         }
 
         /// <summary>
@@ -23,9 +23,9 @@ namespace Fougerite
         /// <param name="qty"></param>
         public void Consume(int qty)
         {
-            if (!this.IsEmpty())
+            if (!IsEmpty())
             {
-                this.RInventoryItem.Consume(ref qty);
+                RInventoryItem.Consume(ref qty);
             }
         }
 
@@ -34,13 +34,17 @@ namespace Fougerite
         /// </summary>
         public void Drop()
         {
-            DropHelper.DropItem(this.internalInv, this.Slot);
+            DropHelper.DropItem(internalInv, Slot);
         }
 
+        /// <summary>
+        /// Returns the IInventoryItem by internal slot.
+        /// </summary>
+        /// <returns></returns>
         private IInventoryItem GetItemRef()
         {
             IInventoryItem item;
-            this.internalInv.GetItem(this.internalSlot, out item);
+            internalInv.GetItem(internalSlot, out item);
             return item;
         }
 
@@ -50,7 +54,7 @@ namespace Fougerite
         /// <returns></returns>
         public bool IsEmpty()
         {
-            return (this.RInventoryItem == null);
+            return (RInventoryItem == null);
         }
 
         /// <summary>
@@ -60,11 +64,11 @@ namespace Fougerite
         /// <returns></returns>
         public bool TryCombine(PlayerItem pi)
         {
-            if (this.IsEmpty() || pi.IsEmpty())
+            if (IsEmpty() || pi.IsEmpty())
             {
                 return false;
             }
-            return (this.RInventoryItem.TryCombine(pi.RInventoryItem) != InventoryItem.MergeResult.Failed);
+            return (RInventoryItem.TryCombine(pi.RInventoryItem) != InventoryItem.MergeResult.Failed);
         }
 
         /// <summary>
@@ -74,11 +78,33 @@ namespace Fougerite
         /// <returns></returns>
         public bool TryStack(PlayerItem pi)
         {
-            if (this.IsEmpty() || pi.IsEmpty())
+            if (IsEmpty() || pi.IsEmpty())
             {
                 return false;
             }
-            return (this.RInventoryItem.TryStack(pi.RInventoryItem) != InventoryItem.MergeResult.Failed);
+            return (RInventoryItem.TryStack(pi.RInventoryItem) != InventoryItem.MergeResult.Failed);
+        }
+
+        /// <summary>
+        /// Returns the inventory class of the item.
+        /// </summary>
+        public Inventory InternalInventory
+        {
+            get
+            {
+                return internalInv;
+            }
+        }
+
+        /// <summary>
+        /// Returns the slot of the item.
+        /// </summary>
+        public int InternalSlot
+        {
+            get
+            {
+                return internalSlot;
+            }
         }
 
         /// <summary>
@@ -88,11 +114,11 @@ namespace Fougerite
         {
             get
             {
-                return this.GetItemRef();
+                return GetItemRef();
             }
             set
             {
-                this.RInventoryItem = value;
+                RInventoryItem = value;
             }
         }
 
@@ -103,15 +129,15 @@ namespace Fougerite
         {
             get
             {
-                if (!this.IsEmpty())
+                if (!IsEmpty())
                 {
-                    return this.RInventoryItem.datablock.name;
+                    return RInventoryItem.datablock.name;
                 }
                 return null;
             }
             set
             {
-                this.RInventoryItem.datablock.name = value;
+                RInventoryItem.datablock.name = value;
             }
         }
 
@@ -122,11 +148,11 @@ namespace Fougerite
         {
             get
             {
-                return Util.UStackable.Contains(Name) ? 1 : this.UsesLeft;
+                return Util.UStackable.Contains(Name) ? 1 : UsesLeft;
             }
             set
             {
-                this.UsesLeft = value;
+                UsesLeft = value;
             }
         }
 
@@ -137,9 +163,9 @@ namespace Fougerite
         {
             get
             {
-                if (!this.IsEmpty())
+                if (!IsEmpty())
                 {
-                    return this.RInventoryItem.slot;
+                    return RInventoryItem.slot;
                 }
                 return -1;
             }
@@ -152,15 +178,15 @@ namespace Fougerite
         {
             get
             {
-                if (!this.IsEmpty())
+                if (!IsEmpty())
                 {
-                    return this.RInventoryItem.uses;
+                    return RInventoryItem.uses;
                 }
                 return -1;
             }
             set
             {
-                this.RInventoryItem.SetUses(value);
+                RInventoryItem.SetUses(value);
             }
         }
 

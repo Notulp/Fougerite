@@ -6,7 +6,7 @@
     public class GrenadeThrowEvent
     {
         private readonly HandGrenadeDataBlock _bw;
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
         private readonly UnityEngine.GameObject _go;
         private readonly ItemRepresentation _ir;
         private readonly uLink.NetworkMessageInfo _unmi;
@@ -15,7 +15,7 @@
         public GrenadeThrowEvent(HandGrenadeDataBlock bw, UnityEngine.GameObject go, ItemRepresentation ir, uLink.NetworkMessageInfo ui, IHandGrenadeItem ibw)
         {
             TakeDamage local = ibw.inventory.GetLocal<TakeDamage>();
-            _player = Fougerite.Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
+            _player = Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
             _bw = bw;
             _go = go;
             _ir = ir;
@@ -28,15 +28,15 @@
         /// </summary>
         public IHandGrenadeItem IHandGrenadeItem
         {
-            get { return this._ibw; }
+            get { return _ibw; }
         }
 
         /// <summary>
         /// Gets the player that is throwing the grenade.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
-            get { return this._player; }
+            get { return _player; }
         }
 
         /// <summary>
@@ -44,7 +44,7 @@
         /// </summary>
         public HandGrenadeDataBlock HandGrenadeDataBlock
         {
-            get { return this._bw; }
+            get { return _bw; }
         }
 
         /// <summary>
@@ -52,7 +52,7 @@
         /// </summary>
         public UnityEngine.GameObject GameObject
         {
-            get { return this._go; }
+            get { return _go; }
         }
 
         /// <summary>
@@ -60,7 +60,7 @@
         /// </summary>
         public ItemRepresentation ItemRepresentation
         {
-            get { return this._ir; }
+            get { return _ir; }
         }
 
         /// <summary>
@@ -68,7 +68,7 @@
         /// </summary>
         public uLink.NetworkMessageInfo NetworkMessageInfo
         {
-            get { return this._unmi; }
+            get { return _unmi; }
         }
     }
 }

@@ -49,21 +49,21 @@ namespace Fougerite.PluginLoaders
         {
             if (Bootstrap.IgnoredPlugins.Contains(name.ToLower()))
             {
-                Logger.LogDebug("[PYPluginLoader] Ignoring plugin " + name + ".");
+                Logger.LogDebug($"[PYPluginLoader] Ignoring plugin {name}.");
                 return;
             }
             
-            Logger.LogDebug("[PYPluginLoader] Loading plugin " + name + ".");
+            Logger.LogDebug($"[PYPluginLoader] Loading plugin {name}.");
 
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
-                Logger.LogError("[PYPluginLoader] " + name + " plugin is already loaded.");
-                throw new InvalidOperationException("[PYPluginLoader] " + name + " plugin is already loaded.");
+                Logger.LogError($"[PYPluginLoader] {name} plugin is already loaded.");
+                throw new InvalidOperationException($"[PYPluginLoader] {name} plugin is already loaded.");
             }
 
             if (PluginLoader.GetInstance().CurrentlyLoadingPlugins.Contains(name))
             {
-                Logger.LogWarning(name + " plugin is already being loaded. Returning.");
+                Logger.LogWarning($"{name} plugin is already being loaded. Returning.");
                 return;
             }
 
@@ -81,7 +81,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                Logger.Log("[PYPluginLoader] " + name + " plugin could not be loaded.");
+                Logger.Log($"[PYPluginLoader] {name} plugin could not be loaded.");
                 Logger.LogException(ex);
                 if (PluginLoader.GetInstance().CurrentlyLoadingPlugins.Contains(name))
                 {
@@ -92,7 +92,7 @@ namespace Fougerite.PluginLoaders
 
         public void LoadPlugins()
         {
-            if (Fougerite.Config.GetBoolValue("Engines", "EnablePython"))
+            if (Config.GetBoolValue("Engines", "EnablePython"))
             {
                 foreach (string name in GetPluginNames())
                     LoadPlugin(name);
@@ -129,7 +129,7 @@ namespace Fougerite.PluginLoaders
 
         public void UnloadPlugin(string name)
         {
-            Logger.LogDebug("[PYPluginLoader] Unloading " + name + " plugin.");
+            Logger.LogDebug($"[PYPluginLoader] Unloading {name} plugin.");
 
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
@@ -149,13 +149,12 @@ namespace Fougerite.PluginLoaders
                     PluginLoader.GetInstance().Plugins.Remove(name);
                 }
 
-                Logger.LogDebug("[PYPluginLoader] " + name + " plugin was unloaded successfuly.");
+                Logger.LogDebug($"[PYPluginLoader] {name} plugin was unloaded successfuly.");
             }
             else
             {
-                Logger.LogError("[PYPluginLoader] Can't unload " + name + ". Plugin is not loaded.");
-                throw new InvalidOperationException("[PYPluginLoader] Can't unload " + name +
-                                                    ". Plugin is not loaded.");
+                Logger.LogError($"[PYPluginLoader] Can't unload {name}. Plugin is not loaded.");
+                throw new InvalidOperationException($"[PYPluginLoader] Can't unload {name}. Plugin is not loaded.");
             }
         }
 
@@ -179,7 +178,7 @@ namespace Fougerite.PluginLoaders
 
         public bool CheckDependencies()
         {
-            return Fougerite.Config.GetBoolValue("Engines", "EnablePython");
+            return Config.GetBoolValue("Engines", "EnablePython");
         }
     }
 }

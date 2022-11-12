@@ -17,8 +17,8 @@
     public class BanEvent
     {
         private BanType _type;
-        private Fougerite.Player _player;
-        private Fougerite.Player _sender;
+        private Player _player;
+        private Player _sender;
         private string _ip;
         private string _id;
         private string _name;
@@ -26,7 +26,7 @@
         private string _banner;
         private bool _cancel = false;
 
-        public BanEvent(Fougerite.Player player, string Banner, string reason, Fougerite.Player Sender)
+        public BanEvent(Player player, string Banner, string reason, Player Sender)
         {
             _type = BanType.Player;
             _player = player;
@@ -87,7 +87,7 @@
         /// <summary>
         /// Returns the banned user.
         /// </summary>
-        public Fougerite.Player BannedUser
+        public Player BannedUser
         {
             get { return _player; }
         }
@@ -95,7 +95,7 @@
         /// <summary>
         /// Returns the ban executor if its a player.
         /// </summary>
-        public Fougerite.Player BanSender
+        public Player BanSender
         {
             get { return _sender; }
         }

@@ -112,8 +112,8 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Fougerite Loom Error] " + ex + " - " + Time.time + " - " + time 
-                                + " - " + action + " - " + Current._actions + " - " + Current._delayed);
+                Logger.LogError(
+                    $"[Fougerite Loom Error] {ex} - {Time.time} - {time} - {action} - {Current._actions} - {Current._delayed}");
             }
         }
 
@@ -148,7 +148,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Loom RunAction] Error: " + ex);
+                Logger.LogError($"[Loom RunAction] Error: {ex}");
             }
             finally
             {

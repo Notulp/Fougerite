@@ -14,8 +14,8 @@ namespace Fougerite
 
         public EntityItem(Inventory inv, int slot)
 		{
-			this._internalInv = inv;
-			this._internalSlot = slot;
+			_internalInv = inv;
+			_internalSlot = slot;
 		}
 
 	    /// <summary>
@@ -36,13 +36,13 @@ namespace Fougerite
 				ItemPickup dropped = null;
 				Vector3 position = _internalInv.transform.localPosition;
 				// Try making the positions random, instead of letting the objects stuck into together.
-				position.x += UnityEngine.Random.Range(0f, 0.85f);
-				position.y += UnityEngine.Random.Range(0.75f, 1f);
-				position.z += UnityEngine.Random.Range(0f, 0.85f);
+				position.x += Random.Range(0f, 0.85f);
+				position.y += Random.Range(0.75f, 1f);
+				position.z += Random.Range(0f, 0.85f);
 				
-				Vector3 arg = new Vector3(UnityEngine.Random.Range(0.75f, 1.3f), UnityEngine.Random.Range(0.75f, 1.3f), UnityEngine.Random.Range(0.75f, 1.3f));
+				Vector3 arg = new Vector3(Random.Range(0.75f, 1.3f), Random.Range(0.75f, 1.3f), Random.Range(0.75f, 1.3f));
 				Quaternion rotation = new Quaternion(0f, 0f, 0f, 1f);
-				GameObject go = NetCull.InstantiateDynamicWithArgs<Vector3>(trait.prefab, position, rotation, arg);
+				GameObject go = NetCull.InstantiateDynamicWithArgs(trait.prefab, position, rotation, arg);
 				dropped = go.GetComponent<ItemPickup>();
 				if (!dropped.SetPickupItem(item))
 				{
@@ -65,7 +65,7 @@ namespace Fougerite
 		private IInventoryItem GetItemRef()
 		{
 			IInventoryItem item;
-			this._internalInv.GetItem(this._internalSlot, out item);
+			_internalInv.GetItem(_internalSlot, out item);
 			return item;
 		}
 
@@ -74,7 +74,7 @@ namespace Fougerite
 		/// </summary>
 		public Inventory Inventory
 		{
-			get { return this._internalInv; }
+			get { return _internalInv; }
 		}
 
 	    /// <summary>
@@ -83,7 +83,7 @@ namespace Fougerite
 	    /// <returns></returns>
 		public bool IsEmpty()
 		{
-			return (this.RInventoryItem == null);
+			return (RInventoryItem == null);
 		}
 
 	    /// <summary>
@@ -93,7 +93,7 @@ namespace Fougerite
 		{
 			get
 			{
-				return this.GetItemRef();
+				return GetItemRef();
 			}
 		}
 
@@ -104,15 +104,15 @@ namespace Fougerite
 		{
 			get
 			{
-				if (!this.IsEmpty())
+				if (!IsEmpty())
 				{
-					return this.RInventoryItem.datablock.name;
+					return RInventoryItem.datablock.name;
 				}
 				return "Empty slot";
 			}
 			set
 			{
-				this.RInventoryItem.datablock.name = value;
+				RInventoryItem.datablock.name = value;
 			}
 		}
 
@@ -123,11 +123,11 @@ namespace Fougerite
 		{
 			get
 			{
-			    return Util.UStackable.Contains(Name) ? 1 : this.UsesLeft;
+			    return Util.UStackable.Contains(Name) ? 1 : UsesLeft;
 			}
 		    set
 			{
-				this.UsesLeft = value;
+				UsesLeft = value;
 			}
 		}
 
@@ -138,11 +138,11 @@ namespace Fougerite
 		{
 			get
 			{
-				if (!this.IsEmpty())
+				if (!IsEmpty())
 				{
-					return this.RInventoryItem.slot;
+					return RInventoryItem.slot;
 				}
-				return this._internalSlot;
+				return _internalSlot;
 			}
 		}
 
@@ -153,15 +153,15 @@ namespace Fougerite
 		{
 			get
 			{
-				if (!this.IsEmpty())
+				if (!IsEmpty())
 				{
-					return this.RInventoryItem.uses;
+					return RInventoryItem.uses;
 				}
 				return -1;
 			}
 			set
 			{
-				this.RInventoryItem.SetUses(value);
+				RInventoryItem.SetUses(value);
 			}
 		}
     }

@@ -47,7 +47,7 @@ namespace Fougerite.PluginLoaders
                 {
                     object result = (object)null;
 
-                    using (new Stopper(Type + " " + Name, func))
+                    using (new Stopper($"{Type} {Name}", func))
                     {
                         result = script.Call(script.Globals[func], args);
                     }
@@ -56,7 +56,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                string fileinfo = ("[Error] Failed to invoke: " + string.Format("{0}<{1}>.{2}()", Name, Type, func) + Environment.NewLine);
+                string fileinfo = ("[Error] Failed to invoke: " + $"{Name}<{Type}>.{func}()" + Environment.NewLine);
                 Logger.LogError(fileinfo + FormatException(ex));
             }
             return null;
@@ -75,20 +75,20 @@ namespace Fougerite.PluginLoaders
                 UserData.RegistrationPolicy = InteropRegistrationPolicy.Automatic;
                 script = new Script();
                 script.DoString(code);
-                script.Globals.Set("Util", UserData.Create(Fougerite.Util.GetUtil()));
+                script.Globals.Set("Util", UserData.Create(Util.GetUtil()));
                 script.Globals.Set("Plugin", UserData.Create(this));
-                script.Globals.Set("Server", UserData.Create(Fougerite.Server.GetServer()));
-                script.Globals.Set("DataStore", UserData.Create(Fougerite.DataStore.GetInstance()));
-                script.Globals.Set("Data", UserData.Create(Fougerite.Data.GetData()));
+                script.Globals.Set("Server", UserData.Create(Server.GetServer()));
+                script.Globals.Set("DataStore", UserData.Create(DataStore.GetInstance()));
+                script.Globals.Set("Data", UserData.Create(Data.GetData()));
                 script.Globals.Set("Web", UserData.Create(Web.GetInstance()));
-                script.Globals.Set("World", UserData.Create(Fougerite.World.GetWorld()));
+                script.Globals.Set("World", UserData.Create(World.GetWorld()));
                 #pragma warning disable 618
                 script.Globals.Set("PluginCollector", UserData.Create(GlobalPluginCollector.GetPluginCollector()));
                 #pragma warning restore 618
                 script.Globals.Set("Loom", UserData.Create(Loom.Current));
                 script.Globals.Set("JSON", UserData.Create(JsonAPI.GetInstance));
                 script.Globals.Set("MySQL", UserData.Create(MySQLConnector.GetInstance));
-                script.Globals.Set("SQLite", UserData.Create(Fougerite.SQLiteConnector.GetInstance));
+                script.Globals.Set("SQLite", UserData.Create(SQLiteConnector.GetInstance));
                 script.Globals.Set("PermissionSystem", UserData.Create(PermissionSystem.GetPermissionSystem()));
                 script.Globals.Set("PlayerCache", UserData.Create(PlayerCache.GetPlayerCache()));
                 foreach (DynValue v in script.Globals.Keys)
@@ -104,7 +104,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Error] Failed to load Lua plugin: " + ex);
+                Logger.LogError($"[Error] Failed to load Lua plugin: {ex}");
                 State = PluginState.FailedToLoad;
             }
 

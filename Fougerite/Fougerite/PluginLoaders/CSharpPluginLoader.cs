@@ -54,21 +54,21 @@ namespace Fougerite.PluginLoaders
         {
             if (Bootstrap.IgnoredPlugins.Contains(name.ToLower()))
             {
-                Logger.LogDebug("[CSharpPluginLoader] Ignoring plugin " + name + ".");
+                Logger.LogDebug($"[CSharpPluginLoader] Ignoring plugin {name}.");
                 return;
             }
             
-            Logger.LogDebug("[CSharpPluginLoader] Loading plugin " + name + ".");
+            Logger.LogDebug($"[CSharpPluginLoader] Loading plugin {name}.");
 
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
-                Logger.LogError("[CSharpPluginLoader] " + name + " plugin is already loaded.");
-                throw new InvalidOperationException("[CSharpPluginLoader] " + name + " plugin is already loaded.");
+                Logger.LogError($"[CSharpPluginLoader] {name} plugin is already loaded.");
+                throw new InvalidOperationException($"[CSharpPluginLoader] {name} plugin is already loaded.");
             }
 
             if (PluginLoader.GetInstance().CurrentlyLoadingPlugins.Contains(name))
             {
-                Logger.LogWarning(name + " plugin is already being loaded. Returning.");
+                Logger.LogWarning($"{name} plugin is already being loaded. Returning.");
                 return;
             }
 
@@ -85,7 +85,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                Logger.Log("[CSharpPluginLoader] " + name + " plugin could not be loaded.");
+                Logger.Log($"[CSharpPluginLoader] {name} plugin could not be loaded.");
                 Logger.LogException(ex);
                 if (PluginLoader.GetInstance().CurrentlyLoadingPlugins.Contains(name))
                 {
@@ -96,7 +96,7 @@ namespace Fougerite.PluginLoaders
 
         public void LoadPlugins()
         {
-            if (Fougerite.Config.GetBoolValue("Engines", "EnableCSharp"))
+            if (Config.GetBoolValue("Engines", "EnableCSharp"))
             {
                 foreach (string name in GetPluginNames())
                 {
@@ -124,8 +124,8 @@ namespace Fougerite.PluginLoaders
                     catch (Exception ex)
                     {
                         // Broken modules better stop the entire server init.
-                        Logger.LogError(string.Format(
-                            "[CSharpPlugin] Module \"{0}\" has thrown an exception during initialization. {1}", CurrentModule.Name, ex));
+                        Logger.LogError(
+                            $"[CSharpPlugin] Module \"{CurrentModule.Name}\" has thrown an exception during initialization. {ex}");
                     }
 
                     //Logger.Log(string.Format(
@@ -166,7 +166,7 @@ namespace Fougerite.PluginLoaders
 
         public void UnloadPlugin(string name)
         {
-            Logger.LogDebug("[CSharpPluginLoader] Unloading " + name + " plugin.");
+            Logger.LogDebug($"[CSharpPluginLoader] Unloading {name} plugin.");
 
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
@@ -182,8 +182,8 @@ namespace Fougerite.PluginLoaders
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(string.Format(
-                        "[Modules] Module \"{0}\" has thrown an exception while being deinitialized:\n{1}", csPlugin.Name, ex));
+                    Logger.LogError(
+                        $"[Modules] Module \"{csPlugin.Name}\" has thrown an exception while being deinitialized:\n{ex}");
                 }
 
                 plugin.KillTimers();
@@ -204,13 +204,12 @@ namespace Fougerite.PluginLoaders
                     }
                 }
 
-                Logger.LogDebug("[CSharpPluginLoader] " + name + " plugin was unloaded successfuly.");
+                Logger.LogDebug($"[CSharpPluginLoader] {name} plugin was unloaded successfuly.");
             }
             else
             {
-                Logger.LogError("[CSharpPluginLoader] Can't unload " + name + ". Plugin is not loaded.");
-                throw new InvalidOperationException("[CSharpPluginLoader] Can't unload " + name +
-                                                    ". Plugin is not loaded.");
+                Logger.LogError($"[CSharpPluginLoader] Can't unload {name}. Plugin is not loaded.");
+                throw new InvalidOperationException($"[CSharpPluginLoader] Can't unload {name}. Plugin is not loaded.");
             }
         }
 
@@ -232,7 +231,7 @@ namespace Fougerite.PluginLoaders
 
         public bool CheckDependencies()
         {
-            return Fougerite.Config.GetBoolValue("Engines", "EnableCSharp");
+            return Config.GetBoolValue("Engines", "EnableCSharp");
         }
     }
 }

@@ -148,39 +148,39 @@ namespace Fougerite
 
         public bool IsMuted(ulong id)
         {
-            return RustPP.Core.muteList.Contains(id);
+            return Core.muteList.Contains(id);
         }
 
         public bool IsMuted(Player pl)
         {
-            return RustPP.Core.muteList.Contains(pl.UID);
+            return Core.muteList.Contains(pl.UID);
         }
 
         public void UnMute(ulong id)
         {
-            RustPP.Core.muteList.Remove(id);
+            Core.muteList.Remove(id);
         }
 
         public void UnMute(Player pl)
         {
-            RustPP.Core.muteList.Remove(pl.UID);
+            Core.muteList.Remove(pl.UID);
         }
 
         public void Mute(ulong id, string name)
         {
-            RustPP.Core.muteList.Add(new PList.Player(id, name));
+            Core.muteList.Add(new PList.Player(id, name));
         }
 
         public void Mute(Player pl)
         {
-            RustPP.Core.muteList.Add(new PList.Player(pl.UID, pl.Name));
+            Core.muteList.Add(new PList.Player(pl.UID, pl.Name));
         }
 
         public Dictionary<ulong, string> Cache
         {
             get
             {
-                return RustPP.Core.userCache;
+                return Core.userCache;
             }
         }
     }

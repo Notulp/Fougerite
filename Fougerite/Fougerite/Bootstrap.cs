@@ -67,7 +67,7 @@ namespace Fougerite
             {
                 var type = typeof(Bootstrap);
                 new GameObject(type.FullName).AddComponent(type);
-                Debug.Log(string.Format("<><[ Fougerite v{0} ]><>", Version));
+                Debug.Log($"<><[ Fougerite v{Version} ]><>");
             }
             catch (Exception ex)
             {
@@ -182,13 +182,13 @@ namespace Fougerite
                 ServerSaveHandler.CrucialSavePoint = 2;
             }
 
-            if (!File.Exists(Util.GetRootFolder() + "\\Save\\IgnoredPlugins.txt"))
+            if (!File.Exists($"{Util.GetRootFolder()}\\Save\\IgnoredPlugins.txt"))
             {
-                File.Create(Util.GetRootFolder() + "\\Save\\IgnoredPlugins.txt").Dispose();
+                File.Create($"{Util.GetRootFolder()}\\Save\\IgnoredPlugins.txt").Dispose();
             }
 
 
-            string[] lines = File.ReadAllLines(Util.GetRootFolder() + "\\Save\\IgnoredPlugins.txt");
+            string[] lines = File.ReadAllLines($"{Util.GetRootFolder()}\\Save\\IgnoredPlugins.txt");
             foreach (var x in lines)
             {
                 if (!x.StartsWith(";"))
@@ -239,7 +239,7 @@ namespace Fougerite
         private void OnIgnoredChanged(object sender, FileSystemEventArgs e)
         {
             IgnoredPlugins.Clear();
-            string[] lines = File.ReadAllLines(Util.GetRootFolder() + "\\Save\\IgnoredPlugins.txt");
+            string[] lines = File.ReadAllLines($"{Util.GetRootFolder()}\\Save\\IgnoredPlugins.txt");
             foreach (var x in lines)
             {
                 if (!x.StartsWith(";"))
@@ -265,7 +265,7 @@ namespace Fougerite
             // Init CTimer
             _timergo = new GameObject();
             _timergo.AddComponent<CTimerHandler>();
-            UnityEngine.Object.DontDestroyOnLoad(_timergo);
+            DontDestroyOnLoad(_timergo);
             CTimer.StartWatching();
             
             // Initialize sqlite

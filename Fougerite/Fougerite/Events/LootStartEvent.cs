@@ -8,14 +8,14 @@ namespace Fougerite.Events
     public class LootStartEvent
     {
         private bool _cancel;
-        private readonly Fougerite.Player _player;
+        private readonly Player _player;
         private readonly LootableObject _lo;
         private readonly Useable _ue;
         private readonly Entity _entity;
         private readonly bool _isobject;
         private readonly uLink.NetworkPlayer _np;
 
-        public LootStartEvent(LootableObject lo, Fougerite.Player player, Useable use, uLink.NetworkPlayer nplayer)
+        public LootStartEvent(LootableObject lo, Player player, Useable use, uLink.NetworkPlayer nplayer)
         {
             _lo = lo;
             _ue = use;
@@ -71,7 +71,7 @@ namespace Fougerite.Events
         /// <summary>
         /// Gets the player who is looting.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
             get
             {

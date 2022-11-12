@@ -56,8 +56,7 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                     if (player != null)
                     {
-                        Logger.LogWarning("[VoiceByteOverflown] Received null value. Possible Sender: " + player.Name +
-                                          " - " + player.SteamID + " - " + player.IP);
+                        Logger.LogWarning($"[VoiceByteOverflown] Received null value. Possible Sender: {player.Name} - {player.SteamID} - {player.IP}");
                     }
                     else
                     {
@@ -76,13 +75,11 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                     if (player != null)
                     {
-                        Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
-                                          data.Length + " " + player.Name + " - " + player.SteamID + " - " + player.IP);
+                        Logger.LogWarning($"[VoiceByteOverflown] Received a huge amount of byte, clearing. {data.Length} {player.Name} - {player.SteamID} - {player.IP}");
                     }
                     else
                     {
-                        Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
-                                          data.Length);
+                        Logger.LogWarning($"[VoiceByteOverflown] Received a huge amount of byte, clearing. {data.Length}");
                     }
                 }
 
@@ -103,14 +100,13 @@ namespace Fougerite
                             Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                             if (player != null)
                             {
-                                Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
-                                                  conversion + " " + player.Name + " - " + player.SteamID + " - " +
-                                                  player.IP);
+                                Logger.LogWarning(
+                                    $"[VoiceByteOverflown] Received a huge amount of byte, clearing. {conversion} {player.Name} - {player.SteamID} - {player.IP}");
                             }
                             else
                             {
-                                Logger.LogWarning("[VoiceByteOverflown] Received a huge amount of byte, clearing. " +
-                                                  conversion);
+                                Logger.LogWarning(
+                                    $"[VoiceByteOverflown] Received a huge amount of byte, clearing. {conversion}");
                             }
                         }
 
@@ -129,8 +125,7 @@ namespace Fougerite
                         if (player != null)
                         {
                             Logger.LogWarning(
-                                "[VoiceByteOverflown] Seems like an error occured while reading the voice bytes. Someone is trying to send false packets? "
-                                + player.Name + " - " + player.SteamID + " - " + player.IP);
+                                $"[VoiceByteOverflown] Seems like an error occured while reading the voice bytes. Someone is trying to send false packets? {player.Name} - {player.SteamID} - {player.IP}");
                         }
                         else
                         {
@@ -152,7 +147,7 @@ namespace Fougerite
             double diff = CalculateDiff(ref _lasTime11);
             if (diff > 10)
             {
-                Logger.LogWarning("[Legbreak RPC] Bypassed a legbreak RPC possibly sent by a hacker. Value: " + v);
+                Logger.LogWarning($"[Legbreak RPC] Bypassed a legbreak RPC possibly sent by a hacker. Value: {v}");
                 _lasTime11 = DateTime.Now;
             }
             //fd.SetLegInjury(v);
@@ -274,7 +269,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogErrorIgnore("LoggerEvent Error: " + ex.ToString(), null, true);
+                Logger.LogErrorIgnore($"LoggerEvent Error: {ex}", null, true);
             }
         }
 
@@ -287,7 +282,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("TablesLoadedEvent Error: " + ex.ToString());
+                Logger.LogError($"TablesLoadedEvent Error: {ex}");
             }
 
             return lists;
@@ -308,9 +303,7 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
-                        Logger.LogWarning("[ITSP InvalidPacket] " + slotNumber
-                                                                  + " - " + player.Name + " - " + player.SteamID +
-                                                                  " - " + player.IP);
+                        Logger.LogWarning($"[ITSP InvalidPacket] {slotNumber} - {player.Name} - {player.SteamID} - {player.IP}");
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ITSP Packet.");
                     }
 
@@ -344,8 +337,7 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
-                        Logger.LogWarning("[IACT InvalidPacket] " + itemIndex + " - " + action
-                                          + " - " + player.Name + " - " + player.SteamID + " - " + player.IP);
+                        Logger.LogWarning($"[IACT InvalidPacket] {itemIndex} - {action} - {player.Name} - {player.SteamID} - {player.IP}");
                         Server.GetServer().BanPlayer(player, "Console", "Invalid IACT Packet.");
                     }
 
@@ -389,8 +381,7 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
-                        Logger.LogWarning("[IAST InvalidPacket] " + itemIndex + " - " + itemRepID
-                                          + " - " + player.Name + " - " + player.SteamID + " - " + player.IP);
+                        Logger.LogWarning($"[IAST InvalidPacket] {itemIndex} - {itemRepID} - {player.Name} - {player.SteamID} - {player.IP}");
                         Server.GetServer().BanPlayer(player, "Console", "Invalid IAST Packet.");
                     }
 
@@ -499,9 +490,7 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
-                        Logger.LogWarning("[ISMV InvalidPacket] " + fromSlot
-                                                                  + " - " + toSlot + " - " + player.Name + " - " +
-                                                                  player.SteamID + " - " + player.IP);
+                        Logger.LogWarning($"[ISMV InvalidPacket] {fromSlot} - {toSlot} - {player.Name} - {player.SteamID} - {player.IP}");
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ISMV Packet.");
                     }
 
@@ -540,9 +529,7 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
-                        Logger.LogWarning("[ITMG InvalidPacket] " + fromSlot
-                                                                  + " - " + toSlot + " - " + player.Name + " - " +
-                                                                  player.SteamID + " - " + player.IP);
+                        Logger.LogWarning($"[ITMG InvalidPacket] {fromSlot} - {toSlot} - {player.Name} - {player.SteamID} - {player.IP}");
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ITMG Packet.");
                     }
 
@@ -582,9 +569,7 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
-                        Logger.LogWarning("[ITMV InvalidPacket] " + fromSlot
-                                                                  + " - " + toSlot + " - " + player.Name + " - " +
-                                                                  player.SteamID + " - " + player.IP);
+                        Logger.LogWarning($"[ITMV InvalidPacket] {fromSlot} - {toSlot} - {player.Name} - {player.SteamID} - {player.IP}");
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ITMV Packet.");
                     }
 
@@ -624,9 +609,8 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
-                        Logger.LogWarning("[ITSM InvalidPacket] " + fromSlot
-                                                                  + " - " + toSlot + " - " + player.Name + " - " +
-                                                                  player.SteamID + " - " + player.IP);
+                        Logger.LogWarning(
+                            $"[ITSM InvalidPacket] {fromSlot} - {toSlot} - {player.Name} - {player.SteamID} - {player.IP}");
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ITSM Packet.");
                     }
 
@@ -663,9 +647,8 @@ namespace Fougerite
                     Player player = Server.GetServer().FindByNetworkPlayer(info.sender);
                     if (player != null)
                     {
-                        Logger.LogWarning("[SVUC InvalidPacket] " + cell
-                                                                  + " - " + player.Name + " - " + player.SteamID +
-                                                                  " - " + player.IP);
+                        Logger.LogWarning(
+                            $"[SVUC InvalidPacket] {cell} - {player.Name} - {player.SteamID} - {player.IP}");
                         Server.GetServer().BanPlayer(player, "Console", "Invalid SVUC Packet.");
                     }
 
@@ -745,7 +728,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("Caught an NGC Error: " + ex);
+                Logger.LogError($"Caught an NGC Error: {ex}");
                 // ignore
             }
 
@@ -757,7 +740,7 @@ namespace Fougerite
             if (data.Length > 30000)
             {
                 Array.Clear(data, 0, data.Length);
-                Logger.LogError("CHook Received: " + data.Length);
+                Logger.LogError($"CHook Received: {data.Length}");
                 return;
             }
 
@@ -767,15 +750,11 @@ namespace Fougerite
                 if (procedure.view != null)
                 {
                     Logger.LogWarning(
-                        "Did not call rpc " +
-                        procedure.view.prefab.installation.methods[procedure.message].method.Name + " for view " +
-                        procedure.view.name + " (entid:{procedure.view.id},msg:{procedure.message})", instance);
+                        $"Did not call rpc {procedure.view.prefab.installation.methods[procedure.message].method.Name} for view {procedure.view.name} (entid:{{procedure.view.id}},msg:{{procedure.message}})", instance);
                 }
                 else if (NGC.log_nonexistant_ngc_errors)
                 {
-                    Logger.LogWarning(
-                        $"Did not call rpc to non existant view# {procedure.target}. ( message id was {procedure.message} )",
-                        instance);
+                    Logger.LogWarning($"Did not call rpc to non existant view# {procedure.target}. ( message id was {procedure.message} )", instance);
                 }
             }
         }
@@ -785,14 +764,14 @@ namespace Fougerite
             if (data.Length > 30000)
             {
                 Array.Clear(data, 0, data.Length);
-                Logger.LogError("AHook Received: " + data.Length);
+                Logger.LogError($"AHook Received: {data.Length}");
                 return false;
             }
 
             if (info.sender != uLink.NetworkPlayer.server)
             {
                 Array.Clear(data, 0, data.Length);
-                Logger.LogError("AHook Received: " + data.Length + " Not server.");
+                Logger.LogError($"AHook Received: {data.Length} Not server.");
                 return false;
             }
 
@@ -828,7 +807,7 @@ namespace Fougerite
                 }
 
                 Server.GetServer().BanPlayerIP(str, "1", "uLink AuthorizationCheck", "Fougerite");
-                Logger.LogWarning("[Fougerite uLinkInternalCheck] Hoax IP automatically banned, and rejected: " + str,
+                Logger.LogWarning($"[Fougerite uLinkInternalCheck] Hoax IP automatically banned, and rejected: {str}",
                     null);
             }
 
@@ -864,8 +843,7 @@ namespace Fougerite
                         if (class48.bool_1)
                         {
                             Logger.LogWarning(
-                                "[Fougerite uLinkAuthorizationCheck] Hoax IP automatically banned, and rejected: " +
-                                str, null);
+                                $"[Fougerite uLinkAuthorizationCheck] Hoax IP automatically banned, and rejected: {str}", null);
                             Server.GetServer().BanPlayerIP(str, "1", "uLink AuthorizationCheck", "Fougerite");
                             return;
                         }
@@ -933,8 +911,7 @@ namespace Fougerite
                     Player player = Server.GetServer().GetCachePlayer(id);
                     if (player != null)
                     {
-                        Logger.LogDebug("[Fougerite uLink] Detected RPC Failing Player: " + player.Name + "-" +
-                                        player.SteamID + " Trying to kick...");
+                        Logger.LogDebug($"[Fougerite uLink] Detected RPC Failing Player: {player.Name}-{player.SteamID} Trying to kick...");
                         if (player.IsOnline)
                         {
                             player.Disconnect(false);
@@ -957,9 +934,8 @@ namespace Fougerite
                     Logger.LogDebug("[Fougerite uLink] Not existing in cache... (2x0)");
                 }
 
-                Logger.LogDebug("[Fougerite uLink] Private RPC (internal RPC " + class5_0.enum0_0 + ")" +
-                                " was not sent because a connection to " + class5_0.networkPlayer_1 +
-                                " was not found!");
+                Logger.LogDebug(
+                    $"[Fougerite uLink] Private RPC (internal RPC {class5_0.enum0_0}) was not sent because a connection to {class5_0.networkPlayer_1} was not found!");
                 //NetworkLog.Error<string, string, uLink.NetworkPlayer, string>(NetworkLogFlags.BadMessage | NetworkLogFlags.RPC, "Private RPC ", (class5_0.method_11() ? class5_0.string_0 : ("(internal RPC " + class5_0.enum0_0 + ")")) + " was not sent because a connection to ", class5_0.networkPlayer_1, " was not found!");
             }
         }
@@ -983,8 +959,8 @@ namespace Fougerite
                 return;
             }
 
-            Logger.LogWarning("[Fougerite uLink] RPC Message from " + netuser.displayName + "-" + netuser.userID +
-                              " triggered an exception. Kicking...");
+            Logger.LogWarning(
+                $"[Fougerite uLink] RPC Message from {netuser.displayName}-{netuser.userID} triggered an exception. Kicking...");
             if (netuser.connected)
             {
                 netuser.Kick(NetError.Facepunch_Kick_Violation, true);
@@ -994,7 +970,7 @@ namespace Fougerite
         public static void uLinkCatch(Class0 instance)
         {
             string ip = ((IPEndPoint)(instance.endPoint_0)).Address.ToString();
-            Logger.Log("[uLink Ignore] Ignored Socket from: " + ip);
+            Logger.Log($"[uLink Ignore] Ignored Socket from: {ip}");
         }
         
         public static void Action1BHook(ItemRepresentation itr, byte[] data, uLink.NetworkMessageInfo info)
@@ -1054,7 +1030,7 @@ namespace Fougerite
             catch (Exception ex)
             {
                 Logger.LogError("[Action1Error] Failed to call RunServerAction, Check logs.");
-                Logger.LogDebug("Error: " + ex);
+                Logger.LogDebug($"Error: {ex}");
             }
         }
 
@@ -1137,7 +1113,7 @@ namespace Fougerite
             catch (Exception ex)
             {
                 Logger.LogError("[Action2Error] Failed to call RunServerAction, Check logs.");
-                Logger.LogDebug("Error: " + ex);
+                Logger.LogDebug($"Error: {ex}");
             }
         }
         

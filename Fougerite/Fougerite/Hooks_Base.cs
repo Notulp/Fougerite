@@ -344,9 +344,7 @@ namespace Fougerite
             OnServerInit = delegate { };
             OnServerShutdown = delegate { };
             OnModulesLoaded = delegate { };
-            OnRecieveNetwork = delegate
-            {
-            };
+            OnRecieveNetwork = delegate { };
             OnShowTalker = delegate { };
             OnCrafting = delegate { };
             OnResourceSpawned = delegate { };
@@ -355,9 +353,7 @@ namespace Fougerite
             OnAirdropCalled = delegate { };
             OnSteamDeny = delegate { };
             OnPlayerApproval = delegate { };
-            OnPlayerMove = delegate
-            {
-            };
+            OnPlayerMove = delegate { };
             OnResearch = delegate { };
             OnServerSaved = delegate { };
             OnItemPickup = delegate { };

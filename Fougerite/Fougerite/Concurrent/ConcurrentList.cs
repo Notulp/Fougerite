@@ -17,20 +17,20 @@ namespace Fougerite.Concurrent
 
         public ConcurrentList()
         {
-            this._lock = new ReaderWriterLock();
-            this._list = new List<T>();
+            _lock = new ReaderWriterLock();
+            _list = new List<T>();
         }
 
         public ConcurrentList(int capacity)
         {
-            this._lock = new ReaderWriterLock();
-            this._list = new List<T>(capacity);
+            _lock = new ReaderWriterLock();
+            _list = new List<T>(capacity);
         }
 
         public ConcurrentList(IEnumerable<T> items)
         {
-            this._lock = new ReaderWriterLock();
-            this._list = new List<T>(items);
+            _lock = new ReaderWriterLock();
+            _list = new List<T>(items);
         }
 
         public List<T> GetShallowCopy()
@@ -38,12 +38,12 @@ namespace Fougerite.Concurrent
             List<T> temp;
             try
             {
-                this._lock.AcquireReaderLock(Timeout.Infinite);
+                _lock.AcquireReaderLock(Timeout.Infinite);
                 temp = new List<T>(_list);
             }
             finally
             {
-                this._lock.ReleaseReaderLock();
+                _lock.ReleaseReaderLock();
             }
 
             return temp;
@@ -53,12 +53,12 @@ namespace Fougerite.Concurrent
         {
             try
             {
-                this._lock.AcquireWriterLock(Timeout.Infinite);
-                this._list.Add(item);
+                _lock.AcquireWriterLock(Timeout.Infinite);
+                _list.Add(item);
             }
             finally
             {
-                this._lock.ReleaseWriterLock();
+                _lock.ReleaseWriterLock();
             }
         }
 
@@ -66,12 +66,12 @@ namespace Fougerite.Concurrent
         {
             try
             {
-                this._lock.AcquireWriterLock(Timeout.Infinite);
-                this._list.Insert(index, item);
+                _lock.AcquireWriterLock(Timeout.Infinite);
+                _list.Insert(index, item);
             }
             finally
             {
-                this._lock.ReleaseWriterLock();
+                _lock.ReleaseWriterLock();
             }
         }
 
@@ -79,12 +79,12 @@ namespace Fougerite.Concurrent
         {
             try
             {
-                this._lock.AcquireWriterLock(Timeout.Infinite);
-                return this._list.Remove(item);
+                _lock.AcquireWriterLock(Timeout.Infinite);
+                return _list.Remove(item);
             }
             finally
             {
-                this._lock.ReleaseWriterLock();
+                _lock.ReleaseWriterLock();
             }
         }
 
@@ -92,12 +92,12 @@ namespace Fougerite.Concurrent
         {
             try
             {
-                this._lock.AcquireWriterLock(Timeout.Infinite);
-                this._list.RemoveAt(index);
+                _lock.AcquireWriterLock(Timeout.Infinite);
+                _list.RemoveAt(index);
             }
             finally
             {
-                this._lock.ReleaseWriterLock();
+                _lock.ReleaseWriterLock();
             }
         }
 
@@ -105,12 +105,12 @@ namespace Fougerite.Concurrent
         {
             try
             {
-                this._lock.AcquireReaderLock(Timeout.Infinite);
-                return this._list.IndexOf(item);
+                _lock.AcquireReaderLock(Timeout.Infinite);
+                return _list.IndexOf(item);
             }
             finally
             {
-                this._lock.ReleaseReaderLock();
+                _lock.ReleaseReaderLock();
             }
         }
 
@@ -118,12 +118,12 @@ namespace Fougerite.Concurrent
         {
             try
             {
-                this._lock.AcquireReaderLock(Timeout.Infinite);
-                this._list.Clear();
+                _lock.AcquireReaderLock(Timeout.Infinite);
+                _list.Clear();
             }
             finally
             {
-                this._lock.ReleaseReaderLock();
+                _lock.ReleaseReaderLock();
             }
         }
 
@@ -131,12 +131,12 @@ namespace Fougerite.Concurrent
         {
             try
             {
-                this._lock.AcquireReaderLock(Timeout.Infinite);
-                return this._list.Contains(item);
+                _lock.AcquireReaderLock(Timeout.Infinite);
+                return _list.Contains(item);
             }
             finally
             {
-                this._lock.ReleaseReaderLock();
+                _lock.ReleaseReaderLock();
             }
         }
 
@@ -144,33 +144,33 @@ namespace Fougerite.Concurrent
         {
             try
             {
-                this._lock.AcquireReaderLock(Timeout.Infinite);
-                this._list.CopyTo(array, arrayIndex);
+                _lock.AcquireReaderLock(Timeout.Infinite);
+                _list.CopyTo(array, arrayIndex);
             }
             finally
             {
-                this._lock.ReleaseReaderLock();
+                _lock.ReleaseReaderLock();
             }
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            return new ConcurrentEnumerator<T>(this._list, this._lock);
+            return new ConcurrentEnumerator<T>(_list, _lock);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new ConcurrentEnumerator<T>(this._list, this._lock);
+            return new ConcurrentEnumerator<T>(_list, _lock);
         }
 
         ~ConcurrentList()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
 
         private void Dispose(bool disposing)
@@ -185,24 +185,24 @@ namespace Fougerite.Concurrent
             {
                 try
                 {
-                    this._lock.AcquireReaderLock(Timeout.Infinite);
-                    return this._list[index];
+                    _lock.AcquireReaderLock(Timeout.Infinite);
+                    return _list[index];
                 }
                 finally
                 {
-                    this._lock.ReleaseReaderLock();
+                    _lock.ReleaseReaderLock();
                 }
             }
             set
             {
                 try
                 {
-                    this._lock.AcquireWriterLock(Timeout.Infinite);
-                    this._list[index] = value;
+                    _lock.AcquireWriterLock(Timeout.Infinite);
+                    _list[index] = value;
                 }
                 finally
                 {
-                    this._lock.ReleaseWriterLock();
+                    _lock.ReleaseWriterLock();
                 }
             }
         }
@@ -213,12 +213,12 @@ namespace Fougerite.Concurrent
             {
                 try
                 {
-                    this._lock.AcquireReaderLock(Timeout.Infinite);
-                    return this._list.Count;
+                    _lock.AcquireReaderLock(Timeout.Infinite);
+                    return _list.Count;
                 }
                 finally
                 {
-                    this._lock.ReleaseReaderLock();
+                    _lock.ReleaseReaderLock();
                 }
             }
         }

@@ -15,9 +15,9 @@ namespace Fougerite.Concurrent
 
         public ConcurrentEnumerator(IEnumerable<T> inner, ReaderWriterLock @lock)
         {
-            this._lock = @lock;
-            this._lock.AcquireReaderLock(Timeout.Infinite);
-            this._inner = inner.GetEnumerator();
+            _lock = @lock;
+            _lock.AcquireReaderLock(Timeout.Infinite);
+            _inner = inner.GetEnumerator();
         }
 
 
@@ -33,7 +33,7 @@ namespace Fougerite.Concurrent
 
         public void Dispose()
         {
-            this._lock.ReleaseReaderLock();
+            _lock.ReleaseReaderLock();
         }
 
         public T Current

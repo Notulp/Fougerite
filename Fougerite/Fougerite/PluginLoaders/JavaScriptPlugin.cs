@@ -11,7 +11,7 @@ namespace Fougerite.PluginLoaders
     public class JavaScriptPlugin : BasePlugin
     {
         public JintEngine Engine;
-        public Jint.Expressions.Program Program;
+        public Program Program;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Pluton.JSPlugin"/> class.
@@ -40,7 +40,7 @@ namespace Fougerite.PluginLoaders
                 {
                     object result = (object) null;
 
-                    using (new Stopper(Type + " " + Name, func))
+                    using (new Stopper($"{Type} {Name}", func))
                     {
                         result = Engine.CallFunction(func, args);
                     }
@@ -50,7 +50,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                string fileinfo = ("[Error] Failed to invoke: " + string.Format("{0}<{1}>.{2}()", Name, Type, func) + Environment.NewLine);
+                string fileinfo = ("[Error] Failed to invoke: " + $"{Name}<{Type}>.{func}()" + Environment.NewLine);
                 Logger.LogError(fileinfo + FormatException(ex));
             }
             return null;
@@ -64,7 +64,7 @@ namespace Fougerite.PluginLoaders
                     .AllowClr(true);
 
                 Engine.SetParameter("Plugin", this)
-                    .SetParameter("Server", Fougerite.Server.GetServer())
+                    .SetParameter("Server", Server.GetServer())
                     .SetParameter("DataStore", DataStore.GetInstance())
                     .SetParameter("Data", Data.GetData())
                     .SetParameter("Web", Web.GetInstance())
@@ -73,10 +73,10 @@ namespace Fougerite.PluginLoaders
                     #pragma warning disable 618
                     .SetParameter("PluginCollector", GlobalPluginCollector.GetPluginCollector())
                     #pragma warning restore 618
-                    .SetParameter("Loom", Fougerite.Loom.Current)
-                    .SetParameter("JSON", Fougerite.JsonAPI.GetInstance)
-                    .SetParameter("MySQL", Fougerite.MySQLConnector.GetInstance)
-                    .SetParameter("SQLite", Fougerite.SQLiteConnector.GetInstance)
+                    .SetParameter("Loom", Loom.Current)
+                    .SetParameter("JSON", JsonAPI.GetInstance)
+                    .SetParameter("MySQL", MySQLConnector.GetInstance)
+                    .SetParameter("SQLite", SQLiteConnector.GetInstance)
                     .SetParameter("PermissionSystem", PermissionSystem.GetPermissionSystem())
                     .SetParameter("PlayerCache", PlayerCache.GetPlayerCache())
                     .SetFunction("importClass", new importit(importClass));
@@ -99,7 +99,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Error] Failed to load lua plugin: " + ex);
+                Logger.LogError($"[Error] Failed to load lua plugin: {ex}");
                 State = PluginState.FailedToLoad;
                 PluginLoader.GetInstance().CurrentlyLoadingPlugins.Remove(Name);
             }
@@ -109,7 +109,7 @@ namespace Fougerite.PluginLoaders
 
         public object GetGlobalObject(string identifier)
         {
-            return Engine.Run(string.Format("return {0};", identifier));
+            return Engine.Run($"return {identifier};");
         }
 
         public delegate Jint.Native.JsInstance importit(string t);

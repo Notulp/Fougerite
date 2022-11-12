@@ -28,26 +28,26 @@ namespace Fougerite
 
         public ModuleContainer(Module plugin, bool dll)
         {
-            this.Plugin = plugin;
-            this.Initialized = false;
-            this.Dll = dll;
+            Plugin = plugin;
+            Initialized = false;
+            Dll = dll;
         }
 
         public void Initialize()
         {
-            this.Plugin.Initialize();
-            this.Initialized = true;
+            Plugin.Initialize();
+            Initialized = true;
         }
 
         public void DeInitialize()
         {
-            this.Initialized = false;
-            this.Plugin.DeInitialize();
+            Initialized = false;
+            Plugin.DeInitialize();
         }
 
         public void Dispose()
         {
-            this.Plugin.Dispose();
+            Plugin.Dispose();
         }
     }
 }

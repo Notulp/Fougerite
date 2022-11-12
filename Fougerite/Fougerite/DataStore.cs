@@ -37,10 +37,7 @@ namespace Fougerite
             {
                 if (keyorval is Vector3 vector3)
                 {
-                    return "Vector3," +
-                           vector3.x.ToString("G9") + "," +
-                           vector3.y.ToString("G9") + "," +
-                           vector3.z.ToString("G9");
+                    return $"Vector3,{vector3.x:G9},{vector3.y:G9},{vector3.z:G9}";
                 }
             }
             catch
@@ -86,7 +83,7 @@ namespace Fougerite
         public void ToIni(string tablename, IniParser ini)
         {
             string nullref = "__NullReference__";
-            Hashtable ht = (Hashtable)this.datastore[tablename];
+            Hashtable ht = (Hashtable)datastore[tablename];
             if (ht == null || ini == null)
                 return;
 
@@ -181,11 +178,11 @@ namespace Fougerite
             if (key == null)
                 return;
 
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable == null)
             {
                 hashtable = new Hashtable();
-                this.datastore.Add(tablename, hashtable);
+                datastore.Add(tablename, hashtable);
             }
             //hashtable[key] = val;
             hashtable[StringifyIfVector3(key)] = StringifyIfVector3(val);
@@ -202,7 +199,7 @@ namespace Fougerite
             if (key == null)
                 return false;
 
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable == null)
                 return false;
 
@@ -218,7 +215,7 @@ namespace Fougerite
         /// <returns>Returns true If It does, false otherwise.</returns>
         public bool ContainsValue(string tablename, object val)
         {
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable == null)
                 return false;
 
@@ -233,7 +230,7 @@ namespace Fougerite
         /// <returns>Returns the number of the elements.</returns>
         public int Count(string tablename)
         {
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable == null)
             {
                 return 0;
@@ -247,9 +244,9 @@ namespace Fougerite
         /// <param name="tablename"></param>
         public void Flush(string tablename)
         {
-            if ((this.datastore[tablename] as Hashtable) != null)
+            if ((datastore[tablename] as Hashtable) != null)
             {
-                this.datastore.Remove(tablename);
+                datastore.Remove(tablename);
             }
         }
 
@@ -264,7 +261,7 @@ namespace Fougerite
             if (key == null)
                 return null;
 
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable == null)
                 return null;
 
@@ -279,7 +276,7 @@ namespace Fougerite
         /// <returns></returns>
         public Hashtable GetTable(string tablename)
         {
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable == null)
                 return null;
 
@@ -299,7 +296,7 @@ namespace Fougerite
         /// <returns>Returns an object array.</returns>
         public object[] Keys(string tablename)
         {
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable == null)
                 return null;
 
@@ -318,8 +315,8 @@ namespace Fougerite
         {
             if (File.Exists(PATH))
             {
-                this.datastore = Util.HashtableFromFile(PATH);
-                Util.GetUtil().ConsoleLog("Fougerite DataStore Loaded", false);
+                datastore = Util.HashtableFromFile(PATH);
+                Util.GetUtil().ConsoleLog("Fougerite DataStore Loaded", true);
             }
         }
 
@@ -333,7 +330,7 @@ namespace Fougerite
             if (key == null)
                 return;
 
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable != null)
             {
                 //hashtable.Remove(key);
@@ -346,10 +343,10 @@ namespace Fougerite
         /// </summary>
         public void Save()
         {
-            if (this.datastore.Count != 0)
+            if (datastore.Count != 0)
             {
                 Logger.Log("[DataStore] Saving...");
-                Util.HashtableToFile(this.datastore, PATH);
+                Util.HashtableToFile(datastore, PATH);
                 Util.GetUtil().ConsoleLog("Fougerite DataStore Saved", false);
                 Logger.Log("[DataStore] Saved!");
             }
@@ -362,7 +359,7 @@ namespace Fougerite
         /// <returns>Returns an object array of the table's values.</returns>
         public object[] Values(string tablename)
         {
-            Hashtable hashtable = this.datastore[tablename] as Hashtable;
+            Hashtable hashtable = datastore[tablename] as Hashtable;
             if (hashtable == null)
                 return null;
 

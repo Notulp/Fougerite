@@ -153,7 +153,7 @@ namespace Fougerite.Concurrent
         {
             lock (this)
             {
-                return (this._seqNum > seqNum);
+                return (_seqNum > seqNum);
             }
         }
 

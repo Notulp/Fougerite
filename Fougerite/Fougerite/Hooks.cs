@@ -31,7 +31,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("AllPluginsLoadedEvent Error: " + ex);
+                    Logger.LogError($"AllPluginsLoadedEvent Error: {ex}");
                 }
             }
         }
@@ -53,7 +53,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("BluePrintUseEvent Error: " + ex);
+                            Logger.LogError($"BluePrintUseEvent Error: {ex}");
                         }
                     }
 
@@ -68,7 +68,7 @@ namespace Fougerite
                                 internalInventory.RemoveItem(item.slot);
                             }
 
-                            player.Notice("", "You can now craft: " + bdb.resultItem.name, 4f);
+                            player.Notice("", $"You can now craft: {bdb.resultItem.name}", 4f);
                         }
                         else
                         {
@@ -98,7 +98,7 @@ namespace Fougerite
                 var quotedMessage = Facepunch.Utility.String.QuoteSafe(arg.GetString(0));
                 if (quotedMessage.Trim('"').StartsWith("/"))
                 {
-                    Logger.LogDebug("[CHAT-CMD] " + quotedName + " executed " + quotedMessage);
+                    Logger.LogDebug($"[CHAT-CMD] {quotedName} executed {quotedMessage}");
                 }
 
                 if (OnChatRaw != null)
@@ -109,7 +109,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("ChatRawEvent Error: " + ex);
+                        Logger.LogError($"ChatRawEvent Error: {ex}");
                     }
                 }
 
@@ -125,7 +125,8 @@ namespace Fougerite
                     Player player = Server.GetServer().FindPlayer(arg.argUser.playerClient.userID);
                     if (command == "fougerite")
                     {
-                        player.Message("[color #00FFFF]This Server is running Fougerite V[color yellow]" + Bootstrap.Version);
+                        player.Message(
+                            $"[color #00FFFF]This Server is running Fougerite V[color yellow]{Bootstrap.Version}");
                         player.Message("[color green]Fougerite Team: www.fougerite.com");
                         player.Message("[color #0C86AE]Pluton Team: www.pluton-team.org");
                     }
@@ -137,7 +138,7 @@ namespace Fougerite
                         // If player has *, restrict all commands.
                         if (player.CommandCancelList.Contains("*") || player.CommandCancelList.Contains(command))
                         {
-                            player.Message("You cannot execute " + command + " at the moment!");
+                            player.Message($"You cannot execute {command} at the moment!");
                             return;
                         }
 
@@ -147,7 +148,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("CommandEvent Error: " + ex);
+                            Logger.LogError($"CommandEvent Error: {ex}");
                         }
                     }
                 }
@@ -164,7 +165,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("ChatEvent Error: " + ex);
+                        Logger.LogError($"ChatEvent Error: {ex}");
                     }
 
                     if (string.IsNullOrEmpty(chatstr.NewText) || chatstr.NewText.Length == 0)
@@ -174,7 +175,7 @@ namespace Fougerite
 
                     string newchat = Facepunch.Utility.String
                         .QuoteSafe(chatstr.NewText.Substring(1, chatstr.NewText.Length - 2))
-                        .Replace("\\\"", "" + '\u0022');
+                        .Replace("\\\"", "\"");
 
                     if (string.IsNullOrEmpty(newchat) || newchat.Length == 0)
                     {
@@ -186,7 +187,7 @@ namespace Fougerite
                     {
                         Data.GetData().chat_history.Add(chatstr);
                         Data.GetData().chat_history_username.Add(quotedName);
-                        ConsoleNetworker.Broadcast("chat.add " + quotedName + " " + newchat);
+                        ConsoleNetworker.Broadcast($"chat.add {quotedName} {newchat}");
                         return;
                     }
 
@@ -208,11 +209,11 @@ namespace Fougerite
 
                         if (i == 1)
                         {
-                            ConsoleNetworker.Broadcast("chat.add " + quotedName + " " + '"' + arr[arr.Length - 1] + x);
+                            ConsoleNetworker.Broadcast($"chat.add {quotedName} \"{arr[arr.Length - 1]}{x}");
                         }
                         else
                         {
-                            ConsoleNetworker.Broadcast("chat.add " + quotedName + " " + x + '"');
+                            ConsoleNetworker.Broadcast($"chat.add {quotedName} {x}\"");
                         }
 
                         i++;
@@ -242,7 +243,7 @@ namespace Fougerite
                 {
                     if (ServerInitialized)
                     {
-                        Logger.LogError("HandleCommand Error: " + ex);
+                        Logger.LogError($"HandleCommand Error: {ex}");
                     }
                     // Ignore, should never happen.
                 }
@@ -268,7 +269,7 @@ namespace Fougerite
                     {
                         if (bWantReply)
                         {
-                            arg.ReplyWith("Command not found: " + arg.Class + "." + arg.Function);
+                            arg.ReplyWith($"Command not found: {arg.Class}.{arg.Function}");
                         }
 
                         return false;
@@ -282,7 +283,7 @@ namespace Fougerite
                         {
                             if (bWantReply)
                             {
-                                arg.ReplyWith("No permission: " + arg.Class + "." + arg.Function);
+                                arg.ReplyWith($"No permission: {arg.Class}.{arg.Function}");
                             }
 
                             return false;
@@ -317,7 +318,7 @@ namespace Fougerite
                         {
                             if (bWantReply)
                             {
-                                arg.ReplyWith("No permission: " + arg.Class + "." + arg.Function);
+                                arg.ReplyWith($"No permission: {arg.Class}.{arg.Function}");
                             }
 
                             return false;
@@ -382,7 +383,7 @@ namespace Fougerite
                             {
                                 if (bWantReply)
                                 {
-                                    arg.ReplyWith("error setting value: " + arg.Class + "." + arg.Function);
+                                    arg.ReplyWith($"error setting value: {arg.Class}.{arg.Function}");
                                 }
                             }
                         }
@@ -397,7 +398,7 @@ namespace Fougerite
                         {
                             if (bWantReply)
                             {
-                                arg.ReplyWith("No permission: " + arg.Class + "." + arg.Function);
+                                arg.ReplyWith($"No permission: {arg.Class}.{arg.Function}");
                             }
 
                             return false;
@@ -463,7 +464,7 @@ namespace Fougerite
                             {
                                 if (bWantReply)
                                 {
-                                    arg.ReplyWith("error setting value: " + arg.Class + "." + arg.Function);
+                                    arg.ReplyWith($"error setting value: {arg.Class}.{arg.Function}");
                                 }
                             }
                         }
@@ -497,10 +498,10 @@ namespace Fougerite
 
                 string userid = "[external][external]";
                 if (adminRights && !external)
-                    userid = string.Format("[{0}][{1}]", a.argUser.displayName, UID.ToString());
+                    userid = $"[{a.argUser.displayName}][{UID.ToString()}]";
 
-                string logmsg = string.Format("[ConsoleReceived] userid={0} adminRights={1} command={2}.{3} args={4}",
-                    userid, adminRights.ToString(), Class, Function, (a.HasArgs(1) ? a.ArgsStr : "none"));
+                string logmsg =
+                    $"[ConsoleReceived] userid={userid} adminRights={adminRights.ToString()} command={Class}.{Function} args={(a.HasArgs(1) ? a.ArgsStr : "none")}";
                 Logger.LogDebug(logmsg);
 
                 string clss = Class.ToLower();
@@ -508,7 +509,7 @@ namespace Fougerite
                 string data;
                 if (!string.IsNullOrEmpty(func))
                 {
-                    data = clss + "." + func;
+                    data = $"{clss}.{func}";
                 }
                 else
                 {
@@ -543,7 +544,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("OnConsoleReceivedWithCancel Error: " + ex);
+                        Logger.LogError($"OnConsoleReceivedWithCancel Error: {ex}");
                     }
 
                     if (ce.Cancelled)
@@ -560,7 +561,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("ConsoleReceived Error: " + ex);
+                        Logger.LogError($"ConsoleReceived Error: {ex}");
                     }
                 }
 
@@ -576,7 +577,7 @@ namespace Fougerite
                                 if (string.Equals(x, plugin, StringComparison.CurrentCultureIgnoreCase))
                                 {
                                     PluginLoader.GetInstance().ReloadPlugin(x);
-                                    a.ReplyWith("Fougerite: Plugin " + x + " reloaded!");
+                                    a.ReplyWith($"Fougerite: Plugin {x} reloaded!");
                                     break;
                                 }
                             }
@@ -602,11 +603,11 @@ namespace Fougerite
                                     if (PluginLoader.GetInstance().Plugins[x].State == PluginState.Loaded)
                                     {
                                         PluginLoader.GetInstance().UnloadPlugin(x);
-                                        a.ReplyWith("Fougerite: UnLoaded " + x + "!");
+                                        a.ReplyWith($"Fougerite: UnLoaded {x}!");
                                     }
                                     else
                                     {
-                                        a.ReplyWith("Fougerite: " + x + " is already unloaded!");
+                                        a.ReplyWith($"Fougerite: {x} is already unloaded!");
                                     }
 
                                     break;
@@ -624,8 +625,8 @@ namespace Fougerite
                         double diff = (then - now).TotalMinutes;
                         if (ServerSaveHandler.CrucialSavePoint != 0 && diff <= ServerSaveHandler.CrucialSavePoint)
                         {
-                            a.ReplyWith("Fougerite: " + ServerSaveHandler.CrucialSavePoint +
-                                        " minutes before autosave. Please wait for It to finish.");
+                            a.ReplyWith(
+                                $"Fougerite: {ServerSaveHandler.CrucialSavePoint} minutes before autosave. Please wait for It to finish.");
                         }
                         else
                         {
@@ -643,8 +644,8 @@ namespace Fougerite
                         double diff = (then - now).TotalMinutes;
                         if (ServerSaveHandler.CrucialSavePoint != 0 && diff <= ServerSaveHandler.CrucialSavePoint)
                         {
-                            a.ReplyWith("Fougerite: " + ServerSaveHandler.CrucialSavePoint +
-                                        " minutes before autosave. Please wait for It to finish.");
+                            a.ReplyWith(
+                                $"Fougerite: {ServerSaveHandler.CrucialSavePoint} minutes before autosave. Please wait for It to finish.");
                         }
                         else
                         {
@@ -658,13 +659,13 @@ namespace Fougerite
                     if (adminRights)
                     {
                         Logger.showRPC = !Logger.showRPC;
-                        a.ReplyWith("Toggled rpctracer to:" + Logger.showRPC);
+                        a.ReplyWith($"Toggled rpctracer to:{Logger.showRPC}");
                     }
                 }
 
                 if (string.IsNullOrEmpty(a.Reply))
                 {
-                    a.ReplyWith(string.Format("Fougerite: {0}.{1} was executed!", Class, Function));
+                    a.ReplyWith($"Fougerite: {Class}.{Function} was executed!");
                 }
 
 
@@ -690,7 +691,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("DoorUseEvent Error: " + ex);
+                        Logger.LogError($"DoorUseEvent Error: {ex}");
                     }
                 }
 
@@ -715,7 +716,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("EntityDecayEvent Error: " + ex);
+                        Logger.LogError($"EntityDecayEvent Error: {ex}");
                     }
 
                     if (decayList.Contains(entity))
@@ -754,7 +755,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("EntityDeployedEvent Error: " + ex);
+                    Logger.LogError($"EntityDeployedEvent Error: {ex}");
                 }
 
                 try
@@ -764,7 +765,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("EntityDeployedWithPlacerEvent Error: " + ex);
+                    Logger.LogError($"EntityDeployedWithPlacerEvent Error: {ex}");
                 }
 
             }
@@ -788,7 +789,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("PlayerHurtEvent Error: " + ex);
+                        Logger.LogError($"PlayerHurtEvent Error: {ex}");
                     }
 
                     if (vp.Health - he.DamageAmount > 0 && e.status == LifeStatus.WasKilled)
@@ -823,7 +824,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("PlayerHurtEvent (Sleeper) Error: " + ex);
+                        Logger.LogError($"PlayerHurtEvent (Sleeper) Error: {ex}");
                     }
 
                     if (vp.Health - he.DamageAmount > 0 && e.status == LifeStatus.WasKilled)
@@ -855,7 +856,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("NPCHurtEvent Error: " + ex);
+                            Logger.LogError($"NPCHurtEvent Error: {ex}");
                         }
 
                         switch (e.status)
@@ -877,7 +878,7 @@ namespace Fougerite
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger.LogError("NPCKilledEvent Error: " + ex);
+                                    Logger.LogError($"NPCKilledEvent Error: {ex}");
                                 }
 
                                 tkd._health = 0f;
@@ -901,7 +902,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("EntityHurtEvent Error: " + ex);
+                        Logger.LogError($"EntityHurtEvent Error: {ex}");
                     }
 
                     if (ent.IsStructure() && !he.IsDecay)
@@ -941,7 +942,7 @@ namespace Fougerite
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger.LogError("EntityDestroyEvent Error: " + ex);
+                                    Logger.LogError($"EntityDestroyEvent Error: {ex}");
                                 }
 
                                 if (!ent.IsDestroyed)
@@ -968,7 +969,7 @@ namespace Fougerite
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger.LogError("EntityDestroyEvent Error: " + ex);
+                                    Logger.LogError($"EntityDestroyEvent Error: {ex}");
                                 }
 
                                 if (!ent.IsDestroyed)
@@ -1002,7 +1003,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ShowTalkerEvent Error: " + ex);
+                    Logger.LogError($"ShowTalkerEvent Error: {ex}");
                 }
             }
         }
@@ -1085,7 +1086,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("DataBlockLoadEvent Error: " + ex);
+                    Logger.LogError($"DataBlockLoadEvent Error: {ex}");
                 }
 
                 int num = 0;
@@ -1131,7 +1132,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ItemPickupEvent Error: " + ex);
+                    Logger.LogError($"ItemPickupEvent Error: {ex}");
                 }
 
                 if (ipe.Cancelled)
@@ -1163,7 +1164,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("ItemPickupEvent Error: " + ex);
+                            Logger.LogError($"ItemPickupEvent Error: {ex}");
                         }
 
                         return true;
@@ -1179,7 +1180,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("ItemPickupEvent Error: " + ex);
+                            Logger.LogError($"ItemPickupEvent Error: {ex}");
                         }
 
                         return false;
@@ -1196,7 +1197,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("ItemPickupEvent Error: " + ex);
+                            Logger.LogError($"ItemPickupEvent Error: {ex}");
                         }
 
                         return false;
@@ -1215,7 +1216,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ItemPickupEvent Error: " + ex);
+                    Logger.LogError($"ItemPickupEvent Error: {ex}");
                 }
 
                 return true;
@@ -1236,7 +1237,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("FallDamageEvent Error: " + ex);
+                    Logger.LogError($"FallDamageEvent Error: {ex}");
                 }
             }
         }
@@ -1340,9 +1341,7 @@ namespace Fougerite
                 // the steam auth event, but I must have put this check here for a good reason.
                 if (srv.ContainsPlayer(uid))
                 {
-                    Logger.LogError(string.Format("[PlayerConnect] Server.Players already contains {0} {1}",
-                        player.Name,
-                        player.SteamID));
+                    Logger.LogError($"[PlayerConnect] Server.Players already contains {player.Name} {player.SteamID}");
                     return user.connected;
                 }
 
@@ -1358,17 +1357,17 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PlayerConnectedEvent Error " + ex);
+                    Logger.LogError($"PlayerConnectedEvent Error {ex}");
                 }
 
                 bool connected = user.connected;
 
                 if (Config.GetBoolValue("Fougerite", "tellversion"))
                 {
-                    player.Message(string.Format("This server is powered by Fougerite v.{0}!", Bootstrap.Version));
+                    player.Message($"This server is powered by Fougerite v.{Bootstrap.Version}!");
                 }
 
-                Logger.LogDebug("User Connected: " + player.Name + " (" + player.SteamID + ")" + " (" + player.IP + ")");
+                Logger.LogDebug($"User Connected: {player.Name} ({player.SteamID}) ({player.IP})");
 
                 if (!FloodChecks.ContainsKey(player.IP))
                 {
@@ -1416,8 +1415,7 @@ namespace Fougerite
                 {
                     Server.GetServer().RemovePlayer(uid);
                     Logger.LogWarning(
-                        "[WeirdDisconnect] Player was null at the disconnection. Something might be wrong? OPT: " +
-                        Bootstrap.CR);
+                        $"[WeirdDisconnect] Player was null at the disconnection. Something might be wrong? OPT: {Bootstrap.CR}");
                     return;
                 }
 
@@ -1442,11 +1440,10 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PlayerDisconnectedEvent Error " + ex);
+                    Logger.LogError($"PlayerDisconnectedEvent Error {ex}");
                 }
 
-                Logger.LogDebug("User Disconnected: " + player.Name + " (" + player.SteamID + ")" + " (" + player.IP +
-                                ")");
+                Logger.LogDebug($"User Disconnected: {player.Name} ({player.SteamID}) ({player.IP})");
                 if (Bootstrap.CR)
                 {
                     Server.GetServer().RemoveCachePlayer(uid);
@@ -1477,7 +1474,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PlayerGatherEvent Error: " + ex);
+                    Logger.LogError($"PlayerGatherEvent Error: {ex}");
                 }
             }
         }
@@ -1506,7 +1503,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PlayerGatherWoodEvent Error: " + ex);
+                    Logger.LogError($"PlayerGatherWoodEvent Error: {ex}");
                 }
             }
         }
@@ -1532,7 +1529,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PlayerKilledEvent Error: " + ex);
+                    Logger.LogError($"PlayerKilledEvent Error: {ex}");
                 }
 
                 return flag;
@@ -1554,7 +1551,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PlayerSpawnedEvent Error: " + ex);
+                    Logger.LogError($"PlayerSpawnedEvent Error: {ex}");
                 }
             }
         }
@@ -1576,7 +1573,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PlayerSpawningEvent Error: " + ex);
+                    Logger.LogError($"PlayerSpawningEvent Error: {ex}");
                 }
 
                 return pos;
@@ -1596,7 +1593,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("PluginInitEvent Error: " + ex);
+                    Logger.LogError($"PluginInitEvent Error: {ex}");
                 }
             }
         }
@@ -1614,7 +1611,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("TeleportEvent Error: " + ex);
+                    Logger.LogError($"TeleportEvent Error: {ex}");
                 }
             }
         }
@@ -1634,7 +1631,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("CraftingEvent Error: " + ex);
+                    Logger.LogError($"CraftingEvent Error: {ex}");
                 }
             }
         }
@@ -1675,7 +1672,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ResourceSpawnedEvent Error: " + ex);
+                    Logger.LogError($"ResourceSpawnedEvent Error: {ex}");
                 }
             }
         }
@@ -1695,7 +1692,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("BowShootEvent Error: " + ex);
+                    Logger.LogError($"BowShootEvent Error: {ex}");
                 }
             }
         }
@@ -1753,7 +1750,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("GrenadeThrowEvent Error: " + ex);
+                            Logger.LogError($"GrenadeThrowEvent Error: {ex}");
                         }
                     }
 
@@ -1779,7 +1776,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ServerSavedEvent Error: " + ex);
+                    Logger.LogError($"ServerSavedEvent Error: {ex}");
                 }
 
                 // Save the permissions.
@@ -1827,7 +1824,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("InventoryRemoveEvent Error: " + ex);
+                    Logger.LogError($"InventoryRemoveEvent Error: {ex}");
                 }
 
                 if (e != null && e.Cancelled)
@@ -1863,7 +1860,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("InventoryAddEvent Error: " + ex);
+                    Logger.LogError($"InventoryAddEvent Error: {ex}");
                 }
 
                 if (e == null || (e != null && !e.Cancelled))
@@ -1902,7 +1899,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("AirdropEvent Error: " + ex);
+                    Logger.LogError($"AirdropEvent Error: {ex}");
                 }
             }
         }
@@ -1920,7 +1917,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("AirdropEvent Error: " + ex);
+                    Logger.LogError($"AirdropEvent Error: {ex}");
                 }
             }
         }
@@ -1938,7 +1935,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("SupplyDropPlaneCreated Error: " + ex);
+                    Logger.LogError($"SupplyDropPlaneCreated Error: {ex}");
                 }
             }
         }
@@ -1966,7 +1963,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("AirdropCrateDroppedEvent Error: " + ex);
+                    Logger.LogError($"AirdropCrateDroppedEvent Error: {ex}");
                 }
             }
         }
@@ -1986,7 +1983,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("SteamDenyEvent Error: " + ex);
+                    Logger.LogError($"SteamDenyEvent Error: {ex}");
                 }
 
                 if (sde.ForceAllow)
@@ -1994,7 +1991,7 @@ namespace Fougerite
                     return;
                 }
 
-                string deny = "Auth failed: " + strReason + " - " + cc.UserName + " (" + cc.UserID + ")";
+                string deny = $"Auth failed: {strReason} - {cc.UserName} ({cc.UserID})";
                 Logger.Log(deny);
                 approval.Deny((uLink.NetworkConnectionError)errornum);
                 ConnectionAcceptor.CloseConnection(cc);
@@ -2040,13 +2037,13 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("[uLink Error] Disconnect failure, report to DreTaX: " + ex);
+                            Logger.LogError($"[uLink Error] Disconnect failure, report to DreTaX: {ex}");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogDebug("[uLink Error] Full Exception: " + ex);
+                    Logger.LogDebug($"[uLink Error] Full Exception: {ex}");
                 }
             }
         }
@@ -2080,7 +2077,7 @@ namespace Fougerite
                         double diff = (now - then).TotalMinutes;
                         if (diff >= 15)
                         {
-                            Logger.LogWarning("[Flood Protection] " + ip + " was removed from the cooldown.");
+                            Logger.LogWarning($"[Flood Protection] {ip} was removed from the cooldown.");
                             FloodCooldown.Remove(ip);
                         }
                     }
@@ -2099,9 +2096,9 @@ namespace Fougerite
                     {
                         if (!srv.IsBannedIP(ip))
                         {
-                            srv.BanPlayerIP(ip, name, "IP is not banned-" + uid, "Console");
-                            Logger.LogDebug("[FougeriteBan] Detected banned ID, but IP is not banned: "
-                                            + name + " - " + ip + " - " + uid);
+                            srv.BanPlayerIP(ip, name, $"IP is not banned-{uid}", "Console");
+                            Logger.LogDebug(
+                                $"[FougeriteBan] Detected banned ID, but IP is not banned: {name} - {ip} - {uid}");
                         }
                         else
                         {
@@ -2113,9 +2110,9 @@ namespace Fougerite
 
                         if (!srv.IsBannedID(uid.ToString()))
                         {
-                            srv.BanPlayerID(uid.ToString(), name, "ID is not banned-" + ip, "Console");
-                            Logger.LogDebug("[FougeriteBan] Detected banned IP, but ID is not banned: "
-                                            + name + " - " + ip + " - " + uid);
+                            srv.BanPlayerID(uid.ToString(), name, $"ID is not banned-{ip}", "Console");
+                            Logger.LogDebug(
+                                $"[FougeriteBan] Detected banned IP, but ID is not banned: {name} - {ip} - {uid}");
                         }
                         else
                         {
@@ -2125,8 +2122,7 @@ namespace Fougerite
                             }
                         }
 
-                        Logger.LogWarning("[FougeriteBan] Disconnected: " + name
-                                                                          + " - " + ip + " - " + uid);
+                        Logger.LogWarning($"[FougeriteBan] Disconnected: {name} - {ip} - {uid}");
                         approval.Deny(uLink.NetworkConnectionError.ConnectionBanned);
                     }
                     else if (ca.IsConnected(uid))
@@ -2142,7 +2138,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("PlayerApprovalEvent Error: " + ex);
+                            Logger.LogError($"PlayerApprovalEvent Error: {ex}");
                         }
 
                         if (ape.ForceAccept)
@@ -2159,7 +2155,7 @@ namespace Fougerite
                             return;
                         }
 
-                        Logger.Log("Denying entry to " + uid + " because they're already connected");
+                        Logger.Log($"Denying entry to {uid} because they're already connected");
                         approval.Deny(uLink.NetworkConnectionError.AlreadyConnectedToAnotherServer);
                     }
                     else if (FloodCooldown.ContainsKey(ip))
@@ -2179,7 +2175,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("PlayerApprovalEvent2 Error: " + ex);
+                            Logger.LogError($"PlayerApprovalEvent2 Error: {ex}");
                         }
 
                         Accept(ca, approval, clientConnection);
@@ -2230,8 +2226,8 @@ namespace Fougerite
                 }
                 else
                 {
-                    Logger.LogWarning("[TeleportHack] " + player.Name + " sent invalid packets. " + player.SteamID);
-                    Server.GetServer().Broadcast(player.Name + " might have tried to teleport with hacks.");
+                    Logger.LogWarning($"[TeleportHack] {player.Name} sent invalid packets. {player.SteamID}");
+                    Server.GetServer().Broadcast($"{player.Name} might have tried to teleport with hacks.");
                     if (Bootstrap.BI)
                     {
                         Server.GetServer().BanPlayer(player, "Console", "TeleportHack");
@@ -2255,7 +2251,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("PlayerMoveEvent Error: " + ex);
+                Logger.LogError($"PlayerMoveEvent Error: {ex}");
             }
         }
 
@@ -2303,13 +2299,13 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ResearchItem Error: " + ex);
+                    Logger.LogError($"ResearchItem Error: {ex}");
                 }
 
                 if (!researchEvent.Cancelled)
                 {
                     inventory.BindBlueprint(block2);
-                    Notice.Popup(inventory.networkView.owner, "?", "You can now craft " + otherItem.datablock.name, 4f);
+                    Notice.Popup(inventory.networkView.owner, "?", $"You can now craft {otherItem.datablock.name}", 4f);
                     int numWant = 1;
                     if (rti.Consume(ref numWant))
                     {
@@ -2344,7 +2340,7 @@ namespace Fougerite
                             }
                             catch (Exception exception)
                             {
-                                Logger.LogError("[SetLooter] Error: " + exception);
+                                Logger.LogError($"[SetLooter] Error: {exception}");
                                 NetCull.RPC((UnityEngine.MonoBehaviour)lo, "StopLooting", uLink.RPCMode.Server);
                                 lo.thisClientIsInWindow = false;
                                 ply = uLink.NetworkPlayer.unassigned;
@@ -2388,8 +2384,7 @@ namespace Fougerite
                 if (((int)use.callState) != 0)
                 {
                     Logger.LogWarning(
-                        "Some how Enter got called from a call stack originating with " + use.callState +
-                        " fix your script to not do this.", use);
+                        $"Some how Enter got called from a call stack originating with {use.callState} fix your script to not do this.", use);
                     return UseResponse.Fail_InvalidOperation;
                 }
 
@@ -2435,8 +2430,7 @@ namespace Fougerite
                                     if (response.Succeeded())
                                     {
                                         Logger.LogError(
-                                            "A IUseableChecked return a invalid value that should have cause success [" +
-                                            response + "], but it was not UseCheck.Success! fix your script.",
+                                            $"A IUseableChecked return a invalid value that should have cause success [{response}], but it was not UseCheck.Success! fix your script.",
                                             use.implementation);
                                         return UseResponse.Fail_Checked_BadResult;
                                     }
@@ -2490,7 +2484,7 @@ namespace Fougerite
                                             }
                                             catch (Exception ex2)
                                             {
-                                                Logger.LogError("LootStartEvent Error: " + ex2);
+                                                Logger.LogError($"LootStartEvent Error: {ex2}");
                                             }
 
                                             if (lt.IsCancelled)
@@ -2503,7 +2497,7 @@ namespace Fougerite
                                 }
                                 catch (Exception ex3)
                                 {
-                                    Logger.LogError("LootStartEvent Outer Error: " + ex3);
+                                    Logger.LogError($"LootStartEvent Outer Error: {ex3}");
                                 }
 
                                 OnUseEnter(lootableObject, use);
@@ -2513,7 +2507,7 @@ namespace Fougerite
                             {
                                 use._user = null;
                                 Logger.LogError(
-                                    "Exception thrown during Useable.Enter. Object not set as used!\r\n" + exception3,
+                                    $"Exception thrown during Useable.Enter. Object not set as used!\r\n{exception3}",
                                     attempt);
                                 Useable.lastException = exception3;
                                 return UseResponse.Fail_EnterException;
@@ -2546,7 +2540,7 @@ namespace Fougerite
                         catch (Exception exception4)
                         {
                             Logger.LogError(
-                                "Caught exception in OnUseDeclined \r\n (response was Fail_Redundant)" + exception4,
+                                $"Caught exception in OnUseDeclined \r\n (response was Fail_Redundant){exception4}",
                                 use.implementation);
                         }
                     }
@@ -2563,7 +2557,7 @@ namespace Fougerite
                     catch (Exception exception5)
                     {
                         Logger.LogError(
-                            "Caught exception in OnUseDeclined \r\n (response was Fail_Vacancy)" + exception5,
+                            $"Caught exception in OnUseDeclined \r\n (response was Fail_Vacancy){exception5}",
                             use.implementation);
                     }
                 }
@@ -2611,8 +2605,8 @@ namespace Fougerite
                     ItemMoveEvent ime4 = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
                     if (ime4.Player != null)
                     {
-                        Logger.LogError("[ItemLoot] The Game says " + ime4.Player.Name +
-                                        " probably cheats with inv. Report this to DreTaX on fougerite.com");
+                        Logger.LogError(
+                            $"[ItemLoot] The Game says {ime4.Player.Name} probably cheats with inv. Report this to DreTaX on fougerite.com");
                     }
 
                     return Inventory.SlotOperationResult.Error_NotALooter;
@@ -2657,7 +2651,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("ItemMoveEvent Error: " + ex);
+                            Logger.LogError($"ItemMoveEvent Error: {ex}");
                         }
 
                         return Inventory.SlotOperationResult.Success_Stacked;
@@ -2675,7 +2669,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("ItemMoveEvent Error: " + ex);
+                            Logger.LogError($"ItemMoveEvent Error: {ex}");
                         }
 
                         return Inventory.SlotOperationResult.Success_Combined;
@@ -2720,7 +2714,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("ItemMoveEvent Error: " + ex);
+                Logger.LogError($"ItemMoveEvent Error: {ex}");
             }
 
             return Inventory.SlotOperationResult.Success_Moved;
@@ -2752,7 +2746,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("RepairEvent Error: " + ex);
+                    Logger.LogError($"RepairEvent Error: {ex}");
                 }
 
                 if (re._cancel)
@@ -2806,7 +2800,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("BanEvent Error: " + ex);
+                    Logger.LogError($"BanEvent Error: {ex}");
                 }
 
                 return be.Cancelled;
@@ -2826,7 +2820,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("GenericSpawnerLoad Error: " + ex);
+                    Logger.LogError($"GenericSpawnerLoad Error: {ex}");
                 }
             }
         }
@@ -2843,7 +2837,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.Log("ServerLoaded Error: " + ex);
+                Logger.Log($"ServerLoaded Error: {ex}");
             }
 
             GameObject go = new GameObject();
@@ -2876,7 +2870,7 @@ namespace Fougerite
 
                     if (float.IsNaN(beltNum) || float.IsInfinity(beltNum) || beltNum < 0 || beltNum > 6)
                     {
-                        Logger.LogWarning("[DoBeltUse] Belt number is different. " + beltNum);
+                        Logger.LogWarning($"[DoBeltUse] Belt number is different. {beltNum}");
                         return;
                     }
 
@@ -2892,7 +2886,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("BeltUseEvent Error: " + ex);
+                        Logger.LogError($"BeltUseEvent Error: {ex}");
                     }
 
                     if (be.Cancelled)
@@ -2911,7 +2905,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("[DoBeltUse Error] " + ex);
+                    Logger.LogError($"[DoBeltUse Error] {ex}");
                 }
             }
         }
@@ -2934,7 +2928,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("[SupplySignalExplosion Error] " + ex);
+                    Logger.LogError($"[SupplySignalExplosion Error] {ex}");
                 }
 
                 if (sg.Cancelled)
@@ -3039,7 +3033,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ShootEvent Error: " + ex);
+                    Logger.LogError($"ShootEvent Error: {ex}");
                 }
 
                 TakeDamage local = item.inventory.GetLocal<TakeDamage>();
@@ -3108,7 +3102,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("GrenadeThrowEvent Error: " + ex);
+                            Logger.LogError($"GrenadeThrowEvent Error: {ex}");
                         }
                     }
 
@@ -3148,7 +3142,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("ShotgunShootEvent Error: " + ex);
+                        Logger.LogError($"ShotgunShootEvent Error: {ex}");
                     }
 
                     pellets = tempcall.Pellets;
@@ -3193,7 +3187,7 @@ namespace Fougerite
                         }
                         catch (Exception ex)
                         {
-                            Logger.LogError("ShotgunShootEvent Error: " + ex);
+                            Logger.LogError($"ShotgunShootEvent Error: {ex}");
                         }
 
                         if (obj2 != null)
@@ -3217,7 +3211,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("ServerShutdownEvent Error: " + ex);
+                Logger.LogError($"ServerShutdownEvent Error: {ex}");
             }
 
             World.GetWorld().ServerSaveHandler.ManualSave();
@@ -3234,7 +3228,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ModulesLoadedEvent Error: " + ex);
+                    Logger.LogError($"ModulesLoadedEvent Error: {ex}");
                 }
             }
         }
@@ -3250,7 +3244,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ServerInitEvent Critical Error: " + ex);
+                    Logger.LogError($"ServerInitEvent Critical Error: {ex}");
                 }
 
                 try
@@ -3260,7 +3254,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("ServerInitEvent Error: " + ex);
+                    Logger.LogError($"ServerInitEvent Error: {ex}");
                 }
             }
         }

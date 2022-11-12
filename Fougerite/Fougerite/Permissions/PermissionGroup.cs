@@ -41,7 +41,7 @@ namespace Fougerite.Permissions
         {
             get;
             set;
-        }
+        } = new List<string>();
         
         /// <summary>
         /// Gets the unique identifier of a string.

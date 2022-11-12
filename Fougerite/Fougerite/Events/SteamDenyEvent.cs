@@ -16,10 +16,10 @@ namespace Fougerite.Events
 
         public SteamDenyEvent(ClientConnection cc, NetworkPlayerApproval approval, string strReason, NetError errornum)
         {
-            this._cc = cc;
-            this._approval = approval;
-            this._strReason = strReason;
-            this._errornum = errornum;
+            _cc = cc;
+            _approval = approval;
+            _strReason = strReason;
+            _errornum = errornum;
         }
 
         /// <summary>

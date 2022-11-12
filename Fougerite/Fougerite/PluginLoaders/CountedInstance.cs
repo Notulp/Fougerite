@@ -50,9 +50,8 @@ namespace Fougerite.PluginLoaders
             foreach (KeyValuePair<Type, Counts> current in InstanceTypes)
             {
                 object obj = text;
-                text = String.Concat(obj, current.Key.FullName, Environment.NewLine + "\tCurrently:\t",
-                    current.Value.Created - current.Value.Destroyed, Environment.NewLine + "\tCreated:  \t",
-                    current.Value.Created, Environment.NewLine);
+                text =
+                    $"{obj}{current.Key.FullName}{Environment.NewLine}\tCurrently:\t{current.Value.Created - current.Value.Destroyed}{$"{Environment.NewLine}\tCreated:  \t"}{current.Value.Created}{Environment.NewLine}";
             }
 
             return text;

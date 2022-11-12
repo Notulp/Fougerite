@@ -35,8 +35,8 @@ namespace Fougerite
             DataBase = database;
             _username = username;
             _password = passwd;
-            string connectionString = "SERVER=" + ServerAddress + ";" + "DATABASE=" +
-            DataBase + ";" + "UID=" + _username + ";" + "PASSWORD=" + _password + ";" + extraarg;
+            string connectionString =
+                $"SERVER={ServerAddress};DATABASE={DataBase};UID={_username};PASSWORD={_password};{extraarg}";
 
             connection = new MySqlConnection(connectionString);
             return connection;
@@ -58,7 +58,7 @@ namespace Fougerite
             }
             catch(Exception ex)
             {
-                Logger.LogError("Failed to execute query " + ex);
+                Logger.LogError($"Failed to execute query {ex}");
                 return false;
             }
             return true;
@@ -124,7 +124,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("Failed to execute query " + ex);
+                Logger.LogError($"Failed to execute query {ex}");
             }
             return result;
         }
@@ -155,7 +155,7 @@ namespace Fougerite
                         Logger.LogError("Invalid username/password, please try again");
                         break;
                     default:
-                        Logger.LogError("Error: " + ex);
+                        Logger.LogError($"Error: {ex}");
                         break;
                 }
                 return false;
@@ -175,7 +175,7 @@ namespace Fougerite
             }
             catch (MySqlException ex)
             {
-                Logger.LogError("Failed to close connection " + ex.Message);
+                Logger.LogError($"Failed to close connection {ex.Message}");
                 return false;
             }
         }

@@ -66,7 +66,7 @@ namespace Fougerite.PluginLoaders
                 {
                     object result = null;
 
-                    using (new Stopper(Type + " " + Name, func))
+                    using (new Stopper($"{Type} {Name}", func))
                     {
                         result = Engine.Operations.Invoke(functionToCall, args);
                     }
@@ -75,16 +75,16 @@ namespace Fougerite.PluginLoaders
                 }
                 return null;
             }
-            catch (Microsoft.Scripting.ArgumentTypeException) // Maintain compatibility for old plugins.
+            catch (ArgumentTypeException) // Maintain compatibility for old plugins.
             {
                 if (func == "On_EntityDeployed")
                 {
-                    return this.Invoke(func, new object[] {args[0], args[1]});
+                    return Invoke(func, new object[] {args[0], args[1]});
                 }
             }
             catch (Exception ex)
             {
-                string fileinfo = ("[Error] Failed to invoke: " + string.Format("{0}<{1}>.{2}()", Name, Type, func) + Environment.NewLine);
+                string fileinfo = ("[Error] Failed to invoke: " + $"{Name}<{Type}>.{func}()" + Environment.NewLine);
                 Logger.LogError(fileinfo + FormatException(ex));
             }
             return null;
@@ -92,13 +92,13 @@ namespace Fougerite.PluginLoaders
 
         public override void Load(string code = "")
         {
-            Engine = IronPython.Hosting.Python.CreateEngine();
+            Engine = Python.CreateEngine();
             Engine.SetSearchPaths(new string[] {ManagedFolder, LibPath});
             Engine.GetBuiltinModule().RemoveVariable("exit");
             Engine.GetBuiltinModule().RemoveVariable("reload");
             Scope = Engine.CreateScope();
             Scope.SetVariable("Plugin", this);
-            Scope.SetVariable("Server", Fougerite.Server.GetServer());
+            Scope.SetVariable("Server", Server.GetServer());
             Scope.SetVariable("DataStore", DataStore.GetInstance());
             Scope.SetVariable("Data", Data.GetData());
             Scope.SetVariable("Web", Web.GetInstance());
@@ -107,10 +107,10 @@ namespace Fougerite.PluginLoaders
             #pragma warning disable 618
             Scope.SetVariable("PluginCollector", GlobalPluginCollector.GetPluginCollector());
             #pragma warning restore 618
-            Scope.SetVariable("Loom", Fougerite.Loom.Current);
-            Scope.SetVariable("JSON", Fougerite.JsonAPI.GetInstance);
-            Scope.SetVariable("MySQL", Fougerite.MySQLConnector.GetInstance);
-            Scope.SetVariable("SQLite", Fougerite.SQLiteConnector.GetInstance);
+            Scope.SetVariable("Loom", Loom.Current);
+            Scope.SetVariable("JSON", JsonAPI.GetInstance);
+            Scope.SetVariable("MySQL", MySQLConnector.GetInstance);
+            Scope.SetVariable("SQLite", SQLiteConnector.GetInstance);
             Scope.SetVariable("PermissionSystem", PermissionSystem.GetPermissionSystem());
             Scope.SetVariable("PlayerCache", PlayerCache.GetPlayerCache());
             
@@ -145,7 +145,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Error] Failed to load Python plugin: " + ex);
+                Logger.LogError($"[Error] Failed to load Python plugin: {ex}");
                 State = PluginState.FailedToLoad;
             }
 

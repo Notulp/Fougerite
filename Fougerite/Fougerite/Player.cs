@@ -435,12 +435,12 @@ namespace Fougerite
             {
                 if (Bootstrap.RustChat)
                 {
-                    SendCommand("chat.add " + String.QuoteSafe(playername) + " " + String.QuoteSafe(arg));
+                    SendCommand($"chat.add {String.QuoteSafe(playername)} {String.QuoteSafe(arg)}");
                 }
 
                 if (Bootstrap.RPCChat)
                 {
-                    string text = String.QuoteSafe(playername) + " " + String.QuoteSafe(arg);
+                    string text = $"{String.QuoteSafe(playername)} {String.QuoteSafe(arg)}";
                     uLink.NetworkView.Get(PlayerClient.networkView).RPC(Bootstrap.RPCChatMethod, NetworkPlayer, text);
                 }
             }
@@ -463,12 +463,12 @@ namespace Fougerite
                     {
                         if (Bootstrap.RustChat)
                         {
-                            SendCommand("chat.add " + String.QuoteSafe(playername) + " " + String.QuoteSafe(lastcolor + x));
+                            SendCommand($"chat.add {String.QuoteSafe(playername)} {String.QuoteSafe(lastcolor + x)}");
                         }
 
                         if (Bootstrap.RPCChat)
                         {
-                            string text = String.QuoteSafe(playername) + " " + String.QuoteSafe(lastcolor + x);
+                            string text = $"{String.QuoteSafe(playername)} {String.QuoteSafe(lastcolor + x)}";
                             uLink.NetworkView.Get(PlayerClient.networkView).RPC(Bootstrap.RPCChatMethod, NetworkPlayer, text);
                         }
                     }
@@ -476,12 +476,12 @@ namespace Fougerite
                     {
                         if (Bootstrap.RustChat)
                         {
-                            SendCommand("chat.add " + String.QuoteSafe(playername) + " " + String.QuoteSafe(x));
+                            SendCommand($"chat.add {String.QuoteSafe(playername)} {String.QuoteSafe(x)}");
                         }
 
                         if (Bootstrap.RPCChat)
                         {
-                            string text = String.QuoteSafe(playername) + " " + String.QuoteSafe(x);
+                            string text = $"{String.QuoteSafe(playername)} {String.QuoteSafe(x)}";
                             uLink.NetworkView.Get(PlayerClient.networkView).RPC(Bootstrap.RPCChatMethod, NetworkPlayer, text);
                         }
                     }
@@ -689,17 +689,14 @@ namespace Fougerite
                     }
 
                     float distance = Vector3.Distance(Location, target);
-                    Logger.LogDebug(string.Format("[{0}] player={1}({2}) from={3} to={4} distance={5} terrain={6}", me,
-                        Name, GameID,
-                        Location.ToString(), target.ToString(), distance.ToString("F2"), terrain.ToString()));
+                    Logger.LogDebug(
+                        $"[{me}] player={Name}({GameID}) from={Location.ToString()} to={target.ToString()} distance={distance.ToString("F2")} terrain={terrain.ToString()}");
 
                     return TeleportTo(target, callhook);
                 }
 
-                Logger.LogDebug(string.Format("[{0}] structures.Count is {1}. Weird.", me,
-                    structureMasters.Count().ToString()));
-                Logger.LogDebug(string.Format("[{0}] target={1} terrain{2}", me, target.ToString(),
-                    terrain.ToString()));
+                Logger.LogDebug($"[{me}] structures.Count is {structureMasters.Count().ToString()}. Weird.");
+                Logger.LogDebug($"[{me}] target={target.ToString()} terrain{terrain.ToString()}");
                 Message("Cannot execute safely with the parameters supplied.");
                 return false;
             }

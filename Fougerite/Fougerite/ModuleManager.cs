@@ -37,28 +37,27 @@ namespace Fougerite
             DirectoryInfo[] DirectoryInfos = new DirectoryInfo(ModulesFolder).GetDirectories();
             foreach (DirectoryInfo DirInfo in DirectoryInfos)
             {
-                FileInfo FileInfo = new FileInfo(Path.Combine(DirInfo.FullName, DirInfo.Name + ".dll"));
+                FileInfo FileInfo = new FileInfo(Path.Combine(DirInfo.FullName, $"{DirInfo.Name}.dll"));
                 if (!FileInfo.Exists)
                     continue;
 
                 if (Array.IndexOf(Config.FougeriteConfig.EnumSection("Modules"), DirInfo.Name) == -1)
                 {
-                    Logger.LogDebug(string.Format("[Modules] {0} is not configured to be loaded.", DirInfo.Name));
+                    Logger.LogDebug($"[Modules] {DirInfo.Name} is not configured to be loaded.");
                     continue;
                 }
 
-                Logger.LogDebug("[Modules] Module Found: " + FileInfo.Name);
+                Logger.LogDebug($"[Modules] Module Found: {FileInfo.Name}");
                 string FileNameWithoutExtension = Path.GetFileNameWithoutExtension(FileInfo.Name);
                 if (IgnoredModules.Contains(FileNameWithoutExtension))
                 {
-                    Logger.LogWarning(string.Format("[Modules] {0} was ignored from being loaded.",
-                        FileNameWithoutExtension));
+                    Logger.LogWarning($"[Modules] {FileNameWithoutExtension} was ignored from being loaded.");
                     continue;
                 }
 
                 try
                 {
-                    Logger.LogDebug("[Modules] Loading assembly: " + FileInfo.Name);
+                    Logger.LogDebug($"[Modules] Loading assembly: {FileInfo.Name}");
                     Assembly Assembly;
                     // The plugin assembly might have been resolved by another plugin assembly already, so no use to
                     // load it again, but we do still have to verify it and create plugin instances.
@@ -72,20 +71,19 @@ namespace Fougerite
                     {
                         if (!Type.IsSubclassOf(typeof(Module)) || !Type.IsPublic || Type.IsAbstract)
                             continue;
-                        Logger.LogDebug("[Modules] Checked " + Type.FullName);
+                        Logger.LogDebug($"[Modules] Checked {Type.FullName}");
 
                         Module PluginInstance = null;
                         try
                         {
                             PluginInstance = (Module)Activator.CreateInstance(Type);
-                            Logger.LogDebug("[Modules] Instance created: " + Type.FullName);
+                            Logger.LogDebug($"[Modules] Instance created: {Type.FullName}");
                         }
                         catch (Exception ex)
                         {
                             // Broken plugins better stop the entire server init.
-                            Logger.LogError(string.Format(
-                                "[Modules] Could not create an instance of plugin class \"{0}\". {1}", Type.FullName,
-                                ex));
+                            Logger.LogError(
+                                $"[Modules] Could not create an instance of plugin class \"{Type.FullName}\". {ex}");
                         }
 
                         if (PluginInstance != null)
@@ -98,7 +96,7 @@ namespace Fougerite
                             GlobalPluginCollector.GetPluginCollector()
                                 .AddPlugin(Container.Plugin.Name, Container, "C#");
 #pragma warning restore 618
-                            Logger.LogDebug("[Modules] Module added: " + FileInfo.Name);
+                            Logger.LogDebug($"[Modules] Module added: {FileInfo.Name}");
                             break;
                         }
                     }
@@ -106,7 +104,7 @@ namespace Fougerite
                 catch (Exception ex)
                 {
                     // Broken assemblies better stop the entire server init.
-                    Logger.LogError(string.Format("[Modules] Failed to load assembly \"{0}\". {1}", FileInfo.Name, ex));
+                    Logger.LogError($"[Modules] Failed to load assembly \"{FileInfo.Name}\". {ex}");
                 }
             }
 
@@ -126,14 +124,12 @@ namespace Fougerite
                 catch (Exception ex)
                 {
                     // Broken modules better stop the entire server init.
-                    Logger.LogError(string.Format(
-                        "[Modules] Module \"{0}\" has thrown an exception during initialization. {1}",
-                        CurrentModule.Plugin.Name, ex));
+                    Logger.LogError(
+                        $"[Modules] Module \"{CurrentModule.Plugin.Name}\" has thrown an exception during initialization. {ex}");
                 }
 
-                Logger.Log(string.Format(
-                    "[Modules] Module {0} v{1} (by {2}) initiated.", CurrentModule.Plugin.Name,
-                    CurrentModule.Plugin.Version, CurrentModule.Plugin.Author));
+                Logger.Log(
+                    $"[Modules] Module {CurrentModule.Plugin.Name} v{CurrentModule.Plugin.Version} (by {CurrentModule.Plugin.Author}) initiated.");
             }
 
             Hooks.ModulesLoaded();
@@ -151,9 +147,8 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(string.Format(
-                        "[Modules] Module \"{0}\" has thrown an exception while being deinitialized:\n{1}",
-                        ModuleContainer.Plugin.Name, ex));
+                    Logger.LogError(
+                        $"[Modules] Module \"{ModuleContainer.Plugin.Name}\" has thrown an exception while being deinitialized:\n{ex}");
                 }
             }
 
@@ -167,9 +162,8 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(string.Format(
-                        "[Modules] Module \"{0}\" has thrown an exception while being disposed:\n{1}",
-                        ModuleContainer.Plugin.Name, ex));
+                    Logger.LogError(
+                        $"[Modules] Module \"{ModuleContainer.Plugin.Name}\" has thrown an exception while being disposed:\n{ex}");
                 }
             }
 #pragma warning disable 618

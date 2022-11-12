@@ -141,9 +141,9 @@ namespace Fougerite.Permissions
                 List<PermissionPlayer> emptyplayers = new List<PermissionPlayer>();
                 List<PermissionGroup> emptygroups = new List<PermissionGroup>();
 
-                if (!File.Exists(Util.GetRootFolder() + "\\Save\\GroupPermissions.json"))
+                if (!File.Exists($"{Util.GetRootFolder()}\\Save\\GroupPermissions.json"))
                 {
-                    File.Create(Util.GetRootFolder() + "\\Save\\GroupPermissions.json").Dispose();
+                    File.Create($"{Util.GetRootFolder()}\\Save\\GroupPermissions.json").Dispose();
                     emptygroups.Add(new PermissionGroup()
                     {
                         GroupName = "Default",
@@ -164,7 +164,7 @@ namespace Fougerite.Permissions
                     });
 
                     using (StreamWriter sw =
-                        new StreamWriter(Util.GetRootFolder() + "\\Save\\GroupPermissions.json", false,
+                        new StreamWriter($"{Util.GetRootFolder()}\\Save\\GroupPermissions.json", false,
                             Encoding.UTF8))
                     {
                         using (JsonWriter writer = new JsonTextWriter(sw))
@@ -175,9 +175,9 @@ namespace Fougerite.Permissions
                     }
                 }
 
-                if (!File.Exists(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json"))
+                if (!File.Exists($"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json"))
                 {
-                    File.Create(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json").Dispose();
+                    File.Create($"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json").Dispose();
 
                     emptyplayers.Add(new PermissionPlayer()
                     {
@@ -188,7 +188,7 @@ namespace Fougerite.Permissions
                     });
 
                     using (StreamWriter sw =
-                        new StreamWriter(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json", false,
+                        new StreamWriter($"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json", false,
                             Encoding.UTF8))
                     {
                         using (JsonWriter writer = new JsonTextWriter(sw))
@@ -203,17 +203,17 @@ namespace Fougerite.Permissions
                 {
                     _handler.PermissionGroups =
                         JsonConvert.DeserializeObject<List<PermissionGroup>>(
-                            File.ReadAllText(Util.GetRootFolder() + "\\Save\\GroupPermissions.json"));
+                            File.ReadAllText($"{Util.GetRootFolder()}\\Save\\GroupPermissions.json"));
                     _handler.PermissionPlayers =
                         JsonConvert.DeserializeObject<List<PermissionPlayer>>(
-                            File.ReadAllText(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json"));
+                            File.ReadAllText($"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json"));
                 }
 
                 Logger.Log("[PermissionSystem] Loaded.");
             }
             catch (Exception ex)
             {
-                Logger.LogError("[PermissionSystem] Error: " + ex);
+                Logger.LogError($"[PermissionSystem] Error: {ex}");
             }
         }
 
@@ -240,31 +240,34 @@ namespace Fougerite.Permissions
             string grouppermissions = "";
             string playerpermissions = "";
 
+            string playerPermissionsPath = $"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json";
+            string groupPermissionsPath = $"{Util.GetRootFolder()}\\Save\\GroupPermissions.json";
+            
             try
             {
-                if (!File.Exists(Util.GetRootFolder() + "\\Save\\GroupPermissions.json"))
+                if (!File.Exists(groupPermissionsPath))
                 {
-                    File.Create(Util.GetRootFolder() + "\\Save\\GroupPermissions.json").Dispose();
+                    File.Create(groupPermissionsPath).Dispose();
                 }
 
-                if (!File.Exists(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json"))
+                if (!File.Exists(playerPermissionsPath))
                 {
-                    File.Create(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json").Dispose();
+                    File.Create(playerPermissionsPath).Dispose();
                 }
 
                 // Backup the data from the current files.
-                grouppermissions = File.ReadAllText(Util.GetRootFolder() + "\\Save\\GroupPermissions.json");
-                playerpermissions = File.ReadAllText(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json");
+                grouppermissions = File.ReadAllText(groupPermissionsPath);
+                playerpermissions = File.ReadAllText(playerPermissionsPath);
 
                 // Empty the files.
-                if (File.Exists(Util.GetRootFolder() + "\\Save\\GroupPermissions.json"))
+                if (File.Exists(groupPermissionsPath))
                 {
-                    File.WriteAllText(Util.GetRootFolder() + "\\Save\\GroupPermissions.json", string.Empty);
+                    File.WriteAllText(groupPermissionsPath, string.Empty);
                 }
 
-                if (File.Exists(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json"))
+                if (File.Exists(playerPermissionsPath))
                 {
-                    File.WriteAllText(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json", string.Empty);
+                    File.WriteAllText(playerPermissionsPath, string.Empty);
                 }
 
                 // Initialize empty list just in case.
@@ -282,7 +285,7 @@ namespace Fougerite.Permissions
                 serializer.NullValueHandling = NullValueHandling.Ignore;
 
                 using (StreamWriter sw =
-                    new StreamWriter(Util.GetRootFolder() + "\\Save\\GroupPermissions.json", false,
+                    new StreamWriter(groupPermissionsPath, false,
                         Encoding.UTF8))
                 {
                     using (JsonWriter writer = new JsonTextWriter(sw))
@@ -293,7 +296,7 @@ namespace Fougerite.Permissions
                 }
 
                 using (StreamWriter sw =
-                    new StreamWriter(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json", false,
+                    new StreamWriter(playerPermissionsPath, false,
                         Encoding.UTF8))
                 {
                     using (JsonWriter writer = new JsonTextWriter(sw))
@@ -305,9 +308,9 @@ namespace Fougerite.Permissions
             }
             catch (Exception ex)
             {
-                Logger.LogError("[PermissionSystem] SaveToDisk Error: " + ex);
-                File.WriteAllText(Util.GetRootFolder() + "\\Save\\GroupPermissions.json", grouppermissions);
-                File.WriteAllText(Util.GetRootFolder() + "\\Save\\PlayerPermissions.json", playerpermissions);
+                Logger.LogError($"[PermissionSystem] SaveToDisk Error: {ex}");
+                File.WriteAllText(groupPermissionsPath, grouppermissions);
+                File.WriteAllText(playerPermissionsPath, playerpermissions);
             }
         }
 
@@ -392,7 +395,7 @@ namespace Fougerite.Permissions
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public PermissionPlayer GetPlayerBySteamID(Fougerite.Player player)
+        public PermissionPlayer GetPlayerBySteamID(Player player)
         {
             return player == null ? null : GetPlayerBySteamID(player.UID);
         }
@@ -403,7 +406,7 @@ namespace Fougerite.Permissions
         /// <param name="player"></param>
         /// <param name="groupname"></param>
         /// <returns></returns>
-        public bool PlayerHasGroup(Fougerite.Player player, string groupname)
+        public bool PlayerHasGroup(Player player, string groupname)
         {
             return player != null && PlayerHasGroup(player.UID, groupname);
         }
@@ -536,7 +539,7 @@ namespace Fougerite.Permissions
         /// <param name="player"></param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public bool PlayerHasPermission(Fougerite.Player player, string permission)
+        public bool PlayerHasPermission(Player player, string permission)
         {
             return player != null && PlayerHasPermission(player.UID, permission);
         }
@@ -546,7 +549,7 @@ namespace Fougerite.Permissions
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public PermissionPlayer CreatePermissionPlayer(Fougerite.Player player)
+        public PermissionPlayer CreatePermissionPlayer(Player player)
         {
             return player == null ? null : CreatePermissionPlayer(player.UID);
         }
@@ -612,7 +615,7 @@ namespace Fougerite.Permissions
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public bool RemovePermissionPlayer(Fougerite.Player player)
+        public bool RemovePermissionPlayer(Player player)
         {
             return player != null && RemovePermissionPlayer(player.UID);
         }
@@ -732,7 +735,7 @@ namespace Fougerite.Permissions
 
             if (nickname == null)
             {
-                nickname = groupname + "NickName";
+                nickname = $"{groupname}NickName";
             }
             
             PermissionGroup group = GetGroupByName(groupname);
@@ -938,7 +941,7 @@ namespace Fougerite.Permissions
         /// <param name="player"></param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public bool AddPermission(Fougerite.Player player, string permission)
+        public bool AddPermission(Player player, string permission)
         {
             return player != null && AddPermission(player.UID, permission);
         }
@@ -987,7 +990,7 @@ namespace Fougerite.Permissions
         /// <param name="player"></param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public bool RemovePermission(Fougerite.Player player, string permission)
+        public bool RemovePermission(Player player, string permission)
         {
             return player != null && RemovePermission(player.UID, permission);
         }

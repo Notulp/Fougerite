@@ -146,7 +146,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[CTimer] Failed at calling " + Func.Method.Name + " Error: " + ex);
+                Logger.LogError($"[CTimer] Failed at calling {Func.Method.Name} Error: {ex}");
             }
             finally
             {

@@ -8,8 +8,8 @@ namespace Fougerite.Events
     public class ShootEvent
     {
         private readonly BulletWeaponDataBlock _bw;
-        private readonly Fougerite.Player _player;
-        private readonly UnityEngine.GameObject _go;
+        private readonly Player _player;
+        private readonly GameObject _go;
         private readonly ItemRepresentation _ir;
         private readonly uLink.NetworkMessageInfo _unmi;
         private readonly IBulletWeaponItem _ibw;
@@ -21,12 +21,12 @@ namespace Fougerite.Events
         private readonly Vector3 _endpos;
         private readonly Vector3 _offset;  
 
-        public ShootEvent(BulletWeaponDataBlock bw, UnityEngine.GameObject go, ItemRepresentation ir, 
+        public ShootEvent(BulletWeaponDataBlock bw, GameObject go, ItemRepresentation ir, 
             uLink.NetworkMessageInfo ui, IBulletWeaponItem ibw, 
             IDRemoteBodyPart part, bool flag, bool flag2, bool flag3, BodyPart part2, Vector3 vector, Vector3 vector2)
         {
             TakeDamage local = ibw.inventory.GetLocal<TakeDamage>();
-            _player = Fougerite.Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
+            _player = Server.GetServer().FindPlayer(local.GetComponent<Character>().netUser.userID);
             _bw = bw;
             _go = go;
             _ir = ir;
@@ -46,15 +46,15 @@ namespace Fougerite.Events
         /// </summary>
         public IBulletWeaponItem IBulletWeaponItem
         {
-            get { return this._ibw; }
+            get { return _ibw; }
         }
 
         /// <summary>
         /// The player who shoots the gun.
         /// </summary>
-        public Fougerite.Player Player
+        public Player Player
         {
-            get { return this._player; }
+            get { return _player; }
         }
 
         /// <summary>
@@ -62,15 +62,15 @@ namespace Fougerite.Events
         /// </summary>
         public BulletWeaponDataBlock BulletWeaponDataBlock
         {
-            get { return this._bw; }
+            get { return _bw; }
         }
 
         /// <summary>
         /// The gameobject of the item.
         /// </summary>
-        public UnityEngine.GameObject GameObject
+        public GameObject GameObject
         {
-            get { return this._go; }
+            get { return _go; }
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Fougerite.Events
         /// </summary>
         public ItemRepresentation ItemRepresentation
         {
-            get { return this._ir; }
+            get { return _ir; }
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Fougerite.Events
         /// </summary>
         public uLink.NetworkMessageInfo NetworkMessageInfo
         {
-            get { return this._unmi; }
+            get { return _unmi; }
         }
 
         /// <summary>

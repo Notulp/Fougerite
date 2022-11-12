@@ -43,7 +43,8 @@ namespace Fougerite
         {
             if (AllPlugins.ContainsKey(name))
             {
-                Logger.LogError("[Fougerite AddPlugin] Tried adding a plugin to the GlobalPluginCollector, with the same name? Rename the duplicate plugin! " + name);
+                Logger.LogError(
+                    $"[Fougerite AddPlugin] Tried adding a plugin to the GlobalPluginCollector, with the same name? Rename the duplicate plugin! {name}");
                 return;
             }
             AllPlugins[name] = plugin;

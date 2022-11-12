@@ -190,47 +190,47 @@ namespace Fougerite
             string blocksPath = Util.GetAbsoluteFilePath("BlocksData.txt");
             foreach (ItemDataBlock block in DatablockDictionary.All)
             {
-                File.AppendAllText(blocksPath, "Name: " + block.name + "\n");
-                File.AppendAllText(blocksPath, "ID: " + block.uniqueID + "\n");
-                File.AppendAllText(blocksPath, "Flags: " + block._itemFlags + "\n");
-                File.AppendAllText(blocksPath, "Max Condition: " + block._maxCondition + "\n");
-                File.AppendAllText(blocksPath, "Loose Condition: " + block.doesLoseCondition + "\n");
-                File.AppendAllText(blocksPath, "Max Uses: " + block._maxUses + "\n");
-                File.AppendAllText(blocksPath, "Mins Uses (Display): " + block._minUsesForDisplay + "\n");
-                File.AppendAllText(blocksPath, "Spawn Uses Max: " + block._spawnUsesMax + "\n");
-                File.AppendAllText(blocksPath, "Spawn Uses Min: " + block._spawnUsesMin + "\n");
-                File.AppendAllText(blocksPath, "Splittable: " + block._splittable + "\n");
-                File.AppendAllText(blocksPath, "Category: " + block.category + "\n");
+                File.AppendAllText(blocksPath, $"Name: {block.name}\n");
+                File.AppendAllText(blocksPath, $"ID: {block.uniqueID}\n");
+                File.AppendAllText(blocksPath, $"Flags: {block._itemFlags}\n");
+                File.AppendAllText(blocksPath, $"Max Condition: {block._maxCondition}\n");
+                File.AppendAllText(blocksPath, $"Loose Condition: {block.doesLoseCondition}\n");
+                File.AppendAllText(blocksPath, $"Max Uses: {block._maxUses}\n");
+                File.AppendAllText(blocksPath, $"Mins Uses (Display): {block._minUsesForDisplay}\n");
+                File.AppendAllText(blocksPath, $"Spawn Uses Max: {block._spawnUsesMax}\n");
+                File.AppendAllText(blocksPath, $"Spawn Uses Min: {block._spawnUsesMin}\n");
+                File.AppendAllText(blocksPath, $"Splittable: {block._splittable}\n");
+                File.AppendAllText(blocksPath, $"Category: {block.category}\n");
                 File.AppendAllText(blocksPath, "Combinations:\n");
                 foreach (ItemDataBlock.CombineRecipe recipe in block.Combinations)
                 {
-                    File.AppendAllText(blocksPath, "\t" + recipe + "\n");
+                    File.AppendAllText(blocksPath, $"\t{recipe}\n");
                 }
-                File.AppendAllText(blocksPath, "Icon: " + block.icon + "\n");
-                File.AppendAllText(blocksPath, "IsRecycleable: " + block.isRecycleable + "\n");
-                File.AppendAllText(blocksPath, "IsRepairable: " + block.isRepairable + "\n");
-                File.AppendAllText(blocksPath, "IsResearchable: " + block.isResearchable + "\n");
-                File.AppendAllText(blocksPath, "Description: " + block.itemDescriptionOverride + "\n");
+                File.AppendAllText(blocksPath, $"Icon: {block.icon}\n");
+                File.AppendAllText(blocksPath, $"IsRecycleable: {block.isRecycleable}\n");
+                File.AppendAllText(blocksPath, $"IsRepairable: {block.isRepairable}\n");
+                File.AppendAllText(blocksPath, $"IsResearchable: {block.isResearchable}\n");
+                File.AppendAllText(blocksPath, $"Description: {block.itemDescriptionOverride}\n");
                 if (block is BulletWeaponDataBlock)
                 {
                     BulletWeaponDataBlock block2 = (BulletWeaponDataBlock)block;
-                    File.AppendAllText(blocksPath, "Min Damage: " + block2.damageMin + "\n");
-                    File.AppendAllText(blocksPath, "Max Damage: " + block2.damageMax + "\n");
-                    File.AppendAllText(blocksPath, "Ammo: " + block2.ammoType + "\n");
-                    File.AppendAllText(blocksPath, "Recoil Duration: " + block2.recoilDuration + "\n");
-                    File.AppendAllText(blocksPath, "RecoilPitch Min: " + block2.recoilPitchMin + "\n");
-                    File.AppendAllText(blocksPath, "RecoilPitch Max: " + block2.recoilPitchMax + "\n");
-                    File.AppendAllText(blocksPath, "RecoilYawn Min: " + block2.recoilYawMin + "\n");
-                    File.AppendAllText(blocksPath, "RecoilYawn Max: " + block2.recoilYawMax + "\n");
-                    File.AppendAllText(blocksPath, "Bullet Range: " + block2.bulletRange + "\n");
-                    File.AppendAllText(blocksPath, "Sway: " + block2.aimSway + "\n");
-                    File.AppendAllText(blocksPath, "SwaySpeed: " + block2.aimSwaySpeed + "\n");
-                    File.AppendAllText(blocksPath, "Aim Sensitivity: " + block2.aimSensitivtyPercent + "\n");
-                    File.AppendAllText(blocksPath, "FireRate: " + block2.fireRate + "\n");
-                    File.AppendAllText(blocksPath, "FireRate Secondary: " + block2.fireRateSecondary + "\n");
-                    File.AppendAllText(blocksPath, "Max Clip Ammo: " + block2.maxClipAmmo + "\n");
-                    File.AppendAllText(blocksPath, "Reload Duration: " + block2.reloadDuration + "\n");
-                    File.AppendAllText(blocksPath, "Attachment Point: " + block2.attachmentPoint + "\n");
+                    File.AppendAllText(blocksPath, $"Min Damage: {block2.damageMin}\n");
+                    File.AppendAllText(blocksPath, $"Max Damage: {block2.damageMax}\n");
+                    File.AppendAllText(blocksPath, $"Ammo: {block2.ammoType}\n");
+                    File.AppendAllText(blocksPath, $"Recoil Duration: {block2.recoilDuration}\n");
+                    File.AppendAllText(blocksPath, $"RecoilPitch Min: {block2.recoilPitchMin}\n");
+                    File.AppendAllText(blocksPath, $"RecoilPitch Max: {block2.recoilPitchMax}\n");
+                    File.AppendAllText(blocksPath, $"RecoilYawn Min: {block2.recoilYawMin}\n");
+                    File.AppendAllText(blocksPath, $"RecoilYawn Max: {block2.recoilYawMax}\n");
+                    File.AppendAllText(blocksPath, $"Bullet Range: {block2.bulletRange}\n");
+                    File.AppendAllText(blocksPath, $"Sway: {block2.aimSway}\n");
+                    File.AppendAllText(blocksPath, $"SwaySpeed: {block2.aimSwaySpeed}\n");
+                    File.AppendAllText(blocksPath, $"Aim Sensitivity: {block2.aimSensitivtyPercent}\n");
+                    File.AppendAllText(blocksPath, $"FireRate: {block2.fireRate}\n");
+                    File.AppendAllText(blocksPath, $"FireRate Secondary: {block2.fireRateSecondary}\n");
+                    File.AppendAllText(blocksPath, $"Max Clip Ammo: {block2.maxClipAmmo}\n");
+                    File.AppendAllText(blocksPath, $"Reload Duration: {block2.reloadDuration}\n");
+                    File.AppendAllText(blocksPath, $"Attachment Point: {block2.attachmentPoint}\n");
                 }
                 File.AppendAllText(blocksPath, "------------------------------------------------------------\n\n");
             }
@@ -390,18 +390,18 @@ namespace Fougerite
         {
             foreach (LootSpawnList list in DatablockDictionary._lootSpawnLists.Values)
             {
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Name: " + list.name + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Min Spawn: " + list.minPackagesToSpawn + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Max Spawn: " + list.maxPackagesToSpawn + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "NoDuplicate: " + list.noDuplicates + "\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "OneOfEach: " + list.spawnOneOfEach + "\n");
+                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Name: {list.name}\n");
+                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Min Spawn: {list.minPackagesToSpawn}\n");
+                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Max Spawn: {list.maxPackagesToSpawn}\n");
+                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"NoDuplicate: {list.noDuplicates}\n");
+                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"OneOfEach: {list.spawnOneOfEach}\n");
                 File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Entries:\n");
                 foreach (LootSpawnList.LootWeightedEntry entry in list.LootPackages)
                 {
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Amount Min: " + entry.amountMin + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Amount Max: " + entry.amountMax + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Weight: " + entry.weight + "\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Object: " + entry.obj + "\n\n");
+                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Amount Min: {entry.amountMin}\n");
+                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Amount Max: {entry.amountMax}\n");
+                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Weight: {entry.weight}\n");
+                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Object: {entry.obj}\n\n");
                 }
             }
         }
@@ -416,13 +416,14 @@ namespace Fougerite
                 if (block is DeployableItemDataBlock)
                 {
                     DeployableItemDataBlock block2 = block as DeployableItemDataBlock;
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Prefabs.txt"), "[\"" + block2.ObjectToPlace.name + "\", \"" + block2.DeployableObjectPrefabName + "\"],\n");
+                    File.AppendAllText(Util.GetAbsoluteFilePath("Prefabs.txt"),
+                        $"[\"{block2.ObjectToPlace.name}\", \"{block2.DeployableObjectPrefabName}\"],\n");
                 }
                 else if (block is StructureComponentDataBlock)
                 {
                     StructureComponentDataBlock block3 = block as StructureComponentDataBlock;
                     File.AppendAllText(Util.GetAbsoluteFilePath("Prefabs.txt"),
-                        "[\"" + block3.structureToPlacePrefab.name + "\", \"" + block3.structureToPlaceName + "\"],\n");
+                        $"[\"{block3.structureToPlacePrefab.name}\", \"{block3.structureToPlaceName}\"],\n");
                 }
             }
         }
@@ -435,7 +436,8 @@ namespace Fougerite
         {
             foreach (ItemDataBlock block in DatablockDictionary.All)
             {
-                File.AppendAllText(Util.GetAbsoluteFilePath("DataBlocks.txt"), string.Format("name={0} uniqueID={1}\n", block.name, block.uniqueID));
+                File.AppendAllText(Util.GetAbsoluteFilePath("DataBlocks.txt"),
+                    $"name={block.name} uniqueID={block.uniqueID}\n");
             }
         }
 
@@ -531,7 +533,7 @@ namespace Fougerite
             }
             catch (Exception e)
             {
-                Logger.LogError("SpawnEntity error: " + e);
+                Logger.LogError($"SpawnEntity error: {e}");
             }
             return obj2;
         }
@@ -590,7 +592,7 @@ namespace Fougerite
             }
             catch (Exception e)
             {
-                Logger.LogError("Spawn error: " + e);
+                Logger.LogError($"Spawn error: {e}");
             }
             return obj2;
         }

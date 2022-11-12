@@ -201,7 +201,7 @@ namespace Fougerite
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError("[CreateAsyncHTTPRequest Failed] Error: " + ex);
+                        Logger.LogError($"[CreateAsyncHTTPRequest Failed] Error: {ex}");
                     }
                 }, null);
             }
@@ -247,7 +247,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("[CreateAsyncHTTPRequest Failed] Error: " + ex);
+                    Logger.LogError($"[CreateAsyncHTTPRequest Failed] Error: {ex}");
                 }
 
                 try
@@ -256,7 +256,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError("[CreateAsyncHTTPRequest Callback] Error: " + ex);
+                    Logger.LogError($"[CreateAsyncHTTPRequest Callback] Error: {ex}");
                 }
             });
         }

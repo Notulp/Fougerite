@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Facepunch.MeshBatch;
+using Fougerite.Permissions;
 using IronPython.Runtime.Types;
 using UnityEngine;
 using String = Facepunch.Utility.String;
@@ -84,26 +85,19 @@ namespace Fougerite
         /// <param name="adminOnly"></param>
         public void ConsoleLog(string str, [Optional, DefaultParameterValue(false)] bool adminOnly)
         {
-            try
+            foreach (Player player in Server.GetServer().Players)
             {
-                foreach (Player player in Server.GetServer().Players)
+                if (!player.IsOnline)
+                    continue;
+
+                if (!adminOnly)
                 {
-                    if (!player.IsOnline) return;
-                    if (!adminOnly)
-                    {
-                        ConsoleNetworker.singleton.networkView.RPC("CL_ConsoleMessage", player.PlayerClient.netPlayer,
-                            str);
-                    }
-                    else if (player.Admin)
-                    {
-                        ConsoleNetworker.singleton.networkView.RPC("CL_ConsoleMessage", player.PlayerClient.netPlayer,
-                            str);
-                    }
+                    ConsoleNetworker.singleton.networkView.RPC("CL_ConsoleMessage", player.PlayerClient.netPlayer, str);
                 }
-            }
-            catch
-            {
-                // Ignore?
+                else if (player.Admin || PermissionSystem.GetPermissionSystem().PlayerHasPermission(player, "fougerite.console"))
+                {
+                    ConsoleNetworker.singleton.networkView.RPC("CL_ConsoleMessage", player.PlayerClient.netPlayer, str);
+                }
             }
         }
 
@@ -384,7 +378,7 @@ namespace Fougerite
             {
                 for (int i = 0; i < 20; i++)
                 {
-                    autoSavePath = ServerSaveManager.autoSavePath + ".old." + i;
+                    autoSavePath = $"{ServerSaveManager.autoSavePath}.old.{i}";
                     if (File.Exists(autoSavePath) && (new FileInfo(autoSavePath).Length > 0L))
                     {
                         return autoSavePath;
@@ -532,13 +526,13 @@ namespace Fougerite
                                 if (z == typeof(BuiltinFunction))
                                 {
                                     if (!keys.Contains(y)) keys.Add(y);
-                                    Logger.LogDebug("[DataStore] " + x + " - " + y +
-                                                    " is not serializable. Saving skipped for It.");
+                                    Logger.LogDebug(
+                                        $"[DataStore] {x} - {y} is not serializable. Saving skipped for It.");
                                 }
                                 else if (!z.IsSerializable)
                                 {
-                                    Logger.LogDebug("[DataStore] " + x + " - " + y +
-                                                    " is not serializable. Saving skipped for It.");
+                                    Logger.LogDebug(
+                                        $"[DataStore] {x} - {y} is not serializable. Saving skipped for It.");
                                     if (!keys.Contains(y)) keys.Add(y);
                                 }
 
@@ -548,13 +542,13 @@ namespace Fougerite
                                     if (z2 == typeof(BuiltinFunction))
                                     {
                                         if (!keys.Contains(y)) keys.Add(y);
-                                        Logger.LogDebug("[DataStore] " + x + " - " + y +
-                                                        " is not serializable. (Table's key) Saving skipped for It.");
+                                        Logger.LogDebug(
+                                            $"[DataStore] {x} - {y} is not serializable. (Table's key) Saving skipped for It.");
                                     }
                                     else if (!z2.IsSerializable)
                                     {
-                                        Logger.LogDebug("[DataStore] " + x + " - " + y +
-                                                        " is not serializable. Saving skipped for It.");
+                                        Logger.LogDebug(
+                                            $"[DataStore] {x} - {y} is not serializable. Saving skipped for It.");
                                         if (!keys.Contains(y)) keys.Add(y);
                                     }
                                 }
@@ -566,7 +560,7 @@ namespace Fougerite
             catch (Exception ex)
             {
                 Logger.LogError("[DataStore] Failed to search for not serializable values!");
-                Logger.LogDebug("[DataStore] Error: " + ex);
+                Logger.LogDebug($"[DataStore] Error: {ex}");
             }
 
             try
@@ -581,7 +575,7 @@ namespace Fougerite
                         {
                             if (hashtable.ContainsKey(y))
                             {
-                                Logger.LogDebug("[DataStore] Key Ignored: " + y + " from table: " + storage[x]);
+                                Logger.LogDebug($"[DataStore] Key Ignored: {y} from table: {storage[x]}");
                                 hashtable.Remove(y);
                             }
                         }
@@ -591,7 +585,7 @@ namespace Fougerite
             catch (Exception ex)
             {
                 Logger.LogError("[DataStore] Failed to remove not serializable values!");
-                Logger.LogDebug("[DataStore] Error: " + ex);
+                Logger.LogDebug($"[DataStore] Error: {ex}");
             }
 
             try
@@ -605,7 +599,7 @@ namespace Fougerite
             catch (Exception ex)
             {
                 Logger.LogError("[DataStore] Failed to save datastore! ");
-                Logger.LogDebug("[DataStore] Error: " + ex);
+                Logger.LogDebug($"[DataStore] Error: {ex}");
             }
         }
 
@@ -685,21 +679,21 @@ namespace Fougerite
             if (pl == null) return;
             if (!pl.IsOnline) return;
             if (!string.IsNullOrEmpty(arg) && !string.IsNullOrEmpty(playername) && player != null)
-                ConsoleNetworker.SendClientCommand(player, "chat.add " + playername + " " + arg);
+                ConsoleNetworker.SendClientCommand(player, $"chat.add {playername} {arg}");
         }
 
         [Obsolete("Use the Server class's broadcast methods instead.", false)]
         public static void sayAll(string customName, string arg)
         {
-            ConsoleNetworker.Broadcast("chat.add " + String.QuoteSafe(customName) + " " + String.QuoteSafe(arg));
+            ConsoleNetworker.Broadcast($"chat.add {String.QuoteSafe(customName)} {String.QuoteSafe(arg)}");
         }
 
         [Obsolete("Use the Server class's broadcast methods instead.", false)]
         public static void sayAll(string arg)
         {
             if (!string.IsNullOrEmpty(arg))
-                ConsoleNetworker.Broadcast("chat.add " + String.QuoteSafe(Server.GetServer().server_message_name) +
-                                           " " + String.QuoteSafe(arg));
+                ConsoleNetworker.Broadcast(
+                    $"chat.add {String.QuoteSafe(Server.GetServer().server_message_name)} {String.QuoteSafe(arg)}");
         }
 
         [Obsolete("Use the Player class's message system instead.", false)]
@@ -710,8 +704,7 @@ namespace Fougerite
             if (!pl.IsOnline) return;
             if (!string.IsNullOrEmpty(arg) && player != null)
                 ConsoleNetworker.SendClientCommand(player,
-                    "chat.add " + String.QuoteSafe(Server.GetServer().server_message_name) + " " +
-                    String.QuoteSafe(arg));
+                    $"chat.add {String.QuoteSafe(Server.GetServer().server_message_name)} {String.QuoteSafe(arg)}");
         }
 
         [Obsolete("Use the Player class's message system instead.", false)]
@@ -722,7 +715,7 @@ namespace Fougerite
             if (!pl.IsOnline) return;
             if (!string.IsNullOrEmpty(arg) && !string.IsNullOrEmpty(customName) && player != null)
                 ConsoleNetworker.SendClientCommand(player,
-                    "chat.add " + String.QuoteSafe(customName) + " " + String.QuoteSafe(arg));
+                    $"chat.add {String.QuoteSafe(customName)} {String.QuoteSafe(arg)}");
         }
 
         public void SetStaticField(string className, string field, object val)
@@ -817,7 +810,7 @@ namespace Fougerite
             if (TryFindType(typeName, out Type t))
                 return t;
             
-            throw new Exception("Type not found " + typeName);
+            throw new Exception($"Type not found {typeName}");
         }
 
         /// <summary>
@@ -1187,8 +1180,8 @@ namespace Fougerite
         {
             using (SHA1Managed sha1 = new SHA1Managed())
             {
-                var hash = sha1.ComputeHash(input);
-                var sb = new StringBuilder(hash.Length * 2);
+                byte[] hash = sha1.ComputeHash(input);
+                StringBuilder sb = new StringBuilder(hash.Length * 2);
 
                 foreach (byte b in hash)
                 {
@@ -1218,8 +1211,8 @@ namespace Fougerite
         {
             using (SHA256Managed sha256 = new SHA256Managed())
             {
-                var hash = sha256.ComputeHash(input);
-                var sb = new StringBuilder();
+                byte[] hash = sha256.ComputeHash(input);
+                StringBuilder sb = new StringBuilder();
 
                 foreach (byte b in hash)
                 {
@@ -1249,8 +1242,8 @@ namespace Fougerite
         {
             using (MD5 md5 = MD5.Create())
             {
-                var sb = new StringBuilder();
-                var hash = md5.ComputeHash(input);
+                StringBuilder sb = new StringBuilder();
+                byte[] hash = md5.ComputeHash(input);
                 foreach (byte b in hash)
                 {
                     sb.Append(b.ToString("X2"));
@@ -1291,7 +1284,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Reflection] Failed to get value of " + fieldName + "! " + ex);
+                Logger.LogError($"[Reflection] Failed to get value of {fieldName}! {ex}");
             }
             
             return null;
@@ -1315,7 +1308,7 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                Logger.LogError("[Reflection] Failed to set value of " + fieldName + "! " + ex);
+                Logger.LogError($"[Reflection] Failed to set value of {fieldName}! {ex}");
             }
         }
 

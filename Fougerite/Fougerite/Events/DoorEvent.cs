@@ -5,27 +5,27 @@
     /// </summary>
     public class DoorEvent
     {
-        private Fougerite.Entity _ent;
+        private Entity _ent;
         private bool _open;
 
-        public DoorEvent(Fougerite.Entity e)
+        public DoorEvent(Entity e)
         {
-            this.Open = false;
-            this.Entity = e;
+            Open = false;
+            Entity = e;
         }
 
         /// <summary>
         /// Gets the door's entity.
         /// </summary>
-        public Fougerite.Entity Entity
+        public Entity Entity
         {
             get
             {
-                return this._ent;
+                return _ent;
             }
             set
             {
-                this._ent = value;
+                _ent = value;
             }
         }
 
@@ -36,11 +36,11 @@
         {
             get
             {
-                return this._open;
+                return _open;
             }
             set
             {
-                this._open = value;
+                _open = value;
             }
         }
     }
