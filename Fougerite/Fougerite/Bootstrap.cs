@@ -261,6 +261,9 @@ namespace Fougerite
             
             // Init Logger
             Logger.Init();
+
+            // Attempt to log unhandled exceptions
+            AppDomain.CurrentDomain.UnhandledException += UnhandledException;
             
             // Init CTimer
             _timergo = new GameObject();
@@ -289,6 +292,20 @@ namespace Fougerite
                 LuaPluginLoader.GetInstance();
                 Hooks.ServerStarted();
                 ShutdownCatcher.Hook();
+            }
+        }
+
+        /// <summary>
+        /// Logs all unhandled exceptions.
+        /// Unity handles this event differently via Mono, but It may catch informative errors.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.ExceptionObject is Exception ex)
+            {
+                Logger.LogError($"[UnHandledException] Error: {ex}");
             }
         }
     }

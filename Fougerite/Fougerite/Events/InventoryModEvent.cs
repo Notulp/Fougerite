@@ -26,23 +26,16 @@ namespace Fougerite.Events
             {
                 foreach (uLink.NetworkPlayer netplayer in inventory._netListeners)
                 {
-                    try
+                    if (netplayer.GetLocalData() is NetUser user)
                     {
-                        NetUser user = netplayer.GetLocalData() as NetUser;
-                        if (user != null)
-                        {
-                            _netuser = user;
-                            _player = Server.GetServer().FindPlayer(_netuser.userID);
-                            _netplayer = netplayer;
-                            break;
-                        }
-                    }
-                    catch
-                    {
-                        //ignore
+                        _netuser = user;
+                        _player = Server.GetServer().FindPlayer(_netuser.userID);
+                        _netplayer = netplayer;
+                        break;
                     }
                 }
             }
+
             _finventory = new FInventory(_inventory);
         }
 

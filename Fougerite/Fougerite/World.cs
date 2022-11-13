@@ -211,9 +211,8 @@ namespace Fougerite
                 File.AppendAllText(blocksPath, $"IsRepairable: {block.isRepairable}\n");
                 File.AppendAllText(blocksPath, $"IsResearchable: {block.isResearchable}\n");
                 File.AppendAllText(blocksPath, $"Description: {block.itemDescriptionOverride}\n");
-                if (block is BulletWeaponDataBlock)
+                if (block is BulletWeaponDataBlock block2)
                 {
-                    BulletWeaponDataBlock block2 = (BulletWeaponDataBlock)block;
                     File.AppendAllText(blocksPath, $"Min Damage: {block2.damageMin}\n");
                     File.AppendAllText(blocksPath, $"Max Damage: {block2.damageMax}\n");
                     File.AppendAllText(blocksPath, $"Ammo: {block2.ammoType}\n");
@@ -278,7 +277,8 @@ namespace Fougerite
         /// <returns></returns>
         public StructureMaster CreateSM(Player p, float x, float y, float z, Quaternion rot)
         {
-            StructureMaster master = NetCull.InstantiateClassic<StructureMaster>(Bundling.Load<StructureMaster>("content/structures/StructureMasterPrefab"), new Vector3(x, y, z), rot, 0);
+            StructureMaster master = NetCull.InstantiateClassic<StructureMaster>(Bundling.Load<StructureMaster>("content/structures/StructureMasterPrefab"),
+                new Vector3(x, y, z), rot, 0);
             master.SetupCreator(p.PlayerClient.controllable);
             return master;
         }
@@ -388,20 +388,21 @@ namespace Fougerite
         /// </summary>
         public void Lists()
         {
+            string listPath = Util.GetAbsoluteFilePath("Lists.txt");
             foreach (LootSpawnList list in DatablockDictionary._lootSpawnLists.Values)
             {
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Name: {list.name}\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Min Spawn: {list.minPackagesToSpawn}\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Max Spawn: {list.maxPackagesToSpawn}\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"NoDuplicate: {list.noDuplicates}\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"OneOfEach: {list.spawnOneOfEach}\n");
-                File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), "Entries:\n");
+                File.AppendAllText(listPath, $"Name: {list.name}\n");
+                File.AppendAllText(listPath, $"Min Spawn: {list.minPackagesToSpawn}\n");
+                File.AppendAllText(listPath, $"Max Spawn: {list.maxPackagesToSpawn}\n");
+                File.AppendAllText(listPath, $"NoDuplicate: {list.noDuplicates}\n");
+                File.AppendAllText(listPath, $"OneOfEach: {list.spawnOneOfEach}\n");
+                File.AppendAllText(listPath, "Entries:\n");
                 foreach (LootSpawnList.LootWeightedEntry entry in list.LootPackages)
                 {
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Amount Min: {entry.amountMin}\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Amount Max: {entry.amountMax}\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Weight: {entry.weight}\n");
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Lists.txt"), $"Object: {entry.obj}\n\n");
+                    File.AppendAllText(listPath, $"Amount Min: {entry.amountMin}\n");
+                    File.AppendAllText(listPath, $"Amount Max: {entry.amountMax}\n");
+                    File.AppendAllText(listPath, $"Weight: {entry.weight}\n");
+                    File.AppendAllText(listPath, $"Object: {entry.obj}\n\n");
                 }
             }
         }
@@ -413,17 +414,20 @@ namespace Fougerite
         {
             foreach (ItemDataBlock block in DatablockDictionary.All)
             {
-                if (block is DeployableItemDataBlock)
+                switch (block)
                 {
-                    DeployableItemDataBlock block2 = block as DeployableItemDataBlock;
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Prefabs.txt"),
-                        $"[\"{block2.ObjectToPlace.name}\", \"{block2.DeployableObjectPrefabName}\"],\n");
-                }
-                else if (block is StructureComponentDataBlock)
-                {
-                    StructureComponentDataBlock block3 = block as StructureComponentDataBlock;
-                    File.AppendAllText(Util.GetAbsoluteFilePath("Prefabs.txt"),
-                        $"[\"{block3.structureToPlacePrefab.name}\", \"{block3.structureToPlaceName}\"],\n");
+                    case DeployableItemDataBlock block2:
+                    {
+                        File.AppendAllText(Util.GetAbsoluteFilePath("Prefabs.txt"),
+                            $"[\"{block2.ObjectToPlace.name}\", \"{block2.DeployableObjectPrefabName}\"],\n");
+                        break;
+                    }
+                    case StructureComponentDataBlock block3:
+                    {
+                        File.AppendAllText(Util.GetAbsoluteFilePath("Prefabs.txt"),
+                            $"[\"{block3.structureToPlacePrefab.name}\", \"{block3.structureToPlaceName}\"],\n");
+                        break;
+                    }
                 }
             }
         }
@@ -436,8 +440,7 @@ namespace Fougerite
         {
             foreach (ItemDataBlock block in DatablockDictionary.All)
             {
-                File.AppendAllText(Util.GetAbsoluteFilePath("DataBlocks.txt"),
-                    $"name={block.name} uniqueID={block.uniqueID}\n");
+                File.AppendAllText(Util.GetAbsoluteFilePath("DataBlocks.txt"), $"name={block.name} uniqueID={block.uniqueID}\n");
             }
         }
 
@@ -502,7 +505,6 @@ namespace Fougerite
                     StructureComponent build = obj3.GetComponent<StructureComponent>();
                     if (build != null)
                     {
-                        
                         obj2 = new Entity(build);
                     } 
                     else if (obj3.GetComponent<LootableObject>())
@@ -683,8 +685,7 @@ namespace Fougerite
                 if (!cache.ContainsKey("BasicDoor") || forceupdate || _doors.Count == 0)
                 {
                     cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                    IEnumerable<Entity> source = from s in Object.FindObjectsOfType<BasicDoor>()
-                        select new Entity(s);
+                    IEnumerable<Entity> source = Object.FindObjectsOfType<BasicDoor>().Select(s => new Entity(s));
                     _doors = source.ToList();
                 }
                 else if (cache.ContainsKey("BasicDoor"))
@@ -693,8 +694,7 @@ namespace Fougerite
                     if (num >= CacheUpdateTime || double.IsNaN(num) || num <= 0)
                     {
                         cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                        IEnumerable<Entity> source = from s in Object.FindObjectsOfType<BasicDoor>()
-                            select new Entity(s);
+                        IEnumerable<Entity> source = Object.FindObjectsOfType<BasicDoor>().Select(s => new Entity(s));
                         _doors = source.ToList();
                     }
                 }
@@ -702,8 +702,7 @@ namespace Fougerite
             catch
             {
                 cache["BasicDoor"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                IEnumerable<Entity> source = from s in Object.FindObjectsOfType<BasicDoor>()
-                                             select new Entity(s);
+                IEnumerable<Entity> source = Object.FindObjectsOfType<BasicDoor>().Select(s => new Entity(s));
                 _doors = source.ToList();
             }
             return _doors;
@@ -720,8 +719,8 @@ namespace Fougerite
                 if (!cache.ContainsKey("DeployableObject") || forceupdate || _deployables.Count == 0)
                 {
                     cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                    IEnumerable<Entity> source = from s in Object.FindObjectsOfType<DeployableObject>()
-                        select new Entity(s);
+                    IEnumerable<Entity> source =
+                        Object.FindObjectsOfType<DeployableObject>().Select(s => new Entity(s));
                     _deployables = source.ToList();
                 }
                 else if (cache.ContainsKey("DeployableObject"))
@@ -730,8 +729,7 @@ namespace Fougerite
                     if (num >= CacheUpdateTime || double.IsNaN(num) || num <= 0)
                     {
                         cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                        IEnumerable<Entity> source = from s in Object.FindObjectsOfType<DeployableObject>()
-                            select new Entity(s);
+                        IEnumerable<Entity> source = Object.FindObjectsOfType<DeployableObject>().Select(s => new Entity(s));
                         _deployables = source.ToList();
                     }
                 }
@@ -739,8 +737,7 @@ namespace Fougerite
             catch
             {
                 cache["DeployableObject"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                IEnumerable<Entity> source = from s in Object.FindObjectsOfType<DeployableObject>()
-                                             select new Entity(s);
+                IEnumerable<Entity> source = Object.FindObjectsOfType<DeployableObject>().Select(s => new Entity(s));
                 _deployables = source.ToList();
             }
             return _deployables;
@@ -757,8 +754,7 @@ namespace Fougerite
                 if (!cache.ContainsKey("StructureComponent") || forceupdate || _structures.Count == 0)
                 {
                     cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                    IEnumerable<Entity> source = from s in Object.FindObjectsOfType<StructureComponent>()
-                        select new Entity(s);
+                    IEnumerable<Entity> source = Object.FindObjectsOfType<StructureComponent>().Select(s => new Entity(s));
                     _structures = source.ToList();
                 }
                 else if (cache.ContainsKey("StructureComponent"))
@@ -767,9 +763,7 @@ namespace Fougerite
                     if (num >= CacheUpdateTime || double.IsNaN(num) || num <= 0)
                     {
                         cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                        IEnumerable<Entity> source =
-                            from s in Object.FindObjectsOfType<StructureComponent>()
-                            select new Entity(s);
+                        IEnumerable<Entity> source = Object.FindObjectsOfType<StructureComponent>().Select(s => new Entity(s));
                         _structures = source.ToList();
                     }
                 }
@@ -777,9 +771,7 @@ namespace Fougerite
             catch
             {
                 cache["StructureComponent"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                IEnumerable<Entity> source =
-                    from s in Object.FindObjectsOfType<StructureComponent>()
-                    select new Entity(s);
+                IEnumerable<Entity> source = Object.FindObjectsOfType<StructureComponent>().Select(s => new Entity(s));
                 _structures = source.ToList();
             }
             return _structures;
@@ -796,8 +788,7 @@ namespace Fougerite
                 if (!cache.ContainsKey("StructureMaster") || forceupdate || _structurems.Count == 0)
                 {
                     cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                    IEnumerable<Entity> source = from s in StructureMaster.AllStructures
-                        select new Entity(s);
+                    IEnumerable<Entity> source = StructureMaster.AllStructures.Select(s => new Entity(s));
                     _structurems = source.ToList();
                 }
                 else if (cache.ContainsKey("StructureMaster"))
@@ -806,8 +797,7 @@ namespace Fougerite
                     if (num >= CacheUpdateTime || double.IsNaN(num) || num <= 0)
                     {
                         cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                        IEnumerable<Entity> source = from s in StructureMaster.AllStructures
-                            select new Entity(s);
+                        IEnumerable<Entity> source = StructureMaster.AllStructures.Select(s => new Entity(s));
                         _structurems = source.ToList();
                     }
                 }
@@ -815,8 +805,7 @@ namespace Fougerite
             catch
             {
                 cache["StructureMaster"] = TimeSpan.FromTicks(DateTime.Now.Ticks).TotalSeconds;
-                IEnumerable<Entity> source = from s in StructureMaster.AllStructures
-                                             select new Entity(s);
+                IEnumerable<Entity> source = StructureMaster.AllStructures.Select(s => new Entity(s));
                 _structurems = source.ToList();
             }
             return _structurems;
@@ -835,8 +824,7 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[Fougerite LootableObjects] Some plugin is calling World.LootableObjects in a Thread/Timer. This is dangerous, and may cause crashes.");
                 }
-                IEnumerable<Entity> source = from s in Object.FindObjectsOfType<LootableObject>()
-                                             select new Entity(s);
+                IEnumerable<Entity> source = Object.FindObjectsOfType<LootableObject>().Select(s => new Entity(s));
                 return source.ToList();
             }
         }
@@ -854,8 +842,7 @@ namespace Fougerite
                 {
                     Logger.LogWarning("[Fougerite SupplyCrates] Some plugin is calling World.SupplyCrates in a Thread/Timer. This is dangerous, and may cause crashes.");
                 }
-                IEnumerable<Entity> source = from s in Object.FindObjectsOfType<SupplyCrate>()
-                                             select new Entity(s);
+                IEnumerable<Entity> source = Object.FindObjectsOfType<SupplyCrate>().Select(s => new Entity(s));
                 return source.ToList();
             }
         }
@@ -875,9 +862,9 @@ namespace Fougerite
                     {
                         Logger.LogWarning("[Fougerite Entities] Some plugin is calling World.Entities in a Thread/Timer. This is dangerous, and may cause crashes.");
                     }
-                    var structs = Object.FindObjectsOfType<StructureComponent>();
-                    var deployables = Object.FindObjectsOfType<DeployableObject>();
-                    var crates = Object.FindObjectsOfType<SupplyCrate>();
+                    StructureComponent[] structs = Object.FindObjectsOfType<StructureComponent>();
+                    DeployableObject[] deployables = Object.FindObjectsOfType<DeployableObject>();
+                    SupplyCrate[] crates = Object.FindObjectsOfType<SupplyCrate>();
                     IEnumerable<Entity> component = structs.Select(x => new Entity(x)).ToList();
                     IEnumerable<Entity> deployable = deployables.Select(x => new Entity(x)).ToList();
                     IEnumerable<Entity> supplydrop = crates.Select(x => new Entity(x)).ToList();

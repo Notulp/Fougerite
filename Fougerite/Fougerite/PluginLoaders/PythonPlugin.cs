@@ -84,7 +84,7 @@ namespace Fougerite.PluginLoaders
             }
             catch (Exception ex)
             {
-                string fileinfo = ("[Error] Failed to invoke: " + $"{Name}<{Type}>.{func}()" + Environment.NewLine);
+                string fileinfo = $"[Error] Failed to invoke: {Name}<{Type}>.{func}(){Environment.NewLine}";
                 Logger.LogError(fileinfo + FormatException(ex));
             }
             return null;

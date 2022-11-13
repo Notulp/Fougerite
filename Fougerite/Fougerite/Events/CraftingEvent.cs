@@ -28,8 +28,7 @@ namespace Fougerite.Events
             {
                 _legit = false;
                 Cancel();
-                Logger.LogWarning(
-                    $"[CraftingHack] Detected: {_player.Name} | {_player.SteamID} | {_player.IP} | {blueprint.name}");
+                Logger.LogWarning($"[CraftingHack] Detected: {_player.Name} | {_player.SteamID} | {_player.IP} | {blueprint.name}");
                 Server.GetServer().Broadcast($"CraftingHack Detected: {_player.Name}");
                 if (Bootstrap.AutoBanCraft)
                 {
@@ -39,7 +38,7 @@ namespace Fougerite.Events
         }
 
         /// <summary>
-        /// Gets if hacking wasnt involved in the crafting.
+        /// Gets if hacking wasn't involved in the crafting.
         /// </summary>
         public bool IsLegit
         {

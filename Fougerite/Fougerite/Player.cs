@@ -690,7 +690,7 @@ namespace Fougerite
 
                     float distance = Vector3.Distance(Location, target);
                     Logger.LogDebug(
-                        $"[{me}] player={Name}({GameID}) from={Location.ToString()} to={target.ToString()} distance={distance.ToString("F2")} terrain={terrain.ToString()}");
+                        $"[{me}] player={Name}({GameID}) from={Location.ToString()} to={target.ToString()} distance={distance:F2} terrain={terrain.ToString()}");
 
                     return TeleportTo(target, callhook);
                 }
@@ -811,7 +811,7 @@ namespace Fougerite
         /// <summary>
         /// Gets if the Player is in the "Moderators" DataStore table or has the Moderator Rust++ permission.
         /// </summary>
-        [ObsoleteAttribute("Most of the plugins should be using PermissionSystem. Refer implementing permissions instead.", false)]
+        [Obsolete("Most of the plugins should be using PermissionSystem. Refer implementing permissions instead.", false)]
         public bool Moderator
         {
             get
@@ -1366,12 +1366,12 @@ namespace Fougerite
                     return null;
                 }
 
-                var query = from sleeper in Object.FindObjectsOfType<SleepingAvatar>()
-                    let deployable = sleeper.GetComponent<DeployableObject>()
-                    where deployable.ownerID == uid
-                    select new Sleeper(deployable);
+                Sleeper firstSleeper = Object.FindObjectsOfType<SleepingAvatar>()
+                    .Select(sleeper => new { sleeper, deployable = sleeper.GetComponent<DeployableObject>() })
+                    .Where(t => t.deployable.ownerID == uid)
+                    .Select(t => new Sleeper(t.deployable)).FirstOrDefault();
 
-                return query.ToList().FirstOrDefault();
+                return firstSleeper;
             }
         }
 

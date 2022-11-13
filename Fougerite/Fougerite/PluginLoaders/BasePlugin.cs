@@ -116,7 +116,7 @@ namespace Fougerite.PluginLoaders
         public virtual string FormatException(Exception ex)
         {
             string nuline = Environment.NewLine;
-            return ex.Message + nuline + ex.TargetSite.ToString() + nuline + ex.StackTrace;
+            return string.Format("{0}{1}{2}{1}{3}", ex.Message, nuline, ex.TargetSite, ex.StackTrace);
         }
 
         /// <summary>

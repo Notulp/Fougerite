@@ -13,8 +13,7 @@ namespace Fougerite
             public string DateTime;
         }
 
-        private static string LogsFolder = Path.Combine(Config.GetPublicFolder(), "Logs");
-        private static StreamWriter SpeedLogWriter;
+        private static readonly string LogsFolder = Path.Combine(Config.GetPublicFolder(), "Logs");
         private static Writer RPCLogWriter;
         private static Writer LogWriter;
         private static Writer ChatWriter;

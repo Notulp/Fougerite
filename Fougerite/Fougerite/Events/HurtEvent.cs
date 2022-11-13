@@ -198,7 +198,7 @@
             }
             catch (Exception ex)
             {
-                Logger.LogDebug(string.Format("[HurtEvent] Error. " + ex.ToString()));
+                Logger.LogError($"[HurtEvent] Error: {ex}");
             }
         }
 
