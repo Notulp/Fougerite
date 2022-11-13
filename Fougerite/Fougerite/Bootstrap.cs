@@ -17,19 +17,19 @@ namespace Fougerite
         /// </summary>
         public const string Version = "1.8.3";
         /// <summary>
-        /// This value decides wheather we should remove the player classes from the cache upon disconnect.
+        /// This value decides whether we should remove the player classes from the cache upon disconnect.
         /// </summary>
         public static bool CR;
         /// <summary>
-        /// This value decides wheater we should ban a player for sending invalid packets.
+        /// This value decides wheter we should ban a player for sending invalid packets.
         /// </summary>
         public static bool BI;
         /// <summary>
-        /// This value decides wheather we should ban a player for Craft hacking.
+        /// This value decides whether we should ban a player for Craft hacking.
         /// </summary>
         public static bool AutoBanCraft = true;
         /// <summary>
-        /// This value decides wheather we should enable the default rust decay.
+        /// This value decides whether we should enable the default rust decay.
         /// </summary>
         public static bool EnableDefaultRustDecay = true;
         /// <summary>
@@ -61,11 +61,15 @@ namespace Fougerite
         private static readonly FileSystemWatcher IgnoredWatcher = new FileSystemWatcher(Path.Combine(Util.GetRootFolder(), "Save"), "IgnoredPlugins.txt");
         private static GameObject _timergo;
 
+        /// <summary>
+        /// Called by a patched function.
+        /// Fougerite initializes here.
+        /// </summary>
         public static void AttachBootstrap()
         {
             try
             {
-                var type = typeof(Bootstrap);
+                Type type = typeof(Bootstrap);
                 new GameObject(type.FullName).AddComponent(type);
                 Debug.Log($"<><[ Fougerite v{Version} ]><>");
             }
@@ -76,11 +80,18 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// MonoBehaviour Awake().
+        /// </summary>
         public void Awake()
         {
             DontDestroyOnLoad(gameObject);
         }
 
+        /// <summary>
+        /// Applies options from the Fougerite.cfg
+        /// </summary>
+        /// <returns></returns>
         public bool ApplyOptions()
         {
             // look for the string 'false' to disable.  **not a bool check**
@@ -236,6 +247,11 @@ namespace Fougerite
             return true;
         }
 
+        /// <summary>
+        /// Handles IgnoredPlugins.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnIgnoredChanged(object sender, FileSystemEventArgs e)
         {
             IgnoredPlugins.Clear();
@@ -252,6 +268,9 @@ namespace Fougerite
             });
         }
 
+        /// <summary>
+        /// Runs when the MonoBehaviour is starting.
+        /// </summary>
         public void Start()
         {
             string FougeriteDirectoryConfig = Path.Combine(Util.GetServerFolder(), "FougeriteDirectory.cfg");
