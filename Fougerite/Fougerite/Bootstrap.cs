@@ -264,6 +264,7 @@ namespace Fougerite
 
             // Attempt to log unhandled exceptions
             AppDomain.CurrentDomain.UnhandledException += UnhandledException;
+            Application.RegisterLogCallback(UnhandledExceptionCallback);
             
             // Init CTimer
             _timergo = new GameObject();
@@ -298,6 +299,24 @@ namespace Fougerite
         /// <summary>
         /// Logs all unhandled exceptions.
         /// Unity handles this event differently via Mono, but It may catch informative errors.
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <param name="stacktrace"></param>
+        /// <param name="type"></param>
+        private void UnhandledExceptionCallback(string condition, string stacktrace, LogType type)
+        {
+            switch (type)
+            {
+                case LogType.Exception:
+                    Logger.LogError($"[UnhandledExceptionCallback] Error: {stacktrace} Condition: {condition}");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Logs all unhandled exceptions.
+        /// Unity handles this event differently via Mono, but It may catch informative errors.
+        /// This would work for sub threads.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
