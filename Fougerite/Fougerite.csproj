@@ -45,6 +45,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Fougerite\Caches\CachedPlayer.cs" />
+    <Compile Include="Fougerite\Caches\EntityCache.cs" />
     <Compile Include="Fougerite\Caches\PlayerCache.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentEnumerator.cs" />
@@ -184,6 +185,7 @@
     <Compile Include="Fougerite\SuperFastHash.cs" />
     <Compile Include="Fougerite\ChatString.cs" />
     <Compile Include="Fougerite\Logger.cs" />
+    <Compile Include="Fougerite\Tools\Cloner.cs" />
     <Compile Include="Fougerite\Zone3D.cs" />
     <Compile Include="Fougerite\DataStore.cs" />
     <Compile Include="Fougerite\Events\BPUseEvent.cs" />

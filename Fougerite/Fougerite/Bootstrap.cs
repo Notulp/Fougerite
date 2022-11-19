@@ -193,20 +193,21 @@ namespace Fougerite
                 ServerSaveHandler.CrucialSavePoint = 2;
             }
 
-            if (!File.Exists($"{Util.GetRootFolder()}\\Save\\IgnoredPlugins.txt"))
+            string ignoredPluginsPath = Path.Combine(Util.GetRootFolder(), "\\Save\\IgnoredPlugins.txt");
+            if (!File.Exists(ignoredPluginsPath))
             {
-                File.Create($"{Util.GetRootFolder()}\\Save\\IgnoredPlugins.txt").Dispose();
+                File.Create(ignoredPluginsPath).Dispose();
             }
 
-
-            string[] lines = File.ReadAllLines($"{Util.GetRootFolder()}\\Save\\IgnoredPlugins.txt");
-            foreach (var x in lines)
+            string[] lines = File.ReadAllLines(ignoredPluginsPath);
+            foreach (string x in lines)
             {
                 if (!x.StartsWith(";"))
                 {
                     IgnoredPlugins.Add(x.ToLower());
                 }
             }
+            
             IgnoredWatcher.EnableRaisingEvents = true;
             IgnoredWatcher.Changed += OnIgnoredChanged;
 
@@ -255,7 +256,7 @@ namespace Fougerite
         private void OnIgnoredChanged(object sender, FileSystemEventArgs e)
         {
             IgnoredPlugins.Clear();
-            string[] lines = File.ReadAllLines($"{Util.GetRootFolder()}\\Save\\IgnoredPlugins.txt");
+            string[] lines = File.ReadAllLines(Path.Combine(Util.GetRootFolder(), "\\Save\\IgnoredPlugins.txt"));
             foreach (var x in lines)
             {
                 if (!x.StartsWith(";"))
@@ -283,8 +284,7 @@ namespace Fougerite
 
             // Attempt to log unhandled exceptions
             AppDomain.CurrentDomain.UnhandledException += UnhandledException;
-            Application.RegisterLogCallback(UnhandledExceptionCallback);
-            
+
             // Init CTimer
             _timergo = new GameObject();
             _timergo.AddComponent<CTimerHandler>();
@@ -299,6 +299,9 @@ namespace Fougerite
             
             // Load Player Cache
             PlayerCache.GetPlayerCache().LoadPlayersCache();
+            
+            // Init Entity Cache
+            EntityCache.GetInstance();
 
             Rust.Steam.Server.SetModded();
             Rust.Steam.Server.Official = false;
@@ -312,23 +315,6 @@ namespace Fougerite
                 LuaPluginLoader.GetInstance();
                 Hooks.ServerStarted();
                 ShutdownCatcher.Hook();
-            }
-        }
-
-        /// <summary>
-        /// Logs all unhandled exceptions.
-        /// Unity handles this event differently via Mono, but It may catch informative errors.
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="stacktrace"></param>
-        /// <param name="type"></param>
-        private void UnhandledExceptionCallback(string condition, string stacktrace, LogType type)
-        {
-            switch (type)
-            {
-                case LogType.Exception:
-                    Logger.LogError($"[UnhandledExceptionCallback] Error: {stacktrace} Condition: {condition}");
-                    break;
             }
         }
 

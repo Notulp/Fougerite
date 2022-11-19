@@ -18,11 +18,15 @@ namespace Fougerite
         private readonly string _creatorname;
         private readonly string _name;
         private readonly string _ownername;
+        private int _instanceId;
         public bool IsDestroyed = false;
 
         public Entity(object Obj)
         {
             _obj = Obj;
+            // Cache InstanceId
+            GetInstanceId();
+            
             if (IsStructureMaster())
             {
                 _ownerid = ((StructureMaster)Obj).ownerID;
@@ -348,6 +352,23 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Returns the Object as a SupplyCrate If possible.
+        /// </summary>
+        public SupplyCrate SupplyCrate
+        {
+            get
+            {
+                if (IsSupplyCrate())
+                {
+                    var x = (SupplyCrate)_obj;
+                    return x; 
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Checks if the object is a ResourceTarget
         /// </summary>
         /// <returns>Returns true if it is.</returns>
@@ -615,17 +636,7 @@ namespace Fougerite
         {
             get
             {
-                if (IsDeployableObject())
-                {
-                    return GetObject<DeployableObject>().GetInstanceID();
-                }
-
-                if (IsStructure())
-                {
-                    return GetObject<StructureComponent>().GetInstanceID();
-                }
-
-                return 0;
+                return _instanceId;
             }
         }
 
@@ -685,6 +696,8 @@ namespace Fougerite
                     return GetObject<LootableObject>().transform.position;
                 if (IsResourceTarget())
                     return GetObject<ResourceTarget>().transform.position;
+                if (IsSupplyCrate())
+                    return GetObject<SupplyCrate>().transform.position;
 
                 return Vector3.zero;
             }
@@ -699,7 +712,8 @@ namespace Fougerite
             {
                 if (IsDeployableObject())
                     return GetObject<DeployableObject>().transform.rotation;
-
+                if (IsSupplyCrate())
+                    return GetObject<SupplyCrate>().transform.rotation;
                 if (IsStructure())
                     return GetObject<StructureComponent>().transform.rotation;
                 if (IsBasicDoor())
@@ -735,6 +749,29 @@ namespace Fougerite
         public float Z
         {
             get { return Location.z; }
+        }
+
+        /// <summary>
+        /// Grabs and stores the instance id of the entity which should be unique
+        /// for entity lifetime while the server is running.
+        /// It's different / server restart.
+        /// </summary>
+        private void GetInstanceId()
+        {
+            if (IsDeployableObject())
+                _instanceId = GetObject<DeployableObject>().GetInstanceID();
+            else if (IsStructure())
+                _instanceId = GetObject<StructureComponent>().GetInstanceID();
+            else if (IsStructureMaster())
+                _instanceId = GetObject<StructureMaster>().GetInstanceID();
+            else if (IsBasicDoor())
+                _instanceId = GetObject<BasicDoor>().GetInstanceID();
+            else if (IsLootableObject())
+                _instanceId = GetObject<LootableObject>().GetInstanceID();
+            else if (IsResourceTarget())
+                _instanceId = GetObject<ResourceTarget>().GetInstanceID();
+            else if (IsSupplyCrate())
+                _instanceId = GetObject<SupplyCrate>().GetInstanceID();
         }
     }
 }

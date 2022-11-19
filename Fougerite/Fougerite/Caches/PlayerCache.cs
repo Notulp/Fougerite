@@ -10,10 +10,11 @@ namespace Fougerite.Caches
     public class PlayerCache
     {
         private static PlayerCache _playerCache;
+        private readonly string _cachedPlayersPath;
 
         private PlayerCache()
         {
-            
+            _cachedPlayersPath = Path.Combine(Util.GetRootFolder(), "\\Save\\CachedPlayers.json");
         }
         
         /// <summary>
@@ -52,12 +53,12 @@ namespace Fougerite.Caches
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.NullValueHandling = NullValueHandling.Ignore;
 
-                if (!File.Exists($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json"))
+                if (!File.Exists(_cachedPlayersPath))
                 {
-                    File.Create($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json").Dispose();
+                    File.Create(_cachedPlayersPath).Dispose();
 
                     using (StreamWriter sw =
-                           new StreamWriter($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json", false,
+                           new StreamWriter(_cachedPlayersPath, false,
                                Encoding.UTF8))
                     {
                         using (JsonWriter writer = new JsonTextWriter(sw))
@@ -71,7 +72,7 @@ namespace Fougerite.Caches
 
                 var deserializedDict =
                     JsonConvert.DeserializeObject<Dictionary<ulong, CachedPlayer>>(
-                        File.ReadAllText($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json"));
+                        File.ReadAllText(_cachedPlayersPath));
 
                 // Assign deserialized dict.
                 CachedPlayers = new ConcurrentDictionary<ulong, CachedPlayer>(deserializedDict);
@@ -90,25 +91,25 @@ namespace Fougerite.Caches
 
             try
             {
-                if (!File.Exists($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json"))
+                if (!File.Exists(_cachedPlayersPath))
                 {
-                    File.Create($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json").Dispose();
+                    File.Create(_cachedPlayersPath).Dispose();
                 }
 
                 // Backup the data from the current files.
-                cachedplayers = File.ReadAllText($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json");
+                cachedplayers = File.ReadAllText(_cachedPlayersPath);
 
                 // Empty the files.
-                if (File.Exists($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json"))
+                if (File.Exists(_cachedPlayersPath))
                 {
-                    File.WriteAllText($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json", string.Empty);
+                    File.WriteAllText(_cachedPlayersPath, string.Empty);
                 }
 
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.NullValueHandling = NullValueHandling.Ignore;
 
                 using (StreamWriter sw =
-                    new StreamWriter($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json", false,
+                    new StreamWriter(_cachedPlayersPath, false,
                         Encoding.UTF8))
                 {
                     using (JsonWriter writer = new JsonTextWriter(sw))
@@ -123,7 +124,7 @@ namespace Fougerite.Caches
             catch (Exception ex)
             {
                 Logger.LogError($"[PlayerCache] SaveToDisk Error: {ex}");
-                File.WriteAllText($"{Util.GetRootFolder()}\\Save\\CachedPlayers.json", cachedplayers);
+                File.WriteAllText(_cachedPlayersPath, cachedplayers);
             }
         }
     }

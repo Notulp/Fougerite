@@ -20,6 +20,8 @@ namespace Fougerite.Permissions
         private static readonly object _obj2 = new object();
         private readonly PermissionHandler _handler;
         private readonly Dictionary<ulong, bool> _disabledpermissions = new Dictionary<ulong, bool>();
+        private readonly string _groupPermissionsPath;
+        private readonly string _playerPermissionsPath;
 
         /// <summary>
         /// PermissionSystem is a Singleton.
@@ -27,6 +29,8 @@ namespace Fougerite.Permissions
         private PermissionSystem()
         {
             _handler = new PermissionHandler();
+            _groupPermissionsPath = Path.Combine(Util.GetRootFolder(), "\\Save\\GroupPermissions.json");
+            _playerPermissionsPath = Path.Combine(Util.GetRootFolder(), "\\Save\\PlayerPermissions.json");
             ReloadPermissions();
         }
 
@@ -141,9 +145,9 @@ namespace Fougerite.Permissions
                 List<PermissionPlayer> emptyplayers = new List<PermissionPlayer>();
                 List<PermissionGroup> emptygroups = new List<PermissionGroup>();
 
-                if (!File.Exists($"{Util.GetRootFolder()}\\Save\\GroupPermissions.json"))
+                if (!File.Exists(_groupPermissionsPath))
                 {
-                    File.Create($"{Util.GetRootFolder()}\\Save\\GroupPermissions.json").Dispose();
+                    File.Create(_groupPermissionsPath).Dispose();
                     emptygroups.Add(new PermissionGroup()
                     {
                         GroupName = "Default",
@@ -164,7 +168,7 @@ namespace Fougerite.Permissions
                     });
 
                     using (StreamWriter sw =
-                        new StreamWriter($"{Util.GetRootFolder()}\\Save\\GroupPermissions.json", false,
+                        new StreamWriter(_groupPermissionsPath, false,
                             Encoding.UTF8))
                     {
                         using (JsonWriter writer = new JsonTextWriter(sw))
@@ -175,9 +179,9 @@ namespace Fougerite.Permissions
                     }
                 }
 
-                if (!File.Exists($"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json"))
+                if (!File.Exists(_playerPermissionsPath))
                 {
-                    File.Create($"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json").Dispose();
+                    File.Create(_playerPermissionsPath).Dispose();
 
                     emptyplayers.Add(new PermissionPlayer()
                     {
@@ -188,7 +192,7 @@ namespace Fougerite.Permissions
                     });
 
                     using (StreamWriter sw =
-                        new StreamWriter($"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json", false,
+                        new StreamWriter(_playerPermissionsPath, false,
                             Encoding.UTF8))
                     {
                         using (JsonWriter writer = new JsonTextWriter(sw))
@@ -201,12 +205,8 @@ namespace Fougerite.Permissions
 
                 lock (_obj)
                 {
-                    _handler.PermissionGroups =
-                        JsonConvert.DeserializeObject<List<PermissionGroup>>(
-                            File.ReadAllText($"{Util.GetRootFolder()}\\Save\\GroupPermissions.json"));
-                    _handler.PermissionPlayers =
-                        JsonConvert.DeserializeObject<List<PermissionPlayer>>(
-                            File.ReadAllText($"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json"));
+                    _handler.PermissionGroups = JsonConvert.DeserializeObject<List<PermissionGroup>>(File.ReadAllText(_groupPermissionsPath));
+                    _handler.PermissionPlayers = JsonConvert.DeserializeObject<List<PermissionPlayer>>(File.ReadAllText(_playerPermissionsPath));
                 }
 
                 Logger.Log("[PermissionSystem] Loaded.");
@@ -240,34 +240,31 @@ namespace Fougerite.Permissions
             string grouppermissions = "";
             string playerpermissions = "";
 
-            string playerPermissionsPath = $"{Util.GetRootFolder()}\\Save\\PlayerPermissions.json";
-            string groupPermissionsPath = $"{Util.GetRootFolder()}\\Save\\GroupPermissions.json";
-            
             try
             {
-                if (!File.Exists(groupPermissionsPath))
+                if (!File.Exists(_groupPermissionsPath))
                 {
-                    File.Create(groupPermissionsPath).Dispose();
+                    File.Create(_groupPermissionsPath).Dispose();
                 }
 
-                if (!File.Exists(playerPermissionsPath))
+                if (!File.Exists(_playerPermissionsPath))
                 {
-                    File.Create(playerPermissionsPath).Dispose();
+                    File.Create(_playerPermissionsPath).Dispose();
                 }
 
                 // Backup the data from the current files.
-                grouppermissions = File.ReadAllText(groupPermissionsPath);
-                playerpermissions = File.ReadAllText(playerPermissionsPath);
+                grouppermissions = File.ReadAllText(_groupPermissionsPath);
+                playerpermissions = File.ReadAllText(_playerPermissionsPath);
 
                 // Empty the files.
-                if (File.Exists(groupPermissionsPath))
+                if (File.Exists(_groupPermissionsPath))
                 {
-                    File.WriteAllText(groupPermissionsPath, string.Empty);
+                    File.WriteAllText(_groupPermissionsPath, string.Empty);
                 }
 
-                if (File.Exists(playerPermissionsPath))
+                if (File.Exists(_playerPermissionsPath))
                 {
-                    File.WriteAllText(playerPermissionsPath, string.Empty);
+                    File.WriteAllText(_playerPermissionsPath, string.Empty);
                 }
 
                 // Initialize empty list just in case.
@@ -284,9 +281,7 @@ namespace Fougerite.Permissions
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.NullValueHandling = NullValueHandling.Ignore;
 
-                using (StreamWriter sw =
-                    new StreamWriter(groupPermissionsPath, false,
-                        Encoding.UTF8))
+                using (StreamWriter sw = new StreamWriter(_groupPermissionsPath, false, Encoding.UTF8))
                 {
                     using (JsonWriter writer = new JsonTextWriter(sw))
                     {
@@ -295,9 +290,7 @@ namespace Fougerite.Permissions
                     }
                 }
 
-                using (StreamWriter sw =
-                    new StreamWriter(playerPermissionsPath, false,
-                        Encoding.UTF8))
+                using (StreamWriter sw = new StreamWriter(_playerPermissionsPath, false, Encoding.UTF8))
                 {
                     using (JsonWriter writer = new JsonTextWriter(sw))
                     {
@@ -309,8 +302,8 @@ namespace Fougerite.Permissions
             catch (Exception ex)
             {
                 Logger.LogError($"[PermissionSystem] SaveToDisk Error: {ex}");
-                File.WriteAllText(groupPermissionsPath, grouppermissions);
-                File.WriteAllText(playerPermissionsPath, playerpermissions);
+                File.WriteAllText(_groupPermissionsPath, grouppermissions);
+                File.WriteAllText(_playerPermissionsPath, playerpermissions);
             }
         }
 

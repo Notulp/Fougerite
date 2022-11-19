@@ -13,12 +13,13 @@ namespace Fougerite
     public class Server
     {
         private ItemsBlocks _items;
-        private StructureMaster _serverStructs = new StructureMaster();
         private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
         private readonly object _playersCacheLock = new object();
         private static Server _server;
+        private bool _serverLoaded;
         private bool HRustPP;
-        private readonly string path = Path.Combine(Util.GetRootFolder(), Path.Combine("Save", "GlobalBanList.ini"));
+        [Obsolete("The bans were moved into the DataStore ages ago.", false)]
+        private readonly string _globalBanListIni = Path.Combine(Util.GetRootFolder(), Path.Combine("Save", "GlobalBanList.ini"));
         private readonly List<string> _ConsoleCommandCancelList = new List<string>();
         [Obsolete("Use DataStore, this is used in old Javascript plugins from years ago.", false)]
         public Data data = new Data();
@@ -44,7 +45,7 @@ namespace Fougerite
 
         internal void UpdateBanlist()
         {
-            if (File.Exists(path))
+            if (File.Exists(_globalBanListIni))
             {
                 DataStore.GetInstance().Flush("Ips");
                 DataStore.GetInstance().Flush("Ids");
@@ -57,7 +58,7 @@ namespace Fougerite
                 {
                     DataStore.GetInstance().Add("Ids", id, ini.GetSetting("Ids", id));
                 }
-                File.Delete(path);
+                File.Delete(_globalBanListIni);
                 DataStore.GetInstance().Save();
             }
         }
@@ -591,6 +592,15 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Returns whether the server is fully loaded by this time.
+        /// </summary>
+        public bool ServerLoaded
+        {
+            get { return _serverLoaded; }
+            internal set { _serverLoaded = value; }
+        }
+
+        /// <summary>
         /// Checks If the current Server has Rust++
         /// </summary>
         public bool HasRustPP 
@@ -615,9 +625,9 @@ namespace Fougerite
         {
             get
             {
-                if (File.Exists(path))
+                if (File.Exists(_globalBanListIni))
                 {
-                    return new IniParser(path);
+                    return new IniParser(_globalBanListIni);
                 }
                 return null;
             }

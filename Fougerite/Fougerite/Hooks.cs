@@ -2828,6 +2828,15 @@ namespace Fougerite
         public static IEnumerator ServerLoadedHook(ServerInit init, string levelName)
         {
             yield return RustLevel.Load(levelName);
+            
+            // Do our own stuff
+            GameObject go = new GameObject();
+            ServerSaveHandler h = go.AddComponent<ServerSaveHandler>();
+            UnityEngine.Object.DontDestroyOnLoad(go);
+            World.GetWorld().ServerSaveHandler = h;
+            ServerInitialized = true;
+            Server.GetServer().ServerLoaded = true;
+            
             try
             {
                 if (OnServerLoaded != null)
@@ -2839,12 +2848,7 @@ namespace Fougerite
             {
                 Logger.Log($"ServerLoaded Error: {ex}");
             }
-
-            GameObject go = new GameObject();
-            ServerSaveHandler h = go.AddComponent<ServerSaveHandler>();
-            UnityEngine.Object.DontDestroyOnLoad(go);
-            World.GetWorld().ServerSaveHandler = h;
-            ServerInitialized = true;
+            
             Logger.Log("Server Initialized.");
             UnityEngine.Object.Destroy(init.gameObject);
             yield break;
@@ -3257,6 +3261,96 @@ namespace Fougerite
                     Logger.LogError($"ServerInitEvent Error: {ex}");
                 }
             }
+        }
+        
+        /// <summary>
+        /// A hook of the NetCull.Instantiated function.
+        /// Re-created to add all spawned Entities into the EntityCache, so we may as well have a synchronized
+        /// list for plugins without having to worry of crashes.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="instantiatedGroup"></param>
+        /// <param name="setGroup"></param>
+        /// <param name="ia"></param>
+        /// <returns></returns>
+        public static UnityEngine.Object Instantiated(UnityEngine.Object instance, int instantiatedGroup, int setGroup, ref NetCull.InstantiateArgs ia)
+        {
+            int? group = ia.group;
+            if ((group.GetValueOrDefault() != instantiatedGroup || group == null) && CullGrid.IsCellGroupID(setGroup))
+            {
+                Facepunch.NetworkView view;
+                if (!NetCull.GetNetworkView(instance, out view))
+                {
+                    Debug.LogError("Could not get view, will not be dynamic group " + instance, instance);
+                }
+                else
+                {
+                    NetworkCullInfo cullInfo = NetCull.RegisterCullInfo(view, ia.piggy, (bool) ia.piggy, ia.owner);
+                    if (ia.owner != null)
+                    {
+                        if (ia.playerRoot)
+                        {
+                            cullInfo.playerRoot = true;
+                            CullGrid.RegisterPlayerRootNetworkCullInfo(cullInfo);
+                        }
+                        else
+                        {
+                            cullInfo.playerRoot = false;
+                            CullGrid.RegisterPlayerNonRootNetworkCullInfo(cullInfo);
+                        }
+                    }
+                    try
+                    {
+                        cullInfo.OnInitialRegistrationComplete();
+                    }
+                    catch (Exception exception1)
+                    {
+                        Debug.LogError(exception1);
+                    }
+                }
+            }
+
+            // This is casted to a GameObject in the NetCull class originally so this should always work.
+            if (instance is GameObject gameObject)
+            {
+                object underLying = null;
+                if (gameObject.GetComponent<DeployableObject>() != null)
+                {
+                    underLying = gameObject.GetComponent<DeployableObject>();
+                }
+                else if (gameObject.GetComponent<StructureComponent>() != null)
+                {
+                    underLying = gameObject.GetComponent<StructureComponent>();
+                }
+                else if (gameObject.GetComponent<StructureMaster>() != null)
+                {
+                    underLying = gameObject.GetComponent<StructureMaster>();
+                }
+                else if (gameObject.GetComponent<BasicDoor>() != null)
+                {
+                    underLying = gameObject.GetComponent<BasicDoor>();
+                }
+                else if (gameObject.GetComponent<LootableObject>() != null)
+                {
+                    underLying = gameObject.GetComponent<LootableObject>();
+                }
+                else if (gameObject.GetComponent<ResourceTarget>() != null)
+                {
+                    underLying = gameObject.GetComponent<ResourceTarget>();
+                }
+                else if (gameObject.GetComponent<SupplyCrate>() != null)
+                {
+                    underLying = gameObject.GetComponent<SupplyCrate>();
+                }
+
+                if (underLying == null) 
+                    return instance;
+                
+                Entity entity = new Entity(underLying);
+                EntityCache.GetInstance().Add(entity);
+            }
+            
+            return instance;
         }
     }
 }

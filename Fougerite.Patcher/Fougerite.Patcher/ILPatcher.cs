@@ -1882,11 +1882,30 @@ namespace Fougerite.Patcher
         private void NetcullPatch()
         {
             TypeDefinition NetCull = rustAssembly.MainModule.GetType("NetCull");
+            TypeDefinition CullGrid = rustAssembly.MainModule.GetType("CullGrid");
+            TypeDefinition NetworkCullInfo = rustAssembly.MainModule.GetType("NetworkCullInfo");
+             
             MethodDefinition CloseConnection = NetCull.GetMethod("CloseConnection");
             TypeDefinition logger = fougeriteAssembly.MainModule.GetType("Fougerite.Logger");
             MethodDefinition logex = logger.GetMethod("LogException");
 
             WrapMethod(CloseConnection, logex, rustAssembly, false);
+
+            NetCull.GetMethod("RegisterCullInfo").SetPublic(true);
+            CullGrid.GetMethod("RegisterPlayerRootNetworkCullInfo").SetPublic(true);
+            CullGrid.GetMethod("RegisterPlayerNonRootNetworkCullInfo").SetPublic(true);
+            NetworkCullInfo.GetMethod("OnInitialRegistrationComplete").SetPublic(true);
+            
+            MethodDefinition Instantiated = NetCull.GetMethod("Instantiated");
+            MethodDefinition InstantiatedHook = hooksClass.GetMethod("Instantiated");
+            Instantiated.Body.Instructions.Clear();
+            Instantiated.Body.ExceptionHandlers.Clear();
+            Instantiated.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            Instantiated.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+            Instantiated.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
+            Instantiated.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_3));
+            Instantiated.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(InstantiatedHook)));
+            Instantiated.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         }
 
         private void ShootPatch()
