@@ -1882,10 +1882,12 @@ namespace Fougerite.Patcher
         private void NetcullPatch()
         {
             TypeDefinition NetCull = rustAssembly.MainModule.GetType("NetCull");
+            TypeDefinition NGC = rustAssembly.MainModule.GetType("NGC");
             TypeDefinition CullGrid = rustAssembly.MainModule.GetType("CullGrid");
             TypeDefinition NetworkCullInfo = rustAssembly.MainModule.GetType("NetworkCullInfo");
             TypeDefinition NetInstance = rustAssembly.MainModule.GetType("NetInstance");
-            
+            TypeDefinition NGCGlobal = NGC.GetNestedType("Global");
+            NGCGlobal.IsPublic = true;
              
             MethodDefinition CloseConnection = NetCull.GetMethod("CloseConnection");
             TypeDefinition logger = fougeriteAssembly.MainModule.GetType("Fougerite.Logger");
@@ -1913,10 +1915,23 @@ namespace Fougerite.Patcher
             MethodDefinition DestroyByViewHook = hooksClass.GetMethod("DestroyByView");
             MethodDefinition DestroyByNetworkIdHook = hooksClass.GetMethod("DestroyByNetworkId");
             MethodDefinition DestroyByGameObjectHook = hooksClass.GetMethod("DestroyByGameObject");
+            MethodDefinition InstantiateNGCHook = hooksClass.GetMethod("InstantiateNGC");
 
             MethodDefinition DestroyByView = null;
             MethodDefinition DestroyByNetworkId = null;
             MethodDefinition DestroyByGameObject = null;
+            MethodDefinition InstantiateNGC = null;
+            
+            foreach (var x in NGC.GetMethods())
+            {
+                if (x.Name != "Instantiate") continue;
+
+                if (x.Parameters[0].ParameterType.Name.Contains("InstantiateArgs"))
+                {
+                    InstantiateNGC = x;
+                    break;
+                }
+            }
 
             foreach (var x in NetCull.GetMethods())
             {
@@ -1935,6 +1950,12 @@ namespace Fougerite.Patcher
                         break;
                 }
             }
+            
+            InstantiateNGC.Body.Instructions.Clear();
+            InstantiateNGC.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            InstantiateNGC.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+            InstantiateNGC.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(InstantiateNGCHook)));
+            InstantiateNGC.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
             
             DestroyByView.Body.Instructions.Clear();
             DestroyByView.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));

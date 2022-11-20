@@ -5,6 +5,7 @@ using System.Threading;
 using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
+using Fougerite.Tools;
 using UnityEngine;
 using MonoBehaviour = Facepunch.MonoBehaviour;
 
@@ -193,7 +194,7 @@ namespace Fougerite
                 ServerSaveHandler.CrucialSavePoint = 2;
             }
 
-            string ignoredPluginsPath = Path.Combine(Util.GetRootFolder(), "\\Save\\IgnoredPlugins.txt");
+            string ignoredPluginsPath = Util.GetRootFolder().Combine("\\Save\\IgnoredPlugins.txt");
             if (!File.Exists(ignoredPluginsPath))
             {
                 File.Create(ignoredPluginsPath).Dispose();
@@ -256,7 +257,7 @@ namespace Fougerite
         private void OnIgnoredChanged(object sender, FileSystemEventArgs e)
         {
             IgnoredPlugins.Clear();
-            string[] lines = File.ReadAllLines(Path.Combine(Util.GetRootFolder(), "\\Save\\IgnoredPlugins.txt"));
+            string[] lines = File.ReadAllLines(Util.GetRootFolder().Combine("\\Save\\IgnoredPlugins.txt"));
             foreach (var x in lines)
             {
                 if (!x.StartsWith(";"))
@@ -274,7 +275,7 @@ namespace Fougerite
         /// </summary>
         public void Start()
         {
-            string FougeriteDirectoryConfig = Path.Combine(Util.GetServerFolder(), "FougeriteDirectory.cfg");
+            string FougeriteDirectoryConfig = Util.GetServerFolder().Combine("FougeriteDirectory.cfg");
             
             // Init Configs
             Config.Init(FougeriteDirectoryConfig);

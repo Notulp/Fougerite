@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Fougerite.Concurrent;
+using Fougerite.Tools;
 using Newtonsoft.Json;
 
 namespace Fougerite.Caches
@@ -14,7 +15,7 @@ namespace Fougerite.Caches
 
         private PlayerCache()
         {
-            _cachedPlayersPath = Path.Combine(Util.GetRootFolder(), "\\Save\\CachedPlayers.json");
+            _cachedPlayersPath = Util.GetRootFolder().Combine("\\Save\\CachedPlayers.json");
         }
         
         /// <summary>

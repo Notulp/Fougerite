@@ -281,7 +281,7 @@ namespace Fougerite
             IsDestroyed = true;
         }
 
-        private void TryNetCullDestroy()
+        public void TryNetCullDestroy()
         {
             try
             {

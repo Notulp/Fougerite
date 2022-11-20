@@ -822,8 +822,7 @@ namespace Fougerite
 
         /// <summary>
         /// Returns all the LootableObjects.
-        /// THIS METHOD IS NOT SAFE TO CALL IN A SUBTHREAD DUE TO Object.FindObjectsOfType.
-        /// CONSIDER USING Util.FindClosestEntity or Util.FindEntitysAroundFast or Util.FindClosestObject or Util.FindObjectsAroundFast
+        /// This is safe to call in a thread / timer.
         /// </summary>
         public IEnumerable<Entity> LootableObjects
         {
@@ -835,8 +834,7 @@ namespace Fougerite
 
         /// <summary>
         /// Returns all the SupplyCrates.
-        /// THIS METHOD IS NOT SAFE TO CALL IN A SUBTHREAD DUE TO Object.FindObjectsOfType.
-        /// CONSIDER USING Util.FindClosestEntity or Util.FindEntitysAroundFast or Util.FindClosestObject or Util.FindObjectsAroundFast
+        /// This is safe to call in a thread / timer.
         /// </summary>
         public IEnumerable<Entity> SupplyCrates
         {
@@ -918,7 +916,8 @@ namespace Fougerite
                 {
                     float hour = EnvironmentControlCenter.Singleton.GetTime();
                     return hour;
-                } catch (NullReferenceException)
+                } 
+                catch (NullReferenceException)
                 {
                     return 12f;
                 }
@@ -932,8 +931,10 @@ namespace Fougerite
                 try
                 {
                     EnvironmentControlCenter.Singleton.SetTime(hour);
-                } catch (Exception)
+                } 
+                catch (Exception)
                 {
+                    // Ignore?
                 }
             }
         }

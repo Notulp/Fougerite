@@ -904,6 +904,8 @@ namespace Fougerite
                         Logger.LogError($"EntityHurtEvent Error: {ex}");
                     }
 
+                    // This should have been before the event so plugins could still modify the damage
+                    // However you can still set the entity's health to your damage if its a ceiling, etc...
                     if (ent.IsStructure() && !he.IsDecay)
                     {
                         StructureComponent component = ent.Object as StructureComponent;
@@ -3353,8 +3355,129 @@ namespace Fougerite
             return instance;
         }
         
+        /// <summary>
+        /// A hook of the NGC.Instantiate function. (A separate call to it when using certain static instantiate and other functions)
+        /// Re-created to add all spawned Entities into the EntityCache, so we may as well have a synchronized
+        /// list for plugins without having to worry of crashes.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="instantiatedGroup"></param>
+        /// <param name="setGroup"></param>
+        /// <param name="ia"></param>
+        /// <returns></returns>
+        public static UnityEngine.Object InstantiateNGC(ref NetCull.InstantiateArgs args, int groupToUse)
+        {
+            NGC.Prefab prefab;
+            NGC component;
+            if (groupToUse < 0)
+            {
+                Debug.LogError("Group cant be less than zero");
+                return null;
+            }
+            if (!NGC.Prefab.Register.Find(args.prefabName, out prefab))
+            {
+                Debug.LogError("No NGC Prefab with name:" + args.prefabName);
+                return null;
+            }
+            if (!NGC.Global.byGroup.TryGetValue((ushort) groupToUse, out component))
+            {
+                component = NetCull.InstantiateClassic("!Ng", Vector3.zero, Quaternion.identity, groupToUse).GetComponent<NGC>();
+            }
+
+            UnityEngine.Object obj = component.ServerInstantiate(prefab, ref args);
+            // This is casted to a GameObject in the NetCull class originally so this should always work.
+            if (obj is GameObject gameObject)
+            {
+                object underLying = null;
+                if (gameObject.GetComponent<DeployableObject>() != null)
+                {
+                    underLying = gameObject.GetComponent<DeployableObject>();
+                }
+                else if (gameObject.GetComponent<StructureComponent>() != null)
+                {
+                    underLying = gameObject.GetComponent<StructureComponent>();
+                }
+                else if (gameObject.GetComponent<StructureMaster>() != null)
+                {
+                    underLying = gameObject.GetComponent<StructureMaster>();
+                }
+                else if (gameObject.GetComponent<BasicDoor>() != null)
+                {
+                    underLying = gameObject.GetComponent<BasicDoor>();
+                }
+                else if (gameObject.GetComponent<LootableObject>() != null)
+                {
+                    underLying = gameObject.GetComponent<LootableObject>();
+                }
+                else if (gameObject.GetComponent<ResourceTarget>() != null)
+                {
+                    underLying = gameObject.GetComponent<ResourceTarget>();
+                }
+                else if (gameObject.GetComponent<SupplyCrate>() != null)
+                {
+                    underLying = gameObject.GetComponent<SupplyCrate>();
+                }
+
+                if (underLying == null) 
+                    return obj;
+                
+                Entity entity = new Entity(underLying);
+                EntityCache.GetInstance().Add(entity);
+            }
+            
+            return obj;
+        }
+
+        
         public static void DestroyByView(Facepunch.NetworkView view)
         {
+            Logger.Log("bDestroyByView");
+            GameObject go = view.gameObject;
+            object underLying = null;
+            
+            int id = go.GetInstanceID();
+            if (go.GetComponent<DeployableObject>() != null)
+            {
+                underLying = go.GetComponent<DeployableObject>();
+                id = ((DeployableObject) underLying).GetInstanceID();
+            }
+            else if (go.GetComponent<StructureComponent>() != null)
+            {
+                underLying = go.GetComponent<StructureComponent>();
+                id = ((StructureComponent) underLying).GetInstanceID();
+            }
+            else if (go.GetComponent<StructureMaster>() != null)
+            {
+                underLying = go.GetComponent<StructureMaster>();
+                id = ((StructureMaster) underLying).GetInstanceID();
+            }
+            else if (go.GetComponent<BasicDoor>() != null)
+            {
+                underLying = go.GetComponent<BasicDoor>();
+                id = ((BasicDoor) underLying).GetInstanceID();
+            }
+            else if (go.GetComponent<LootableObject>() != null)
+            {
+                underLying = go.GetComponent<LootableObject>();
+                id = ((LootableObject) underLying).GetInstanceID();
+            }
+            else if (go.GetComponent<ResourceTarget>() != null)
+            {
+                underLying = go.GetComponent<ResourceTarget>();
+                id = ((ResourceTarget) underLying).GetInstanceID();
+            }
+            else if (go.GetComponent<SupplyCrate>() != null)
+            {
+                underLying = go.GetComponent<SupplyCrate>();
+                id = ((SupplyCrate) underLying).GetInstanceID();
+            }
+            
+            if (underLying != null && EntityCache.GetInstance().Contains(id))
+            {
+                Logger.Log("DestroyByView " + id);
+                EntityCache.GetInstance().Remove(id);
+            }
+            
             NetworkCullInfo info;
             NetInstance.PreServerDestroy(view);
             if (NetworkCullInfo.Find(view, out info))
@@ -3370,6 +3493,7 @@ namespace Fougerite
 
         public static void DestroyByNetworkId(uLink.NetworkViewID viewID)
         {
+            Logger.Log("bDestroyByNetworkId");
             NetworkCullInfo info;
             NetInstance.PreServerDestroy(viewID);
             if (NetworkCullInfo.Find(viewID, out info))
@@ -3385,39 +3509,58 @@ namespace Fougerite
         
         public static void DestroyByGameObject(GameObject go)
         {
+            Logger.Log("bDestroyByGameObject");
             object underLying = null;
+            int id = go.GetInstanceID();
+            IDBase xd = null;
+            
             if (go.GetComponent<DeployableObject>() != null)
             {
                 underLying = go.GetComponent<DeployableObject>();
+                id = ((DeployableObject) underLying).GetInstanceID();
+                xd = ((DeployableObject)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<StructureComponent>() != null)
             {
                 underLying = go.GetComponent<StructureComponent>();
+                id = ((StructureComponent) underLying).GetInstanceID();
+                xd = ((StructureComponent)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<StructureMaster>() != null)
             {
                 underLying = go.GetComponent<StructureMaster>();
+                id = ((StructureMaster) underLying).GetInstanceID();
+                xd = ((StructureMaster)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<BasicDoor>() != null)
             {
                 underLying = go.GetComponent<BasicDoor>();
+                id = ((BasicDoor) underLying).GetInstanceID();
+                xd = ((BasicDoor)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<LootableObject>() != null)
             {
                 underLying = go.GetComponent<LootableObject>();
+                id = ((LootableObject) underLying).GetInstanceID();
+                xd = ((LootableObject)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<ResourceTarget>() != null)
             {
                 underLying = go.GetComponent<ResourceTarget>();
+                id = ((ResourceTarget) underLying).GetInstanceID();
+                xd = ((ResourceTarget)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<SupplyCrate>() != null)
             {
                 underLying = go.GetComponent<SupplyCrate>();
+                id = ((SupplyCrate) underLying).GetInstanceID();
+                xd = ((SupplyCrate)underLying).GetComponent<IDBase>();
             }
-
-            int id = go.GetInstanceID();
+            
+            Logger.Log("DestroyByGameObject " + id + " " + EntityCache.GetInstance().Contains(id) + " " + (underLying != null) + " " + xd + " " + EntityCache.GetInstance().GetEntities().Count);
             if (underLying != null && EntityCache.GetInstance().Contains(id))
             {
+                Logger.Log("DestroyByGameObject asass " + id);
                 EntityCache.GetInstance().Remove(id);
             }
 

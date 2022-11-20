@@ -186,6 +186,7 @@
     <Compile Include="Fougerite\ChatString.cs" />
     <Compile Include="Fougerite\Logger.cs" />
     <Compile Include="Fougerite\Tools\Cloner.cs" />
+    <Compile Include="Fougerite\Tools\Extensions.cs" />
     <Compile Include="Fougerite\Zone3D.cs" />
     <Compile Include="Fougerite\DataStore.cs" />
     <Compile Include="Fougerite\Events\BPUseEvent.cs" />

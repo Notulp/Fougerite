@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Fougerite.Tools;
 using Newtonsoft.Json;
 
 namespace Fougerite.Permissions
@@ -29,8 +30,8 @@ namespace Fougerite.Permissions
         private PermissionSystem()
         {
             _handler = new PermissionHandler();
-            _groupPermissionsPath = Path.Combine(Util.GetRootFolder(), "\\Save\\GroupPermissions.json");
-            _playerPermissionsPath = Path.Combine(Util.GetRootFolder(), "\\Save\\PlayerPermissions.json");
+            _groupPermissionsPath = Util.GetRootFolder().Combine("\\Save\\GroupPermissions.json");
+            _playerPermissionsPath = Util.GetRootFolder().Combine("\\Save\\PlayerPermissions.json");
             ReloadPermissions();
         }
 
