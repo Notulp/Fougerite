@@ -931,15 +931,8 @@ namespace Fougerite
                             }
                             case LifeStatus.WasKilled:
                             {
-                                DestroyEvent de2 = null;
-                                try
-                                {
-                                    de2 = new DestroyEvent(ref e, ent, he.IsDecay);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Logger.Log("plz " + ex);
-                                }
+                                DestroyEvent de2 = new DestroyEvent(ref e, ent, he.IsDecay);
+
                                 try
                                 {
                                     if (OnEntityDestroyed != null)
@@ -951,15 +944,15 @@ namespace Fougerite
                                 {
                                     Logger.LogError($"EntityDestroyEvent Error: {ex}");
                                 }
+                                
+                                if (DecayList.ContainsKey(ent.InstanceID))
+                                {
+                                    DecayList.TryRemove(ent.InstanceID);
+                                }
 
                                 if (!ent.IsDestroyed)
                                 {
                                     tkd._health = 0f;
-
-                                    if (DecayList.ContainsKey(ent.InstanceID))
-                                    {
-                                        DecayList.TryRemove(ent.InstanceID);
-                                    }
                                 }
 
                                 break;
@@ -978,16 +971,16 @@ namespace Fougerite
                                 {
                                     Logger.LogError($"EntityDestroyEvent Error: {ex}");
                                 }
+                                
+                                if (DecayList.ContainsKey(ent.InstanceID))
+                                {
+                                    DecayList.TryRemove(ent.InstanceID);
+                                }
 
                                 if (!ent.IsDestroyed)
                                 {
                                     tkd._health = 0f;
                                     ent.Destroy();
-
-                                    if (DecayList.ContainsKey(ent.InstanceID))
-                                    {
-                                        DecayList.TryRemove(ent.InstanceID);
-                                    }
                                 }
 
                                 break;

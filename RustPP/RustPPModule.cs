@@ -367,10 +367,7 @@
                         {
                             try
                             {
-                                if (!he.IsDecay)
-                                    he.Entity.Destroy();
-                                else if (Fougerite.Hooks.DecayList.ContainsKey(he.Entity.InstanceID))
-                                    Fougerite.Hooks.DecayList.TryRemove(he.Entity.InstanceID);
+                                he.Entity.Destroy();
                             }
                             catch (Exception ex)
                             {
@@ -393,8 +390,6 @@
                                 try
                                 {
                                     x.Destroy();
-                                    if (Fougerite.Hooks.DecayList.ContainsKey(x.InstanceID))
-                                        Fougerite.Hooks.DecayList.TryRemove(x.InstanceID);
                                 }
                                 catch
                                 {
@@ -404,8 +399,6 @@
                             try
                             {
                                 he.Entity.Destroy();
-                                if (Fougerite.Hooks.DecayList.ContainsKey(he.Entity.InstanceID))
-                                    Fougerite.Hooks.DecayList.TryRemove(he.Entity.InstanceID);
                             }
                             catch (Exception ex)
                             {

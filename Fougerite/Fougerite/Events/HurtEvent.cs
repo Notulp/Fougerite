@@ -83,7 +83,7 @@
                 if (d.attacker.networkViewID == uLink.NetworkViewID.unassigned &&
                     d.victim.networkViewID == uLink.NetworkViewID.unassigned)
                 {
-                    switch (d.attacker.idOwnerMain)
+                    switch (d.attacker.idMain)
                     {
                         // Check for structures and deployableobjects
                         case StructureComponent structureComponent when d.victim.idMain is StructureComponent structureComponent2:
