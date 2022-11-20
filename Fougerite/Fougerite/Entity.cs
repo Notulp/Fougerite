@@ -787,6 +787,60 @@ namespace Fougerite
         {
             get { return Location.z; }
         }
+        
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="b1"></param>
+        /// <param name="b2"></param>
+        /// <returns></returns>
+        public static bool operator ==(Entity b1, Entity b2)
+        {
+            if (ReferenceEquals(b1, b2)) 
+                return true;
+            if (ReferenceEquals(b1, null)) 
+                return false;
+            if (ReferenceEquals(b2, null))
+                return false;
+
+            return b1.Equals(b2);
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="b1"></param>
+        /// <param name="b2"></param>
+        /// <returns></returns>
+        public static bool operator !=(Entity b1, Entity b2)
+        {
+            return !(b1 == b2);
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            Entity b2 = obj as Entity;
+            return b2 != null && _instanceId == b2.InstanceID;
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return _instanceId;
+        }
 
         /// <summary>
         /// Grabs and stores the instance id of the entity which should be unique

@@ -30,6 +30,7 @@ namespace Fougerite
         private readonly List<string> _ConsoleCommandCancelList;
         private bool disconnected;
         private Vector3 _lastpost;
+        private readonly int _instanceId;
         internal bool _adminoff;
         internal bool _modoff;
         internal uLink.NetworkPlayer _np;
@@ -41,6 +42,7 @@ namespace Fougerite
 
         public Player(PlayerClient client)
         {
+            _instanceId = client.GetInstanceID();
             disconnected = false;
             justDied = true;
             ourPlayer = client;
@@ -1726,6 +1728,60 @@ namespace Fougerite
 
                 return false;
             }
+        }
+        
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="b1"></param>
+        /// <param name="b2"></param>
+        /// <returns></returns>
+        public static bool operator ==(Player b1, Player b2)
+        {
+            if (ReferenceEquals(b1, b2)) 
+                return true;
+            if (ReferenceEquals(b1, null)) 
+                return false;
+            if (ReferenceEquals(b2, null))
+                return false;
+
+            return b1.Equals(b2);
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="b1"></param>
+        /// <param name="b2"></param>
+        /// <returns></returns>
+        public static bool operator !=(Player b1, Player b2)
+        {
+            return !(b1 == b2);
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            Player b2 = obj as Player;
+            return b2 != null && UID == b2.UID && b2._instanceId == _instanceId;
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return _instanceId;
         }
     }
 }

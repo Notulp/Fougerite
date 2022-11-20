@@ -5,10 +5,15 @@ namespace Fougerite
     public class NPC
     {
         private Character _char;
+        private readonly int _instanceId;
+        private readonly string _name;
 
         public NPC(Character c)
         {
             _char = c;
+            _instanceId = _char.GetInstanceID();
+            _name = _char.name;
+            _name = _name.Contains("_A(Clone)") ? _name.Replace("_A(Clone)", "") : _name.Replace("(Clone)", "");
         }
 
         /// <summary>
@@ -54,12 +59,7 @@ namespace Fougerite
         /// </summary>
         public string Name
         {
-            get
-            {
-                return _char.name.Contains("_A(Clone)")
-                    ? _char.name.Replace("_A(Clone)", "")
-                    : _char.name.Replace("(Clone)", "");
-            }
+            get { return _name; }
         }
 
         /// <summary>
@@ -92,6 +92,61 @@ namespace Fougerite
         public float Z
         {
             get { return _char.transform.position.z; }
+        }
+        
+        
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="b1"></param>
+        /// <param name="b2"></param>
+        /// <returns></returns>
+        public static bool operator ==(NPC b1, NPC b2)
+        {
+            if (ReferenceEquals(b1, b2)) 
+                return true;
+            if (ReferenceEquals(b1, null)) 
+                return false;
+            if (ReferenceEquals(b2, null))
+                return false;
+
+            return b1.Equals(b2);
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="b1"></param>
+        /// <param name="b2"></param>
+        /// <returns></returns>
+        public static bool operator !=(NPC b1, NPC b2)
+        {
+            return !(b1 == b2);
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, null))
+                return false;
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            NPC b2 = obj as NPC;
+            return b2 != null && _name == b2._name && b2._instanceId == _instanceId;
+        }
+
+        /// <summary>
+        /// For easier comparism.
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return _instanceId;
         }
     }
 }
