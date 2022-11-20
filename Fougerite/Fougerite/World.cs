@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Facepunch;
+using Fougerite.Caches;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = System.Random;
@@ -674,6 +675,8 @@ namespace Fougerite
             set { env.daylength = value; }
         }
 
+        [Obsolete(@"This API was originally created to not rely on World.Entities,
+        which used to be an expensive call for plugins. You should use World.Entities as It is now thread safe.", false)]
         public IEnumerable<Entity> BasicDoors(bool forceupdate = false)
         {
             try
@@ -708,6 +711,8 @@ namespace Fougerite
             return _doors;
         }
 
+        [Obsolete(@"This API was originally created to not rely on World.Entities,
+        which used to be an expensive call for plugins. You should use World.Entities as It is now thread safe.", false)]
         public IEnumerable<Entity> DeployableObjects(bool forceupdate = false)
         {
             try
@@ -743,6 +748,8 @@ namespace Fougerite
             return _deployables;
         }
 
+        [Obsolete(@"This API was originally created to not rely on World.Entities,
+        which used to be an expensive call for plugins. You should use World.Entities as It is now thread safe.", false)]
         public IEnumerable<Entity> StructureComponents(bool forceupdate = false)
         {
             try
@@ -777,6 +784,8 @@ namespace Fougerite
             return _structures;
         }
 
+        [Obsolete(@"This API was originally created to not rely on World.Entities,
+        which used to be an expensive call for plugins. You should use World.Entities as It is now thread safe.", false)]
         public IEnumerable<Entity> StructureMasters(bool forceupdate = false)
         {
             try
@@ -820,12 +829,7 @@ namespace Fougerite
         {
             get
             {
-                if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
-                {
-                    Logger.LogWarning("[Fougerite LootableObjects] Some plugin is calling World.LootableObjects in a Thread/Timer. This is dangerous, and may cause crashes.");
-                }
-                IEnumerable<Entity> source = Object.FindObjectsOfType<LootableObject>().Select(s => new Entity(s));
-                return source.ToList();
+                return Entities.Where(x => x.IsLootableObject()).ToList();
             }
         }
 
@@ -838,12 +842,20 @@ namespace Fougerite
         {
             get
             {
-                if (Util.GetUtil().CurrentWorkingThreadID != Util.GetUtil().MainThreadID)
-                {
-                    Logger.LogWarning("[Fougerite SupplyCrates] Some plugin is calling World.SupplyCrates in a Thread/Timer. This is dangerous, and may cause crashes.");
-                }
-                IEnumerable<Entity> source = Object.FindObjectsOfType<SupplyCrate>().Select(s => new Entity(s));
-                return source.ToList();
+                return Entities.Where(x => x.IsSupplyCrate()).ToList();
+            }
+        }
+
+        /// <summary>
+        /// Returns all the Entities into a list.
+        /// This is safe to call in a thread / timer.
+        /// To see what objects get in the list take a look at Fougerite.Hooks.Instantiated
+        /// </summary>
+        public List<Entity> Entities
+        {
+            get
+            {
+                return EntityCache.GetInstance().GetEntities();
             }
         }
 
@@ -852,7 +864,8 @@ namespace Fougerite
         /// THIS METHOD IS NOT SAFE TO CALL IN A SUBTHREAD DUE TO Object.FindObjectsOfType.
         /// CONSIDER USING Util.FindClosestEntity or Util.FindEntitysAroundFast or Util.FindClosestObject or Util.FindObjectsAroundFast
         /// </summary>
-        public List<Entity> Entities
+        [Obsolete("This API was originally World.Entities, which couldn't be used in a thread / timer. Use this if you really want to rely on FindObjectsOfType", false)]
+        public List<Entity> RangedEntities
         {
             get
             {

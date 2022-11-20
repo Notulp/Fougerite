@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Fougerite.Tools;
 using ReaderWriterLock = Fougerite.Concurrent.ReaderWriterLock;
 
 namespace Fougerite.Caches
@@ -18,10 +17,13 @@ namespace Fougerite.Caches
     public class EntityCache
     {
         private static EntityCache _entityCache;
-        // https://forum.unity.com/threads/getinstanceid-v-gethashcode.1005546/
-        // Although in Unity 4.5.5f this doesn't seem to be the case yet to check for threads, although I'm not sure of the native
-        // implementation. Pre-allocating 10k slots, It will increase when needed.
-        private readonly Dictionary<int, Entity> _allEntities = new Dictionary<int, Entity>(10000);
+        /// <summary>
+        /// https://forum.unity.com/threads/getinstanceid-v-gethashcode.1005546/
+        /// Although in Unity 4.5.5f this doesn't seem to be the case yet to check for threads, although I'm not sure of the native
+        /// implementation. Pre-allocating 100003 slots (prime number), It will increase when needed. I didn't see significant increase
+        /// in memory when running a server with 80007 objects.
+        /// </summary>
+        private readonly Dictionary<int, Entity> _allEntities = new Dictionary<int, Entity>(100003);
         private readonly ReaderWriterLock _lock = new ReaderWriterLock();
         
         private EntityCache()
@@ -112,7 +114,7 @@ namespace Fougerite.Caches
             try
             {
                 _lock.AcquireReaderLock(Timeout.Infinite);
-                entities = Cloner<List<Entity>>.Clone(_allEntities.Values.ToList());
+                entities = _allEntities.Values.ToList();
             }
             catch (Exception ex)
             {
@@ -125,6 +127,32 @@ namespace Fougerite.Caches
             }
 
             return entities;
+        }
+
+        /// <summary>
+        /// Returns an Entity by instance id.
+        /// Null if doesn't exist.
+        /// </summary>
+        /// <param name="instanceId"></param>
+        /// <returns></returns>
+        public Entity GetEntityByInstanceId(int instanceId)
+        {
+            Entity entity = null;
+            try
+            {
+                _lock.AcquireReaderLock(Timeout.Infinite);
+                _allEntities.TryGetValue(instanceId, out entity);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[EntityCache] Failed to get the entity from list. Error: {ex}");
+            }
+            finally
+            {
+                _lock.ReleaseReaderLock();
+            }
+
+            return entity;
         }
     }
 }

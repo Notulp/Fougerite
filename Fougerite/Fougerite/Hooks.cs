@@ -3353,7 +3353,7 @@ namespace Fougerite
             return instance;
         }
         
-        /*public static void DestroyByView(Facepunch.NetworkView view)
+        public static void DestroyByView(Facepunch.NetworkView view)
         {
             NetworkCullInfo info;
             NetInstance.PreServerDestroy(view);
@@ -3444,6 +3444,6 @@ namespace Fougerite
                     uLink.Network.Destroy(go);
                 }
             }
-        }*/
+        }
     }
 }

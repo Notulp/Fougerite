@@ -1884,6 +1884,8 @@ namespace Fougerite.Patcher
             TypeDefinition NetCull = rustAssembly.MainModule.GetType("NetCull");
             TypeDefinition CullGrid = rustAssembly.MainModule.GetType("CullGrid");
             TypeDefinition NetworkCullInfo = rustAssembly.MainModule.GetType("NetworkCullInfo");
+            TypeDefinition NetInstance = rustAssembly.MainModule.GetType("NetInstance");
+            
              
             MethodDefinition CloseConnection = NetCull.GetMethod("CloseConnection");
             TypeDefinition logger = fougeriteAssembly.MainModule.GetType("Fougerite.Logger");
@@ -1892,12 +1894,63 @@ namespace Fougerite.Patcher
             WrapMethod(CloseConnection, logex, rustAssembly, false);
 
             NetCull.GetMethod("RegisterCullInfo").SetPublic(true);
+            NetCull.GetMethod("ShutdownNetworkCullInfoAndDestroy").SetPublic(true);
             CullGrid.GetMethod("RegisterPlayerRootNetworkCullInfo").SetPublic(true);
             CullGrid.GetMethod("RegisterPlayerNonRootNetworkCullInfo").SetPublic(true);
             NetworkCullInfo.GetMethod("OnInitialRegistrationComplete").SetPublic(true);
-            
+
+            foreach (var x in NetInstance.GetMethods())
+            {
+                if (x.Name == "PreServerDestroy")
+                {
+                    x.SetPublic(true);
+                }
+            }
+
             MethodDefinition Instantiated = NetCull.GetMethod("Instantiated");
+            
             MethodDefinition InstantiatedHook = hooksClass.GetMethod("Instantiated");
+            MethodDefinition DestroyByViewHook = hooksClass.GetMethod("DestroyByView");
+            MethodDefinition DestroyByNetworkIdHook = hooksClass.GetMethod("DestroyByNetworkId");
+            MethodDefinition DestroyByGameObjectHook = hooksClass.GetMethod("DestroyByGameObject");
+
+            MethodDefinition DestroyByView = null;
+            MethodDefinition DestroyByNetworkId = null;
+            MethodDefinition DestroyByGameObject = null;
+
+            foreach (var x in NetCull.GetMethods())
+            {
+                if (x.Name != "Destroy") continue;
+                
+                switch (x.Parameters[0].ParameterType.Name)
+                {
+                    case "NetworkView":
+                        DestroyByView = x;
+                        break;
+                    case "NetworkViewID":
+                        DestroyByNetworkId = x;
+                        break;
+                    case "GameObject":
+                        DestroyByGameObject = x;
+                        break;
+                }
+            }
+            
+            DestroyByView.Body.Instructions.Clear();
+            DestroyByView.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            DestroyByView.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(DestroyByViewHook)));
+            DestroyByView.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            DestroyByNetworkId.Body.Instructions.Clear();
+            DestroyByNetworkId.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            DestroyByNetworkId.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(DestroyByNetworkIdHook)));
+            DestroyByNetworkId.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            DestroyByGameObject.Body.Instructions.Clear();
+            DestroyByGameObject.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            DestroyByGameObject.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(DestroyByGameObjectHook)));
+            DestroyByGameObject.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
             Instantiated.Body.Instructions.Clear();
             Instantiated.Body.ExceptionHandlers.Clear();
             Instantiated.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
