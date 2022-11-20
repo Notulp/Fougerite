@@ -14,10 +14,16 @@
 
 		public DestroyEvent(ref DamageEvent d, Entity ent, bool isdecay)
 		{
-			Player player = Server.GetServer().FindPlayer(d.attacker.client.userID);
-			if (player != null) 
+			if (!isdecay)
 			{
-				Attacker = player;
+				if (d.attacker.client != null)
+				{
+					Player player = Server.GetServer().FindPlayer(d.attacker.client.userID);
+					if (player != null)
+					{
+						Attacker = player;
+					}
+				}
 			}
 
 			WeaponData = null;

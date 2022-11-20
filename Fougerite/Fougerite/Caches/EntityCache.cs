@@ -20,8 +20,8 @@ namespace Fougerite.Caches
         private static EntityCache _entityCache;
         // https://forum.unity.com/threads/getinstanceid-v-gethashcode.1005546/
         // Although in Unity 4.5.5f this doesn't seem to be the case yet to check for threads, although I'm not sure of the native
-        // implementation
-        private readonly Dictionary<int, Entity> _allEntities = new Dictionary<int, Entity>();
+        // implementation. Pre-allocating 10k slots, It will increase when needed.
+        private readonly Dictionary<int, Entity> _allEntities = new Dictionary<int, Entity>(10000);
         private readonly ReaderWriterLock _lock = new ReaderWriterLock();
         
         private EntityCache()
@@ -64,21 +64,42 @@ namespace Fougerite.Caches
         /// <summary>
         /// This method is called by the Hooks class when an entity is destroyed.
         /// </summary>
-        /// <param name="entity"></param>
-        internal void Remove(Entity entity)
+        /// <param name="instanceId"></param>
+        internal void Remove(int instanceId)
         {
             try
             {
                 _lock.AcquireWriterLock(Timeout.Infinite);
-                if (_allEntities.ContainsKey(entity.InstanceID))
+                if (_allEntities.ContainsKey(instanceId))
                 {
-                    _allEntities.Remove(entity.InstanceID);
+                    _allEntities.Remove(instanceId);
                 }
             }
             finally
             {
                 _lock.ReleaseWriterLock();
             }
+        }
+
+        /// <summary>
+        /// Checks if the instance id is in the dictionary.
+        /// </summary>
+        /// <param name="instanceId"></param>
+        /// <returns></returns>
+        internal bool Contains(int instanceId)
+        {
+            bool ret;
+            try
+            {
+                _lock.AcquireReaderLock(Timeout.Infinite);
+                ret = _allEntities.ContainsKey(instanceId);
+            }
+            finally
+            {
+                _lock.ReleaseReaderLock();
+            }
+
+            return ret;
         }
 
         /// <summary>

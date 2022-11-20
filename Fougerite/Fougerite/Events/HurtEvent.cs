@@ -34,7 +34,6 @@
                 _sleeper = false;
                 DamageEvent = d;
                 WeaponData = null;
-                IsDecay = false;
                 _status = d.status;
                 string weaponName = "Unknown";
                 if (d.victim.idMain is DeployableObject deployableObject)
@@ -80,7 +79,28 @@
                     _playervictim = false;
                 }
                 
-                
+                // These should be unassigned on decay
+                if (d.attacker.networkViewID == uLink.NetworkViewID.unassigned &&
+                    d.victim.networkViewID == uLink.NetworkViewID.unassigned)
+                {
+                    switch (d.attacker.idOwnerMain)
+                    {
+                        // Check for structures and deployableobjects
+                        case StructureComponent structureComponent when d.victim.idMain is StructureComponent structureComponent2:
+                        {
+                            // The attacker on decay is the victim it self
+                            IsDecay = structureComponent.GetInstanceID() == structureComponent2.GetInstanceID();
+                            break;
+                        }
+                        case DeployableObject deployableObject3 when d.victim.idMain is DeployableObject deployableObject2:
+                        {
+                            // The attacker on decay is the victim it self
+                            IsDecay = deployableObject3.GetInstanceID() == deployableObject2.GetInstanceID();
+                            break;
+                        }
+                    }
+                }
+
                 if (!(bool) d.attacker.id)
                 {
                     if (d.victim.client != null)
@@ -100,13 +120,12 @@
                 else if (d.attacker.id is SupplyCrate)
                 {
                     _playerattacker = false;
-                    Attacker = new Entity(d.attacker.idMain.gameObject);
+                    Attacker = new Entity(d.attacker.idMain.GetComponent<SupplyCrate>());
                     _entityattacker = true;
                     weaponName = "Supply Crate";
                 }
                 else if (d.attacker.id is Metabolism && d.victim.id is Metabolism)
                 {
-                    // This here looks pretty sus, I assume attacker is always null here, but I don't dare to change It.
                     Player temp = Server.GetServer().GetCachePlayer(d.attacker.client.userID);
                     Attacker = temp ?? Player.FindByPlayerClient(d.attacker.client);
                     _playerattacker = false;

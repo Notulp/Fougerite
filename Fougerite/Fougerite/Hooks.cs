@@ -248,7 +248,7 @@ namespace Fougerite
                     // Ignore, should never happen.
                 }
 
-                bool flag;
+                //bool flag;
                 Type[] typeArray = ConsoleSystem.FindTypes(arg.Class);
                 if (typeArray.Length == 0)
                 {
@@ -303,7 +303,7 @@ namespace Fougerite
                             string[] textArray3 = new string[]
                                 { "Error: ", arg.Class, ".", arg.Function, " - ", exception.Message };
                             arg.ReplyWith(string.Concat(textArray3));
-                            flag = false;
+                            //flag = false;
                             break;
                         }
 
@@ -708,7 +708,8 @@ namespace Fougerite
 
                 try
                 {
-                    DecayEvent de = new DecayEvent(new Entity(entity), ref dmg);
+                    Entity ent = new Entity(entity);
+                    DecayEvent de = new DecayEvent(ent, ref dmg);
                     try
                     {
                         if (OnEntityDecay != null)
@@ -719,10 +720,7 @@ namespace Fougerite
                         Logger.LogError($"EntityDecayEvent Error: {ex}");
                     }
 
-                    if (decayList.Contains(entity))
-                        decayList.Remove(entity);
-
-                    decayList.Add(entity);
+                    DecayList[ent.InstanceID] = ent;
                     return de.DamageAmount;
                 }
                 catch
@@ -890,7 +888,8 @@ namespace Fougerite
                 else if (he.VictimIsEntity)
                 {
                     var ent = he.Entity;
-                    if (decayList.Contains(he.Entity))
+                    // Double validate this weird logic...
+                    if (!he.IsDecay && DecayList.ContainsKey(he.Entity.InstanceID))
                         he.IsDecay = true;
 
                     try
@@ -932,7 +931,15 @@ namespace Fougerite
                             }
                             case LifeStatus.WasKilled:
                             {
-                                DestroyEvent de2 = new DestroyEvent(ref e, ent, he.IsDecay);
+                                DestroyEvent de2 = null;
+                                try
+                                {
+                                    de2 = new DestroyEvent(ref e, ent, he.IsDecay);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Logger.Log("plz " + ex);
+                                }
                                 try
                                 {
                                     if (OnEntityDestroyed != null)
@@ -949,9 +956,9 @@ namespace Fougerite
                                 {
                                     tkd._health = 0f;
 
-                                    if (decayList.Contains(ent))
+                                    if (DecayList.ContainsKey(ent.InstanceID))
                                     {
-                                        decayList.Remove(ent);
+                                        DecayList.TryRemove(ent.InstanceID);
                                     }
                                 }
 
@@ -977,9 +984,9 @@ namespace Fougerite
                                     tkd._health = 0f;
                                     ent.Destroy();
 
-                                    if (decayList.Contains(ent))
+                                    if (DecayList.ContainsKey(ent.InstanceID))
                                     {
-                                        decayList.Remove(ent);
+                                        DecayList.TryRemove(ent.InstanceID);
                                     }
                                 }
 
@@ -3352,5 +3359,98 @@ namespace Fougerite
             
             return instance;
         }
+        
+        /*public static void DestroyByView(Facepunch.NetworkView view)
+        {
+            NetworkCullInfo info;
+            NetInstance.PreServerDestroy(view);
+            if (NetworkCullInfo.Find(view, out info))
+            {
+                NetCull.ShutdownNetworkCullInfoAndDestroy(info);
+            }
+            else
+            {
+                NetCull.RemoveRPCs(view.viewID);
+                uLink.Network.Destroy(view);
+            }
+        }
+
+        public static void DestroyByNetworkId(uLink.NetworkViewID viewID)
+        {
+            NetworkCullInfo info;
+            NetInstance.PreServerDestroy(viewID);
+            if (NetworkCullInfo.Find(viewID, out info))
+            {
+                NetCull.ShutdownNetworkCullInfoAndDestroy(info);
+            }
+            else
+            {
+                NetCull.RemoveRPCs(viewID);
+                uLink.Network.Destroy(viewID);
+            }
+        }
+        
+        public static void DestroyByGameObject(GameObject go)
+        {
+            object underLying = null;
+            if (go.GetComponent<DeployableObject>() != null)
+            {
+                underLying = go.GetComponent<DeployableObject>();
+            }
+            else if (go.GetComponent<StructureComponent>() != null)
+            {
+                underLying = go.GetComponent<StructureComponent>();
+            }
+            else if (go.GetComponent<StructureMaster>() != null)
+            {
+                underLying = go.GetComponent<StructureMaster>();
+            }
+            else if (go.GetComponent<BasicDoor>() != null)
+            {
+                underLying = go.GetComponent<BasicDoor>();
+            }
+            else if (go.GetComponent<LootableObject>() != null)
+            {
+                underLying = go.GetComponent<LootableObject>();
+            }
+            else if (go.GetComponent<ResourceTarget>() != null)
+            {
+                underLying = go.GetComponent<ResourceTarget>();
+            }
+            else if (go.GetComponent<SupplyCrate>() != null)
+            {
+                underLying = go.GetComponent<SupplyCrate>();
+            }
+
+            int id = go.GetInstanceID();
+            if (underLying != null && EntityCache.GetInstance().Contains(id))
+            {
+                EntityCache.GetInstance().Remove(id);
+            }
+
+            NGCView component = go.GetComponent<NGCView>();
+            if (component)
+            {
+                NGC.DispatchNetDestroy(component);
+            }
+            else
+            {
+                NetworkCullInfo info;
+                NetInstance.PreServerDestroy(go);
+                if (NetworkCullInfo.Find(go, out info))
+                {
+                    NetCull.ShutdownNetworkCullInfoAndDestroy(info);
+                }
+                else
+                {
+                    Facepunch.NetworkView view2 = Facepunch.NetworkView.Get(go);
+                    if (view2)
+                    {
+                        NetCull.RemoveRPCs(view2.viewID);
+                    }
+                    uLink.Network.Destroy(go);
+                }
+            }
+        }*/
     }
 }

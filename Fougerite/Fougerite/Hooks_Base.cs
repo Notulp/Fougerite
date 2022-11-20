@@ -9,7 +9,7 @@ namespace Fougerite
 {
     public partial class Hooks
     {
-        public static ConcurrentList<object> decayList = new ConcurrentList<object>();
+        public static ConcurrentDictionary<int, Entity> DecayList = new ConcurrentDictionary<int, Entity>();
         public static Hashtable talkerTimers = new Hashtable();
         public static bool ServerInitialized = false;
         public static readonly List<ulong> uLinkDCCache = new List<ulong>();

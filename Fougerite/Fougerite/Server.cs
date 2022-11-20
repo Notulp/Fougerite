@@ -45,7 +45,9 @@ namespace Fougerite
 
         internal void UpdateBanlist()
         {
+#pragma warning disable CS0618
             if (File.Exists(_globalBanListIni))
+#pragma warning restore CS0618
             {
                 DataStore.GetInstance().Flush("Ips");
                 DataStore.GetInstance().Flush("Ids");
@@ -58,7 +60,9 @@ namespace Fougerite
                 {
                     DataStore.GetInstance().Add("Ids", id, ini.GetSetting("Ids", id));
                 }
+#pragma warning disable CS0618
                 File.Delete(_globalBanListIni);
+#pragma warning restore CS0618
                 DataStore.GetInstance().Save();
             }
         }
@@ -66,7 +70,9 @@ namespace Fougerite
         public void BanPlayer(Player player, string Banner = "Console", string reason = "You were banned.", Player Sender = null, bool AnnounceToServer = false)
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(player, Banner, reason, Sender));
-            if (cancel) { return;}
+            if (cancel) 
+                return;
+            
             string red = "[color #FF0000]";
             string green = "[color #009900]";
             string white = "[color #FFFFFF]";
@@ -105,7 +111,8 @@ namespace Fougerite
         public void BanPlayerIPandID(string ip, string id, string name = "1", string reason = "You were banned.", string adminname = "Unknown")
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(ip, id, name, reason, adminname));
-            if (cancel) { return; }
+            if (cancel) 
+                return;
 
             string banLogPath = Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log");
             File.AppendAllText(banLogPath, $"[{DateTime.Now.ToShortDateString()} {DateTime.Now:HH:mm:ss}] {name}|{ip}|{adminname}|{reason}\r\n");
@@ -117,7 +124,9 @@ namespace Fougerite
         public void BanPlayerIP(string ip, string name = "1", string reason = "You were banned.", string adminname = "Unknown")
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(ip, name, reason, adminname, false));
-            if (cancel) { return; }
+            if (cancel) 
+                return;
+            
             File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"),
                 $"[{DateTime.Now.ToShortDateString()} {DateTime.Now:HH:mm:ss}] {name}|{ip}|{adminname}|{reason}\r\n");
             DataStore.GetInstance().Add("Ips", ip, name);
@@ -126,7 +135,8 @@ namespace Fougerite
         public void BanPlayerID(string id, string name = "1", string reason = "You were banned.", string adminname = "Unknown")
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(id, name, reason, adminname, true));
-            if (cancel) { return; }
+            if (cancel) 
+                return; 
             
             File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"),
                 $"[{DateTime.Now.ToShortDateString()} {DateTime.Now:HH:mm:ss}] {name}|{id}|{adminname}|{reason}\r\n");
@@ -208,8 +218,10 @@ namespace Fougerite
             List<string> collection = new List<string>();
             foreach (var ip in ips)
             {
-                if (DataStore.GetInstance().Get("Ips", ip) == null) { continue;}
-                if (DataStore.GetInstance().Get("Ips", ip).ToString().ToLower() == l) collection.Add(ip.ToString());
+                if (DataStore.GetInstance().Get("Ips", ip) == null) 
+                    continue;
+                if (DataStore.GetInstance().Get("Ips", ip).ToString().ToLower() == l) 
+                    collection.Add(ip.ToString());
             }
             return collection;
         }
@@ -226,8 +238,10 @@ namespace Fougerite
             List<string> collection = new List<string>();
             foreach (var id in ids)
             {
-                if (DataStore.GetInstance().Get("Ids", id) == null) continue;
-                if (DataStore.GetInstance().Get("Ids", id).ToString().ToLower() == l) collection.Add(id.ToString());
+                if (DataStore.GetInstance().Get("Ids", id) == null) 
+                    continue;
+                if (DataStore.GetInstance().Get("Ids", id).ToString().ToLower() == l) 
+                    collection.Add(id.ToString());
             }
             return collection;
         }
@@ -309,10 +323,10 @@ namespace Fougerite
         /// <returns></returns>
         public Player FindByNetworkPlayer(uLink.NetworkPlayer np)
         {
-            foreach (var x in GetServer().Players)
+            foreach (Player x in GetServer().Players)
             {
-                if (x.PlayerClient.netPlayer == null) continue;
-                if (x.PlayerClient.netPlayer == np) return x;
+                if (x.PlayerClient.netPlayer == np) 
+                    return x;
             }
             return null;
         }
@@ -324,9 +338,10 @@ namespace Fougerite
         /// <returns></returns>
         public Player FindByPlayerClient(PlayerClient pc)
         {
-            foreach (var x in GetServer().Players)
+            foreach (Player x in GetServer().Players)
             {
-                if (x.PlayerClient == pc) return x;
+                if (x.PlayerClient == pc) 
+                    return x;
             }
             return null;
         }
@@ -348,7 +363,7 @@ namespace Fougerite
                     {
                         return player;
                     }
-                    var flist = Players.Where(x => x.UID == uid).ToList();
+                    List<Player> flist = Players.Where(x => x.UID == uid).ToList();
                     if (flist.Count >= 1)
                     {
                         return flist[0];
@@ -356,7 +371,7 @@ namespace Fougerite
                 }
                 else
                 {
-                    var flist = Players.Where(x => x.SteamID == search || x.SteamID.Contains(search)).ToList();
+                    List<Player> flist = Players.Where(x => x.SteamID == search || x.SteamID.Contains(search)).ToList();
                     if (flist.Count >= 1)
                     {
                         return flist[0];
@@ -365,8 +380,8 @@ namespace Fougerite
             }
             else
             {
-                var list = Players.Where(x => x.Name.ToLower().Contains(search.ToLower()) || 
-                    string.Equals(x.Name, search, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                List<Player> list = Players.Where(x => x.Name.ToLower().Contains(search.ToLower()) 
+                                                       || string.Equals(x.Name, search, StringComparison.CurrentCultureIgnoreCase)).ToList();
                 if (list.Count >= 1)
                 {
                     return list[0];
@@ -388,7 +403,7 @@ namespace Fougerite
                 return player;
             }
             
-            var flist = Players.Where(x => x.UID == search).ToList();
+            List<Player> flist = Players.Where(x => x.UID == search).ToList();
             if (flist.Count >= 1)
             {
                 return flist[0];
@@ -625,10 +640,12 @@ namespace Fougerite
         {
             get
             {
+#pragma warning disable CS0618
                 if (File.Exists(_globalBanListIni))
                 {
                     return new IniParser(_globalBanListIni);
                 }
+#pragma warning restore CS0618
                 return null;
             }
         }

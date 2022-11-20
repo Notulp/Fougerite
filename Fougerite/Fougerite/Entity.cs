@@ -183,7 +183,7 @@ namespace Fougerite
         /// <param name="p"></param>
         public void ChangeOwner(Player p)
         {
-            if (IsDeployableObject() && !(bool)(Object as DeployableObject)?.GetComponent<SleepingAvatar>())
+            if (IsDeployableObject() && GetObject<DeployableObject>().GetComponent<SleepingAvatar>() == null)
                 GetObject<DeployableObject>().SetupCreator(p.PlayerClient.controllable);
             else if (IsStructureMaster())
                 GetObject<StructureMaster>().SetupCreator(p.PlayerClient.controllable);
@@ -194,6 +194,43 @@ namespace Fougerite
                     if (st.GetObject<StructureMaster>() != null)
                     {
                         GetObject<StructureMaster>().SetupCreator(p.PlayerClient.controllable);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Changes the Entity's owner to the specified steamid.
+        /// </summary>
+        /// <param name="steamId"></param>
+        public void ChangeOwner(ulong steamId)
+        {
+            if (IsDeployableObject() && GetObject<DeployableObject>().GetComponent<SleepingAvatar>() == null)
+            {
+                DeployableObject deployableObject = GetObject<DeployableObject>();
+                deployableObject.creatorID = steamId;
+                deployableObject.ownerID = steamId;
+                deployableObject.CacheCreator();
+                deployableObject.CreatorSet();
+            }
+            else if (IsStructureMaster())
+            {
+                StructureMaster structureMaster = GetObject<StructureMaster>();
+                structureMaster.creatorID = steamId;
+                structureMaster.ownerID = steamId;
+                structureMaster.CacheCreator();
+            }
+            else if (IsStructure())
+            {
+                foreach (Entity st in GetLinkedStructs())
+                {
+                    if (st.GetObject<StructureMaster>() != null)
+                    {
+                        StructureMaster structureMaster = GetObject<StructureMaster>();
+                        structureMaster.creatorID = steamId;
+                        structureMaster.ownerID = steamId;
+                        structureMaster.CacheCreator();
                         break;
                     }
                 }
