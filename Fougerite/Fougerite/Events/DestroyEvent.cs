@@ -16,9 +16,10 @@
 		{
 			if (!isdecay)
 			{
-				if (d.attacker.client != null)
+				PlayerClient playerClient = d.attacker.client;
+				if (playerClient != null)
 				{
-					Player player = Server.GetServer().FindPlayer(d.attacker.client.userID);
+					Player player = Server.GetServer().FindPlayer(playerClient.userID);
 					if (player != null)
 					{
 						Attacker = player;
