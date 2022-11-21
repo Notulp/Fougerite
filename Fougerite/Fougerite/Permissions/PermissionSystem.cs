@@ -142,6 +142,9 @@ namespace Fougerite.Permissions
             try
             {
                 JsonSerializer serializer = new JsonSerializer();
+                // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
+                serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
                 serializer.NullValueHandling = NullValueHandling.Ignore;
                 List<PermissionPlayer> emptyplayers = new List<PermissionPlayer>();
                 List<PermissionGroup> emptygroups = new List<PermissionGroup>();
@@ -280,6 +283,9 @@ namespace Fougerite.Permissions
                 }
 
                 JsonSerializer serializer = new JsonSerializer();
+                // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
+                serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
                 serializer.NullValueHandling = NullValueHandling.Ignore;
 
                 using (StreamWriter sw = new StreamWriter(_groupPermissionsPath, false, Encoding.UTF8))

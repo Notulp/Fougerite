@@ -52,6 +52,9 @@ namespace Fougerite.Caches
             try
             {
                 JsonSerializer serializer = new JsonSerializer();
+                // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
+                serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
                 serializer.NullValueHandling = NullValueHandling.Ignore;
 
                 if (!File.Exists(_cachedPlayersPath))
@@ -107,6 +110,9 @@ namespace Fougerite.Caches
                 }
 
                 JsonSerializer serializer = new JsonSerializer();
+                // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
+                serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
                 serializer.NullValueHandling = NullValueHandling.Ignore;
 
                 using (StreamWriter sw =

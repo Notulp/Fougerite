@@ -3420,7 +3420,6 @@ namespace Fougerite
                     return obj;
                 
                 Entity entity = new Entity(underLying);
-                Logger.Log("placed " + entity.InstanceID);
                 EntityCache.GetInstance().Add(entity);
             }
             
@@ -3578,52 +3577,44 @@ namespace Fougerite
             
             object underLying = null;
             int id = go.GetInstanceID();
-            IDBase xd = null;
-            
+
             if (go.GetComponent<DeployableObject>() != null)
             {
                 underLying = go.GetComponent<DeployableObject>();
                 id = ((DeployableObject) underLying).GetInstanceID();
-                xd = ((DeployableObject)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<StructureComponent>() != null)
             {
                 underLying = go.GetComponent<StructureComponent>();
                 id = ((StructureComponent) underLying).GetInstanceID();
-                xd = ((StructureComponent)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<StructureMaster>() != null)
             {
                 underLying = go.GetComponent<StructureMaster>();
                 id = ((StructureMaster) underLying).GetInstanceID();
-                xd = ((StructureMaster)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<BasicDoor>() != null)
             {
                 underLying = go.GetComponent<BasicDoor>();
                 id = ((BasicDoor) underLying).GetInstanceID();
-                xd = ((BasicDoor)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<LootableObject>() != null)
             {
                 underLying = go.GetComponent<LootableObject>();
                 id = ((LootableObject) underLying).GetInstanceID();
-                xd = ((LootableObject)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<ResourceTarget>() != null)
             {
                 underLying = go.GetComponent<ResourceTarget>();
                 id = ((ResourceTarget) underLying).GetInstanceID();
-                xd = ((ResourceTarget)underLying).GetComponent<IDBase>();
             }
             else if (go.GetComponent<SupplyCrate>() != null)
             {
                 underLying = go.GetComponent<SupplyCrate>();
                 id = ((SupplyCrate) underLying).GetInstanceID();
-                xd = ((SupplyCrate)underLying).GetComponent<IDBase>();
             }
             
-            Logger.Log("DestroyByGameObject " + id + " " + EntityCache.GetInstance().Contains(id) + " " + (underLying != null) + " " + xd + " " + EntityCache.GetInstance().GetEntities().Count);
+            Logger.Log("DestroyByGameObject " + id + " " + EntityCache.GetInstance().Contains(id) + " " + (underLying != null) + " " + EntityCache.GetInstance().GetEntities().Count);
             if (underLying != null && EntityCache.GetInstance().Contains(id))
             {
                 Logger.Log("DestroyByGameObject asass " + id);

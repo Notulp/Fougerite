@@ -85,7 +85,11 @@ namespace Fougerite
 
         public JsonSerializer CreateJsonSerializer()
         {
-            return new JsonSerializer();
+            JsonSerializer serializer = new JsonSerializer();
+            // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
+            serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+            serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+            return serializer;
         }
 
         public JsonWriter CreateJsonWriter(StringBuilder sb, bool idented = false)
