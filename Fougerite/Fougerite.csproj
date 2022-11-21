@@ -68,6 +68,7 @@
     <Compile Include="Fougerite\Events\ShootEvent.cs" />
     <Compile Include="Fougerite\Events\ShotgunShootEvent.cs" />
     <Compile Include="Fougerite\Events\SupplySignalExplosionEvent.cs" />
+    <Compile Include="Fougerite\Events\TimedExplosiveEvent.cs" />
     <Compile Include="Fougerite\Flood.cs" />
     <Compile Include="Fougerite\Hooks_Base.cs" />
     <Compile Include="Fougerite\Hooks_RustFixes.cs" />

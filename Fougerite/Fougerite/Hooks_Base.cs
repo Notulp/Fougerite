@@ -314,6 +314,11 @@ namespace Fougerite
         public static event NPCSpawnedEventDelegate OnNPCSpawned;
 
         /// <summary>
+        /// This delegate runs when a C4 is placed.
+        /// </summary>
+        public static event TimedExplosiveEventDelegate OnTimedExplosiveSpawned;
+
+        /// <summary>
         /// This value returns if the server is shutting down.
         /// </summary>
         public static bool IsShuttingDown { get; set; }
@@ -379,6 +384,7 @@ namespace Fougerite
             OnLogger = delegate { };
             OnAirdropCrateDropped = delegate { };
             OnSupplyDropPlaneCreated = delegate {  };
+            OnTimedExplosiveSpawned = delegate {  };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -498,5 +504,7 @@ namespace Fougerite
         public delegate void SupplyDropPlaneCreatedDelegate(SupplyDropPlane plane);
 
         public delegate void NPCSpawnedEventDelegate(NPC npc);
+
+        public delegate void TimedExplosiveEventDelegate(TimedExplosiveEvent timedExplosiveEvent);
     }
 }

@@ -3724,5 +3724,41 @@ namespace Fougerite
             
             return WildlifeManager.DataInitialized && WildlifeManager.Data.Remove(ai);
         }
+        
+        /// <summary>
+        /// A hook of TimedExplosive.Awake function.
+        /// Runs when a C4 is placed.
+        /// </summary>
+        /// <param name="timedExplosive"></param>
+        public static void TimedExplosiveSpawn(TimedExplosive timedExplosive)
+        {
+            using (new Stopper(nameof(Hooks), nameof(TimedExplosiveSpawn)))
+            {
+                // Set testView first like in the original code
+                timedExplosive.testView = timedExplosive.GetComponent<NGCView>();
+
+                // Event
+                TimedExplosiveEvent timedExplosiveEvent = new TimedExplosiveEvent(timedExplosive);
+                try
+                {
+                    if (OnTimedExplosiveSpawned != null)
+                        OnTimedExplosiveSpawned(timedExplosiveEvent);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"TimedExplosiveSpawn Error: {ex}");
+                }
+
+                // Return on cancel
+                // Cancelling will leave the C4 there and ticking.
+                // On my end doing the exact same as TimedExplosive.Explode() does (open in a reverse tool)
+                // RPC to ClientExplode (this threw nullref) and NetCull.Destroy seem to have failed
+                // I didn't research any further, but you are welcome to try
+                if (timedExplosiveEvent.Cancelled)
+                    return;
+                
+                timedExplosive.Invoke(nameof(TimedExplosive.Explode), timedExplosive.fuseLength);
+            }
+        }
     }
 }

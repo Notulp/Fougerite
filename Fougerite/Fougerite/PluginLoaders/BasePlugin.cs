@@ -975,5 +975,10 @@ namespace Fougerite.PluginLoaders
         {
             Invoke("On_NPCSpawned", npc);
         }
+
+        public void OnTimedExplosiveSpawned(TimedExplosiveEvent ev)
+        {
+            Invoke("On_TimedExplosiveSpawned", ev);
+        }
     }
 }

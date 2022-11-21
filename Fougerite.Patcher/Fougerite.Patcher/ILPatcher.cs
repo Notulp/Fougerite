@@ -2317,6 +2317,20 @@ namespace Fougerite.Patcher
             iLProcessor6.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(CHook)));
             iLProcessor6.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         }
+
+        private void TimedExplosivePatch()
+        {
+            TypeDefinition TimedExplosive = rustAssembly.MainModule.GetType("TimedExplosive");
+            MethodDefinition TimedExplosiveSpawnHook = hooksClass.GetMethod("TimedExplosiveSpawn");
+            MethodDefinition TimedExplosiveAwake = TimedExplosive.GetMethod("Awake");
+            TimedExplosive.GetField("testView").SetPublic(true);
+            
+            ILProcessor iLProcessor = TimedExplosiveAwake.Body.GetILProcessor();
+            iLProcessor.Body.Instructions.Clear();
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(TimedExplosiveSpawnHook)));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        }
         
         // uLink Class56.method_36 has been patched here: https://i.imgur.com/WIEQXhX.png
         // I modified using dynspy to avoid the struggle.
@@ -2453,6 +2467,7 @@ namespace Fougerite.Patcher
                     this.ItemRepresentation();
                     this.DoAction1Patch();
                     this.NGCPatch();
+                    this.TimedExplosivePatch();
                 }
                 catch (Exception ex)
                 {
