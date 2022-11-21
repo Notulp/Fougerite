@@ -3361,14 +3361,6 @@ namespace Fougerite
                 {
                     underLying = gameObject.GetComponent<SupplyCrate>();
                 }
-                else if (gameObject.GetComponent<HostileWildlifeAI>())
-                {
-                    Logger.Log("Found HostileWildlifeAI");
-                }
-                else if (gameObject.GetComponent<BasicWildLifeAI>())
-                {
-                    Logger.Log("Found BasicWildLifeAI");
-                }
 
                 if (underLying == null) 
                     return instance;
@@ -3439,14 +3431,6 @@ namespace Fougerite
                 else if (gameObject.GetComponent<SupplyCrate>() != null)
                 {
                     underLying = gameObject.GetComponent<SupplyCrate>();
-                }
-                else if (gameObject.GetComponent<HostileWildlifeAI>())
-                {
-                    Logger.Log("Found HostileWildlifeAI");
-                }
-                else if (gameObject.GetComponent<BasicWildLifeAI>())
-                {
-                    Logger.Log("Found BasicWildLifeAI");
                 }
 
                 if (underLying == null) 
