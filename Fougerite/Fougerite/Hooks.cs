@@ -3426,7 +3426,12 @@ namespace Fougerite
             return obj;
         }
 
-        
+        /// <summary>
+        /// A hook of the NetCull.Destroy function.
+        /// Re-created to remove all destroyed Entities from the EntityCache, so we may as well have a synchronized
+        /// list for plugins without having to worry of crashes.
+        /// </summary>
+        /// <param name="view"></param>
         public static void DestroyByView(Facepunch.NetworkView view)
         {
             // Sanity check, shouldn't happen.
@@ -3435,7 +3440,6 @@ namespace Fougerite
                 return;
             }
             
-            Logger.Log("bDestroyByView");
             GameObject go = view.gameObject;
             object underLying = null;
             
@@ -3495,6 +3499,12 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// A hook of the NetCull.Destroy function.
+        /// Re-created to remove all destroyed Entities from the EntityCache, so we may as well have a synchronized
+        /// list for plugins without having to worry of crashes.
+        /// </summary>
+        /// <param name="viewID"></param>
         public static void DestroyByNetworkId(uLink.NetworkViewID viewID)
         {
             Logger.Log("bDestroyByNetworkId " + viewID);
@@ -3503,9 +3513,7 @@ namespace Fougerite
                 Facepunch.NetworkView networkView = Facepunch.NetworkView.Find(viewID);
                 if (networkView != null)
                 {
-                    Logger.Log("bwab");
                     GameObject go = networkView.gameObject;
-                    Logger.Log("xd " + go.GetInstanceID());
                     object underLying = null;
             
                     int id = go.GetInstanceID();
@@ -3544,6 +3552,8 @@ namespace Fougerite
                         underLying = go.GetComponent<SupplyCrate>();
                         id = ((SupplyCrate) underLying).GetInstanceID();
                     }
+                    
+                    Logger.Log("xd " + id);
             
                     if (underLying != null && EntityCache.GetInstance().Contains(id))
                     {
@@ -3566,9 +3576,14 @@ namespace Fougerite
             }
         }
         
+        /// <summary>
+        /// A hook of the NetCull.Destroy function.
+        /// Re-created to remove all destroyed Entities from the EntityCache, so we may as well have a synchronized
+        /// list for plugins without having to worry of crashes.
+        /// </summary>
+        /// <param name="go"></param>
         public static void DestroyByGameObject(GameObject go)
         {
-            Logger.Log("bDestroyByGameObject");
             // Sanity check, shouldn't happen.
             if (go == null)
             {

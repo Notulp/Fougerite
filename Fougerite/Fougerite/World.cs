@@ -847,7 +847,10 @@ namespace Fougerite
         /// <summary>
         /// Returns all the Entities into a list.
         /// This is safe to call in a thread / timer.
+        /// This list is a shallow copy.
         /// To see what objects get in the list take a look at Fougerite.Hooks.Instantiated
+        /// Using this (collect/iterate) on a 77664 object count server (StructureComponent/DeployableObject/SupplyCrate, but this list includes
+        /// Resources/StructureMasters/LootableObject/BasicDoor) roughly takes 13ms on my PC which means it only causes lagg for 13ms
         /// </summary>
         public List<Entity> Entities
         {
@@ -861,6 +864,8 @@ namespace Fougerite
         /// Returns all the Entities into a list.
         /// THIS METHOD IS NOT SAFE TO CALL IN A SUBTHREAD DUE TO Object.FindObjectsOfType.
         /// CONSIDER USING Util.FindClosestEntity or Util.FindEntitysAroundFast or Util.FindClosestObject or Util.FindObjectsAroundFast
+        /// Using this (collect/iterate) on 77664 object count server (StructureComponent/DeployableObject/SupplyCrate) roughly takes 766ms on my PC
+        /// which means causes lagg for 0.8 second for players.
         /// </summary>
         [Obsolete("This API was originally World.Entities, which couldn't be used in a thread / timer. Use this if you really want to rely on FindObjectsOfType", false)]
         public List<Entity> RangedEntities
