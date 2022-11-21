@@ -21,7 +21,7 @@ namespace Fougerite.Caches
         /// https://forum.unity.com/threads/getinstanceid-v-gethashcode.1005546/
         /// Although in Unity 4.5.5f this doesn't seem to be the case yet to check for threads, although I'm not sure of the native
         /// implementation. Pre-allocating 100003 slots (prime number), It will increase when needed. I didn't see significant increase
-        /// in memory when running a server with 80007 objects.
+        /// in memory (100-150mb, this is worth for this implementation imo) when running a server with 80007 objects.
         /// </summary>
         private readonly Dictionary<int, Entity> _allEntities = new Dictionary<int, Entity>(100003);
         private readonly ReaderWriterLock _lock = new ReaderWriterLock();
