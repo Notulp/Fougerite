@@ -27,17 +27,16 @@ namespace Fougerite
             // Cache InstanceId
             GetInstanceId();
             
-            if (IsStructureMaster())
+            if (GetObject(out StructureMaster structureMaster))
             {
-                _ownerid = ((StructureMaster)Obj).ownerID;
-                _creatorid = ((StructureMaster)Obj).creatorID;
+                _ownerid = structureMaster.ownerID;
+                _creatorid = structureMaster.creatorID;
                 _name = "Structure Master";
             }
 
-            if (IsStructure())
+            if (GetObject(out StructureComponent comp))
             {
-                StructureComponent comp = Obj as StructureComponent;
-                if (comp != null && comp._master != null)
+                if (comp._master != null)
                 {
                     _ownerid = comp._master.ownerID;
                     _creatorid = comp._master.creatorID;
@@ -47,82 +46,70 @@ namespace Fougerite
                 }
             }
 
-            if (IsDeployableObject())
+            if (GetObject(out DeployableObject dobj))
             {
-                DeployableObject dobj = Obj as DeployableObject;
-                if (dobj != null)
+                _ownerid = dobj.ownerID;
+                _creatorid = dobj.creatorID;
+                string clone = dobj.ToString();
+                if (clone.Contains("Barricade"))
                 {
-                    _ownerid = dobj.ownerID;
-                    _creatorid = dobj.creatorID;
-                    string clone = dobj.ToString();
-                    if (clone.Contains("Barricade"))
-                    {
-                        _name = "Wood Barricade";
-                    }
-                    else
-                    {
-                        var index = clone.IndexOf("(Clone)");
-                        _name = clone.Substring(0, index);
-                    }
-
-                    var inventory = dobj.GetComponent<Inventory>();
-                    if (inventory != null)
-                    {
-                        hasInventory = true;
-                        inv = new EntityInv(inventory, this);
-                    }
-                    else
-                    {
-                        hasInventory = false;
-                    }
+                    _name = "Wood Barricade";
                 }
+                else
+                {
+                    int index = clone.IndexOf("(Clone)");
+                    _name = clone.Substring(0, index);
+                }
+
+                Inventory inventory = dobj.GetComponent<Inventory>();
+                if (inventory != null)
+                {
+                    hasInventory = true;
+                    inv = new EntityInv(inventory, this);
+                }
+                else
+                {
+                    hasInventory = false;
+                }
+
             }
-            else if (IsLootableObject())
+            else if (GetObject(out LootableObject loot))
             {
                 _ownerid = 76561198095992578UL;
                 _creatorid = 76561198095992578UL;
-                var loot = Obj as LootableObject;
-                if (loot != null)
+                _name = loot.name;
+                Inventory inventory = loot._inventory;
+                if (inventory != null)
                 {
-                    _name = loot.name;
-                    var inventory = loot._inventory;
-                    if (inventory != null)
-                    {
-                        hasInventory = true;
-                        inv = new EntityInv(inventory, this);
-                    }
-                    else
-                    {
-                        hasInventory = false;
-                    }
+                    hasInventory = true;
+                    inv = new EntityInv(inventory, this);
+                }
+                else
+                {
+                    hasInventory = false;
                 }
             }
-            else if (IsSupplyCrate())
+            else if (GetObject(out SupplyCrate crate))
             {
                 _ownerid = 76561198095992578UL;
                 _creatorid = 76561198095992578UL;
                 _name = "Supply Crate";
-                var crate = Obj as SupplyCrate;
-                if (crate != null)
+                Inventory inventory = crate.lootableObject._inventory;
+                if (inventory != null)
                 {
-                    var inventory = crate.lootableObject._inventory;
-                    if (inventory != null)
-                    {
-                        hasInventory = true;
-                        inv = new EntityInv(inventory, this);
-                    }
-                    else
-                    {
-                        hasInventory = false;
-                    }
+                    hasInventory = true;
+                    inv = new EntityInv(inventory, this);
+                }
+                else
+                {
+                    hasInventory = false;
                 }
             }
-            else if (IsResourceTarget())
+            else if (GetObject(out ResourceTarget resourceTarget))
             {
-                var x = (ResourceTarget)Obj;
                 _ownerid = 76561198095992578UL;
                 _creatorid = 76561198095992578UL;
-                _name = x.name;
+                _name = resourceTarget.name;
                 hasInventory = false;
             }
             else
@@ -183,17 +170,17 @@ namespace Fougerite
         /// <param name="p"></param>
         public void ChangeOwner(Player p)
         {
-            if (IsDeployableObject() && GetObject<DeployableObject>().GetComponent<SleepingAvatar>() == null)
-                GetObject<DeployableObject>().SetupCreator(p.PlayerClient.controllable);
-            else if (IsStructureMaster())
-                GetObject<StructureMaster>().SetupCreator(p.PlayerClient.controllable);
+            if (GetObject(out DeployableObject deployableObject) && GetObject<DeployableObject>().GetComponent<SleepingAvatar>() == null)
+                deployableObject.SetupCreator(p.PlayerClient.controllable);
+            else if (GetObject(out StructureMaster structureMaster2))
+                structureMaster2.SetupCreator(p.PlayerClient.controllable);
             else if (IsStructure())
             {
                 foreach (Entity st in GetLinkedStructs())
                 {
-                    if (st.GetObject<StructureMaster>() != null)
+                    if (st.GetObject(out StructureMaster structureMaster))
                     {
-                        GetObject<StructureMaster>().SetupCreator(p.PlayerClient.controllable);
+                        structureMaster.SetupCreator(p.PlayerClient.controllable);
                         break;
                     }
                 }
@@ -206,28 +193,25 @@ namespace Fougerite
         /// <param name="steamId"></param>
         public void ChangeOwner(ulong steamId)
         {
-            if (IsDeployableObject() && GetObject<DeployableObject>().GetComponent<SleepingAvatar>() == null)
+            if (GetObject(out DeployableObject deployableObject) && GetObject<DeployableObject>().GetComponent<SleepingAvatar>() == null)
             {
-                DeployableObject deployableObject = GetObject<DeployableObject>();
                 deployableObject.creatorID = steamId;
                 deployableObject.ownerID = steamId;
                 deployableObject.CacheCreator();
                 deployableObject.CreatorSet();
             }
-            else if (IsStructureMaster())
+            else if (GetObject(out StructureMaster structureMaster2))
             {
-                StructureMaster structureMaster = GetObject<StructureMaster>();
-                structureMaster.creatorID = steamId;
-                structureMaster.ownerID = steamId;
-                structureMaster.CacheCreator();
+                structureMaster2.creatorID = steamId;
+                structureMaster2.ownerID = steamId;
+                structureMaster2.CacheCreator();
             }
             else if (IsStructure())
             {
                 foreach (Entity st in GetLinkedStructs())
                 {
-                    if (st.GetObject<StructureMaster>() != null)
+                    if (st.GetObject(out StructureMaster structureMaster))
                     {
-                        StructureMaster structureMaster = GetObject<StructureMaster>();
                         structureMaster.creatorID = steamId;
                         structureMaster.ownerID = steamId;
                         structureMaster.CacheCreator();
@@ -247,24 +231,24 @@ namespace Fougerite
                 return;
             }
 
-            if (IsDeployableObject())
+            if (GetObject(out DeployableObject deployableObject))
             {
                 try
                 {
-                    GetObject<DeployableObject>().OnKilled();
+                    deployableObject.OnKilled();
                 }
                 catch
                 {
                     TryNetCullDestroy();
                 }
             }
-            else if (IsStructure())
+            else if (GetObject(out StructureComponent structureComponent))
             {
-                DestroyStructure(GetObject<StructureComponent>());
+                DestroyStructure(structureComponent);
             }
-            else if (IsStructureMaster())
+            else if (GetObject(out StructureMaster structureMaster))
             {
-                HashSet<StructureComponent> components = GetObject<StructureMaster>()._structureComponents;
+                HashSet<StructureComponent> components = structureMaster._structureComponents;
                 foreach (StructureComponent comp in components)
                     DestroyStructure(comp);
 
@@ -281,19 +265,18 @@ namespace Fougerite
             IsDestroyed = true;
         }
 
-        public void TryNetCullDestroy()
+        private void TryNetCullDestroy()
         {
             try
             {
-                if (IsDeployableObject())
+                if (GetObject(out DeployableObject deployableObject))
+                    NetCull.Destroy(deployableObject.gameObject);
+                else if (GetObject(out StructureMaster structureMaster))
                 {
-                    if (GetObject<DeployableObject>() != null)
-                        NetCull.Destroy(GetObject<DeployableObject>().gameObject);
-                }
-                else if (IsStructureMaster())
-                {
-                    if (GetObject<StructureMaster>() != null)
-                        NetCull.Destroy(GetObject<StructureMaster>().networkViewID);
+                    if (structureMaster.networkViewID != uLink.NetworkViewID.unassigned)
+                        NetCull.Destroy(structureMaster.networkViewID);
+                    else if (structureMaster.gameObject != null)
+                        NetCull.Destroy(structureMaster.gameObject);
                 }
             }
             catch
@@ -304,6 +287,10 @@ namespace Fougerite
 
         private static void DestroyStructure(StructureComponent comp)
         {
+            // Sanity check, shouldn't happen.
+            if (comp == null)
+                return;
+            
             try
             {
                 comp._master.RemoveComponent(comp);
@@ -312,7 +299,10 @@ namespace Fougerite
             }
             catch
             {
-                NetCull.Destroy(comp.networkViewID);
+                if (comp.networkViewID != uLink.NetworkViewID.unassigned)
+                    NetCull.Destroy(comp.networkViewID);
+                else if (comp.gameObject != null)
+                    NetCull.Destroy(comp.gameObject);
             }
         }
 
@@ -322,17 +312,20 @@ namespace Fougerite
         /// <returns>Returns a list containing all connected structures. If the entity isn't a structure, then It returns It self in a list.</returns>
         public List<Entity> GetLinkedStructs()
         {
-            List<Entity> list = new List<Entity>();
-            var obj = Object as StructureComponent;
-            if (obj == null)
+            List<Entity> list;
+            if (!GetObject(out StructureComponent obj))
             {
-                list.Add(this);
+                list = new List<Entity>(1)
+                {
+                    this
+                };
                 return list;
             }
 
+            list = new List<Entity>(obj._master._structureComponents.Count);
             foreach (StructureComponent component in obj._master._structureComponents)
             {
-                if (component != Object as StructureComponent)
+                if (component != obj)
                 {
                     list.Add(new Entity(component));
                 }
@@ -355,17 +348,34 @@ namespace Fougerite
 
             return default(T);
         }
+        
+        /// <summary>
+        /// Casts the object to the specified type.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool GetObject<T>(out T type)
+        {
+            if (Object is T objectType)
+            {
+                type = objectType;
+                return true;
+            }
+
+            type = default(T);
+            return false;
+        }
 
         public TakeDamage GetTakeDamage()
         {
-            if (IsDeployableObject())
+            if (GetObject(out DeployableObject deployableObject))
             {
-                return GetObject<DeployableObject>().GetComponent<TakeDamage>();
+                return deployableObject.GetComponent<TakeDamage>();
             }
 
-            if (IsStructure())
+            if (GetObject(out StructureComponent structureComponent))
             {
-                return GetObject<StructureComponent>().GetComponent<TakeDamage>();
+                return structureComponent.GetComponent<TakeDamage>();
             }
 
             return null;
@@ -378,10 +388,9 @@ namespace Fougerite
         {
             get
             {
-                if (IsResourceTarget())
+                if (GetObject(out ResourceTarget resourceTarget))
                 {
-                    var x = (ResourceTarget)_obj;
-                    return x;
+                    return resourceTarget;
                 }
 
                 return null;
@@ -395,10 +404,9 @@ namespace Fougerite
         {
             get
             {
-                if (IsSupplyCrate())
+                if (GetObject(out SupplyCrate supplyCrate))
                 {
-                    var x = (SupplyCrate)_obj;
-                    return x; 
+                    return supplyCrate;
                 }
 
                 return null;
@@ -451,8 +459,8 @@ namespace Fougerite
         /// <returns>Returns true if it is.</returns>
         public bool IsStorage()
         {
-            if (IsDeployableObject())
-                return GetObject<DeployableObject>().GetComponent<SaveableInventory>() != null;
+            if (GetObject(out DeployableObject deployableObject))
+                return deployableObject.GetComponent<SaveableInventory>() != null;
 
             return false;
         }
@@ -483,8 +491,8 @@ namespace Fougerite
         /// <returns>Returns true if it is.</returns>
         public bool IsSleeper()
         {
-            if (IsDeployableObject())
-                return GetObject<DeployableObject>().GetComponent<SleepingAvatar>() != null;
+            if (GetObject(out DeployableObject deployableObject))
+                return deployableObject.GetComponent<SleepingAvatar>() != null;
 
             return false;
         }
@@ -495,8 +503,8 @@ namespace Fougerite
         /// <returns>Returns true if it is.</returns>
         public bool IsFireBarrel()
         {
-            if (IsDeployableObject())
-                return GetObject<DeployableObject>().GetComponent<FireBarrel>() != null;
+            if (GetObject(out DeployableObject deployableObject))
+                return deployableObject.GetComponent<FireBarrel>() != null;
 
             return false;
         }
@@ -517,9 +525,9 @@ namespace Fougerite
         /// <param name="c"></param>
         public void SetDecayEnabled(bool c)
         {
-            if (IsDeployableObject())
+            if (GetObject(out DeployableObject deployableObject))
             {
-                GetObject<DeployableObject>().SetDecayEnabled(c);
+                deployableObject.SetDecayEnabled(c);
             }
         }
 
@@ -528,13 +536,13 @@ namespace Fougerite
         /// </summary>
         public void UpdateHealth()
         {
-            if (IsDeployableObject())
+            if (GetObject(out DeployableObject deployableObject))
             {
-                GetObject<DeployableObject>().UpdateClientHealth();
+                deployableObject.UpdateClientHealth();
             }
-            else if (IsStructure())
+            else if (GetObject(out StructureComponent structureComponent))
             {
-                GetObject<StructureComponent>().UpdateClientHealth();
+                structureComponent.UpdateClientHealth();
             }
         }
 
@@ -606,19 +614,19 @@ namespace Fougerite
         {
             get
             {
-                if (IsDeployableObject())
+                if (GetObject(out DeployableObject deployableObject))
                 {
-                    return GetObject<DeployableObject>().GetComponent<TakeDamage>().health;
+                    return deployableObject.GetComponent<TakeDamage>().health;
                 }
 
-                if (IsStructure())
+                if (GetObject(out StructureComponent structureComponent))
                 {
-                    return GetObject<StructureComponent>().GetComponent<TakeDamage>().health;
+                    return structureComponent.GetComponent<TakeDamage>().health;
                 }
 
-                if (IsStructureMaster())
+                if (GetObject(out StructureMaster structureMaster))
                 {
-                    float sum = GetObject<StructureMaster>()._structureComponents.Sum(s => s.GetComponent<TakeDamage>().health);
+                    float sum = structureMaster._structureComponents.Sum(s => s.GetComponent<TakeDamage>().health);
                     return sum;
                 }
 
@@ -626,13 +634,13 @@ namespace Fougerite
             }
             set
             {
-                if (IsDeployableObject())
+                if (GetObject(out DeployableObject deployableObject))
                 {
-                    GetObject<DeployableObject>().GetComponent<TakeDamage>().health = value;
+                    deployableObject.GetComponent<TakeDamage>().health = value;
                 }
-                else if (IsStructure())
+                else if (GetObject(out StructureComponent structureComponent))
                 {
-                    GetObject<StructureComponent>().GetComponent<TakeDamage>().health = value;
+                    structureComponent.GetComponent<TakeDamage>().health = value;
                 }
 
                 UpdateHealth();
@@ -646,19 +654,19 @@ namespace Fougerite
         {
             get
             {
-                if (IsDeployableObject())
+                if (GetObject(out DeployableObject deployableObject))
                 {
-                    return GetObject<DeployableObject>().GetComponent<TakeDamage>().maxHealth;
+                    return deployableObject.GetComponent<TakeDamage>().maxHealth;
                 }
 
-                if (IsStructure())
+                if (GetObject(out StructureComponent structureComponent))
                 {
-                    return GetObject<StructureComponent>().GetComponent<TakeDamage>().maxHealth;
+                    return structureComponent.GetComponent<TakeDamage>().maxHealth;
                 }
 
-                if (IsStructureMaster())
+                if (GetObject(out StructureMaster structureMaster))
                 {
-                    float sum = GetObject<StructureMaster>()._structureComponents.Sum(s => s.GetComponent<TakeDamage>().maxHealth);
+                    float sum = structureMaster._structureComponents.Sum(s => s.GetComponent<TakeDamage>().maxHealth);
                     return sum;
                 }
 
@@ -721,20 +729,20 @@ namespace Fougerite
         {
             get
             {
-                if (IsDeployableObject())
-                    return GetObject<DeployableObject>().transform.position;
-                if (IsStructure())
-                    return GetObject<StructureComponent>().transform.position;
-                if (IsStructureMaster())
-                    return GetObject<StructureMaster>().containedBounds.center;
-                if (IsBasicDoor())
-                    return GetObject<BasicDoor>().transform.position;
-                if (IsLootableObject())
-                    return GetObject<LootableObject>().transform.position;
-                if (IsResourceTarget())
-                    return GetObject<ResourceTarget>().transform.position;
-                if (IsSupplyCrate())
-                    return GetObject<SupplyCrate>().transform.position;
+                if (GetObject(out DeployableObject deployableObject))
+                    return deployableObject.transform.position;
+                if (GetObject(out StructureComponent structureComponent))
+                    return structureComponent.transform.position;
+                if (GetObject(out StructureMaster structureMaster))
+                    return structureMaster.containedBounds.center;
+                if (GetObject(out BasicDoor basicDoor))
+                    return basicDoor.transform.position;
+                if (GetObject(out LootableObject lootableObject))
+                    return lootableObject.transform.position;
+                if (GetObject(out ResourceTarget resourceTarget))
+                    return resourceTarget.transform.position;
+                if (GetObject(out SupplyCrate supplyCrate))
+                    return supplyCrate.transform.position;
 
                 return Vector3.zero;
             }
@@ -747,18 +755,18 @@ namespace Fougerite
         {
             get
             {
-                if (IsDeployableObject())
-                    return GetObject<DeployableObject>().transform.rotation;
-                if (IsSupplyCrate())
-                    return GetObject<SupplyCrate>().transform.rotation;
-                if (IsStructure())
-                    return GetObject<StructureComponent>().transform.rotation;
-                if (IsBasicDoor())
-                    return GetObject<BasicDoor>().transform.rotation;
-                if (IsLootableObject())
-                    return GetObject<LootableObject>().transform.rotation;
-                if (IsResourceTarget())
-                    return GetObject<ResourceTarget>().transform.rotation;
+                if (GetObject(out DeployableObject deployableObject))
+                    return deployableObject.transform.rotation;
+                if (GetObject(out StructureComponent structureComponent))
+                    return structureComponent.transform.rotation;
+                if (GetObject(out BasicDoor basicDoor))
+                    return basicDoor.transform.rotation;
+                if (GetObject(out LootableObject lootableObject))
+                    return lootableObject.transform.rotation;
+                if (GetObject(out ResourceTarget resourceTarget))
+                    return resourceTarget.transform.rotation;
+                if (GetObject(out SupplyCrate supplyCrate))
+                    return supplyCrate.transform.rotation;
 
                 return new Quaternion(0, 0, 0, 0);
             }
@@ -849,20 +857,20 @@ namespace Fougerite
         /// </summary>
         private void GetInstanceId()
         {
-            if (IsDeployableObject())
-                _instanceId = GetObject<DeployableObject>().GetInstanceID();
-            else if (IsStructure())
-                _instanceId = GetObject<StructureComponent>().GetInstanceID();
-            else if (IsStructureMaster())
-                _instanceId = GetObject<StructureMaster>().GetInstanceID();
-            else if (IsBasicDoor())
-                _instanceId = GetObject<BasicDoor>().GetInstanceID();
-            else if (IsLootableObject())
-                _instanceId = GetObject<LootableObject>().GetInstanceID();
-            else if (IsResourceTarget())
-                _instanceId = GetObject<ResourceTarget>().GetInstanceID();
-            else if (IsSupplyCrate())
-                _instanceId = GetObject<SupplyCrate>().GetInstanceID();
+            if (GetObject(out DeployableObject deployableObject))
+                _instanceId = deployableObject.GetInstanceID();
+            else if (GetObject(out StructureComponent structureComponent))
+                _instanceId = structureComponent.GetInstanceID();
+            else if (GetObject(out StructureMaster structureMaster))
+                _instanceId = structureMaster.GetInstanceID();
+            else if (GetObject(out BasicDoor basicDoor))
+                _instanceId = basicDoor.GetInstanceID();
+            else if (GetObject(out LootableObject lootableObject))
+                _instanceId = lootableObject.GetInstanceID();
+            else if (GetObject(out ResourceTarget resourceTarget))
+                _instanceId = resourceTarget.GetInstanceID();
+            else if (GetObject(out SupplyCrate supplyCrate))
+                _instanceId = supplyCrate.GetInstanceID();
         }
     }
 }

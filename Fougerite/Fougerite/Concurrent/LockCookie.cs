@@ -30,31 +30,22 @@ namespace Fougerite.Concurrent
 
         public override int GetHashCode()
         {
-            return (base.GetHashCode());
+            return base.GetHashCode();
         }
 
         public bool Equals(LockCookie obj)
         {
-            if (ThreadId == obj.ThreadId &&
-                ReaderLocks == obj.ReaderLocks &&
-                WriterLocks == obj.WriterLocks)
-            {
-                return (true);
-            }
-            else
-            {
-                return (false);
-            }
+            return ThreadId == obj.ThreadId && ReaderLocks == obj.ReaderLocks && WriterLocks == obj.WriterLocks;
         }
 
         public override bool Equals(Object obj)
         {
-            if (!(obj is LockCookie))
+            if (!(obj is LockCookie cookie))
             {
-                return (false);
+                return false;
             }
 
-            return (obj.Equals(this));
+            return cookie.Equals(this);
         }
 
         public static bool operator ==(LockCookie a, LockCookie b)

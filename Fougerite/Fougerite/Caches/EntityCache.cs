@@ -67,20 +67,24 @@ namespace Fougerite.Caches
         /// This method is called by the Hooks class when an entity is destroyed.
         /// </summary>
         /// <param name="instanceId"></param>
-        internal void Remove(int instanceId)
+        internal bool Remove(int instanceId)
         {
+            bool result = false;
             try
             {
                 _lock.AcquireWriterLock(Timeout.Infinite);
                 if (_allEntities.ContainsKey(instanceId))
                 {
                     _allEntities.Remove(instanceId);
+                    result = true;
                 }
             }
             finally
             {
                 _lock.ReleaseWriterLock();
             }
+
+            return result;
         }
 
         /// <summary>
@@ -145,6 +149,48 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
+                Logger.LogError($"[EntityCache] Failed to get the entity from list. Error: {ex}");
+            }
+            finally
+            {
+                _lock.ReleaseReaderLock();
+            }
+
+            return entity;
+        }
+        
+        /// <summary>
+        /// Tries to find an Entity class by the instance id.
+        /// If It doesn't exist It will allocate, but this shouldn't happen as the Instantiate events
+        /// already handled that before somebody would even use the component objects.
+        /// Other than that you can easily grab the class without instantiating new Entity(obj)
+        /// all the time. I shall use this in the Fougerite core to pass entities to delegates.
+        /// </summary>
+        /// <param name="instanceId"></param>
+        /// <param name="component"></param>
+        /// <returns></returns>
+        internal Entity GrabOrAllocate(int instanceId, object component)
+        {
+            Entity entity = null;
+            Fougerite.Concurrent.LockCookie cookie = new Fougerite.Concurrent.LockCookie(int.MinValue);
+            try
+            {
+                _lock.AcquireReaderLock(Timeout.Infinite);
+                // This shouldn't probably happen (a compatible entity missing from the list), but I still handle it just in case
+                if (!_allEntities.TryGetValue(instanceId, out entity))
+                {
+                    cookie = _lock.UpgradeToWriterLock(Timeout.Infinite);
+                    entity = new Entity(component);
+                    _allEntities[instanceId] = entity;
+                    _lock.DowngradeFromWriterLock(ref cookie);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Sanity check, thread id should never be negative.
+                // If this is a negative number, we had an upgrade to the lock which we need to downgrade.
+                if (cookie.ThreadId != int.MinValue)
+                    _lock.DowngradeFromWriterLock(ref cookie);
                 Logger.LogError($"[EntityCache] Failed to get the entity from list. Error: {ex}");
             }
             finally
