@@ -39,7 +39,7 @@ namespace Fougerite.Caches
         /// <summary>
         /// The last login date of the player.
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty]
         public DateTime? LastLogin
         {
             get;
@@ -50,7 +50,7 @@ namespace Fougerite.Caches
         /// The last logout date of the player.
         /// Can be null.
         /// </summary>
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty]
         public DateTime? LastLogout
         {
             get;

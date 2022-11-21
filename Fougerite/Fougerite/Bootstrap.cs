@@ -6,6 +6,7 @@ using Fougerite.Caches;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
 using Fougerite.Tools;
+using Newtonsoft.Json;
 using UnityEngine;
 using MonoBehaviour = Facepunch.MonoBehaviour;
 
@@ -285,6 +286,15 @@ namespace Fougerite
 
             // Attempt to log unhandled exceptions
             AppDomain.CurrentDomain.UnhandledException += UnhandledException;
+            
+            // Initialize a default serializer for the datetime problem
+            // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                NullValueHandling = NullValueHandling.Include,
+            };
 
             // Init CTimer
             _timergo = new GameObject();
