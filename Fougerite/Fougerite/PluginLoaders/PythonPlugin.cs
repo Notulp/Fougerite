@@ -54,7 +54,6 @@ namespace Fougerite.PluginLoaders
         /// <summary>
         /// Invoke the specified method and args.
         /// </summary>
-        /// <param name="method">Method.</param>
         /// <param name="args">Arguments.</param>
         /// <param name="func">Func.</param>
         public override object Invoke(string func, params object[] args)
@@ -75,12 +74,14 @@ namespace Fougerite.PluginLoaders
                 }
                 return null;
             }
-            catch (ArgumentTypeException) // Maintain compatibility for old plugins.
+            catch (ArgumentTypeException ex) // Maintain compatibility for old plugins.
             {
                 if (func == "On_EntityDeployed")
                 {
                     return Invoke(func, new object[] {args[0], args[1]});
                 }
+                string fileinfo = $"[Error] Failed to invoke: {Name}<{Type}>.{func}(){Environment.NewLine}";
+                Logger.LogError(fileinfo + FormatException(ex));
             }
             catch (Exception ex)
             {

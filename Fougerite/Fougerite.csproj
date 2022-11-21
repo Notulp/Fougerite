@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Fougerite\Caches\CachedPlayer.cs" />
     <Compile Include="Fougerite\Caches\EntityCache.cs" />
+    <Compile Include="Fougerite\Caches\NPCCache.cs" />
     <Compile Include="Fougerite\Caches\PlayerCache.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentEnumerator.cs" />
@@ -135,7 +136,7 @@
     <Reference Include="Microsoft.Scripting.Core, Version=1.1.2.22, Culture=neutral, PublicKeyToken=7f709c5b713576e1">
       <HintPath>References\FougeriteExtraReferences\Microsoft.Scripting.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MoonSharp.Interpreter, Version=0.9.7.1, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="MoonSharp.Interpreter">
       <HintPath>References\FougeriteExtraReferences\MoonSharp.Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="MySql.Data">

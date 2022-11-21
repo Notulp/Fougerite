@@ -3095,9 +3095,10 @@ namespace Fougerite
                     GameObject obj2 = grenade.ThrowItem(rep, origin, forward);
                     if (obj2 != null)
                     {
-                        obj2.rigidbody.AddTorque(new Vector3(UnityEngine.Random.Range((float)-1f, (float)1f),
-                            UnityEngine.Random.Range((float)-1f, (float)1f),
-                            UnityEngine.Random.Range((float)-1f, (float)1f)) * 10f);
+                        obj2.rigidbody.AddTorque(new Vector3(
+                            UnityEngine.Random.Range(-1f, 1f),
+                            UnityEngine.Random.Range(-1f, 1f),
+                            UnityEngine.Random.Range(-1f, 1f)) * 10f);
                         try
                         {
                             if (OnGrenadeThrow != null)
@@ -3264,6 +3265,22 @@ namespace Fougerite
                 }
             }
         }
+
+        public static void NPCSpawned(NPC npc)
+        {
+            using (new Stopper(nameof(Hooks), nameof(NPCSpawned)))
+            {
+                try
+                {
+                    if (OnNPCSpawned != null)
+                        OnNPCSpawned(npc);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"NPCSpawned Error: {ex}");
+                }
+            }
+        }
         
         /// <summary>
         /// A hook of the NetCull.Instantiated function.
@@ -3344,6 +3361,14 @@ namespace Fougerite
                 {
                     underLying = gameObject.GetComponent<SupplyCrate>();
                 }
+                else if (gameObject.GetComponent<HostileWildlifeAI>())
+                {
+                    Logger.Log("Found HostileWildlifeAI");
+                }
+                else if (gameObject.GetComponent<BasicWildLifeAI>())
+                {
+                    Logger.Log("Found BasicWildLifeAI");
+                }
 
                 if (underLying == null) 
                     return instance;
@@ -3414,6 +3439,14 @@ namespace Fougerite
                 else if (gameObject.GetComponent<SupplyCrate>() != null)
                 {
                     underLying = gameObject.GetComponent<SupplyCrate>();
+                }
+                else if (gameObject.GetComponent<HostileWildlifeAI>())
+                {
+                    Logger.Log("Found HostileWildlifeAI");
+                }
+                else if (gameObject.GetComponent<BasicWildLifeAI>())
+                {
+                    Logger.Log("Found BasicWildLifeAI");
                 }
 
                 if (underLying == null) 
@@ -3659,6 +3692,53 @@ namespace Fougerite
                     uLink.Network.Destroy(go);
                 }
             }
+        }
+        
+        /// <summary>
+        /// A hook of the WildlifeManager.AddWildlifeInstance function.
+        /// Used to cache NPCs basically.
+        /// AI spawns even before the physics is baked / server is initialized.
+        /// </summary>
+        /// <param name="ai"></param>
+        /// <returns></returns>
+        public static bool AddWildlifeInstance(BasicWildLifeAI ai)
+        {
+            // Check for DataShutdown, and add It to the Data class before if possible
+            bool value = !WildlifeManager.DataShutdown && WildlifeManager.Data.Add(ai);
+            
+            // Grab the character
+            Character ch = ai.GetComponent<Character>();
+            
+            // Check DataShutdown and Addition
+            if (ch != null && value)
+            {
+                // All good, create the NPC class and throw it to our cache
+                NPC npc = new NPC(ch);
+                NPCCache.GetInstance().Add(npc);
+                
+                // Call event, from this point a plugin can kill the NPC as well as It's already in the Data class
+                NPCSpawned(npc);
+            }
+            
+            return value;
+        }
+
+        /// <summary>
+        /// A hook of the WildlifeManager.AddWildlifeInstance function.
+        /// Used to cache NPCs basically.
+        /// </summary>
+        /// <param name="ai"></param>
+        /// <returns></returns>
+        public static bool RemoveWildlifeInstance(BasicWildLifeAI ai)
+        {
+            // Grab the character
+            Character ch = ai.GetComponent<Character>();
+            if (ch != null && NPCCache.GetInstance().Contains(ch.GetInstanceID()))
+            {
+                NPCCache.GetInstance().Remove(ch.GetInstanceID());
+            }
+            
+            return WildlifeManager.DataInitialized && WildlifeManager.Data.Remove(ai);
         }
     }
 }

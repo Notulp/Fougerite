@@ -309,6 +309,11 @@ namespace Fougerite
         public static event LoggerDelegate OnLogger;
 
         /// <summary>
+        /// This delegate runs when an NPC is spawned.
+        /// </summary>
+        public static event NPCSpawnedEventDelegate OnNPCSpawned;
+
+        /// <summary>
         /// This value returns if the server is shutting down.
         /// </summary>
         public static bool IsShuttingDown { get; set; }
@@ -325,6 +330,7 @@ namespace Fougerite
             OnPlayerDisconnected = delegate { };
             OnNPCKilled = delegate { };
             OnNPCHurt = delegate { };
+            OnNPCSpawned = delegate {  };
             OnPlayerKilled = delegate { };
             OnPlayerHurt = delegate { };
             OnPlayerSpawned = delegate { };
@@ -490,5 +496,7 @@ namespace Fougerite
         public delegate void AirdropCrateDroppedDelegate(SupplyDropPlane plane, Entity supplyCrate);
 
         public delegate void SupplyDropPlaneCreatedDelegate(SupplyDropPlane plane);
+
+        public delegate void NPCSpawnedEventDelegate(NPC npc);
     }
 }

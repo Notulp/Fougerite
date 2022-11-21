@@ -7,6 +7,8 @@ namespace Fougerite
         private Character _char;
         private readonly int _instanceId;
         private readonly string _name;
+        private readonly HostileWildlifeAI _hostileWildlifeAI;
+        private readonly BasicWildLifeAI _basicWildLifeAI;
 
         public NPC(Character c)
         {
@@ -14,6 +16,8 @@ namespace Fougerite
             _instanceId = _char.GetInstanceID();
             _name = _char.name;
             _name = _name.Contains("_A(Clone)") ? _name.Replace("_A(Clone)", "") : _name.Replace("(Clone)", "");
+            _basicWildLifeAI = _char.GetComponent<BasicWildLifeAI>();
+            _hostileWildlifeAI = _char.GetComponent<HostileWildlifeAI>();
         }
 
         /// <summary>
@@ -25,6 +29,30 @@ namespace Fougerite
             {
                 Character.Signal_ServerCharacterDeath();
                 Character.SendMessage("OnKilled", new DamageEvent(), SendMessageOptions.DontRequireReceiver);
+            }
+        }
+
+        /// <summary>
+        /// Returns the HostileWildlifeAI component.
+        /// Null if the NPC isn't a HostileWildlifeAI.
+        /// </summary>
+        public HostileWildlifeAI HostileWildlifeAI
+        {
+            get
+            {
+                return _hostileWildlifeAI;
+            }
+        }
+        
+        /// <summary>
+        /// Returns the BasicWildLifeAI component.
+        /// Every AI class derives from this, so this should never return null.
+        /// </summary>
+        public BasicWildLifeAI BasicWildLifeAI
+        {
+            get
+            {
+                return _basicWildLifeAI;
             }
         }
 

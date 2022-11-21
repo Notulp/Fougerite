@@ -970,5 +970,10 @@ namespace Fougerite.PluginLoaders
         {
             Invoke("On_SupplyDropPlaneCreated", plane);
         }
+        
+        public void OnNPCSpawn(NPC npc)
+        {
+            Invoke("On_NPCSpawned", npc);
+        }
     }
 }

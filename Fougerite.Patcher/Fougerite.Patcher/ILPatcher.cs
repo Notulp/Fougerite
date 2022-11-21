@@ -33,6 +33,7 @@ namespace Fougerite.Patcher
         {
             TypeDefinition type = rustAssembly.MainModule.GetType("WildlifeManager");
             TypeDefinition data = type.GetNestedType("Data");
+            data.IsPublic = true;
             MethodDefinition think = data.GetMethod("Think");
             MethodDefinition update = type.GetMethod("Update");
 
@@ -50,8 +51,36 @@ namespace Fougerite.Patcher
             TypeDefinition logger = fougeriteAssembly.MainModule.GetType("Fougerite.Logger");
             MethodDefinition logex = logger.GetMethod("LogException");
 
+            // TODO: This should be checked instead of suppressed
             WrapMethod(update, logex, rustAssembly, false);
             //WrapMethod(think, logex, rustAssembly, false);
+
+            foreach (var x in type.Fields)
+            {
+                x.SetPublic(true);
+            }
+            
+            foreach (var x in data.Fields)
+            {
+                x.SetPublic(true);
+            }
+
+            MethodDefinition AddWildlifeInstance = type.GetMethod("AddWildlifeInstance");
+            MethodDefinition AddWildlifeInstanceHook = hooksClass.GetMethod("AddWildlifeInstance");
+            MethodDefinition RemoveWildlifeInstance = type.GetMethod("RemoveWildlifeInstance");
+            MethodDefinition RemoveWildlifeInstanceHook = hooksClass.GetMethod("RemoveWildlifeInstance");
+            
+            ILProcessor iLProcessor = AddWildlifeInstance.Body.GetILProcessor();
+            iLProcessor.Body.Instructions.Clear();
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(AddWildlifeInstanceHook)));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            ILProcessor iLProcessor2 = RemoveWildlifeInstance.Body.GetILProcessor();
+            iLProcessor2.Body.Instructions.Clear();
+            iLProcessor2.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor2.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(RemoveWildlifeInstanceHook)));
+            iLProcessor2.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         }
 
         private void PatchFacePunch()

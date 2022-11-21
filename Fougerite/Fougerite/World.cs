@@ -845,6 +845,19 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Returns all the animals into a list.
+        /// This is safe to call in a thread / timer.
+        /// This list is a shallow copy.
+        /// </summary>
+        public List<NPC> Animals
+        {
+            get
+            {
+                return NPCCache.GetInstance().GetNPCs();
+            }
+        }
+
+        /// <summary>
         /// Returns all the Entities into a list.
         /// This is safe to call in a thread / timer.
         /// This list is a shallow copy.
