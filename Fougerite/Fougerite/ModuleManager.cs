@@ -7,6 +7,8 @@ using System.Reflection;
 
 namespace Fougerite
 {
+    [Obsolete(@"Modules is obsolete, and might be removed in the future.
+             Use PluginLoader.GetInstance().Plugins.Values", false)]
     public class ModuleManager
     {
         private static readonly Dictionary<string, Assembly> LoadedAssemblies = new Dictionary<string, Assembly>();

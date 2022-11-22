@@ -123,8 +123,7 @@ namespace Fougerite.PluginLoaders
                         #pragma warning restore 618
                         Engine = PluginInstance;
                         Logger.LogDebug($"[Modules] Module added: {FileInfo.Name}");
-                        Globals = (from method in Type.GetMethods()
-                            select method.Name).ToList<string>();
+                        Globals = Type.GetMethods().Select(method => method.Name).ToList();
                         break;
                     }
                 }

@@ -130,10 +130,12 @@ namespace Fougerite
             }
             else if (Server.GetServer().HasRustPP)
             {
+#pragma warning disable CS0618
                 if (Server.GetServer().GetRustPPAPI().Cache.ContainsKey(_ownerid))
                 {
                     _ownername = Server.GetServer().GetRustPPAPI().Cache[_ownerid];
                 }
+#pragma warning restore CS0618
             }
             else
             {
@@ -153,10 +155,12 @@ namespace Fougerite
             }
             else if (Server.GetServer().HasRustPP)
             {
+#pragma warning disable CS0618
                 if (Server.GetServer().GetRustPPAPI().Cache.ContainsKey(_creatorid))
                 {
                     _creatorname = Server.GetServer().GetRustPPAPI().Cache[_creatorid];
                 }
+#pragma warning restore CS0618
             }
             else
             {

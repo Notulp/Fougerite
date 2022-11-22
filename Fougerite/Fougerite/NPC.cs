@@ -31,6 +31,18 @@ namespace Fougerite
                 Character.SendMessage("OnKilled", new DamageEvent(), SendMessageOptions.DontRequireReceiver);
             }
         }
+        
+        /// <summary>
+        /// Deals a specific amount of damage to the NPC.
+        /// </summary>
+        /// <param name="dmg"></param>
+        public void Damage(float dmg)
+        {
+            if (IsAlive)
+            {
+                TakeDamage.HurtSelf(_char, dmg);
+            }
+        }
 
         /// <summary>
         /// Returns the HostileWildlifeAI component.

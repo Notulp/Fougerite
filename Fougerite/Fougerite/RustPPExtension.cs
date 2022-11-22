@@ -16,6 +16,7 @@ namespace Fougerite
     /// Although I have shown the examples years later on how proper plugin APIs should be
     /// I am afraid due to plugins using this, is going to remain as-is.
     /// </summary>
+    [Obsolete("I do not recommend using this, read the documentation for the reason.", false)]
     public class RustPPExtension
     {
         public FriendList FriendsOf(ulong steamid)

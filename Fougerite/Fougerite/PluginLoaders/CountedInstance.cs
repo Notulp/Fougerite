@@ -6,7 +6,8 @@ namespace Fougerite.PluginLoaders
     [Serializable]
     public class CountedInstance
     {
-        [NonSerialized] public static readonly Dictionary<Type, Counts> InstanceTypes;
+        [NonSerialized] 
+        public static readonly Dictionary<Type, Counts> InstanceTypes;
 
         ~CountedInstance()
         {

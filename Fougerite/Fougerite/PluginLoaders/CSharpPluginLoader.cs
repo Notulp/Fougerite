@@ -194,7 +194,7 @@ namespace Fougerite.PluginLoaders
                 }
 
                 #pragma warning disable 618
-                foreach (var x in ModuleManager.Plugins)
+                foreach (ModuleContainer x in ModuleManager.Plugins)
                 {
                     if (x.Plugin == csPlugin.Engine)
                     {

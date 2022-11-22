@@ -7,7 +7,6 @@ using Fougerite.Concurrent;
 using Fougerite.Events;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
-using Object = UnityEngine.Object;
 
 namespace Fougerite
 {
@@ -628,6 +627,7 @@ namespace Fougerite
         /// Tries to Grab the current Rust++ API.
         /// </summary>
         /// <returns></returns>
+        [Obsolete("Obsolete. Read RustPPExtension's documentation to find out why.", false)]
         public RustPPExtension GetRustPPAPI()
         {
             if (HasRustPP) 
