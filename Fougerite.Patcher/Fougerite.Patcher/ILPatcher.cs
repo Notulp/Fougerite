@@ -2332,6 +2332,34 @@ namespace Fougerite.Patcher
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         }
         
+        private void SleepingAvatarPatch()
+        {
+            TypeDefinition SleepingAvatar = rustAssembly.MainModule.GetType("SleepingAvatar");
+            TypeDefinition Registry = SleepingAvatar.GetNestedType("Registry");
+            Registry.IsPublic = true;
+            Registry.GetField("all").SetPublic(true);
+            SleepingAvatar.GetField("registered").SetPublic(true);
+            
+            MethodDefinition Register = Registry.GetMethod("Register");
+            MethodDefinition UnRegister = Registry.GetMethod("UnRegister");
+            
+            MethodDefinition RegisterHook = hooksClass.GetMethod("SleeperRegister");
+            MethodDefinition UnRegisterHook = hooksClass.GetMethod("SleeperUnRegister");
+
+            
+            ILProcessor iLProcessor = Register.Body.GetILProcessor();
+            iLProcessor.Body.Instructions.Clear();
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(RegisterHook)));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            ILProcessor iLProcessor2 = UnRegister.Body.GetILProcessor();
+            iLProcessor2.Body.Instructions.Clear();
+            iLProcessor2.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor2.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(UnRegisterHook)));
+            iLProcessor2.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        }
+        
         // uLink Class56.method_36 has been patched here: https://i.imgur.com/WIEQXhX.png
         // I modified using dynspy to avoid the struggle.
 
@@ -2468,6 +2496,7 @@ namespace Fougerite.Patcher
                     this.DoAction1Patch();
                     this.NGCPatch();
                     this.TimedExplosivePatch();
+                    this.SleepingAvatarPatch();
                 }
                 catch (Exception ex)
                 {

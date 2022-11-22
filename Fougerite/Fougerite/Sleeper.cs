@@ -10,15 +10,17 @@ namespace Fougerite
     public class Sleeper
     {
         private readonly DeployableObject _sleeper;
+        private readonly SleepingAvatar _sleepingAvatar;
         private readonly ulong _uid;
-        private readonly int _instanceid;
+        private readonly int _instanceId;
         private readonly string _name;
         public bool IsDestroyed;
 
         public Sleeper(DeployableObject obj)
         {
             _sleeper = obj;
-            _instanceid = _sleeper.GetInstanceID();
+            _instanceId = _sleeper.GetInstanceID();
+            _sleepingAvatar = _sleeper.GetComponent<SleepingAvatar>();
             _uid = _sleeper.ownerID;
             CachedPlayer cachedPlayer;
             bool success = PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(UID, out cachedPlayer);
@@ -85,6 +87,14 @@ namespace Fougerite
         public DeployableObject Object
         {
             get { return _sleeper; }
+        }
+
+        /// <summary>
+        /// Returns the SleepingAvatar class.
+        /// </summary>
+        public SleepingAvatar SleepingAvatar
+        {
+            get { return _sleepingAvatar; }
         }
 
         /// <summary>
@@ -166,7 +176,7 @@ namespace Fougerite
         {
             get
             {
-                return _instanceid;
+                return _instanceId;
             }
         }
     }

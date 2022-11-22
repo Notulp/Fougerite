@@ -1368,11 +1368,7 @@ namespace Fougerite
                     return null;
                 }
 
-                Sleeper firstSleeper = Object.FindObjectsOfType<SleepingAvatar>()
-                    .Select(sleeper => new { sleeper, deployable = sleeper.GetComponent<DeployableObject>() })
-                    .Where(t => t.deployable.ownerID == uid)
-                    .Select(t => new Sleeper(t.deployable)).FirstOrDefault();
-
+                Sleeper firstSleeper = Server.GetServer().Sleepers.FirstOrDefault(x => x.UID == uid);
                 return firstSleeper;
             }
         }

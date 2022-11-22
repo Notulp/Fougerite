@@ -980,5 +980,10 @@ namespace Fougerite.PluginLoaders
         {
             Invoke("On_TimedExplosiveSpawned", ev);
         }
+
+        public void OnSleeperSpawned(Sleeper sleeper)
+        {
+            Invoke("On_SleeperSpawned", sleeper);
+        }
     }
 }

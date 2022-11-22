@@ -3337,6 +3337,10 @@ namespace Fougerite
                 {
                     underLying = gameObject.GetComponent<DeployableObject>();
                 }
+                else if (gameObject.GetComponent<StructureMaster>() != null)
+                {
+                    underLying = gameObject.GetComponent<StructureMaster>();
+                }
                 else if (gameObject.GetComponent<StructureComponent>() != null)
                 {
                     underLying = gameObject.GetComponent<StructureComponent>();
@@ -3344,10 +3348,6 @@ namespace Fougerite
                 else if (gameObject.GetComponent<StructureMaster>() != null)
                 {
                     underLying = gameObject.GetComponent<StructureMaster>();
-                }
-                else if (gameObject.GetComponent<BasicDoor>() != null)
-                {
-                    underLying = gameObject.GetComponent<BasicDoor>();
                 }
                 else if (gameObject.GetComponent<LootableObject>() != null)
                 {
@@ -3408,14 +3408,15 @@ namespace Fougerite
                 {
                     underLying = gameObject.GetComponent<DeployableObject>();
                 }
-                else if (gameObject.GetComponent<StructureComponent>() != null)
-                {
-                    underLying = gameObject.GetComponent<StructureComponent>();
-                }
                 else if (gameObject.GetComponent<StructureMaster>() != null)
                 {
                     underLying = gameObject.GetComponent<StructureMaster>();
                 }
+                else if (gameObject.GetComponent<StructureComponent>() != null)
+                {
+                    underLying = gameObject.GetComponent<StructureComponent>();
+                }
+                // BasicDoor is a DeployableObject anyway
                 else if (gameObject.GetComponent<BasicDoor>() != null)
                 {
                     underLying = gameObject.GetComponent<BasicDoor>();
@@ -3466,16 +3467,17 @@ namespace Fougerite
                 underLying = go.GetComponent<DeployableObject>();
                 id = ((DeployableObject) underLying).GetInstanceID();
             }
-            else if (go.GetComponent<StructureComponent>() != null)
-            {
-                underLying = go.GetComponent<StructureComponent>();
-                id = ((StructureComponent) underLying).GetInstanceID();
-            }
             else if (go.GetComponent<StructureMaster>() != null)
             {
                 underLying = go.GetComponent<StructureMaster>();
                 id = ((StructureMaster) underLying).GetInstanceID();
             }
+            else if (go.GetComponent<StructureComponent>() != null)
+            {
+                underLying = go.GetComponent<StructureComponent>();
+                id = ((StructureComponent) underLying).GetInstanceID();
+            }
+            // BasicDoor is a DeployableObject anyway
             else if (go.GetComponent<BasicDoor>() != null)
             {
                 underLying = go.GetComponent<BasicDoor>();
@@ -3539,16 +3541,17 @@ namespace Fougerite
                         underLying = go.GetComponent<DeployableObject>();
                         id = ((DeployableObject) underLying).GetInstanceID();
                     }
-                    else if (go.GetComponent<StructureComponent>() != null)
-                    {
-                        underLying = go.GetComponent<StructureComponent>();
-                        id = ((StructureComponent) underLying).GetInstanceID();
-                    }
                     else if (go.GetComponent<StructureMaster>() != null)
                     {
                         underLying = go.GetComponent<StructureMaster>();
                         id = ((StructureMaster) underLying).GetInstanceID();
                     }
+                    else if (go.GetComponent<StructureComponent>() != null)
+                    {
+                        underLying = go.GetComponent<StructureComponent>();
+                        id = ((StructureComponent) underLying).GetInstanceID();
+                    }
+                    // BasicDoor is a DeployableObject anyway
                     else if (go.GetComponent<BasicDoor>() != null)
                     {
                         underLying = go.GetComponent<BasicDoor>();
@@ -3615,16 +3618,17 @@ namespace Fougerite
                 underLying = go.GetComponent<DeployableObject>();
                 id = ((DeployableObject) underLying).GetInstanceID();
             }
-            else if (go.GetComponent<StructureComponent>() != null)
-            {
-                underLying = go.GetComponent<StructureComponent>();
-                id = ((StructureComponent) underLying).GetInstanceID();
-            }
             else if (go.GetComponent<StructureMaster>() != null)
             {
                 underLying = go.GetComponent<StructureMaster>();
                 id = ((StructureMaster) underLying).GetInstanceID();
             }
+            else if (go.GetComponent<StructureComponent>() != null)
+            {
+                underLying = go.GetComponent<StructureComponent>();
+                id = ((StructureComponent) underLying).GetInstanceID();
+            }
+            // BasicDoor is a DeployableObject anyway
             else if (go.GetComponent<BasicDoor>() != null)
             {
                 underLying = go.GetComponent<BasicDoor>();
@@ -3746,7 +3750,7 @@ namespace Fougerite
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError($"TimedExplosiveSpawn Error: {ex}");
+                    Logger.LogError($"TimedExplosiveSpawnedEvent Error: {ex}");
                 }
 
                 // Return on cancel
@@ -3759,6 +3763,89 @@ namespace Fougerite
                 
                 timedExplosive.Invoke(nameof(TimedExplosive.Explode), timedExplosive.fuseLength);
             }
+        }
+        
+        /// <summary>
+        /// A hook of SleepingAvatar.Registry.Register function.
+        /// Runs when a Sleeper is created.
+        /// </summary>
+        /// <param name="avatar"></param>
+        /// <returns></returns>
+        public static bool SleeperRegister(SleepingAvatar avatar)
+        {
+            // Sanity check
+            if (avatar == null)
+            {
+                return false;
+            }
+            
+            SleepingAvatar avatar2;
+            if (SleepingAvatar.Registry.all.TryGetValue(avatar.creatorID, out avatar2))
+            {
+                if (avatar2 == avatar)
+                {
+                    return false;
+                }
+                avatar2.registered = false;
+            }
+            SleepingAvatar.Registry.all[avatar.creatorID] = avatar;
+            avatar.registered = true;
+
+            // Add It to the cache
+            DeployableObject deployableObject = avatar.GetComponent<DeployableObject>();
+            if (deployableObject != null)
+            {
+                Sleeper sleeper = new Sleeper(deployableObject);
+                SleeperCache.GetInstance().Add(sleeper);
+                
+                try
+                {
+                    if (OnSleeperSpawned != null)
+                        OnSleeperSpawned(sleeper);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"SleeperSpawnedEvent Error: {ex}");
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// A hook of SleepingAvatar.Registry.UnRegister function.
+        /// Runs when a Sleeper is destroyed/killed.
+        /// </summary>
+        /// <param name="avatar"></param>
+        /// <returns></returns>
+        public static bool SleeperUnRegister(SleepingAvatar avatar)
+        {
+            if (avatar != null)
+            {
+                if (!avatar.registered) 
+                    return false;
+                
+                if (SleepingAvatar.Registry.all.TryGetValue(avatar.creatorID, out SleepingAvatar avatar2) && avatar2 == avatar)
+                {
+                    SleepingAvatar.Registry.all.Remove(avatar.creatorID);
+                }
+                avatar.registered = false;
+                
+                // Remove It from the cache
+                DeployableObject deployableObject = avatar.GetComponent<DeployableObject>();
+                if (deployableObject != null)
+                {
+                    SleeperCache.GetInstance().Remove(deployableObject.GetInstanceID());
+                }
+                
+                return true;
+            }
+            if (!ReferenceEquals(avatar, null))
+            {
+                Debug.LogWarning("Got missing avatar in UnRegister, running scan to find invalid entries..", avatar);
+                SleepingAvatar.Registry.CleanUpPossibleMissingPairs();
+            }
+            return false;
         }
     }
 }

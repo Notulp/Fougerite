@@ -48,6 +48,7 @@
     <Compile Include="Fougerite\Caches\EntityCache.cs" />
     <Compile Include="Fougerite\Caches\NPCCache.cs" />
     <Compile Include="Fougerite\Caches\PlayerCache.cs" />
+    <Compile Include="Fougerite\Caches\SleeperCache.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentEnumerator.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentList.cs" />

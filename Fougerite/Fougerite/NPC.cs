@@ -121,7 +121,14 @@ namespace Fougerite
         {
             get { return _char.transform.position.z; }
         }
-        
+
+        /// <summary>
+        /// Returns the InstanceID (Unique ID) of the NPC.
+        /// </summary>
+        public int InstanceID
+        {
+            get { return _instanceId; }
+        }
         
         /// <summary>
         /// For easier comparism.

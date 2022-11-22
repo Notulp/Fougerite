@@ -69,7 +69,8 @@
             "On_AirdropCrateDropped",
             "On_SupplyDropPlaneCreated",
             "On_NPCSpawned",
-            "On_TimedExplosiveSpawned"
+            "On_TimedExplosiveSpawned",
+            "On_SleeperSpawned"
         };
 
         public void Initialize()
@@ -344,6 +345,9 @@
                         case "On_TimedExplosiveSpawned":
                             Hooks.OnTimedExplosiveSpawned += plugin.OnTimedExplosiveSpawned;
                             break;
+                        case "On_SleeperSpawned":
+                            Hooks.OnSleeperSpawned += plugin.OnSleeperSpawned;
+                            break;
                     }
                 }
             }
@@ -526,6 +530,9 @@
                             break;
                         case "On_TimedExplosiveSpawned":
                             Hooks.OnTimedExplosiveSpawned -= plugin.OnTimedExplosiveSpawned;
+                            break;
+                        case "On_SleeperSpawned":
+                            Hooks.OnSleeperSpawned -= plugin.OnSleeperSpawned;
                             break;
                     }
                 }

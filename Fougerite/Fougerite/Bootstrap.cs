@@ -311,8 +311,10 @@ namespace Fougerite
             // Load Player Cache
             PlayerCache.GetPlayerCache().LoadPlayersCache();
             
-            // Init Entity Cache
+            // Init other Caches.
             EntityCache.GetInstance();
+            NPCCache.GetInstance();
+            SleeperCache.GetInstance();
 
             Rust.Steam.Server.SetModded();
             Rust.Steam.Server.Official = false;

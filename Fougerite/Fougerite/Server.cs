@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Fougerite.Caches;
 using Fougerite.Concurrent;
 using Fougerite.Events;
 using Fougerite.Permissions;
@@ -587,14 +588,14 @@ namespace Fougerite
 
         /// <summary>
         /// Gets all the current sleepers on the server.
+        /// This list is thread / timer safe.
+        /// This is a shallow copy.
         /// </summary>
         public List<Sleeper> Sleepers
         {
             get
             {
-                var query = from s in Object.FindObjectsOfType<SleepingAvatar>()
-                            select new Sleeper(s.GetComponent<DeployableObject>());
-                return query.ToList();
+                return SleeperCache.GetInstance().GetSleepers();
             }
         }
         

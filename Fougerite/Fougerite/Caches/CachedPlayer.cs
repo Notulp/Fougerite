@@ -38,6 +38,7 @@ namespace Fougerite.Caches
 
         /// <summary>
         /// The last login date of the player.
+        /// Can be null.
         /// </summary>
         [JsonProperty]
         public DateTime? LastLogin

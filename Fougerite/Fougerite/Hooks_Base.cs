@@ -319,6 +319,11 @@ namespace Fougerite
         public static event TimedExplosiveEventDelegate OnTimedExplosiveSpawned;
 
         /// <summary>
+        /// This delegate runs when a Sleeper is spawned.
+        /// </summary>
+        public static event SleeperSpawnEventDelegate OnSleeperSpawned;
+
+        /// <summary>
         /// This value returns if the server is shutting down.
         /// </summary>
         public static bool IsShuttingDown { get; set; }
@@ -385,6 +390,7 @@ namespace Fougerite
             OnAirdropCrateDropped = delegate { };
             OnSupplyDropPlaneCreated = delegate {  };
             OnTimedExplosiveSpawned = delegate {  };
+            OnSleeperSpawned = delegate {  };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -506,5 +512,7 @@ namespace Fougerite
         public delegate void NPCSpawnedEventDelegate(NPC npc);
 
         public delegate void TimedExplosiveEventDelegate(TimedExplosiveEvent timedExplosiveEvent);
+
+        public delegate void SleeperSpawnEventDelegate(Sleeper sleeper);
     }
 }
