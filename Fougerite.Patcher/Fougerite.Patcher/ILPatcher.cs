@@ -756,6 +756,10 @@ namespace Fougerite.Patcher
 
             TypeDefinition BasicDoor = rustAssembly.MainModule.GetType("BasicDoor");
             BasicDoor.GetField("state").SetPublic(true);
+            BasicDoor.GetNestedType("State").IsPublic = true;
+            BasicDoor.GetNestedType("Side").IsPublic = true;
+            BasicDoor.GetNestedType("RunFlags").IsPublic = true;
+            
             foreach (MethodDefinition met in BasicDoor.Methods)
             {
                 if (met.Name.Equals("ToggleStateServer"))

@@ -678,13 +678,19 @@ namespace Fougerite
             using (new Stopper(nameof(Hooks), nameof(CheckOwner)))
             {
                 DoorEvent de = new DoorEvent(new Entity(obj));
+                // Possibly was used for sleeping bag stuff, and they refer to CheckOwner
+                // Also for the Doors of course
                 if (obj.ownerID == controllable.playerClient.userID)
                 {
                     de.Open = true;
                 }
 
-                if (!(obj is SleepingBag) && OnDoorUse != null)
+                BasicDoor basicDoor = obj.GetComponent<BasicDoor>();
+                if (basicDoor != null && OnDoorUse != null)
                 {
+                    de.State = (BasicDoor.State) basicDoor.state;
+                    de.BasicDoor = basicDoor;
+                    
                     try
                     {
                         OnDoorUse(Server.GetServer().FindPlayer(controllable.playerClient.userID), de);

@@ -7,10 +7,13 @@
     {
         private Entity _ent;
         private bool _open;
+        private BasicDoor _basicDoor;
+        private bool _cancelled;
+        private BasicDoor.State _basicDoorState;
 
         public DoorEvent(Entity e)
         {
-            Open = false;
+            _open = false;
             Entity = e;
         }
 
@@ -25,7 +28,23 @@
             }
             set
             {
+                // Ehh, this shouldn't have been implemented
                 _ent = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the BasicDoor class.
+        /// </summary>
+        public BasicDoor BasicDoor
+        {
+            get
+            {
+                return _basicDoor;
+            }
+            internal set
+            {
+                _basicDoor = value;
             }
         }
 
@@ -40,7 +59,38 @@
             }
             set
             {
+                if (_cancelled)
+                    return;
+                
                 _open = value;
+                if (_open == false)
+                    _cancelled = true;
+            }
+        }
+
+        /// <summary>
+        /// Gets if the event was cancelled using the Open property.
+        /// </summary>
+        public bool Cancelled
+        {
+            get
+            {
+                return _cancelled;
+            }
+        }
+
+        /// <summary>
+        /// Gets the current state of the door
+        /// </summary>
+        public BasicDoor.State State
+        {
+            get
+            {
+                return _basicDoorState;
+            }
+            internal set
+            {
+                _basicDoorState = value;
             }
         }
     }

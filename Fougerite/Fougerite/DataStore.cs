@@ -33,16 +33,9 @@ namespace Fougerite
             if (keyorval == null)
                 return null;
             
-            try
+            if (keyorval is Vector3 vector3)
             {
-                if (keyorval is Vector3 vector3)
-                {
-                    return $"Vector3,{vector3.x:G9},{vector3.y:G9},{vector3.z:G9}";
-                }
-            }
-            catch
-            {
-                //Logger.LogException(ex);
+                return $"Vector3,{vector3.x:G9},{vector3.y:G9},{vector3.z:G9}";
             }
 
             return null;
