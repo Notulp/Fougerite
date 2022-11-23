@@ -823,6 +823,7 @@ namespace Fougerite
         /// <summary>
         /// Returns all the LootableObjects.
         /// This is safe to call in a thread / timer.
+        /// This list is a shallow copy.
         /// </summary>
         public IEnumerable<Entity> LootableObjects
         {
@@ -835,6 +836,7 @@ namespace Fougerite
         /// <summary>
         /// Returns all the SupplyCrates.
         /// This is safe to call in a thread / timer.
+        /// This list is a shallow copy.
         /// </summary>
         public IEnumerable<Entity> SupplyCrates
         {
@@ -844,6 +846,32 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Returns all the Doors.
+        /// This is safe to call in a thread / timer.
+        /// This list is a shallow copy.
+        /// </summary>
+        public List<Entity> Doors
+        {
+            get
+            {
+                return Entities.Where(x => x.IsBasicDoor()).ToList();
+            }
+        }
+        
+        /// <summary>
+        /// Returns all the Resources.
+        /// This is safe to call in a thread / timer.
+        /// This list is a shallow copy.
+        /// </summary>
+        public List<Entity> Resources
+        {
+            get
+            {
+                return Entities.Where(x => x.IsResourceTarget()).ToList();
+            }
+        }
+        
         /// <summary>
         /// Returns all the animals into a list.
         /// This is safe to call in a thread / timer.
