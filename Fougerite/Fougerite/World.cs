@@ -855,7 +855,7 @@ namespace Fougerite
         {
             get
             {
-                return Entities.Where(x => x.IsBasicDoor()).ToList();
+                return Entities.Where(x => x.IsDeployableObject() && x.GetObject<DeployableObject>().GetComponent<BasicDoor>() != null).ToList();
             }
         }
         
