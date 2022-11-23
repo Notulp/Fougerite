@@ -16,6 +16,7 @@
         private object _victim;
         private string _weapon;
         private WeaponImpact _wi;
+        private bool _cancelled;
         private readonly bool _playervictim;
         private readonly bool _entityvictim = false;
         private readonly bool _npcvictim = false;
@@ -271,6 +272,18 @@
         }
 
         /// <summary>
+        /// Gets whether the event was cancelled.
+        /// (DamageAmount was set to 0f)
+        /// </summary>
+        public bool Cancelled
+        {
+            get
+            {
+                return _cancelled;
+            }
+        }
+
+        /// <summary>
         /// Gets or Sets the Damage of the event.
         /// </summary>
         public float DamageAmount
@@ -281,7 +294,13 @@
             }
             set
             {
+                // We shouldn't conflict with other plugins once damage was set to 0f.
+                if (_cancelled)
+                    return;
+                
                 _de.amount = value;
+                if (_de.amount == 0f)
+                    _cancelled = true;
             }
         }
 

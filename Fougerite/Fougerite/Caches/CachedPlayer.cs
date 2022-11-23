@@ -39,6 +39,7 @@ namespace Fougerite.Caches
         /// <summary>
         /// The last login date of the player.
         /// Can be null.
+        /// It's in UTC time format.
         /// </summary>
         [JsonProperty]
         public DateTime? LastLogin
@@ -50,6 +51,7 @@ namespace Fougerite.Caches
         /// <summary>
         /// The last logout date of the player.
         /// Can be null.
+        /// It's in UTC time format.
         /// </summary>
         [JsonProperty]
         public DateTime? LastLogout
