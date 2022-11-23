@@ -114,6 +114,9 @@ namespace Fougerite.PluginLoaders
             Scope.SetVariable("SQLite", SQLiteConnector.GetInstance);
             Scope.SetVariable("PermissionSystem", PermissionSystem.GetPermissionSystem());
             Scope.SetVariable("PlayerCache", PlayerCache.GetPlayerCache());
+            Scope.SetVariable("EntityCache", EntityCache.GetInstance());
+            Scope.SetVariable("NPCCache", NPCCache.GetInstance());
+            Scope.SetVariable("SleeperCache", SleeperCache.GetInstance());
             
             try
             {

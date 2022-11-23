@@ -91,6 +91,9 @@ namespace Fougerite.PluginLoaders
                 script.Globals.Set("SQLite", UserData.Create(SQLiteConnector.GetInstance));
                 script.Globals.Set("PermissionSystem", UserData.Create(PermissionSystem.GetPermissionSystem()));
                 script.Globals.Set("PlayerCache", UserData.Create(PlayerCache.GetPlayerCache()));
+                script.Globals.Set("EntityCache", UserData.Create(EntityCache.GetInstance()));
+                script.Globals.Set("NPCCache", UserData.Create(NPCCache.GetInstance()));
+                script.Globals.Set("SleeperCache", UserData.Create(SleeperCache.GetInstance()));
                 foreach (DynValue v in script.Globals.Keys)
                 {
                     Globals.Add(v.ToString().Replace("\"", ""));

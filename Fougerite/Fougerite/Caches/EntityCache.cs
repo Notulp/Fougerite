@@ -9,10 +9,11 @@ namespace Fougerite.Caches
     /// <summary>
     /// This class provides a thread-safe implementation to the entity list.
     /// Unity.Object.FindObjectsOfType (which is not thread-safe) will result in server
-    /// crashes after multiple uses in a timer or thread.
+    /// crashes after multiple uses in a timer or thread, and It is also super slow, taking 0.8 seconds to collect & iterate
+    /// when your map has 80k objects on an Intel i7-9700k.
     /// This class gets called when a new Entity is spawned, or destroyed (Thus slowing server start slightly)
     /// but allowing plugins to safely iterate Entities on another thread while not interfering with the main thread
-    /// of the game and cause lagging.
+    /// of the game and returns the list under 10ms (Tested with 80k objects again).
     /// </summary>
     public class EntityCache
     {

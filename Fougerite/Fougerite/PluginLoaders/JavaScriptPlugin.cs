@@ -79,6 +79,9 @@ namespace Fougerite.PluginLoaders
                     .SetParameter("SQLite", SQLiteConnector.GetInstance)
                     .SetParameter("PermissionSystem", PermissionSystem.GetPermissionSystem())
                     .SetParameter("PlayerCache", PlayerCache.GetPlayerCache())
+                    .SetParameter("EntityCache", EntityCache.GetInstance())
+                    .SetParameter("SleeperCache", SleeperCache.GetInstance())
+                    .SetParameter("NPCCache", NPCCache.GetInstance())
                     .SetFunction("importClass", new importit(importClass));
                 Program = JintEngine.Compile(code, false);
 
