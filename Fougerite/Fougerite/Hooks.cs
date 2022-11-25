@@ -1337,7 +1337,7 @@ namespace Fougerite
                     }
 
                     // Check if this name is in the aliases
-                    if (!cachedPlayer.Aliases.Contains(player.Name, StringComparer.CurrentCultureIgnoreCase))
+                    if (!cachedPlayer.Aliases.Contains(player.Name, StringComparer.OrdinalIgnoreCase))
                     {
                         cachedPlayer.Aliases.Add(player.Name);
                     }
