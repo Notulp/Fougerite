@@ -136,7 +136,7 @@ namespace Fougerite
                     if (OnCommand != null)
                     {
                         // If player has *, restrict all commands.
-                        if (player.CommandCancelList.Contains("*") || player.CommandCancelList.Contains(command))
+                        if (player.CommandCancelList.Contains("*", StringComparer.OrdinalIgnoreCase) || player.CommandCancelList.Contains(command, StringComparer.OrdinalIgnoreCase))
                         {
                             player.Message($"You cannot execute {command} at the moment!");
                             return;
@@ -517,7 +517,7 @@ namespace Fougerite
                 }
 
                 // Allow server console to execute anything
-                if (!external && Server.GetServer().ConsoleCommandCancelList.Contains(data))
+                if (!external && Server.GetServer().ConsoleCommandCancelList.Contains(data, StringComparer.OrdinalIgnoreCase))
                 {
                     a.ReplyWith("This console command is globally restricted!");
                     return false;
@@ -527,7 +527,7 @@ namespace Fougerite
                 if (UID > 0)
                 {
                     Player player = Server.GetServer().FindPlayer(UID);
-                    if (player != null && player.ConsoleCommandCancelList.Contains(data))
+                    if (player != null && player.ConsoleCommandCancelList.Contains(data, StringComparer.OrdinalIgnoreCase))
                     {
                         a.ReplyWith("This console command is restricted for you!");
                         player.Message("This console command is restricted for you!");
@@ -572,9 +572,9 @@ namespace Fougerite
                         if (a.HasArgs(1))
                         {
                             string plugin = a.ArgsStr;
-                            foreach (var x in PluginLoader.GetInstance().Plugins.Keys)
+                            foreach (string x in PluginLoader.GetInstance().Plugins.Keys)
                             {
-                                if (string.Equals(x, plugin, StringComparison.CurrentCultureIgnoreCase))
+                                if (string.Equals(x, plugin, StringComparison.OrdinalIgnoreCase))
                                 {
                                     PluginLoader.GetInstance().ReloadPlugin(x);
                                     a.ReplyWith($"Fougerite: Plugin {x} reloaded!");
@@ -596,9 +596,9 @@ namespace Fougerite
                         if (a.HasArgs(1))
                         {
                             string plugin = a.ArgsStr;
-                            foreach (var x in PluginLoader.GetInstance().Plugins.Keys)
+                            foreach (string x in PluginLoader.GetInstance().Plugins.Keys)
                             {
-                                if (string.Equals(x, plugin, StringComparison.CurrentCultureIgnoreCase))
+                                if (string.Equals(x, plugin, StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (PluginLoader.GetInstance().Plugins[x].State == PluginState.Loaded)
                                     {

@@ -2,12 +2,14 @@ namespace Fougerite.Events
 {
     public class ConsoleEvent
     {
+        private bool _cancelled;
+        
         /// <summary>
         /// Cancels the event.
         /// </summary>
         public void Cancel()
         {
-            Cancelled = true;
+            _cancelled = true;
         }
         
         /// <summary>
@@ -15,8 +17,10 @@ namespace Fougerite.Events
         /// </summary>
         public bool Cancelled
         {
-            get;
-            private set;
+            get
+            {
+                return _cancelled;
+            }
         }
     }
 }
