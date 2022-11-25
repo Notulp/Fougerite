@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Fougerite
 {
@@ -11,7 +12,7 @@ namespace Fougerite
     /// </summary>
     public class DataStore
     {
-        public Hashtable datastore = new Hashtable();
+        private Hashtable _datastore = new Hashtable();
         private static DataStore _instance;
         public static string PATH = Path.Combine(Config.GetPublicFolder(), "FougeriteDatastore.ds");
 
@@ -28,44 +29,15 @@ namespace Fougerite
             return _instance;
         }
 
-        private object StringifyIfVector3(object keyorval)
+        /// <summary>
+        /// Returns the hashtable instance.
+        /// </summary>
+        public Hashtable Hashtable
         {
-            if (keyorval == null)
-                return null;
-            
-            if (keyorval is Vector3 vector3)
+            get
             {
-                return $"Vector3,{vector3.x:G9},{vector3.y:G9},{vector3.z:G9}";
+                return _datastore;
             }
-
-            return null;
-        }
-
-        private object ParseIfVector3String(object keyorval)
-        {
-            if (keyorval == null)
-                return null;
-
-            try
-            {
-                if (keyorval is string s)
-                {
-                    if (s.StartsWith("Vector3,", StringComparison.Ordinal))
-                    {
-                        string[] v3array = s.Split(',');
-                        Vector3 parse = new Vector3(Single.Parse(v3array[1]),
-                                            Single.Parse(v3array[2]),
-                                            Single.Parse(v3array[3]));
-                        return parse;
-                    }
-                }
-            }
-            catch
-            {
-                //Logger.LogException(ex);
-            }
-            
-            return keyorval;
         }
 
         /// <summary>
@@ -75,8 +47,8 @@ namespace Fougerite
         /// <param name="ini">The IniParser instance to use.</param>
         public void ToIni(string tablename, IniParser ini)
         {
-            string nullref = "__NullReference__";
-            Hashtable ht = (Hashtable)datastore[tablename];
+            const string nullref = "__NullReference__";
+            Hashtable ht = (Hashtable)_datastore[tablename];
             if (ht == null || ini == null)
                 return;
 
@@ -98,7 +70,7 @@ namespace Fougerite
                             // Ignore
                         }
                     } 
-                    var t = ht[setting].GetType();
+                    Type t = ht[setting].GetType();
                     if (t == typeof(Vector4) || t == typeof(Vector3) || t == typeof(Vector2) || t == typeof(Quaternion) || t == typeof(Bounds))
                     {
                         try
@@ -109,7 +81,8 @@ namespace Fougerite
                         {
                             // Ignore
                         }
-                    } else
+                    } 
+                    else
                     {
                         val = ht[setting].ToString();
                     }
@@ -171,13 +144,12 @@ namespace Fougerite
             if (key == null)
                 return;
 
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable == null)
+            if (!(_datastore[tablename] is Hashtable hashtable))
             {
                 hashtable = new Hashtable();
-                datastore.Add(tablename, hashtable);
+                _datastore.Add(tablename, hashtable);
             }
-            //hashtable[key] = val;
+            
             hashtable[StringifyIfVector3(key)] = StringifyIfVector3(val);
         }
 
@@ -192,8 +164,7 @@ namespace Fougerite
             if (key == null)
                 return false;
 
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable == null)
+            if (!(_datastore[tablename] is Hashtable hashtable))
                 return false;
 
             //return hashtable.ContainsKey(key);
@@ -208,11 +179,9 @@ namespace Fougerite
         /// <returns>Returns true If It does, false otherwise.</returns>
         public bool ContainsValue(string tablename, object val)
         {
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable == null)
+            if (!(_datastore[tablename] is Hashtable hashtable))
                 return false;
-
-            //return hashtable.ContainsValue(val);
+            
             return hashtable.ContainsValue(StringifyIfVector3(val));
         }
 
@@ -223,8 +192,7 @@ namespace Fougerite
         /// <returns>Returns the number of the elements.</returns>
         public int Count(string tablename)
         {
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable == null)
+            if (!(_datastore[tablename] is Hashtable hashtable))
             {
                 return 0;
             }
@@ -237,9 +205,9 @@ namespace Fougerite
         /// <param name="tablename"></param>
         public void Flush(string tablename)
         {
-            if ((datastore[tablename] as Hashtable) != null)
+            if (_datastore[tablename] is Hashtable)
             {
-                datastore.Remove(tablename);
+                _datastore.Remove(tablename);
             }
         }
 
@@ -254,11 +222,9 @@ namespace Fougerite
             if (key == null)
                 return null;
 
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable == null)
+            if (!(_datastore[tablename] is Hashtable hashtable))
                 return null;
-
-            //return hashtable[key];
+            
             return ParseIfVector3String(hashtable[StringifyIfVector3(key)]);
         }
 
@@ -269,8 +235,7 @@ namespace Fougerite
         /// <returns></returns>
         public Hashtable GetTable(string tablename)
         {
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable == null)
+            if (!(_datastore[tablename] is Hashtable hashtable))
                 return null;
 
             Hashtable parse = new Hashtable(hashtable.Count);
@@ -278,7 +243,7 @@ namespace Fougerite
             {
                 parse.Add(ParseIfVector3String(entry.Key), ParseIfVector3String(entry.Value));
             }
-            //return hashtable;
+
             return parse;
         }
 
@@ -289,18 +254,11 @@ namespace Fougerite
         /// <returns>Returns an object array.</returns>
         public object[] Keys(string tablename)
         {
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable == null)
+            if (!(_datastore[tablename] is Hashtable hashtable))
                 return null;
-
-            /*object[] array = new object[hashtable.Keys.Count];
-            hashtable.Keys.CopyTo(array, 0);
-            return array;*/
+            
             List<object> parse = new List<object>(hashtable.Keys.Count);
-            foreach (object key in hashtable.Keys)
-            {
-                parse.Add(ParseIfVector3String(key));
-            }
+            parse.AddRange(hashtable.Keys.Cast<object>().Select(ParseIfVector3String));
             return parse.ToArray<object>();
         }
 
@@ -308,7 +266,7 @@ namespace Fougerite
         {
             if (File.Exists(PATH))
             {
-                datastore = Util.HashtableFromFile(PATH);
+                _datastore = Util.HashtableFromFile(PATH);
                 Util.GetUtil().ConsoleLog("Fougerite DataStore Loaded", true);
             }
         }
@@ -323,8 +281,7 @@ namespace Fougerite
             if (key == null)
                 return;
 
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable != null)
+            if (_datastore[tablename] is Hashtable hashtable)
             {
                 //hashtable.Remove(key);
                 hashtable.Remove(StringifyIfVector3(key));
@@ -336,10 +293,10 @@ namespace Fougerite
         /// </summary>
         public void Save()
         {
-            if (datastore.Count != 0)
+            if (_datastore.Count != 0)
             {
                 Logger.Log("[DataStore] Saving...");
-                Util.HashtableToFile(datastore, PATH);
+                Util.HashtableToFile(_datastore, PATH);
                 Util.GetUtil().ConsoleLog("Fougerite DataStore Saved", false);
                 Logger.Log("[DataStore] Saved!");
             }
@@ -352,19 +309,51 @@ namespace Fougerite
         /// <returns>Returns an object array of the table's values.</returns>
         public object[] Values(string tablename)
         {
-            Hashtable hashtable = datastore[tablename] as Hashtable;
-            if (hashtable == null)
+            if (!(_datastore[tablename] is Hashtable hashtable))
                 return null;
-
-            /*object[] array = new object[hashtable.Values.Count];
-            hashtable.Values.CopyTo(array, 0);
-            return array;*/
+            
             List<object> parse = new List<object>(hashtable.Values.Count);
-            foreach (object val in hashtable.Values)
-            {
-                parse.Add(ParseIfVector3String(val));
-            }
+            parse.AddRange(hashtable.Values.Cast<object>().Select(ParseIfVector3String));
             return parse.ToArray();
+        }
+        
+        private object StringifyIfVector3(object keyorval)
+        {
+            switch (keyorval)
+            {
+                case null:
+                    return null;
+                case Vector3 vector3:
+                    return $"Vector3,{vector3.x:G9},{vector3.y:G9},{vector3.z:G9}";
+                default:
+                    return keyorval;
+            }
+        }
+
+        private object ParseIfVector3String(object keyorval)
+        {
+            switch (keyorval)
+            {
+                case null:
+                    return null;
+                case string s when s.StartsWith("Vector3,", StringComparison.Ordinal):
+                {
+                    try
+                    {
+                        string[] v3array = s.Split(',');
+                        Vector3 parse = new Vector3(Single.Parse(v3array[1]), Single.Parse(v3array[2]), Single.Parse(v3array[3]));
+                        return parse;
+                    }
+                    catch
+                    {
+                        // Ignore.
+                    }
+
+                    break;
+                }
+            }
+
+            return keyorval;
         }
     }
 }
