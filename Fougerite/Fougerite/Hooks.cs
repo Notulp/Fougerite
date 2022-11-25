@@ -98,14 +98,10 @@ namespace Fougerite
                 string quotedMessage = Facepunch.Utility.String.QuoteSafe(arg.GetString(0));
                 bool wasCommand = quotedMessage.Trim('"').StartsWith("/");
                 Player player = Server.GetServer().FindPlayer(arg.argUser.playerClient.userID);
-                
-                if (wasCommand)
-                {
-                    Logger.LogDebug($"[CHAT-CMD] {quotedName} executed {quotedMessage}");
-                }
 
                 if (wasCommand)
                 {
+                    Logger.LogDebug($"[CHAT-CMD] {quotedName} executed {quotedMessage}");
                     string[] args = Facepunch.Utility.String.SplitQuotesStrings(quotedMessage.Trim('"'));
                     var command = args[0].TrimStart('/');
                     
