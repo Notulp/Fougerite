@@ -83,65 +83,63 @@ namespace Fougerite
         {
             using (new Stopper(nameof(Hooks), nameof(ChatReceived)))
             {
-
                 if (!chat.enabled)
                 {
                     return;
                 }
 
-                if (string.IsNullOrEmpty(arg.ArgsStr))
+                // This must have values
+                if (string.IsNullOrEmpty(arg.ArgsStr) || arg.argUser == null)
                 {
                     return;
                 }
 
-                var quotedName = Facepunch.Utility.String.QuoteSafe(arg.argUser.displayName);
-                var quotedMessage = Facepunch.Utility.String.QuoteSafe(arg.GetString(0));
-                if (quotedMessage.Trim('"').StartsWith("/"))
+                string quotedName = Facepunch.Utility.String.QuoteSafe(arg.argUser.displayName);
+                string quotedMessage = Facepunch.Utility.String.QuoteSafe(arg.GetString(0));
+                bool wasCommand = quotedMessage.Trim('"').StartsWith("/");
+                Player player = Server.GetServer().FindPlayer(arg.argUser.playerClient.userID);
+                
+                if (wasCommand)
                 {
                     Logger.LogDebug($"[CHAT-CMD] {quotedName} executed {quotedMessage}");
                 }
 
-                if (OnChatRaw != null)
-                {
-                    try
-                    {
-                        OnChatRaw(ref arg);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogError($"ChatRawEvent Error: {ex}");
-                    }
-                }
-
-                if (string.IsNullOrEmpty(arg.ArgsStr))
-                {
-                    return;
-                }
-
-                if (quotedMessage.Trim('"').StartsWith("/"))
+                if (wasCommand)
                 {
                     string[] args = Facepunch.Utility.String.SplitQuotesStrings(quotedMessage.Trim('"'));
                     var command = args[0].TrimStart('/');
-                    Player player = Server.GetServer().FindPlayer(arg.argUser.playerClient.userID);
+                    
                     if (command == "fougerite")
                     {
-                        player.Message(
-                            $"[color #00FFFF]This Server is running Fougerite V[color yellow]{Bootstrap.Version}");
+                        player.Message($"[color #00FFFF]This Server is running Fougerite V[color yellow]{Bootstrap.Version}");
                         player.Message("[color green]Fougerite Team: www.fougerite.com");
                         player.Message("[color #0C86AE]Pluton Team: www.pluton-team.org");
                     }
+                    
+                    // If player has *, restrict all commands.
+                    if (player.CommandCancelList.Contains("*", StringComparer.OrdinalIgnoreCase) || player.CommandCancelList.Contains(command, StringComparer.OrdinalIgnoreCase))
+                    {
+                        player.Message($"You cannot execute {command} at the moment!");
+                        return;
+                    }
+                    
+                    // Execute Raw Event after restriction check
+                    if (OnChatRaw != null)
+                    {
+                        try
+                        {
+                            OnChatRaw(ref arg);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogError($"ChatRawEvent Error: {ex}");
+                        }
+                    }
 
-                    var cargs = new string[args.Length - 1];
+                    string[] cargs = new string[args.Length - 1];
                     Array.Copy(args, 1, cargs, 0, cargs.Length);
                     if (OnCommand != null)
                     {
-                        // If player has *, restrict all commands.
-                        if (player.CommandCancelList.Contains("*", StringComparer.OrdinalIgnoreCase) || player.CommandCancelList.Contains(command, StringComparer.OrdinalIgnoreCase))
-                        {
-                            player.Message($"You cannot execute {command} at the moment!");
-                            return;
-                        }
-
                         try
                         {
                             OnCommand(player, command, cargs);
@@ -154,13 +152,26 @@ namespace Fougerite
                 }
                 else
                 {
+                    // Execute raw event first
+                    if (OnChatRaw != null)
+                    {
+                        try
+                        {
+                            OnChatRaw(ref arg);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogError($"ChatRawEvent Error: {ex}");
+                        }
+                    }
+                    
                     Logger.ChatLog(quotedName, quotedMessage);
-                    var chatstr = new ChatString(quotedMessage);
+                    ChatString chatstr = new ChatString(quotedMessage);
                     try
                     {
                         if (OnChat != null)
                         {
-                            OnChat(Server.GetServer().FindPlayer(arg.argUser.playerClient.userID), ref chatstr);
+                            OnChat(player, ref chatstr);
                         }
                     }
                     catch (Exception ex)
@@ -168,7 +179,8 @@ namespace Fougerite
                         Logger.LogError($"ChatEvent Error: {ex}");
                     }
 
-                    if (string.IsNullOrEmpty(chatstr.NewText) || chatstr.NewText.Length == 0)
+                    // Check for empty text
+                    if (string.IsNullOrEmpty(chatstr.NewText))
                     {
                         return;
                     }
@@ -177,7 +189,8 @@ namespace Fougerite
                         .QuoteSafe(chatstr.NewText.Substring(1, chatstr.NewText.Length - 2))
                         .Replace("\\\"", "\"");
 
-                    if (string.IsNullOrEmpty(newchat) || newchat.Length == 0)
+                    // Check for empty text again
+                    if (string.IsNullOrEmpty(newchat))
                     {
                         return;
                     }
@@ -192,7 +205,7 @@ namespace Fougerite
                     }
 
                     string[] ns = Util.GetUtil().SplitInParts(newchat, 100).ToArray();
-                    var arr = Regex.Matches(newchat, @"\[/?color\b.*?\]")
+                    string[] arr = Regex.Matches(newchat, @"\[/?color\b.*?\]")
                         .Cast<Match>()
                         .Select(m => m.Value)
                         .ToArray();
@@ -202,19 +215,14 @@ namespace Fougerite
                         arr = new[] { "" };
                     }
 
-                    foreach (var x in ns)
+                    foreach (string x in ns)
                     {
                         Data.GetData().chat_history.Add(x);
                         Data.GetData().chat_history_username.Add(quotedName);
 
-                        if (i == 1)
-                        {
-                            ConsoleNetworker.Broadcast($"chat.add {quotedName} \"{arr[arr.Length - 1]}{x}");
-                        }
-                        else
-                        {
-                            ConsoleNetworker.Broadcast($"chat.add {quotedName} {x}\"");
-                        }
+                        ConsoleNetworker.Broadcast(i == 1
+                            ? $"chat.add {quotedName} \"{arr[arr.Length - 1]}{x}"
+                            : $"chat.add {quotedName} {x}\"");
 
                         i++;
                     }
