@@ -3867,5 +3867,35 @@ namespace Fougerite
             }
             return false;
         }
+
+        /// <summary>
+        /// Runs when a command or console command is being restricted / unrestricted.
+        /// </summary>
+        /// <param name="player"></param>
+        /// <param name="restrictionType"></param>
+        /// <param name="restrictionScale"></param>
+        /// <param name="command"></param>
+        /// <param name="isBeingRestricted"></param>
+        /// <returns></returns>
+        internal static bool RestrictionChange(Player player, CommandRestrictionType restrictionType,
+            CommandRestrictionScale restrictionScale, string command, bool isBeingRestricted)
+        {
+            CommandRestrictionEvent commandRestrictionEvent = new CommandRestrictionEvent(player, command,
+                restrictionType, restrictionScale, isBeingRestricted);
+
+            try
+            {
+                if (OnCommandRestriction != null)
+                {
+                    OnCommandRestriction(commandRestrictionEvent);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"RestrictionChangeEvent Error: {ex}");
+            }
+
+            return commandRestrictionEvent.Cancelled;
+        }
     }
 }

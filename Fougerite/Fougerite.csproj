@@ -59,6 +59,7 @@
     <Compile Include="Fougerite\Events\BanEvent.cs" />
     <Compile Include="Fougerite\Events\BeltUseEvent.cs" />
     <Compile Include="Fougerite\Events\BowShootEvent.cs" />
+    <Compile Include="Fougerite\Events\CommandRestrictionEvent.cs" />
     <Compile Include="Fougerite\Events\ConsoleEvent.cs" />
     <Compile Include="Fougerite\Events\ExtendedTimedEvent.cs" />
     <Compile Include="Fougerite\Events\GrenadeThrowEvent.cs" />

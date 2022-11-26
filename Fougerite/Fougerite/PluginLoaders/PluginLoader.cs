@@ -70,7 +70,8 @@
             "On_SupplyDropPlaneCreated",
             "On_NPCSpawned",
             "On_TimedExplosiveSpawned",
-            "On_SleeperSpawned"
+            "On_SleeperSpawned",
+            "On_CommandRestriction"
         };
 
         public void Initialize()
@@ -348,6 +349,9 @@
                         case "On_SleeperSpawned":
                             Hooks.OnSleeperSpawned += plugin.OnSleeperSpawned;
                             break;
+                        case "On_CommandRestriction":
+                            Hooks.OnCommandRestriction += plugin.OnCommandRestriction;
+                            break;
                     }
                 }
             }
@@ -533,6 +537,9 @@
                             break;
                         case "On_SleeperSpawned":
                             Hooks.OnSleeperSpawned -= plugin.OnSleeperSpawned;
+                            break;
+                        case "On_CommandRestriction":
+                            Hooks.OnCommandRestriction -= plugin.OnCommandRestriction;
                             break;
                     }
                 }

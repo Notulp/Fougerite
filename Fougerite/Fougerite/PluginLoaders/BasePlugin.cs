@@ -985,5 +985,10 @@ namespace Fougerite.PluginLoaders
         {
             Invoke("On_SleeperSpawned", sleeper);
         }
+
+        public void OnCommandRestriction(CommandRestrictionEvent ev)
+        {
+            Invoke("On_CommandRestriction", ev);
+        }
     }
 }

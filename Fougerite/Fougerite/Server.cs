@@ -20,7 +20,7 @@ namespace Fougerite
         private bool HRustPP;
         [Obsolete("The bans were moved into the DataStore ages ago.", false)]
         private readonly string _globalBanListIni = Path.Combine(Util.GetRootFolder(), Path.Combine("Save", "GlobalBanList.ini"));
-        private readonly List<string> _ConsoleCommandCancelList = new List<string>();
+        private readonly ConcurrentList<string> _ConsoleCommandCancelList = new ConcurrentList<string>();
         [Obsolete("Use DataStore, this is used in old Javascript plugins from years ago.", false)]
         public Data data = new Data();
         public string server_message_name = "Fougerite";
@@ -553,7 +553,11 @@ namespace Fougerite
         {
             if (!ConsoleCommandCancelList.Contains(cmd))
             {
-                ConsoleCommandCancelList.Add(cmd);
+                bool result = Hooks.RestrictionChange(null, CommandRestrictionType.ConsoleCommand, 
+                    CommandRestrictionScale.Global, cmd, true);
+                
+                if (!result)
+                    ConsoleCommandCancelList.Add(cmd);
             }
         }
 
@@ -565,7 +569,11 @@ namespace Fougerite
         {
             if (ConsoleCommandCancelList.Contains(cmd))
             {
-                ConsoleCommandCancelList.Remove(cmd);
+                bool result = Hooks.RestrictionChange(null, CommandRestrictionType.ConsoleCommand, 
+                    CommandRestrictionScale.Global, cmd, false);
+                
+                if (!result)
+                    ConsoleCommandCancelList.Remove(cmd);
             }
         }
 
@@ -574,7 +582,10 @@ namespace Fougerite
         /// </summary>
         public void CleanRestrictedConsoleCommands()
         {
-            ConsoleCommandCancelList.Clear();
+            foreach (string x in ConsoleCommandCancelList)
+            {
+                UnRestrictConsoleCommand(x);
+            }
         }
 
         /// <summary>
@@ -582,7 +593,7 @@ namespace Fougerite
         /// </summary>
         public List<string> ConsoleCommandCancelList
         {
-            get { return _ConsoleCommandCancelList; }
+            get { return _ConsoleCommandCancelList.GetShallowCopy(); }
         }
 
         /// <summary>

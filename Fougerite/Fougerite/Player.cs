@@ -5,8 +5,9 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Facepunch.MeshBatch;
 using Fougerite.Caches;
+using Fougerite.Concurrent;
+using Fougerite.Events;
 using UnityEngine;
-using Object = UnityEngine.Object;
 using String = Facepunch.Utility.String;
 using Timer = System.Timers.Timer;
 
@@ -27,8 +28,8 @@ namespace Fougerite
         private readonly ulong uid;
         private string name;
         private string ipaddr;
-        private readonly List<string> _CommandCancelList;
-        private readonly List<string> _ConsoleCommandCancelList;
+        private readonly ConcurrentList<string> _CommandCancelList;
+        private readonly ConcurrentList<string> _ConsoleCommandCancelList;
         private bool disconnected;
         private Vector3 _lastpost;
         private readonly int _instanceId;
@@ -53,8 +54,8 @@ namespace Fougerite
             uid = client.netUser.userID;
             name = client.netUser.displayName;
             ipaddr = client.netPlayer.externalIP;
-            _CommandCancelList = new List<string>();
-            _ConsoleCommandCancelList = new List<string>();
+            _CommandCancelList = new ConcurrentList<string>();
+            _ConsoleCommandCancelList = new ConcurrentList<string>();
             _lastpost = Vector3.zero;
             _np = client.netUser.networkPlayer;
         }
@@ -233,7 +234,11 @@ namespace Fougerite
         {
             if (!ConsoleCommandCancelList.Contains(cmd))
             {
-                ConsoleCommandCancelList.Add(cmd);
+                bool result = Hooks.RestrictionChange(this, CommandRestrictionType.ConsoleCommand, 
+                    CommandRestrictionScale.SpecificPlayer, cmd, true);
+                
+                if (!result)
+                    ConsoleCommandCancelList.Add(cmd);
             }
         }
         
@@ -245,7 +250,11 @@ namespace Fougerite
         {
             if (ConsoleCommandCancelList.Contains(cmd))
             {
-                ConsoleCommandCancelList.Remove(cmd);
+                bool result = Hooks.RestrictionChange(this, CommandRestrictionType.ConsoleCommand, 
+                    CommandRestrictionScale.SpecificPlayer, cmd, false);
+                
+                if (!result)
+                    ConsoleCommandCancelList.Remove(cmd);
             }
         }
         
@@ -254,7 +263,10 @@ namespace Fougerite
         /// </summary>
         public void CleanRestrictedConsoleCommands()
         {
-            ConsoleCommandCancelList.Clear();
+            foreach (string x in ConsoleCommandCancelList)
+            {
+                UnRestrictConsoleCommand(x);
+            }
         }
 
         /// <summary>
@@ -265,7 +277,11 @@ namespace Fougerite
         {
             if (!CommandCancelList.Contains(cmd))
             {
-                CommandCancelList.Add(cmd);
+                bool result = Hooks.RestrictionChange(this, CommandRestrictionType.Command, 
+                    CommandRestrictionScale.SpecificPlayer, cmd, true);
+                
+                if (!result)
+                    CommandCancelList.Add(cmd);
             }
         }
 
@@ -277,7 +293,11 @@ namespace Fougerite
         {
             if (CommandCancelList.Contains(cmd))
             {
-                CommandCancelList.Remove(cmd);
+                bool result = Hooks.RestrictionChange(this, CommandRestrictionType.Command, 
+                    CommandRestrictionScale.SpecificPlayer, cmd, false);
+                
+                if (!result)
+                    CommandCancelList.Remove(cmd);
             }
         }
 
@@ -286,7 +306,10 @@ namespace Fougerite
         /// </summary>
         public void CleanRestrictedCommands()
         {
-            CommandCancelList.Clear();
+            foreach (string x in CommandCancelList)
+            {
+                UnRestrictCommand(x);
+            }
         }
 
         /// <summary>
@@ -865,7 +888,7 @@ namespace Fougerite
         /// </summary>
         public List<string> CommandCancelList
         {
-            get { return _CommandCancelList; }
+            get { return _CommandCancelList.GetShallowCopy(); }
         }
 
         /// <summary>
@@ -875,7 +898,7 @@ namespace Fougerite
         {
             get
             {
-                return _ConsoleCommandCancelList;
+                return _ConsoleCommandCancelList.GetShallowCopy();
             }
         }
 

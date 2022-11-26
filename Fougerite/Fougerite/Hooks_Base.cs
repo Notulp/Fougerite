@@ -324,10 +324,19 @@ namespace Fougerite
         public static event SleeperSpawnEventDelegate OnSleeperSpawned;
 
         /// <summary>
+        /// This delegate runs when a command is restricted on unrestricted.
+        /// </summary>
+        public static event CommandRestrictionEventDelegate OnCommandRestriction;
+
+        /// <summary>
         /// This value returns if the server is shutting down.
         /// </summary>
         public static bool IsShuttingDown { get; set; }
 
+        /// <summary>
+        /// Does what It says.
+        /// UnHooks all plugins from the events.
+        /// </summary>
         public static void ResetHooks()
         {
             OnPluginInit = delegate { };
@@ -391,6 +400,7 @@ namespace Fougerite
             OnSupplyDropPlaneCreated = delegate {  };
             OnTimedExplosiveSpawned = delegate {  };
             OnSleeperSpawned = delegate {  };
+            OnCommandRestriction = delegate {  };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -407,8 +417,7 @@ namespace Fougerite
 
         public delegate void ConsoleHandlerDelegate(ref ConsoleSystem.Arg arg, bool external);
 
-        public delegate void
-            ConsoleHandlerWithCancelDelegate(ref ConsoleSystem.Arg arg, bool external, ConsoleEvent ce);
+        public delegate void ConsoleHandlerWithCancelDelegate(ref ConsoleSystem.Arg arg, bool external, ConsoleEvent ce);
 
         public delegate void DisconnectionHandlerDelegate(Player player);
 
@@ -418,8 +427,7 @@ namespace Fougerite
 
         public delegate void EntityDeployedDelegate(Player player, Entity e);
 
-        public delegate void EntityDeployedWithPlacerDelegate(Player player, Entity e,
-            Player actualplacer);
+        public delegate void EntityDeployedWithPlacerDelegate(Player player, Entity e, Player actualplacer);
 
         public delegate void EntityHurtDelegate(HurtEvent he);
 
@@ -514,5 +522,7 @@ namespace Fougerite
         public delegate void TimedExplosiveEventDelegate(TimedExplosiveEvent timedExplosiveEvent);
 
         public delegate void SleeperSpawnEventDelegate(Sleeper sleeper);
+
+        public delegate void CommandRestrictionEventDelegate(CommandRestrictionEvent commandRestrictionEvent);
     }
 }
