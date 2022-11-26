@@ -3516,6 +3516,11 @@ namespace Fougerite
                 EntityCache.GetInstance().Remove(id);
             }
             
+            if (underLying != null && DecayList.ContainsKey(id))
+            {
+                DecayList.TryRemove(id);
+            }
+            
             NetworkCullInfo info;
             NetInstance.PreServerDestroy(view);
             if (NetworkCullInfo.Find(view, out info))
@@ -3586,6 +3591,11 @@ namespace Fougerite
                     if (underLying != null && EntityCache.GetInstance().Contains(id))
                     {
                         EntityCache.GetInstance().Remove(id);
+                    }
+                    
+                    if (underLying != null && DecayList.ContainsKey(id))
+                    {
+                        DecayList.TryRemove(id);
                     }
                 }
             }
@@ -3660,6 +3670,11 @@ namespace Fougerite
             if (underLying != null && EntityCache.GetInstance().Contains(id))
             {
                 EntityCache.GetInstance().Remove(id);
+            }
+            
+            if (underLying != null && DecayList.ContainsKey(id))
+            {
+                DecayList.TryRemove(id);
             }
 
             NGCView component = go.GetComponent<NGCView>();
