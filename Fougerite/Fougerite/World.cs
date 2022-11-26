@@ -7,6 +7,7 @@ using Fougerite.Caches;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = System.Random;
+using Fougerite.Tools;
 
 namespace Fougerite
 {
@@ -482,6 +483,32 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// An overload for SpawnEntity below.
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <param name="rep"></param>
+        /// <returns></returns>
+        public Entity SpawnEntity(string prefab, float x, float y, float z, int rep = 1)
+        {
+            return SpawnEntity(prefab, new Vector3(x, y, z), 1);
+        }
+
+        /// <summary>
+        /// An overload for SpawnEntity below.
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="location"></param>
+        /// <param name="rep"></param>
+        /// <returns></returns>
+        public Entity SpawnEntity(string prefab, Vector3 location, int rep = 1)
+        {
+            return SpawnEntity(prefab, location, Quaternion.identity, rep);
+        }
+
+        /// <summary>
         /// Spawns a prefab at the given vector, rotation, N times.
         /// IMPORTANT: Returns the prefab as an Entity class.
         /// Entity class only supports specific types, like LootableObject
@@ -503,22 +530,21 @@ namespace Fougerite
                 for (int i = 0; i < rep; i++)
                 {
                     GameObject obj3 = NetCull.InstantiateStatic(prefab, location, rotation);
-                    StructureComponent build = obj3.GetComponent<StructureComponent>();
-                    if (build != null)
+                    if (obj3.GetComponent(out StructureComponent structureComponent))
                     {
-                        obj2 = new Entity(build);
+                        obj2 = EntityCache.GetInstance().GrabOrAllocate(structureComponent.GetInstanceID(), structureComponent);
                     } 
-                    else if (obj3.GetComponent<LootableObject>())
+                    else if (obj3.GetComponent(out LootableObject lootableObject))
                     {
-                        obj2 = new Entity(obj3.GetComponent<LootableObject>());
+                        obj2 = EntityCache.GetInstance().GrabOrAllocate(lootableObject.GetInstanceID(), lootableObject);
                     }
-                    else if (obj3.GetComponent<SupplyCrate>())
+                    else if (obj3.GetComponent(out SupplyCrate supplyCrate))
                     {
-                        obj2 = new Entity(obj3.GetComponent<SupplyCrate>());
+                        obj2 = EntityCache.GetInstance().GrabOrAllocate(supplyCrate.GetInstanceID(), supplyCrate);
                     }
-                    else if (obj3.GetComponent<ResourceTarget>())
+                    else if (obj3.GetComponent(out ResourceTarget resourceTarget))
                     {
-                        obj2 = new Entity(obj3.GetComponent<ResourceTarget>());
+                        obj2 = EntityCache.GetInstance().GrabOrAllocate(resourceTarget.GetInstanceID(), resourceTarget);
                     }
                     else
                     {
@@ -529,7 +555,7 @@ namespace Fougerite
                             obj4.creatorID = 0L;
                             obj4.CacheCreator();
                             obj4.CreatorSet();
-                            obj2 = new Entity(obj4);
+                            obj2 = EntityCache.GetInstance().GrabOrAllocate(obj4.GetInstanceID(), obj4);
                         }
                     }
                 }
@@ -561,22 +587,22 @@ namespace Fougerite
                     {
                         GameObject obj3 = NetCull.InstantiateStatic(prefab, location, rotation);
                         obj2 = obj3;
-                        StructureComponent component = obj3.GetComponent<StructureComponent>();
-                        if (component != null)
+
+                        if (obj3.GetComponent(out StructureComponent structureComponent))
                         {
-                            obj2 = new Entity(component);
+                            obj2 = EntityCache.GetInstance().GrabOrAllocate(structureComponent.GetInstanceID(), structureComponent);
                         } 
-                        else if (obj3.GetComponent<LootableObject>())
+                        else if (obj3.GetComponent(out LootableObject lootableObject))
                         {
-                            obj2 = new Entity(obj3.GetComponent<LootableObject>());
+                            obj2 = EntityCache.GetInstance().GrabOrAllocate(lootableObject.GetInstanceID(), lootableObject);
                         }
-                        else if (obj3.GetComponent<SupplyCrate>())
+                        else if (obj3.GetComponent(out SupplyCrate supplyCrate))
                         {
-                            obj2 = new Entity(obj3.GetComponent<SupplyCrate>());
+                            obj2 = EntityCache.GetInstance().GrabOrAllocate(supplyCrate.GetInstanceID(), supplyCrate);
                         }
-                        else if (obj3.GetComponent<ResourceTarget>())
+                        else if (obj3.GetComponent(out ResourceTarget resourceTarget))
                         {
-                            obj2 = new Entity(obj3.GetComponent<ResourceTarget>());
+                            obj2 = EntityCache.GetInstance().GrabOrAllocate(resourceTarget.GetInstanceID(), resourceTarget);
                         }
                         else
                         {
@@ -587,7 +613,7 @@ namespace Fougerite
                                 obj4.creatorID = 0L;
                                 obj4.CacheCreator();
                                 obj4.CreatorSet();
-                                obj2 = new Entity(obj4);
+                                obj2 = EntityCache.GetInstance().GrabOrAllocate(obj4.GetInstanceID(), obj4);
                             }
                         }
                     }

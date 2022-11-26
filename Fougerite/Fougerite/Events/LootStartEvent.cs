@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Fougerite.Caches;
+using UnityEngine;
 
 namespace Fougerite.Events
 {
@@ -25,13 +26,15 @@ namespace Fougerite.Events
             {
                 if (collider.GetComponent<DeployableObject>() != null)
                 {
-                    _entity = new Entity(collider.GetComponent<DeployableObject>());
+                    DeployableObject deployableObject = collider.GetComponent<DeployableObject>();
+                    _entity = EntityCache.GetInstance().GrabOrAllocate(deployableObject.GetInstanceID(), deployableObject);
                     _isobject = true;
                     break;
                 }
                 if (collider.GetComponent<LootableObject>() != null)
                 {
-                    _entity = new Entity(collider.GetComponent<LootableObject>());
+                    LootableObject lootableObject = collider.GetComponent<LootableObject>();
+                    _entity = EntityCache.GetInstance().GrabOrAllocate(lootableObject.GetInstanceID(), lootableObject);
                     _isobject = false;
                     break;
                 }

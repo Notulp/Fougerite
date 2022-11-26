@@ -181,7 +181,17 @@ namespace Fougerite.Caches
                 if (!_allEntities.TryGetValue(instanceId, out entity))
                 {
                     cookie = _lock.UpgradeToWriterLock(Timeout.Infinite);
-                    entity = new Entity(component);
+                    
+                    // Try to safely create the entity (This should never throw errors though, but just in case)
+                    try
+                    {
+                        entity = new Entity(component);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError($"[EntityCache] Failed to allocate entity. Error: {ex}");
+                    }
+
                     _allEntities[instanceId] = entity;
                     _lock.DowngradeFromWriterLock(ref cookie);
                 }

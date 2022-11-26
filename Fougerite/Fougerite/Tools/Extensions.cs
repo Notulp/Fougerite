@@ -1,4 +1,5 @@
 using System.IO;
+using UnityEngine;
 
 namespace Fougerite.Tools
 {
@@ -19,6 +20,32 @@ namespace Fougerite.Tools
             }
 
             return Path.Combine(path1, path2);
+        }
+
+        /// <summary>
+        /// A better implementation of getcomponent.
+        /// </summary>
+        /// <param name="gameObject"></param>
+        /// <param name="component"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static bool GetComponent<T>(this GameObject gameObject, out T component) where T : Component
+        {
+            if (gameObject == null)
+            {
+                component = default(T);
+                return false;
+            }
+
+            T tComponent = gameObject.GetComponent<T>();
+            if (tComponent == null)
+            {
+                component = default(T);
+                return false;
+            }
+
+            component = tComponent;
+            return true;
         }
     }
 }

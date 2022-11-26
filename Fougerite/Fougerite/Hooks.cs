@@ -681,7 +681,8 @@ namespace Fougerite
         {
             using (new Stopper(nameof(Hooks), nameof(CheckOwner)))
             {
-                DoorEvent de = new DoorEvent(new Entity(obj));
+                
+                DoorEvent de = new DoorEvent(EntityCache.GetInstance().GrabOrAllocate(obj.GetInstanceID(), obj));
                 // Possibly was used for sleeping bag stuff, and they refer to CheckOwner
                 // Also for the Doors of course
                 if (obj.ownerID == controllable.playerClient.userID)
@@ -1964,7 +1965,8 @@ namespace Fougerite
                 obj.rigidbody.centerOfMass = new Vector3(0f, -1.5f, 0f);
                 obj.rigidbody.AddForceAtPosition(-forward * 50f, obj.transform.position - new Vector3(0f, 1f, 0f));
 
-                Entity entity = new Entity(obj.GetComponent<SupplyCrate>());
+                SupplyCrate supplyCrate = obj.GetComponent<SupplyCrate>();
+                Entity entity = EntityCache.GetInstance().GrabOrAllocate(supplyCrate.GetInstanceID(), supplyCrate);
 
                 try
                 {
@@ -3511,7 +3513,6 @@ namespace Fougerite
             
             if (underLying != null && EntityCache.GetInstance().Contains(id))
             {
-                Logger.Log("DestroyByView " + id);
                 EntityCache.GetInstance().Remove(id);
             }
             
@@ -3536,7 +3537,6 @@ namespace Fougerite
         /// <param name="viewID"></param>
         public static void DestroyByNetworkId(uLink.NetworkViewID viewID)
         {
-            Logger.Log("bDestroyByNetworkId " + viewID);
             if (viewID != uLink.NetworkViewID.unassigned)
             {
                 Facepunch.NetworkView networkView = Facepunch.NetworkView.Find(viewID);
@@ -3582,12 +3582,9 @@ namespace Fougerite
                         underLying = go.GetComponent<SupplyCrate>();
                         id = ((SupplyCrate) underLying).GetInstanceID();
                     }
-                    
-                    Logger.Log("xd " + id);
-            
+
                     if (underLying != null && EntityCache.GetInstance().Contains(id))
                     {
-                        Logger.Log("DestroyByView " + id);
                         EntityCache.GetInstance().Remove(id);
                     }
                 }
@@ -3660,10 +3657,8 @@ namespace Fougerite
                 id = ((SupplyCrate) underLying).GetInstanceID();
             }
             
-            Logger.Log("DestroyByGameObject " + id + " " + EntityCache.GetInstance().Contains(id) + " " + (underLying != null) + " " + EntityCache.GetInstance().GetEntities().Count);
             if (underLying != null && EntityCache.GetInstance().Contains(id))
             {
-                Logger.Log("DestroyByGameObject asass " + id);
                 EntityCache.GetInstance().Remove(id);
             }
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Facepunch.MeshBatch;
+using Fougerite.Caches;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using String = Facepunch.Utility.String;
@@ -1512,87 +1513,69 @@ namespace Fougerite
             }
         }
 
-        private static Entity[] QueryToEntity<T>(ref List<T> list)
-        {
-            Entity[] these = new Entity[list.Count];
-            for (int i = 0; i < these.Length; i++)
-            {
-                these[i] = new Entity((list[i] as Component)?.GetComponent<DeployableObject>());
-            }
-
-            return these;
-        }
-
         /// <summary>
         /// Gets all Entities (Buildings) that the player owns.
+        /// This array is a shallow copy & thread safe.
         /// </summary>
         public Entity[] Structures
         {
             get
             {
-                List<StructureMaster> structureMasters = StructureMaster.AllStructures.Where(s => UID == s.ownerID).ToList();
-                Entity[] these = new Entity[structureMasters.Count];
-                for (int i = 0; i < these.Length; i++)
-                {
-                    these[i] = new Entity(structureMasters.ElementAtOrDefault(i));
-                }
-
-                return these;
+                Entity[] structureMasters = EntityCache.GetInstance().GetEntities().Where(s => s.IsStructureMaster() && UID == s.UOwnerID).ToArray();
+                return structureMasters;
             }
         }
 
         /// <summary>
         /// Gets all Entities (Chests, Barricades, etc.) that the player owns.
+        /// This array is a shallow copy & thread safe.
         /// </summary>
         public Entity[] Deployables
         {
             get
             {
-                List<DeployableObject> list = ((DeployableObject[]) Object.FindObjectsOfType(typeof(DeployableObject)))
-                    .Where(d => UID == d.ownerID)
-                    .ToList();
-                return QueryToEntity(ref list);
+                Entity[] deployableObjects = EntityCache.GetInstance().GetEntities().Where(s => s.IsDeployableObject() && UID == s.UOwnerID).ToArray();
+                return deployableObjects;
             }
         }
 
         /// <summary>
         /// Gets all Entities (Shelters) that the player owns.
+        /// This array is a shallow copy & thread safe.
         /// </summary>
         public Entity[] Shelters
         {
             get
             {
-                List<DeployableObject> list = ((DeployableObject[]) Object.FindObjectsOfType(typeof(DeployableObject))).Where(d =>
-                    d.name.Contains("Shelter") && UID == d.ownerID).ToList();
-                return QueryToEntity(ref list);
+                Entity[] deployableObjects = EntityCache.GetInstance().GetEntities().Where(s => s.IsDeployableObject() 
+                    && UID == s.UOwnerID && s.Name.ToLower().Contains("shelter")).ToArray();
+                return deployableObjects;
             }
         }
 
         /// <summary>
         /// Gets all Entities (Chests, Stashes) that the player owns.
+        /// This array is a shallow copy & thread safe.
         /// </summary>
         public Entity[] Storage
         {
             get
             {
-                List<SaveableInventory> list = ((SaveableInventory[]) Object.FindObjectsOfType(typeof(SaveableInventory)))
-                    .Where(s => UID == s.GetComponent<DeployableObject>().ownerID)
-                    .ToList();
-                return QueryToEntity(ref list);
+                Entity[] deployableObjects = EntityCache.GetInstance().GetEntities().Where(s => s.IsStorage() && UID == s.UOwnerID).ToArray();
+                return deployableObjects;
             }
         }
 
         /// <summary>
         /// Gets all Entities (Camp Fires) that the player owns.
+        /// This array is a shallow copy & thread safe.
         /// </summary>
         public Entity[] Fires
         {
             get
             {
-                List<FireBarrel> list = ((FireBarrel[])Object.FindObjectsOfType(typeof(FireBarrel)))
-                    .Where(f => UID == f.GetComponent<DeployableObject>().ownerID)
-                    .ToList();
-                return QueryToEntity(ref list);
+                Entity[] deployableObjects = EntityCache.GetInstance().GetEntities().Where(s => s.IsFireBarrel() && UID == s.UOwnerID).ToArray();
+                return deployableObjects;
             }
         }
 

@@ -61,9 +61,7 @@ namespace Fougerite.Caches
                 {
                     File.Create(_cachedPlayersPath).Dispose();
 
-                    using (StreamWriter sw =
-                           new StreamWriter(_cachedPlayersPath, false,
-                               Encoding.UTF8))
+                    using (StreamWriter sw = new StreamWriter(_cachedPlayersPath, false, Encoding.UTF8))
                     {
                         using (JsonWriter writer = new JsonTextWriter(sw))
                         {
@@ -115,9 +113,7 @@ namespace Fougerite.Caches
                 serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
                 serializer.NullValueHandling = NullValueHandling.Include;
 
-                using (StreamWriter sw =
-                    new StreamWriter(_cachedPlayersPath, false,
-                        Encoding.UTF8))
+                using (StreamWriter sw = new StreamWriter(_cachedPlayersPath, false, Encoding.UTF8))
                 {
                     using (JsonWriter writer = new JsonTextWriter(sw))
                     {

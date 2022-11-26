@@ -11,10 +11,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Facepunch.MeshBatch;
+using Fougerite.Caches;
 using Fougerite.Permissions;
 using IronPython.Runtime.Types;
 using UnityEngine;
 using String = Facepunch.Utility.String;
+using Fougerite.Tools;
 
 namespace Fougerite
 {
@@ -147,6 +149,7 @@ namespace Fougerite
 
         /// <summary>
         /// Creates a Quaterion
+        /// Default rotation is: Quaternion(0.0f, 0.0f, 0.0f, 1f)
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -944,34 +947,34 @@ namespace Fougerite
                 }
             }
 
-            if (closest.gameObject.GetComponent<StructureMaster>())
+            if (closest.gameObject.GetComponent(out StructureMaster structureMaster))
             {
-                return new Entity(closest.gameObject.GetComponent<StructureMaster>());
+                return EntityCache.GetInstance().GrabOrAllocate(structureMaster.GetInstanceID(), structureMaster);
             }
 
-            if (closest.gameObject.GetComponent<StructureComponent>())
+            if (closest.gameObject.GetComponent(out StructureComponent structureComponent))
             {
-                return new Entity(closest.gameObject.GetComponent<StructureComponent>());
+                return EntityCache.GetInstance().GrabOrAllocate(structureComponent.GetInstanceID(), structureComponent);
             }
 
-            if (closest.gameObject.GetComponent<DeployableObject>())
+            if (closest.gameObject.GetComponent(out DeployableObject deployableObject))
             {
-                return new Entity(closest.gameObject.GetComponent<DeployableObject>());
+                return EntityCache.GetInstance().GrabOrAllocate(deployableObject.GetInstanceID(), deployableObject);
             }
 
-            if (closest.gameObject.GetComponent<LootableObject>())
+            if (closest.gameObject.GetComponent(out LootableObject lootableObject))
             {
-                return new Entity(closest.gameObject.GetComponent<LootableObject>());
+                return EntityCache.GetInstance().GrabOrAllocate(lootableObject.GetInstanceID(), lootableObject);
             }
 
-            if (closest.gameObject.GetComponent<SupplyCrate>())
+            if (closest.gameObject.GetComponent(out SupplyCrate supplyCrate))
             {
-                return new Entity(closest.gameObject.GetComponent<SupplyCrate>());
+                return EntityCache.GetInstance().GrabOrAllocate(supplyCrate.GetInstanceID(), supplyCrate);
             }
 
-            if (closest.gameObject.GetComponent<ResourceTarget>())
+            if (closest.gameObject.GetComponent(out ResourceTarget resourceTarget))
             {
-                return new Entity(closest.gameObject.GetComponent<ResourceTarget>());
+                return EntityCache.GetInstance().GrabOrAllocate(resourceTarget.GetInstanceID(), resourceTarget);
             }
 
             return null;
@@ -989,29 +992,29 @@ namespace Fougerite
             List<Entity> list = new List<Entity>(array.Length);
             foreach (Collider x in array)
             {
-                if (x.gameObject.GetComponent<StructureMaster>())
+                if (x.gameObject.GetComponent(out StructureMaster structureMaster))
                 {
-                    list.Add(new Entity(x.gameObject.GetComponent<StructureMaster>()));
+                    list.Add(EntityCache.GetInstance().GrabOrAllocate(structureMaster.GetInstanceID(), structureMaster));
                 }
-                else if (x.gameObject.GetComponent<StructureComponent>())
+                else if (x.gameObject.GetComponent(out StructureComponent structureComponent))
                 {
-                    list.Add(new Entity(x.gameObject.GetComponent<StructureComponent>()));
+                    list.Add(EntityCache.GetInstance().GrabOrAllocate(structureComponent.GetInstanceID(), structureComponent));
                 }
-                else if (x.gameObject.GetComponent<DeployableObject>())
+                else if (x.gameObject.GetComponent(out DeployableObject deployableObject))
                 {
-                    list.Add(new Entity(x.gameObject.GetComponent<DeployableObject>()));
+                    list.Add(EntityCache.GetInstance().GrabOrAllocate(deployableObject.GetInstanceID(), deployableObject));
                 }
-                else if (x.gameObject.GetComponent<LootableObject>())
+                else if (x.gameObject.GetComponent(out LootableObject lootableObject))
                 {
-                    list.Add(new Entity(x.gameObject.GetComponent<LootableObject>()));
+                    list.Add(EntityCache.GetInstance().GrabOrAllocate(lootableObject.GetInstanceID(), lootableObject));
                 }
-                else if (x.gameObject.GetComponent<SupplyCrate>())
+                else if (x.gameObject.GetComponent(out SupplyCrate supplyCrate))
                 {
-                    list.Add(new Entity(x.gameObject.GetComponent<SupplyCrate>()));
+                    list.Add(EntityCache.GetInstance().GrabOrAllocate(supplyCrate.GetInstanceID(), supplyCrate));
                 }
-                else if (x.gameObject.GetComponent<ResourceTarget>())
+                else if (x.gameObject.GetComponent(out ResourceTarget resourceTarget))
                 {
-                    list.Add(new Entity(x.gameObject.GetComponent<ResourceTarget>()));
+                    list.Add(EntityCache.GetInstance().GrabOrAllocate(resourceTarget.GetInstanceID(), resourceTarget));
                 }
             }
 

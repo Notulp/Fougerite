@@ -331,7 +331,7 @@ namespace Fougerite
             {
                 if (component != obj)
                 {
-                    list.Add(new Entity(component));
+                    list.Add(EntityCache.GetInstance().GrabOrAllocate(component.GetInstanceID(), component));
                 }
             }
 

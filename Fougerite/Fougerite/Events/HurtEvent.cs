@@ -1,4 +1,6 @@
-﻿namespace Fougerite.Events
+﻿using Fougerite.Caches;
+
+namespace Fougerite.Events
 {
     using Fougerite;
     using System;
@@ -37,8 +39,9 @@
                 WeaponData = null;
                 _status = d.status;
                 string weaponName = "Unknown";
-                if (d.victim.idMain is DeployableObject deployableObject)
+                if (d.victim.idMain.GetComponent<DeployableObject>() != null)
                 {
+                    DeployableObject deployableObject = d.victim.idMain.GetComponent<DeployableObject>();
                     if (d.victim.id.ToString().ToLower().Contains("sleeping"))
                     {
                         _sleeper = true;
@@ -46,16 +49,17 @@
                     }
                     else
                     {
-                        Victim = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
-                        _ent = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
+                        Victim = EntityCache.GetInstance().GrabOrAllocate(deployableObject.GetInstanceID(), deployableObject);
+                        _ent = EntityCache.GetInstance().GrabOrAllocate(deployableObject.GetInstanceID(), deployableObject);
                         _entityvictim = true;
                     }
                     _playervictim = false;
                 }
-                else if (d.victim.idMain is StructureComponent)
+                else if (d.victim.idMain.GetComponent<StructureComponent>() != null)
                 {
-                    Victim = new Entity(d.victim.idMain.GetComponent<StructureComponent>());
-                    _ent = new Entity(d.victim.idMain.GetComponent<StructureComponent>());
+                    StructureComponent structureComponent = d.victim.idMain.GetComponent<StructureComponent>();
+                    Victim = EntityCache.GetInstance().GrabOrAllocate(structureComponent.GetInstanceID(), structureComponent);
+                    _ent = EntityCache.GetInstance().GrabOrAllocate(structureComponent.GetInstanceID(), structureComponent);
                     _playervictim = false;
                     _entityvictim = true;
                     _entityvictim = true;
@@ -63,8 +67,9 @@
                 else if (d.victim.id is SpikeWall)
                 {
                     _playerattacker = false;
-                    Victim = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
-                    _ent = new Entity(d.victim.idMain.GetComponent<DeployableObject>());
+                    DeployableObject deployableObject = d.victim.idMain.GetComponent<DeployableObject>();
+                    Victim = EntityCache.GetInstance().GrabOrAllocate(deployableObject.GetInstanceID(), deployableObject);
+                    _ent = EntityCache.GetInstance().GrabOrAllocate(deployableObject.GetInstanceID(), deployableObject);
                     _entityvictim = true;
                 }
                 else if (d.victim.client != null)
@@ -75,7 +80,13 @@
                 }
                 else if (d.victim.character != null)
                 {
-                    Victim = new NPC(d.victim.character);
+                    NPC npc = NPCCache.GetInstance().GetEntityByInstanceId(d.victim.character.GetInstanceID());
+                    // Should never happen, but just in case...
+                    if (npc == null)
+                    {
+                        npc = new NPC(d.victim.character);
+                    }
+                    Victim = npc;
                     _npcvictim = true;
                     _playervictim = false;
                 }
@@ -114,14 +125,16 @@
                 else if (d.attacker.id is SpikeWall)
                 {
                     _playerattacker = false;
-                    Attacker = new Entity(d.attacker.idMain.GetComponent<DeployableObject>());
+                    DeployableObject deployableObject = d.attacker.idMain.GetComponent<DeployableObject>();
+                    Attacker = EntityCache.GetInstance().GrabOrAllocate(deployableObject.GetInstanceID(), deployableObject);
                     _entityattacker = true;
                     weaponName = d.attacker.id.ToString().Contains("Large") ? "Large Spike Wall" : "Spike Wall";
                 }
                 else if (d.attacker.id is SupplyCrate)
                 {
                     _playerattacker = false;
-                    Attacker = new Entity(d.attacker.idMain.GetComponent<SupplyCrate>());
+                    SupplyCrate supplyCrate = d.attacker.idMain.GetComponent<SupplyCrate>();
+                    Attacker = EntityCache.GetInstance().GrabOrAllocate(supplyCrate.GetInstanceID(), supplyCrate);
                     _entityattacker = true;
                     weaponName = "Supply Crate";
                 }
@@ -208,7 +221,13 @@
                 }
                 else if (d.attacker.character != null)
                 {
-                    Attacker = new NPC(d.attacker.character);
+                    NPC npc = NPCCache.GetInstance().GetEntityByInstanceId(d.attacker.character.GetInstanceID());
+                    // Should never happen, but just in case...
+                    if (npc == null)
+                    {
+                        npc = new NPC(d.attacker.character);
+                    }
+                    Attacker = npc;
                     _playerattacker = false;
                     _npcattacker = true;
                     var temp = (NPC) Attacker;

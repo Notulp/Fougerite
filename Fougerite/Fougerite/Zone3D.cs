@@ -108,8 +108,7 @@ namespace Fougerite
                 {
                     float ground = World.GetWorld().GetGround(vector.x, vector.y);
                     Vector3 location = new Vector3(vector.x, ground, vector.y);
-                    object o = World.GetWorld().Spawn(";struct_metal_pillar", location);
-                    Entity item = new Entity(o);
+                    Entity item = World.GetWorld().SpawnEntity(";struct_metal_pillar", location);
                     tmpPoints.Add(item);
                 }
             }
