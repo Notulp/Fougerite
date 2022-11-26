@@ -521,7 +521,8 @@ namespace Fougerite
                 }
 
                 // Allow server console to execute anything
-                if (!external && Server.GetServer().ConsoleCommandCancelList.Contains(data, StringComparer.OrdinalIgnoreCase))
+                if (!external && (Server.GetServer().ConsoleCommandCancelList.Contains(data, StringComparer.OrdinalIgnoreCase)
+                    || Server.GetServer().ConsoleCommandCancelList.Contains("*", StringComparer.OrdinalIgnoreCase)))
                 {
                     a.ReplyWith("This console command is globally restricted!");
                     return false;
@@ -531,7 +532,8 @@ namespace Fougerite
                 if (UID > 0)
                 {
                     Player player = Server.GetServer().FindPlayer(UID);
-                    if (player != null && player.ConsoleCommandCancelList.Contains(data, StringComparer.OrdinalIgnoreCase))
+                    if (player != null && (player.ConsoleCommandCancelList.Contains(data, StringComparer.OrdinalIgnoreCase)
+                        || player.ConsoleCommandCancelList.Contains("*", StringComparer.OrdinalIgnoreCase)))
                     {
                         a.ReplyWith("This console command is restricted for you!");
                         player.Message("This console command is restricted for you!");
