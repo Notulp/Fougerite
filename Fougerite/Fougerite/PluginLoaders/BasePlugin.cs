@@ -440,12 +440,13 @@ namespace Fougerite.PluginLoaders
         /// <returns>The timer.</returns>
         /// <param name="name">Name.</param>
         /// <param name="timeoutDelay">Timeout delay.</param>
-        public TimedEvent CreateTimer(string name, int timeoutDelay)
+        /// <param name="autoReset">True if the timer should raise the elapsed event each time it elapses, false if only once.</param>
+        public TimedEvent CreateTimer(string name, int timeoutDelay, bool autoReset = false)
         {
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
-                timedEvent = new TimedEvent(name, timeoutDelay);
+                timedEvent = new TimedEvent(name, timeoutDelay, autoReset);
                 timedEvent.OnFire += OnTimerCB;
                 Timers.Add(name, timedEvent);
             }
@@ -460,12 +461,13 @@ namespace Fougerite.PluginLoaders
         /// <param name="name">Name.</param>
         /// <param name="timeoutDelay">Timeout delay.</param>
         /// <param name="callback">The callback function.</param>
-        public TimedEvent CreateTimer(string name, int timeoutDelay, Action<TimedEvent> callback)
+        /// <param name="autoReset">True if the timer should raise the elapsed event each time it elapses, false if only once.</param>
+        public TimedEvent CreateTimer(string name, int timeoutDelay, Action<TimedEvent> callback, bool autoReset = false)
         {
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
-                timedEvent = new TimedEvent(name, timeoutDelay);
+                timedEvent = new TimedEvent(name, timeoutDelay, autoReset);
                 timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(callback);
                 Timers.Add(name, timedEvent);
             }
@@ -480,12 +482,13 @@ namespace Fougerite.PluginLoaders
         /// <param name="name">Name.</param>
         /// <param name="timeoutDelay">Timeout delay.</param>
         /// <param name="args">Arguments.</param>
-        public TimedEvent CreateTimer(string name, int timeoutDelay, Dictionary<string, object> args)
+        /// <param name="autoReset">True if the timer should raise the elapsed event each time it elapses, false if only once.</param>
+        public TimedEvent CreateTimer(string name, int timeoutDelay, Dictionary<string, object> args, bool autoReset = false)
         {
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
-                timedEvent = new TimedEvent(name, timeoutDelay);
+                timedEvent = new TimedEvent(name, timeoutDelay, autoReset);
                 timedEvent.Args = args;
                 timedEvent.OnFire += OnTimerCB;
                 Timers.Add(name, timedEvent);
@@ -501,13 +504,15 @@ namespace Fougerite.PluginLoaders
         /// <param name="name">Name.</param>
         /// <param name="timeoutDelay">Timeout delay.</param>
         /// <param name="args">Arguments.</param>
+        /// <param name="callback">The callback function.</param>
+        /// <param name="autoReset">True if the timer should raise the elapsed event each time it elapses, false if only once.</param>
         public TimedEvent CreateTimer(string name, int timeoutDelay, Dictionary<string, object> args,
-            Action<TimedEvent> callback)
+            Action<TimedEvent> callback, bool autoReset = false)
         {
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
-                timedEvent = new TimedEvent(name, timeoutDelay);
+                timedEvent = new TimedEvent(name, timeoutDelay, autoReset);
                 timedEvent.Args = args;
                 timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(callback);
                 Timers.Add(name, timedEvent);
@@ -567,9 +572,10 @@ namespace Fougerite.PluginLoaders
         /// <param name="name">Name.</param>
         /// <param name="timeoutDelay">Timeout delay.</param>
         /// <param name="args">Arguments.</param>
-        public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args)
+        /// <param name="autoReset">True if the timer should raise the elapsed event each time it elapses, false if only once.</param>
+        public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args, bool autoReset = false)
         {
-            TimedEvent timedEvent = new TimedEvent(name, timeoutDelay);
+            TimedEvent timedEvent = new TimedEvent(name, timeoutDelay, autoReset);
             timedEvent.Args = args;
             timedEvent.OnFire += OnTimerCB;
             ParallelTimers.Add(timedEvent);
@@ -583,10 +589,12 @@ namespace Fougerite.PluginLoaders
         /// <param name="name">Name.</param>
         /// <param name="timeoutDelay">Timeout delay.</param>
         /// <param name="args">Arguments.</param>
+        /// <param name="callback">The callback function.</param>
+        /// <param name="autoReset">True if the timer should raise the elapsed event each time it elapses, false if only once.</param>
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args,
-            Action<TimedEvent> callback)
+            Action<TimedEvent> callback, bool autoReset = false)
         {
-            TimedEvent timedEvent = new TimedEvent(name, timeoutDelay);
+            TimedEvent timedEvent = new TimedEvent(name, timeoutDelay, autoReset);
             timedEvent.Args = args;
             timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(callback);
             ParallelTimers.Add(timedEvent);
