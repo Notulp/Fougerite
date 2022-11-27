@@ -301,11 +301,9 @@ namespace Fougerite
                         }
                         catch (Exception exception)
                         {
-                            string[] textArray2 = new string[]
-                                { "Error: ", arg.Class, ".", arg.Function, " - ", exception.Message };
+                            string[] textArray2 = { "Error: ", arg.Class, ".", arg.Function, " - ", exception.Message };
                             Debug.LogWarning(string.Concat(textArray2));
-                            string[] textArray3 = new string[]
-                                { "Error: ", arg.Class, ".", arg.Function, " - ", exception.Message };
+                            string[] textArray3 = { "Error: ", arg.Class, ".", arg.Function, " - ", exception.Message };
                             arg.ReplyWith(string.Concat(textArray3));
                             //flag = false;
                             break;
@@ -333,8 +331,7 @@ namespace Fougerite
                         {
                             if (bWantReply)
                             {
-                                string[] textArray5 = new string[]
-                                {
+                                string[] textArray5 = {
                                     arg.Class, ".", arg.Function, ": ",
                                     Facepunch.Utility.String.QuoteSafe(field.GetValue(null).ToString()),
                                     " (", fieldType.Name, ")"
@@ -369,17 +366,12 @@ namespace Fougerite
 
                                 if (bWantReply)
                                 {
-                                    string[] textArray4 = new string[10];
-                                    textArray4[0] = arg.Class;
-                                    textArray4[1] = ".";
-                                    textArray4[2] = arg.Function;
-                                    textArray4[3] = ": changed ";
-                                    textArray4[4] = Facepunch.Utility.String.QuoteSafe(str);
-                                    textArray4[5] = " to ";
-                                    textArray4[6] = Facepunch.Utility.String.QuoteSafe(field.GetValue(null).ToString());
-                                    textArray4[7] = " (";
-                                    textArray4[8] = fieldType.Name;
-                                    textArray4[9] = ")";
+                                    string[] textArray4 =
+                                    {
+                                        arg.Class, ".", arg.Function, ": changed ", Facepunch.Utility.String.QuoteSafe(str),
+                                        " to ", Facepunch.Utility.String.QuoteSafe(field.GetValue(null).ToString()),
+                                        " (", fieldType.Name, ")"
+                                    };
                                     arg.ReplyWith(string.Concat(textArray4));
                                 }
                             }
@@ -449,18 +441,13 @@ namespace Fougerite
 
                                 if (bWantReply)
                                 {
-                                    string[] textArray6 = new string[10];
-                                    textArray6[0] = arg.Class;
-                                    textArray6[1] = ".";
-                                    textArray6[2] = arg.Function;
-                                    textArray6[3] = ": changed ";
-                                    textArray6[4] = Facepunch.Utility.String.QuoteSafe(str);
-                                    textArray6[5] = " to ";
-                                    textArray6[6] =
-                                        Facepunch.Utility.String.QuoteSafe(property.GetValue(null, null).ToString());
-                                    textArray6[7] = " (";
-                                    textArray6[8] = propertyType.Name;
-                                    textArray6[9] = ")";
+                                    string[] textArray6 =
+                                    {
+                                        arg.Class, ".", arg.Function, ": changed ", Facepunch.Utility.String.QuoteSafe(str),
+                                        " to ", Facepunch.Utility.String.QuoteSafe(property.GetValue(null, null).ToString()),
+                                        " (", propertyType.Name, ")"
+                                    };
+                                    
                                     arg.ReplyWith(string.Concat(textArray6));
                                 }
                             }
@@ -492,7 +479,13 @@ namespace Fougerite
                 bool adminRights = (a.argUser != null && a.argUser.admin) || external;
                 string Class = a.Class;
                 string Function = a.Function;
-
+                
+                // Player chat commands are chat.say, console is global.say
+                // Let the chat event handle that... (Idk why legacy uses InvariantCultureIgnoreCase)
+                if (Class.Equals("chat", ic) && Function.Equals("say", ic))
+                {
+                    return true;
+                }
 
                 ulong UID = 0;
                 if (a.argUser != null)
