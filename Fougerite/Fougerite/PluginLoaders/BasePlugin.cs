@@ -303,12 +303,12 @@ namespace Fougerite.PluginLoaders
         {
             path = ValidateRelativePath($"{path}.ini");
             if (path == null)
-                return (IniParser) null;
+                return null;
 
             if (File.Exists(path))
                 return new IniParser(path);
 
-            return (IniParser) null;
+            return null;
         }
 
         /// <summary>
@@ -351,7 +351,7 @@ namespace Fougerite.PluginLoaders
                 Logger.LogException(ex);
             }
 
-            return (IniParser) null;
+            return null;
         }
 
         /// <summary>
@@ -418,10 +418,14 @@ namespace Fougerite.PluginLoaders
         /// <returns>The timestamp.</returns>
         public long GetTimestamp()
         {
-            TimeSpan span = (TimeSpan) (DateTime.UtcNow - new DateTime(0x7b2, 1, 1, 0, 0, 0));
+            TimeSpan span = DateTime.UtcNow - new DateTime(0x7b2, 1, 1, 0, 0, 0);
             return (long) span.TotalSeconds;
         }
 
+        /// <summary>
+        /// Runs when a Timer is fired.
+        /// </summary>
+        /// <param name="evt"></param>
         public void OnTimerCB(TimedEvent evt)
         {
             if (Globals.Contains($"{evt.Name}Callback"))
@@ -441,8 +445,8 @@ namespace Fougerite.PluginLoaders
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
-                timedEvent = new TimedEvent(name, (double) timeoutDelay);
-                timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(OnTimerCB);
+                timedEvent = new TimedEvent(name, timeoutDelay);
+                timedEvent.OnFire += OnTimerCB;
                 Timers.Add(name, timedEvent);
             }
 
@@ -455,12 +459,13 @@ namespace Fougerite.PluginLoaders
         /// <returns>The timer.</returns>
         /// <param name="name">Name.</param>
         /// <param name="timeoutDelay">Timeout delay.</param>
+        /// <param name="callback">The callback function.</param>
         public TimedEvent CreateTimer(string name, int timeoutDelay, Action<TimedEvent> callback)
         {
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
-                timedEvent = new TimedEvent(name, (double) timeoutDelay);
+                timedEvent = new TimedEvent(name, timeoutDelay);
                 timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(callback);
                 Timers.Add(name, timedEvent);
             }
@@ -480,9 +485,9 @@ namespace Fougerite.PluginLoaders
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
-                timedEvent = new TimedEvent(name, (double) timeoutDelay);
+                timedEvent = new TimedEvent(name, timeoutDelay);
                 timedEvent.Args = args;
-                timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(OnTimerCB);
+                timedEvent.OnFire += OnTimerCB;
                 Timers.Add(name, timedEvent);
             }
 
@@ -502,7 +507,7 @@ namespace Fougerite.PluginLoaders
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
-                timedEvent = new TimedEvent(name, (double) timeoutDelay);
+                timedEvent = new TimedEvent(name, timeoutDelay);
                 timedEvent.Args = args;
                 timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(callback);
                 Timers.Add(name, timedEvent);
@@ -518,16 +523,7 @@ namespace Fougerite.PluginLoaders
         /// <param name="name">Name.</param>
         public TimedEvent GetTimer(string name)
         {
-            TimedEvent result;
-            if (Timers.ContainsKey(name))
-            {
-                result = Timers[name];
-            }
-            else
-            {
-                result = null;
-            }
-
+            TimedEvent result = Timers.ContainsKey(name) ? Timers[name] : null;
             return result;
         }
 
@@ -573,9 +569,9 @@ namespace Fougerite.PluginLoaders
         /// <param name="args">Arguments.</param>
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args)
         {
-            TimedEvent timedEvent = new TimedEvent(name, (double) timeoutDelay);
+            TimedEvent timedEvent = new TimedEvent(name, timeoutDelay);
             timedEvent.Args = args;
-            timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(OnTimerCB);
+            timedEvent.OnFire += OnTimerCB;
             ParallelTimers.Add(timedEvent);
             return timedEvent;
         }
@@ -590,7 +586,7 @@ namespace Fougerite.PluginLoaders
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args,
             Action<TimedEvent> callback)
         {
-            TimedEvent timedEvent = new TimedEvent(name, (double) timeoutDelay);
+            TimedEvent timedEvent = new TimedEvent(name, timeoutDelay);
             timedEvent.Args = args;
             timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(callback);
             ParallelTimers.Add(timedEvent);
@@ -604,9 +600,7 @@ namespace Fougerite.PluginLoaders
         /// <param name="name">Name.</param>
         public List<TimedEvent> GetParallelTimer(string name)
         {
-            return (from timer in ParallelTimers
-                where timer.Name == name
-                select timer).ToList();
+            return ParallelTimers.Where(timer => timer.Name == name).ToList();
         }
 
         /// <summary>
