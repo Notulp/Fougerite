@@ -232,13 +232,13 @@ namespace Fougerite
         /// <param name="cmd"></param>
         public void RestrictConsoleCommand(string cmd)
         {
-            if (!ConsoleCommandCancelList.Contains(cmd))
+            if (!_ConsoleCommandCancelList.Contains(cmd))
             {
                 bool result = Hooks.RestrictionChange(this, CommandRestrictionType.ConsoleCommand, 
                     CommandRestrictionScale.SpecificPlayer, cmd, true);
                 
                 if (!result)
-                    ConsoleCommandCancelList.Add(cmd);
+                    _ConsoleCommandCancelList.Add(cmd);
             }
         }
         
@@ -248,13 +248,13 @@ namespace Fougerite
         /// <param name="cmd"></param>
         public void UnRestrictConsoleCommand(string cmd)
         {
-            if (ConsoleCommandCancelList.Contains(cmd))
+            if (_ConsoleCommandCancelList.Contains(cmd))
             {
                 bool result = Hooks.RestrictionChange(this, CommandRestrictionType.ConsoleCommand, 
                     CommandRestrictionScale.SpecificPlayer, cmd, false);
                 
                 if (!result)
-                    ConsoleCommandCancelList.Remove(cmd);
+                    _ConsoleCommandCancelList.Remove(cmd);
             }
         }
         
@@ -275,13 +275,13 @@ namespace Fougerite
         /// <param name="cmd"></param>
         public void RestrictCommand(string cmd)
         {
-            if (!CommandCancelList.Contains(cmd))
+            if (!_CommandCancelList.Contains(cmd))
             {
                 bool result = Hooks.RestrictionChange(this, CommandRestrictionType.Command, 
                     CommandRestrictionScale.SpecificPlayer, cmd, true);
                 
                 if (!result)
-                    CommandCancelList.Add(cmd);
+                    _CommandCancelList.Add(cmd);
             }
         }
 
@@ -291,13 +291,13 @@ namespace Fougerite
         /// <param name="cmd"></param>
         public void UnRestrictCommand(string cmd)
         {
-            if (CommandCancelList.Contains(cmd))
+            if (_CommandCancelList.Contains(cmd))
             {
                 bool result = Hooks.RestrictionChange(this, CommandRestrictionType.Command, 
                     CommandRestrictionScale.SpecificPlayer, cmd, false);
                 
                 if (!result)
-                    CommandCancelList.Remove(cmd);
+                    _CommandCancelList.Remove(cmd);
             }
         }
 

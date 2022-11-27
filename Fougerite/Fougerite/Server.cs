@@ -551,13 +551,13 @@ namespace Fougerite
         /// <param name="cmd"></param>
         public void RestrictConsoleCommand(string cmd)
         {
-            if (!ConsoleCommandCancelList.Contains(cmd))
+            if (!_ConsoleCommandCancelList.Contains(cmd))
             {
                 bool result = Hooks.RestrictionChange(null, CommandRestrictionType.ConsoleCommand, 
                     CommandRestrictionScale.Global, cmd, true);
                 
                 if (!result)
-                    ConsoleCommandCancelList.Add(cmd);
+                    _ConsoleCommandCancelList.Add(cmd);
             }
         }
 
@@ -567,13 +567,13 @@ namespace Fougerite
         /// <param name="cmd"></param>
         public void UnRestrictConsoleCommand(string cmd)
         {
-            if (ConsoleCommandCancelList.Contains(cmd))
+            if (_ConsoleCommandCancelList.Contains(cmd))
             {
                 bool result = Hooks.RestrictionChange(null, CommandRestrictionType.ConsoleCommand, 
                     CommandRestrictionScale.Global, cmd, false);
                 
                 if (!result)
-                    ConsoleCommandCancelList.Remove(cmd);
+                    _ConsoleCommandCancelList.Remove(cmd);
             }
         }
 
