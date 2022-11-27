@@ -64,8 +64,7 @@ namespace Fougerite.Events
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             // Dispose the timer first, as It has always been unreliable on long run in mono
-            if (_timer != null)
-                _timer.Dispose();
+            Kill();
 
             // Call the event
             try
@@ -85,11 +84,12 @@ namespace Fougerite.Events
             _lastTickDate = DateTime.Now;
             _elapsedCount += 1;
 
-            // Re-Create
-            ReCreate();
-
-            // Start
-            Start();
+            // Re-Start the timer only, if auto reset was true
+            if (_autoReset)
+            {
+                // Start
+                Start();
+            }
         }
 
         /// <summary>
@@ -108,10 +108,14 @@ namespace Fougerite.Events
         /// </summary>
         public void Start()
         {
-            if (_timer == null)
+            // It's already running
+            if (_timer != null && _timer.Enabled)
             {
-                ReCreate();
+                return;
             }
+            
+            // Re-Create is always.
+            ReCreate();
             
             // Should have a value by this time.
             _timer?.Start();
@@ -137,10 +141,12 @@ namespace Fougerite.Events
             Stop();
             if (_timer != null)
                 _timer.Dispose();
+            _timer = null;
         }
 
         /// <summary>
         /// True if the timer should raise the elapsed event each time it elapses, false if only once.
+        /// Basically true means the timer will keep running forever, false means only once.
         /// </summary>
         public bool AutoReset
         {
