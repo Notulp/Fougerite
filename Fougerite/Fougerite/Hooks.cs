@@ -24,10 +24,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnAllPluginsLoaded != null)
-                    {
-                        OnAllPluginsLoaded();
-                    }
+                    ExecuteSubscribers(OnAllPluginsLoaded, "AllPluginsLoadedEvent");
                 }
                 catch (Exception ex)
                 {
@@ -49,7 +46,7 @@ namespace Fougerite
                     {
                         try
                         {
-                            OnBlueprintUse(player, ae);
+                            ExecuteSubscribers(OnBlueprintUse, "BluePrintUseEvent", player, ae);
                         }
                         catch (Exception ex)
                         {
@@ -138,7 +135,7 @@ namespace Fougerite
                     {
                         try
                         {
-                            OnCommand(player, command, cargs);
+                            ExecuteSubscribers(OnCommand, "CommandEvent", player, command, cargs);
                         }
                         catch (Exception ex)
                         {
@@ -693,7 +690,7 @@ namespace Fougerite
                     
                     try
                     {
-                        OnDoorUse(Server.GetServer().FindPlayer(controllable.playerClient.userID), de);
+                        ExecuteSubscribers(OnDoorUse, "DoorUseEvent", Server.GetServer().FindPlayer(controllable.playerClient.userID), de);
                     }
                     catch (Exception ex)
                     {
@@ -718,8 +715,7 @@ namespace Fougerite
                     DecayEvent de = new DecayEvent(ent, ref dmg);
                     try
                     {
-                        if (OnEntityDecay != null)
-                            OnEntityDecay(de);
+                        ExecuteSubscribers(OnEntityDecay, "EntityDecayEvent", de);
                     }
                     catch (Exception ex)
                     {
@@ -745,7 +741,7 @@ namespace Fougerite
                 Entity e = new Entity(entity);
                 uLink.NetworkPlayer nplayer = info.sender;
                 Player creator = e.Creator;
-                var data = nplayer.GetLocalData();
+                object data = nplayer.GetLocalData();
                 Player ActualPlacer = null;
                 if (data is NetUser user)
                 {
@@ -754,8 +750,7 @@ namespace Fougerite
 
                 try
                 {
-                    if (OnEntityDeployed != null)
-                        OnEntityDeployed(creator, e);
+                    ExecuteSubscribers(OnEntityDeployed, "EntityDeployedEvent", creator, e);
                 }
                 catch (Exception ex)
                 {
@@ -764,8 +759,7 @@ namespace Fougerite
 
                 try
                 {
-                    if (OnEntityDeployedWithPlacer != null)
-                        OnEntityDeployedWithPlacer(creator, e, ActualPlacer);
+                    ExecuteSubscribers(OnEntityDeployedWithPlacer, "EntityDeployedWithPlacerEvent", creator, e, ActualPlacer);
                 }
                 catch (Exception ex)
                 {
@@ -786,10 +780,7 @@ namespace Fougerite
                     Player vp = (Player)he.Victim;
                     try
                     {
-                        if (OnPlayerHurt != null)
-                        {
-                            OnPlayerHurt(he);
-                        }
+                        ExecuteSubscribers(OnPlayerHurt, "PlayerHurtEvent", he);
                     }
                     catch (Exception ex)
                     {
@@ -821,10 +812,7 @@ namespace Fougerite
                     Sleeper vp = (Sleeper)he.Victim;
                     try
                     {
-                        if (OnPlayerHurt != null)
-                        {
-                            OnPlayerHurt(he);
-                        }
+                        ExecuteSubscribers(OnPlayerHurt, "PlayerHurtEvent", he);
                     }
                     catch (Exception ex)
                     {
@@ -853,10 +841,7 @@ namespace Fougerite
                     {
                         try
                         {
-                            if (OnNPCHurt != null)
-                            {
-                                OnNPCHurt(he);
-                            }
+                            ExecuteSubscribers(OnNPCHurt, "NPCHurtEvent", he);
                         }
                         catch (Exception ex)
                         {
@@ -875,10 +860,7 @@ namespace Fougerite
                                 DeathEvent de = new DeathEvent(ref e);
                                 try
                                 {
-                                    if (OnNPCKilled != null)
-                                    {
-                                        OnNPCKilled(de);
-                                    }
+                                    ExecuteSubscribers(OnNPCKilled, "NPCKilledEvent", de);
                                 }
                                 catch (Exception ex)
                                 {
@@ -893,17 +875,14 @@ namespace Fougerite
                 }
                 else if (he.VictimIsEntity)
                 {
-                    var ent = he.Entity;
+                    Entity ent = he.Entity;
                     // Double validate this weird logic...
                     if (!he.IsDecay && DecayList.ContainsKey(he.Entity.InstanceID))
                         he.IsDecay = true;
 
                     try
                     {
-                        if (OnEntityHurt != null)
-                        {
-                            OnEntityHurt(he);
-                        }
+                        ExecuteSubscribers(OnEntityHurt, "EntityHurtEvent", he);
                     }
                     catch (Exception ex)
                     {
@@ -943,10 +922,7 @@ namespace Fougerite
 
                                 try
                                 {
-                                    if (OnEntityDestroyed != null)
-                                    {
-                                        OnEntityDestroyed(de2);
-                                    }
+                                    ExecuteSubscribers(OnEntityDestroyed, "EntityDestroyEvent", de2);
                                 }
                                 catch (Exception ex)
                                 {
@@ -970,10 +946,7 @@ namespace Fougerite
                                 DestroyEvent de22 = new DestroyEvent(ref e, ent, he.IsDecay);
                                 try
                                 {
-                                    if (OnEntityDestroyed != null)
-                                    {
-                                        OnEntityDestroyed(de22);
-                                    }
+                                    ExecuteSubscribers(OnEntityDestroyed, "EntityDestroyEvent", de22);
                                 }
                                 catch (Exception ex)
                                 {
@@ -1006,8 +979,7 @@ namespace Fougerite
                 Player pl = Server.GetServer().FindPlayer(p2.userID);
                 try
                 {
-                    if (OnShowTalker != null)
-                        OnShowTalker(p.netPlayer, pl);
+                    ExecuteSubscribers(OnShowTalker, "ShowTalkerEvent", p.netPlayer, pl);
                 }
                 catch (Exception ex)
                 {
@@ -1089,8 +1061,7 @@ namespace Fougerite
                 ItemsBlocks blocks = new ItemsBlocks(items);
                 try
                 {
-                    if (OnItemsLoaded != null)
-                        OnItemsLoaded(blocks);
+                    ExecuteSubscribers(OnItemsLoaded, "DataBlockLoadEvent", blocks);
                 }
                 catch (Exception ex)
                 {
@@ -1133,10 +1104,7 @@ namespace Fougerite
                     Inventory.AddExistingItemResult.BadItemArgument, PickupEventType.Before);
                 try
                 {
-                    if (OnItemPickup != null)
-                    {
-                        OnItemPickup(ipe);
-                    }
+                    ExecuteSubscribers(OnItemPickup, "ItemPickupEvent", ipe);
                 }
                 catch (Exception ex)
                 {
@@ -1165,10 +1133,7 @@ namespace Fougerite
                         pickup.UpdateItemInfo(item);
                         try
                         {
-                            if (OnItemPickup != null)
-                            {
-                                OnItemPickup(aftercall);
-                            }
+                            ExecuteSubscribers(OnItemPickup, "ItemPickupEvent", aftercall);
                         }
                         catch (Exception ex)
                         {
@@ -1181,10 +1146,7 @@ namespace Fougerite
                     {
                         try
                         {
-                            if (OnItemPickup != null)
-                            {
-                                OnItemPickup(aftercall);
-                            }
+                            ExecuteSubscribers(OnItemPickup, "ItemPickupEvent", aftercall);
                         }
                         catch (Exception ex)
                         {
@@ -1198,10 +1160,7 @@ namespace Fougerite
                         pickup.RemoveThis();
                         try
                         {
-                            if (OnItemPickup != null)
-                            {
-                                OnItemPickup(aftercall);
-                            }
+                            ExecuteSubscribers(OnItemPickup, "ItemPickupEvent", aftercall);
                         }
                         catch (Exception ex)
                         {
@@ -1217,10 +1176,7 @@ namespace Fougerite
                 pickup.RemoveThis();
                 try
                 {
-                    if (OnItemPickup != null)
-                    {
-                        OnItemPickup(aftercall);
-                    }
+                    ExecuteSubscribers(OnItemPickup, "ItemPickupEvent", aftercall);
                 }
                 catch (Exception ex)
                 {
@@ -1238,10 +1194,7 @@ namespace Fougerite
                 FallDamageEvent fde = new FallDamageEvent(fd, speed, num, flag, flag2);
                 try
                 {
-                    if (OnFallDamage != null)
-                    {
-                        OnFallDamage(fde);
-                    }
+                    ExecuteSubscribers(OnFallDamage, "FallDamageEvent", fde);
                 }
                 catch (Exception ex)
                 {
@@ -1358,10 +1311,7 @@ namespace Fougerite
 
                 try
                 {
-                    if (OnPlayerConnected != null)
-                    {
-                        OnPlayerConnected(player);
-                    }
+                    ExecuteSubscribers(OnPlayerConnected, "PlayerConnectedEvent", player);
                 }
                 catch (Exception ex)
                 {
@@ -1441,10 +1391,7 @@ namespace Fougerite
 
                 try
                 {
-                    if (OnPlayerDisconnected != null)
-                    {
-                        OnPlayerDisconnected(player);
-                    }
+                    ExecuteSubscribers(OnPlayerDisconnected, "PlayerDisconnectedEvent", player);
                 }
                 catch (Exception ex)
                 {
@@ -1467,10 +1414,7 @@ namespace Fougerite
                 GatherEvent ge = new GatherEvent(rt, rg, amount);
                 try
                 {
-                    if (OnPlayerGathering != null)
-                    {
-                        OnPlayerGathering(player, ge);
-                    }
+                    ExecuteSubscribers(OnPlayerGathering, "PlayerGatherEvent", player, ge);
 
                     amount = ge.Quantity;
                     if (!ge.Override)
@@ -1500,10 +1444,7 @@ namespace Fougerite
 
                 try
                 {
-                    if (OnPlayerGathering != null)
-                    {
-                        OnPlayerGathering(player, ge);
-                    }
+                    ExecuteSubscribers(OnPlayerGathering, "PlayerGatherWoodEvent", player, ge);
 
                     db = Server.GetServer().Items.Find(ge.Item);
                     amount = ge.Quantity;
@@ -1530,8 +1471,7 @@ namespace Fougerite
                     }
 
                     flag = event2.DropItems;
-                    if (OnPlayerKilled != null)
-                        OnPlayerKilled(event2);
+                    ExecuteSubscribers(OnPlayerKilled, "PlayerKilledEvent", event2);
 
                     flag = event2.DropItems;
                 }
@@ -1552,10 +1492,8 @@ namespace Fougerite
                 SpawnEvent se = new SpawnEvent(pos, camp);
                 try
                 {
-                    if (OnPlayerSpawned != null && player != null)
-                    {
-                        OnPlayerSpawned(player, se);
-                    }
+                    if (player != null)
+                        ExecuteSubscribers(OnPlayerSpawned, "PlayerSpawnedEvent", player, se);
                 }
                 catch (Exception ex)
                 {
@@ -1572,11 +1510,9 @@ namespace Fougerite
                 SpawnEvent se = new SpawnEvent(pos, camp);
                 try
                 {
-                    if (OnPlayerSpawning != null && player != null)
-                    {
-                        OnPlayerSpawning(player, se);
-                    }
-
+                    if (player != null)
+                        ExecuteSubscribers(OnPlayerSpawning, "PlayerSpawningEvent", player, se);
+                    
                     return new Vector3(se.X, se.Y, se.Z);
                 }
                 catch (Exception ex)
@@ -1594,10 +1530,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnPluginInit != null)
-                    {
-                        OnPluginInit();
-                    }
+                    ExecuteSubscribers(OnPluginInit, "PluginInitEvent");
                 }
                 catch (Exception ex)
                 {
@@ -1612,10 +1545,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnPlayerTeleport != null)
-                    {
-                        OnPlayerTeleport(player, from, dest);
-                    }
+                    ExecuteSubscribers(OnPlayerTeleport, "TeleportEvent", player, from, dest);
                 }
                 catch (Exception ex)
                 {
@@ -1632,10 +1562,7 @@ namespace Fougerite
                 try
                 {
                     CraftingEvent e = new CraftingEvent(inv, blueprint, amount, startTime);
-                    if (OnCrafting != null)
-                    {
-                        OnCrafting(e);
-                    }
+                    ExecuteSubscribers(OnCrafting, "CraftingEvent", e);
                 }
                 catch (Exception ex)
                 {
@@ -1673,10 +1600,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnResourceSpawned != null)
-                    {
-                        OnResourceSpawned(target);
-                    }
+                    ExecuteSubscribers(OnResourceSpawned, "ResourceSpawnedEvent", target);
                 }
                 catch (Exception ex)
                 {
@@ -1692,11 +1616,8 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnBowShoot != null)
-                    {
-                        BowShootEvent se = new BowShootEvent(db, rep, info, bwi);
-                        OnBowShoot(se);
-                    }
+                    BowShootEvent se = new BowShootEvent(db, rep, info, bwi);
+                    ExecuteSubscribers(OnBowShoot, "BowShootEvent", se);
                 }
                 catch (Exception ex)
                 {
@@ -1750,11 +1671,8 @@ namespace Fougerite
                             UnityEngine.Random.Range(-1f, 1f)) * 10f);
                         try
                         {
-                            if (OnGrenadeThrow != null)
-                            {
-                                GrenadeThrowEvent se = new GrenadeThrowEvent(hgd, obj2, rep, info, item);
-                                OnGrenadeThrow(se);
-                            }
+                            GrenadeThrowEvent se = new GrenadeThrowEvent(hgd, obj2, rep, info, item);
+                            ExecuteSubscribers(OnGrenadeThrow, "GrenadeThrowEvent", se);
                         }
                         catch (Exception ex)
                         {
@@ -1777,10 +1695,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnServerSaved != null)
-                    {
-                        OnServerSaved(amount, seconds);
-                    }
+                    ExecuteSubscribers(OnServerSaved, "ServerSavedEvent", amount, seconds);
                 }
                 catch (Exception ex)
                 {
@@ -1815,7 +1730,7 @@ namespace Fougerite
                 Collection<InventoryItem> collection = inv.collection;
                 InventoryItem inventoryItem;
                 if (mustMatch && (!collection.Get(slot, out inventoryItem) ||
-                                  !ReferenceEquals((object)inventoryItem, (object)match)) ||
+                                  !ReferenceEquals(inventoryItem, match)) ||
                     !collection.Evict(slot, out inventoryItem))
                 {
                     return false;
@@ -1825,10 +1740,7 @@ namespace Fougerite
                 try
                 {
                     e = new InventoryModEvent(inv, slot, inventoryItem.iface, "Remove");
-                    if (OnItemRemoved != null)
-                    {
-                        OnItemRemoved(e);
-                    }
+                    ExecuteSubscribers(OnItemRemoved, "InventoryRemoveEvent", e);
                 }
                 catch (Exception ex)
                 {
@@ -1861,10 +1773,7 @@ namespace Fougerite
                 try
                 {
                     e = new InventoryModEvent(args.inventory, args.slot, args.item.iface, "Add");
-                    if (OnItemAdded != null)
-                    {
-                        OnItemAdded(e);
-                    }
+                    ExecuteSubscribers(OnItemAdded, "InventoryAddEvent", e);
                 }
                 catch (Exception ex)
                 {
@@ -1900,10 +1809,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnAirdropCalled != null)
-                    {
-                        OnAirdropCalled(v);
-                    }
+                    ExecuteSubscribers(OnAirdropCalled, "AirdropEvent", v);
                 }
                 catch (Exception ex)
                 {
@@ -1918,10 +1824,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnAirdropCalled != null)
-                    {
-                        OnAirdropCalled(srz.GetSupplyTargetPosition());
-                    }
+                    ExecuteSubscribers(OnAirdropCalled, "AirdropEvent", srz.GetSupplyTargetPosition());
                 }
                 catch (Exception ex)
                 {
@@ -1936,10 +1839,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnSupplyDropPlaneCreated != null)
-                    {
-                        OnSupplyDropPlaneCreated(plane);
-                    }
+                    ExecuteSubscribers(OnSupplyDropPlaneCreated, "SupplyDropPlaneCreated", plane);
                 }
                 catch (Exception ex)
                 {
@@ -1965,10 +1865,7 @@ namespace Fougerite
 
                 try
                 {
-                    if (OnAirdropCrateDropped != null)
-                    {
-                        OnAirdropCrateDropped(plane, entity);
-                    }
+                    ExecuteSubscribers(OnAirdropCrateDropped, "AirdropCrateDroppedEvent", plane, entity);
                 }
                 catch (Exception ex)
                 {
@@ -1985,10 +1882,7 @@ namespace Fougerite
                 SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum);
                 try
                 {
-                    if (OnSteamDeny != null)
-                    {
-                        OnSteamDeny(sde);
-                    }
+                    ExecuteSubscribers(OnSteamDeny, "SteamDenyEvent", sde);
                 }
                 catch (Exception ex)
                 {
@@ -2021,8 +1915,8 @@ namespace Fougerite
                         if (data is NetUser user)
                         {
                             ulong id = user.userID;
-                            var client = user.playerClient;
-                            var loc = user.playerClient.lastKnownPosition;
+                            PlayerClient client = user.playerClient;
+                            Vector3 loc = user.playerClient.lastKnownPosition;
 
                             Player player = Server.GetServer().GetCachePlayer(id);
                             // Sanity check
@@ -2093,12 +1987,12 @@ namespace Fougerite
 
                     if (clientConnection.Protocol != 1069)
                     {
-                        Debug.Log((object)("Denying entry to client with invalid protocol version (" + ip + ")"));
+                        Debug.Log("Denying entry to client with invalid protocol version (" + ip + ")");
                         approval.Deny(uLink.NetworkConnectionError.IncompatibleVersions);
                     }
                     else if (BanList.Contains(uid))
                     {
-                        Debug.Log((object)("Rejecting client (" + uid + "in banlist)"));
+                        Debug.Log("Rejecting client (" + uid + "in banlist)");
                         approval.Deny(uLink.NetworkConnectionError.ConnectionBanned);
                     }
                     else if (srv.IsBannedID(uid.ToString()) || srv.IsBannedIP(ip))
@@ -2140,10 +2034,7 @@ namespace Fougerite
                             new PlayerApprovalEvent(ca, approval, clientConnection, true, uid, ip, name);
                         try
                         {
-                            if (OnPlayerApproval != null)
-                            {
-                                OnPlayerApproval(ape);
-                            }
+                            ExecuteSubscribers(OnPlayerApproval, "PlayerApprovalEvent", ape);
                         }
                         catch (Exception ex)
                         {
@@ -2177,10 +2068,7 @@ namespace Fougerite
                             new PlayerApprovalEvent(ca, approval, clientConnection, false, uid, ip, name);
                         try
                         {
-                            if (OnPlayerApproval != null)
-                            {
-                                OnPlayerApproval(ape);
-                            }
+                            ExecuteSubscribers(OnPlayerApproval, "PlayerApprovalEvent2", ape);
                         }
                         catch (Exception ex)
                         {
@@ -2253,10 +2141,7 @@ namespace Fougerite
             Util.PlayerActions action = ((Util.PlayerActions)data);
             try
             {
-                if (OnPlayerMove != null)
-                {
-                    OnPlayerMove(hc, origin, encoded, stateFlags, info, action);
-                }
+                ExecuteSubscribers(OnPlayerMove, "PlayerMoveEvent", hc, origin, encoded, stateFlags, info, action);
             }
             catch (Exception ex)
             {
@@ -2298,13 +2183,10 @@ namespace Fougerite
                 }
 
                 ResearchEvent researchEvent = new ResearchEvent(otherItem);
-                ;
+                
                 try
                 {
-                    if (OnResearch != null)
-                    {
-                        OnResearch(researchEvent);
-                    }
+                    ExecuteSubscribers(OnResearch, "ResearchItemEvent", researchEvent);
                 }
                 catch (Exception ex)
                 {
@@ -2350,7 +2232,7 @@ namespace Fougerite
                             catch (Exception exception)
                             {
                                 Logger.LogError($"[SetLooter] Error: {exception}");
-                                NetCull.RPC((UnityEngine.MonoBehaviour)lo, "StopLooting", uLink.RPCMode.Server);
+                                NetCull.RPC(lo, "StopLooting", uLink.RPCMode.Server);
                                 lo.thisClientIsInWindow = false;
                                 ply = uLink.NetworkPlayer.unassigned;
                             }
@@ -2370,7 +2252,7 @@ namespace Fougerite
         {
             using (new Stopper(nameof(Hooks), nameof(OnUseEnter)))
             {
-                uLink.NetworkPlayer ulinkuser = uLink.NetworkView.Get((UnityEngine.MonoBehaviour)use.user).owner;
+                uLink.NetworkPlayer ulinkuser = uLink.NetworkView.Get(use.user).owner;
                 lo._useable = use;
                 lo._currentlyUsingPlayer = ulinkuser;
                 lo._inventory.AddNetListener(lo._currentlyUsingPlayer);
@@ -2475,7 +2357,7 @@ namespace Fougerite
                                 use._user = attempt;
                                 try
                                 {
-                                    var ulinkuser = uLink.NetworkView.Get((UnityEngine.MonoBehaviour)use.user).owner;
+                                    uLink.NetworkPlayer ulinkuser = uLink.NetworkView.Get(use.user).owner;
                                     NetUser user = ulinkuser.GetLocalData() as NetUser;
                                     LootStartEvent lt = null;
                                     if (user != null)
@@ -2486,10 +2368,7 @@ namespace Fougerite
                                             lt = new LootStartEvent(lootableObject, pl, use, ulinkuser);
                                             try
                                             {
-                                                if (OnLootUse != null)
-                                                {
-                                                    OnLootUse(lt);
-                                                }
+                                                ExecuteSubscribers(OnLootUse, "LootStartEvent", lt);
                                             }
                                             catch (Exception ex2)
                                             {
@@ -2653,10 +2532,7 @@ namespace Fougerite
                         ItemMoveEvent ime2 = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
                         try
                         {
-                            if (OnItemMove != null)
-                            {
-                                OnItemMove(ime2);
-                            }
+                            ExecuteSubscribers(OnItemMove, "ItemMoveEvent", ime2);
                         }
                         catch (Exception ex)
                         {
@@ -2671,10 +2547,7 @@ namespace Fougerite
                         ItemMoveEvent ime3 = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
                         try
                         {
-                            if (OnItemMove != null)
-                            {
-                                OnItemMove(ime3);
-                            }
+                            ExecuteSubscribers(OnItemMove, "ItemMoveEvent", ime3);
                         }
                         catch (Exception ex)
                         {
@@ -2716,10 +2589,7 @@ namespace Fougerite
             ItemMoveEvent ime = new ItemMoveEvent(inst, fromSlot, toInventory, toSlot, info);
             try
             {
-                if (OnItemMove != null)
-                {
-                    OnItemMove(ime);
-                }
+                ExecuteSubscribers(OnItemMove, "ItemMoveEvent", ime);
             }
             catch (Exception ex)
             {
@@ -2748,10 +2618,7 @@ namespace Fougerite
                 Fougerite.Events.RepairEvent re = new Fougerite.Events.RepairEvent(inst, ingredientInv);
                 try
                 {
-                    if (OnRepairBench != null)
-                    {
-                        OnRepairBench(re);
-                    }
+                    ExecuteSubscribers(OnRepairBench, "RepairEvent", re);
                 }
                 catch (Exception ex)
                 {
@@ -2802,10 +2669,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnPlayerBan != null)
-                    {
-                        OnPlayerBan(be);
-                    }
+                    ExecuteSubscribers(OnPlayerBan, "BanEvent", be);
                 }
                 catch (Exception ex)
                 {
@@ -2822,10 +2686,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnGenericSpawnerLoad != null)
-                    {
-                        OnGenericSpawnerLoad(gs);
-                    }
+                    ExecuteSubscribers(OnGenericSpawnerLoad, "GenericSpawnerLoad", gs);
                 }
                 catch (Exception ex)
                 {
@@ -2848,10 +2709,7 @@ namespace Fougerite
             
             try
             {
-                if (OnServerLoaded != null)
-                {
-                    OnServerLoaded();
-                }
+                ExecuteSubscribers(OnServerLoaded, "ServerLoaded");
             }
             catch (Exception ex)
             {
@@ -2892,10 +2750,7 @@ namespace Fougerite
                     BeltUseEvent be = new BeltUseEvent(holder, beltNum);
                     try
                     {
-                        if (OnBeltUse != null)
-                        {
-                            OnBeltUse(be);
-                        }
+                        ExecuteSubscribers(OnBeltUse, "BeltUseEvent", be);
                     }
                     catch (Exception ex)
                     {
@@ -2928,16 +2783,13 @@ namespace Fougerite
             using (new Stopper(nameof(Hooks), nameof(OnSupplySignalExplosion)))
             {
                 Vector3 randompos = grenade.rigidbody.position +
-                                    new Vector3(UnityEngine.Random.Range((float)-20f, (float)20f), 75f,
-                                        UnityEngine.Random.Range((float)-20f, (float)20f));
+                                    new Vector3(UnityEngine.Random.Range(-20f, 20f), 75f,
+                                        UnityEngine.Random.Range(-20f, 20f));
                 SupplySignalExplosionEvent sg = new SupplySignalExplosionEvent(grenade, randompos);
 
                 try
                 {
-                    if (OnSupplySignalExpode != null)
-                    {
-                        OnSupplySignalExpode(sg);
-                    }
+                    ExecuteSubscribers(OnSupplySignalExpode, "SupplySignalExplosionEvent", sg);
                 }
                 catch (Exception ex)
                 {
@@ -3037,12 +2889,9 @@ namespace Fougerite
 
                 try
                 {
-                    if (OnShoot != null)
-                    {
-                        ShootEvent se = new ShootEvent(instance, obj2, rep, info, item, part, flag, flag2, flag3, part2,
-                            vector, vector2);
-                        OnShoot(se);
-                    }
+                    ShootEvent se = new ShootEvent(instance, obj2, rep, info, item, part, flag, flag2, flag3, part2,
+                        vector, vector2);
+                    ExecuteSubscribers(OnShoot, "ShootEvent", se);
                 }
                 catch (Exception ex)
                 {
@@ -3108,11 +2957,8 @@ namespace Fougerite
                             UnityEngine.Random.Range(-1f, 1f)) * 10f);
                         try
                         {
-                            if (OnGrenadeThrow != null)
-                            {
-                                GrenadeThrowEvent se = new GrenadeThrowEvent(grenade, obj2, rep, info, item);
-                                OnGrenadeThrow(se);
-                            }
+                            GrenadeThrowEvent se = new GrenadeThrowEvent(grenade, obj2, rep, info, item);
+                            ExecuteSubscribers(OnGrenadeThrow, "GrenadeThrowEvent", se);
                         }
                         catch (Exception ex)
                         {
@@ -3149,10 +2995,7 @@ namespace Fougerite
                         ShotgunEventType.BeforeShot);
                     try
                     {
-                        if (OnShotgunShoot != null)
-                        {
-                            OnShotgunShoot(tempcall);
-                        }
+                        ExecuteSubscribers(OnShotgunShoot, "ShotgunShootEvent", tempcall);
                     }
                     catch (Exception ex)
                     {
@@ -3192,12 +3035,9 @@ namespace Fougerite
 
                         try
                         {
-                            if (OnShotgunShoot != null)
-                            {
-                                ShotgunShootEvent se = new ShotgunShootEvent(instance, rep, info, found,
-                                    ShotgunEventType.AfterShot, part, flag, flag2, flag3, part2, vector, vector2);
-                                OnShotgunShoot(se);
-                            }
+                            ShotgunShootEvent se = new ShotgunShootEvent(instance, rep, info, found,
+                                ShotgunEventType.AfterShot, part, flag, flag2, flag3, part2, vector, vector2);
+                            ExecuteSubscribers(OnShotgunShoot, "ShotgunShootEvent", se);
                         }
                         catch (Exception ex)
                         {
@@ -3220,8 +3060,7 @@ namespace Fougerite
             IsShuttingDown = true;
             try
             {
-                if (OnServerShutdown != null)
-                    OnServerShutdown();
+                ExecuteSubscribers(OnServerShutdown, "ServerShutdownEvent");
             }
             catch (Exception ex)
             {
@@ -3237,8 +3076,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnModulesLoaded != null)
-                        OnModulesLoaded();
+                    ExecuteSubscribers(OnModulesLoaded, "ModulesLoadedEvent");
                 }
                 catch (Exception ex)
                 {
@@ -3263,8 +3101,7 @@ namespace Fougerite
 
                 try
                 {
-                    if (OnServerInit != null)
-                        OnServerInit();
+                    ExecuteSubscribers(OnServerInit, "ServerInitEvent");
                 }
                 catch (Exception ex)
                 {
@@ -3279,8 +3116,7 @@ namespace Fougerite
             {
                 try
                 {
-                    if (OnNPCSpawned != null)
-                        OnNPCSpawned(npc);
+                    ExecuteSubscribers(OnNPCSpawned, "NPCSpawned", npc);
                 }
                 catch (Exception ex)
                 {
@@ -3760,8 +3596,7 @@ namespace Fougerite
                 TimedExplosiveEvent timedExplosiveEvent = new TimedExplosiveEvent(timedExplosive);
                 try
                 {
-                    if (OnTimedExplosiveSpawned != null)
-                        OnTimedExplosiveSpawned(timedExplosiveEvent);
+                    ExecuteSubscribers(OnTimedExplosiveSpawned, "TimedExplosiveSpawnedEvent", timedExplosiveEvent);
                 }
                 catch (Exception ex)
                 {
@@ -3815,8 +3650,7 @@ namespace Fougerite
                 
                 try
                 {
-                    if (OnSleeperSpawned != null)
-                        OnSleeperSpawned(sleeper);
+                    ExecuteSubscribers(OnSleeperSpawned, "SleeperSpawnedEvent", sleeper);
                 }
                 catch (Exception ex)
                 {
@@ -3880,10 +3714,7 @@ namespace Fougerite
 
             try
             {
-                if (OnCommandRestriction != null)
-                {
-                    OnCommandRestriction(commandRestrictionEvent);
-                }
+                ExecuteSubscribers(OnCommandRestriction, "RestrictionChangeEvent", commandRestrictionEvent);
             }
             catch (Exception ex)
             {

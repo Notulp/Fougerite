@@ -524,5 +524,35 @@ namespace Fougerite
         public delegate void SleeperSpawnEventDelegate(Sleeper sleeper);
 
         public delegate void CommandRestrictionEventDelegate(CommandRestrictionEvent commandRestrictionEvent);
+
+        /// <summary>
+        /// Safely calls all subscribers of the event and handles each error individually
+        /// rather than having the chain of invocation broken on one exception.
+        /// Console/ChatRaw is excluded due to passing refs.
+        /// </summary>
+        /// <param name="delegateOfEvent"></param>
+        /// <param name="eventName"></param>
+        /// <param name="parameters"></param>
+        public static void ExecuteSubscribers(Delegate delegateOfEvent, string eventName, params object[] parameters)
+        {
+            // Sanity check
+            if (delegateOfEvent == null)
+            {
+                return;
+            }
+            
+            // Iterate all subscribers
+            foreach (Delegate x in delegateOfEvent.GetInvocationList())
+            {
+                try
+                {
+                    x.DynamicInvoke(parameters);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"{eventName} Error: {ex}");
+                }
+            }
+        }
     }
 }
