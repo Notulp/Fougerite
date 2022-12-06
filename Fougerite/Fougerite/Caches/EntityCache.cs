@@ -172,6 +172,13 @@ namespace Fougerite.Caches
         /// <returns></returns>
         internal Entity GrabOrAllocate(int instanceId, object component)
         {
+            // This should never ever happen.
+            if (instanceId == 0)
+            {
+                Logger.LogWarning("[EntityCache] GrabOrAllocate Received 0 as instanceId");
+                return new Entity(component);
+            }
+            
             Entity entity = null;
             Fougerite.Concurrent.LockCookie cookie = new Fougerite.Concurrent.LockCookie(int.MinValue);
             try

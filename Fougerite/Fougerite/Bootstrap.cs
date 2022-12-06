@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Fougerite.Caches;
+using Fougerite.Concurrent;
 using Fougerite.Permissions;
 using Fougerite.PluginLoaders;
 using Fougerite.Tools;
@@ -41,7 +41,7 @@ namespace Fougerite
         /// <summary>
         /// Contains the ignored plugin names.
         /// </summary>
-        public static readonly List<string> IgnoredPlugins = new List<string>();
+        public static readonly ConcurrentList<string> IgnoredPlugins = new ConcurrentList<string>();
         /// <summary>
         /// Text to display to the player when the server is saving, and the building parts cannot be placed due the subthread.
         /// </summary>

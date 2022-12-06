@@ -45,7 +45,7 @@ namespace RustPP
                 {
                     flag = false;
                 }
-                if (list.Contains(pl.UID))
+                else if (list.Contains(pl.UID))
                 {
                     flag = true;
                 }

@@ -106,7 +106,7 @@
             shareList.Add(friend.UserID);
             shared_doors[sharing.UID] = shareList;
             sharing.MessageFrom(Core.Name, string.Format("You have shared doors with {0}.", friend.DisplayName));
-            Fougerite.Player client = Fougerite.Server.GetServer().FindPlayer(friend.UserID.ToString());
+            Fougerite.Player client = Fougerite.Server.GetServer().FindPlayer(friend.UserID);
             if (client != null)
                 client.MessageFrom(Core.Name, string.Format("{0} has shared doors with you.", sharing.Name));
         }

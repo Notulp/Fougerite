@@ -673,7 +673,6 @@ namespace Fougerite
         {
             using (new Stopper(nameof(Hooks), nameof(CheckOwner)))
             {
-                
                 DoorEvent de = new DoorEvent(EntityCache.GetInstance().GrabOrAllocate(obj.GetInstanceID(), obj));
                 // Possibly was used for sleeping bag stuff, and they refer to CheckOwner
                 // Also for the Doors of course
@@ -711,7 +710,23 @@ namespace Fougerite
 
                 try
                 {
-                    Entity ent = new Entity(entity);
+                    int instanceId = 0;
+                    if (entity is DeployableObject deployableObject)
+                        instanceId = deployableObject.GetInstanceID();
+                    else if (entity is StructureComponent structureComponent)
+                        instanceId = structureComponent.GetInstanceID();
+                    else if (entity is StructureMaster structureMaster)
+                        instanceId = structureMaster.GetInstanceID();
+                    // Leaving these ifs for some weird plugin supports i guess
+                    else if (entity is LootableObject lootableObject)
+                        instanceId = lootableObject.GetInstanceID();
+                    else if (entity is ResourceTarget resourceTarget)
+                        instanceId = resourceTarget.GetInstanceID();
+                    else if (entity is SupplyCrate supplyCrate)
+                        instanceId = supplyCrate.GetInstanceID();
+
+                    // Grab our already created entity class
+                    Entity ent = EntityCache.GetInstance().GrabOrAllocate(instanceId, entity);
                     DecayEvent de = new DecayEvent(ent, ref dmg);
                     try
                     {
@@ -738,7 +753,27 @@ namespace Fougerite
         {
             using (new Stopper(nameof(Hooks), nameof(EntityDeployed)))
             {
-                Entity e = new Entity(entity);
+                int instanceId = 0;
+                if (entity is DeployableObject deployableObject)
+                    instanceId = deployableObject.GetInstanceID();
+                else if (entity is StructureComponent structureComponent)
+                    instanceId = structureComponent.GetInstanceID();
+                else if (entity is StructureMaster structureMaster)
+                    instanceId = structureMaster.GetInstanceID();
+                // Leaving these ifs for some weird plugin supports i guess
+                else if (entity is LootableObject lootableObject)
+                    instanceId = lootableObject.GetInstanceID();
+                else if (entity is ResourceTarget resourceTarget)
+                    instanceId = resourceTarget.GetInstanceID();
+                else if (entity is SupplyCrate supplyCrate)
+                    instanceId = supplyCrate.GetInstanceID();
+
+                // Grab our already created entity class
+                Entity e = EntityCache.GetInstance().GrabOrAllocate(instanceId, entity);
+                // Freshly created object will not assign the ownerids yet, as the NGC.Instantiate hook is called earlier than
+                // Rust's SetupCharacter, SetupCreator functions..
+                e.InitiateFix();
+                
                 uLink.NetworkPlayer nplayer = info.sender;
                 Player creator = e.Creator;
                 object data = nplayer.GetLocalData();
@@ -1368,12 +1403,14 @@ namespace Fougerite
                 }
 
                 ulong uid = user.userID;
+                string name = user.displayName;
+                
                 Player player = Server.GetServer().GetCachePlayer(uid);
                 if (player == null)
                 {
                     Server.GetServer().RemovePlayer(uid);
                     Logger.LogWarning(
-                        $"[WeirdDisconnect] Player was null at the disconnection. Something might be wrong? OPT: {Bootstrap.CR}");
+                        $"[WeirdDisconnect] Player was null at the disconnection ({uid} - {name}). Something might be wrong? OPT: {Bootstrap.CR}");
                     return;
                 }
 
@@ -2716,6 +2753,13 @@ namespace Fougerite
                 Logger.Log($"ServerLoaded Error: {ex}");
             }
             
+            // The hooked NGC functions are called before the object.ReadSave() functions.
+            // They are inconsistent implementations, so I fix up the Entity data manually after loading.
+            foreach (Entity loadedEntity in World.GetWorld().Entities)
+            {
+                loadedEntity.InitiateFix();
+            }
+            
             Logger.Log("Server Initialized.");
             UnityEngine.Object.Destroy(init.gameObject);
             yield break;
@@ -3259,11 +3303,6 @@ namespace Fougerite
                 {
                     underLying = gameObject.GetComponent<StructureComponent>();
                 }
-                // BasicDoor is a DeployableObject anyway
-                else if (gameObject.GetComponent<BasicDoor>() != null)
-                {
-                    underLying = gameObject.GetComponent<BasicDoor>();
-                }
                 else if (gameObject.GetComponent<LootableObject>() != null)
                 {
                     underLying = gameObject.GetComponent<LootableObject>();
@@ -3319,12 +3358,6 @@ namespace Fougerite
             {
                 underLying = go.GetComponent<StructureComponent>();
                 id = ((StructureComponent) underLying).GetInstanceID();
-            }
-            // BasicDoor is a DeployableObject anyway
-            else if (go.GetComponent<BasicDoor>() != null)
-            {
-                underLying = go.GetComponent<BasicDoor>();
-                id = ((BasicDoor) underLying).GetInstanceID();
             }
             else if (go.GetComponent<LootableObject>() != null)
             {
@@ -3396,12 +3429,6 @@ namespace Fougerite
                     {
                         underLying = go.GetComponent<StructureComponent>();
                         id = ((StructureComponent) underLying).GetInstanceID();
-                    }
-                    // BasicDoor is a DeployableObject anyway
-                    else if (go.GetComponent<BasicDoor>() != null)
-                    {
-                        underLying = go.GetComponent<BasicDoor>();
-                        id = ((BasicDoor) underLying).GetInstanceID();
                     }
                     else if (go.GetComponent<LootableObject>() != null)
                     {
@@ -3475,12 +3502,6 @@ namespace Fougerite
             {
                 underLying = go.GetComponent<StructureComponent>();
                 id = ((StructureComponent) underLying).GetInstanceID();
-            }
-            // BasicDoor is a DeployableObject anyway
-            else if (go.GetComponent<BasicDoor>() != null)
-            {
-                underLying = go.GetComponent<BasicDoor>();
-                id = ((BasicDoor) underLying).GetInstanceID();
             }
             else if (go.GetComponent<LootableObject>() != null)
             {
@@ -3645,6 +3666,12 @@ namespace Fougerite
             DeployableObject deployableObject = avatar.GetComponent<DeployableObject>();
             if (deployableObject != null)
             {
+                int instanceId = deployableObject.GetInstanceID();
+                // Freshly created Sleeper object will not assign the ownerids yet, as the NGC.Instantiate hook is called earlier than
+                // Rust's SetupCharacter, SetupCreator functions..
+                Entity ent = EntityCache.GetInstance().GrabOrAllocate(instanceId, deployableObject);
+                ent.InitiateFix();
+                
                 Sleeper sleeper = new Sleeper(deployableObject);
                 SleeperCache.GetInstance().Add(sleeper);
                 

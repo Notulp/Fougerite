@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using Fougerite.Caches;
@@ -10,23 +11,40 @@ namespace Fougerite
     /// </summary>
     public class Entity
     {
-        public readonly bool hasInventory;
+        [Obsolete("Use Entity.HasInventory, this isn't supposed to be public.", false)]
+        public bool hasInventory;
         private readonly object _obj;
-        private readonly EntityInv inv;
-        private readonly ulong _ownerid;
-        private readonly ulong _creatorid;
-        private readonly string _creatorname;
-        private readonly string _name;
-        private readonly string _ownername;
+        private EntityInv _inv;
+        private ulong _ownerid;
+        private ulong _creatorid;
+        private string _creatorname;
+        private string _name;
+        private string _ownername;
         private int _instanceId;
         public bool IsDestroyed = false;
 
-        public Entity(object Obj)
+        public Entity(object obj)
         {
-            _obj = Obj;
+            // Store the main component for now
+            _obj = obj;
+            
             // Cache InstanceId
             GetInstanceId();
             
+            // Grab properties if we can (Ownerid and things like that may be 0 for now)
+            InitiateFix();
+        }
+
+        /// <summary>
+        /// A functionality created for the EntityCache.
+        /// The NGC.Instantiate, and other Instantiate functions are obviously running sooner than rust would
+        /// assign ownership to the Entity in any way.
+        /// We call this function at certain events to fix this when It was already read.
+        /// During the time of my reversal those are the only parts where we need to call this functionality.
+        /// </summary>
+        internal void InitiateFix()
+        {
+#pragma warning disable CS0618
             if (GetObject(out StructureMaster structureMaster))
             {
                 _ownerid = structureMaster.ownerID;
@@ -65,7 +83,7 @@ namespace Fougerite
                 if (inventory != null)
                 {
                     hasInventory = true;
-                    inv = new EntityInv(inventory, this);
+                    _inv = new EntityInv(inventory, this);
                 }
                 else
                 {
@@ -82,7 +100,7 @@ namespace Fougerite
                 if (inventory != null)
                 {
                     hasInventory = true;
-                    inv = new EntityInv(inventory, this);
+                    _inv = new EntityInv(inventory, this);
                 }
                 else
                 {
@@ -98,7 +116,7 @@ namespace Fougerite
                 if (inventory != null)
                 {
                     hasInventory = true;
-                    inv = new EntityInv(inventory, this);
+                    _inv = new EntityInv(inventory, this);
                 }
                 else
                 {
@@ -166,6 +184,7 @@ namespace Fougerite
             {
                 _creatorname = "UnKnown";
             }
+#pragma warning restore CS0618
         }
 
         /// <summary>
@@ -174,10 +193,25 @@ namespace Fougerite
         /// <param name="p"></param>
         public void ChangeOwner(Player p)
         {
+            if (p == null)
+                return;
+            
             if (GetObject(out DeployableObject deployableObject) && GetObject<DeployableObject>().GetComponent<SleepingAvatar>() == null)
+            {
                 deployableObject.SetupCreator(p.PlayerClient.controllable);
+                _ownerid = p.UID;
+                _ownername = p.Name;
+                _creatorid = p.UID;
+                _creatorname = p.Name;
+            }
             else if (GetObject(out StructureMaster structureMaster2))
+            {
                 structureMaster2.SetupCreator(p.PlayerClient.controllable);
+                _ownerid = p.UID;
+                _ownername = p.Name;
+                _creatorid = p.UID;
+                _creatorname = p.Name;
+            }
             else if (IsStructure())
             {
                 foreach (Entity st in GetLinkedStructs())
@@ -185,6 +219,10 @@ namespace Fougerite
                     if (st.GetObject(out StructureMaster structureMaster))
                     {
                         structureMaster.SetupCreator(p.PlayerClient.controllable);
+                        _ownerid = p.UID;
+                        _ownername = p.Name;
+                        _creatorid = p.UID;
+                        _creatorname = p.Name;
                         break;
                     }
                 }
@@ -203,12 +241,28 @@ namespace Fougerite
                 deployableObject.ownerID = steamId;
                 deployableObject.CacheCreator();
                 deployableObject.CreatorSet();
+
+                _ownerid = steamId;
+                _creatorid = steamId;
+                if (PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(steamId, out CachedPlayer cachedPlayer))
+                {
+                    _ownername = cachedPlayer.Name;
+                    _creatorname = cachedPlayer.Name;
+                }
             }
             else if (GetObject(out StructureMaster structureMaster2))
             {
                 structureMaster2.creatorID = steamId;
                 structureMaster2.ownerID = steamId;
                 structureMaster2.CacheCreator();
+                
+                _ownerid = steamId;
+                _creatorid = steamId;
+                if (PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(steamId, out CachedPlayer cachedPlayer))
+                {
+                    _ownername = cachedPlayer.Name;
+                    _creatorname = cachedPlayer.Name;
+                }
             }
             else if (IsStructure())
             {
@@ -219,6 +273,14 @@ namespace Fougerite
                         structureMaster.creatorID = steamId;
                         structureMaster.ownerID = steamId;
                         structureMaster.CacheCreator();
+                        
+                        _ownerid = steamId;
+                        _creatorid = steamId;
+                        if (PlayerCache.GetPlayerCache().CachedPlayers.TryGetValue(steamId, out CachedPlayer cachedPlayer))
+                        {
+                            _ownername = cachedPlayer.Name;
+                            _creatorname = cachedPlayer.Name;
+                        }
                         break;
                     }
                 }
@@ -433,8 +495,12 @@ namespace Fougerite
         /// <returns></returns>
         public bool IsBasicDoor()
         {
-            BasicDoor str = Object as BasicDoor;
-            return str != null;
+            if (GetObject(out DeployableObject deployableObject))
+            {
+                return deployableObject.GetComponent<BasicDoor>() != null;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -696,9 +762,22 @@ namespace Fougerite
         {
             get
             {
-                if (hasInventory)
-                    return inv;
-                return null;
+#pragma warning disable CS0618
+                return hasInventory ? _inv : null;
+#pragma warning restore CS0618
+            }
+        }
+
+        /// <summary>
+        /// Gets if the Entity has an inventory.
+        /// </summary>
+        public bool HasInventory
+        {
+            get
+            {
+#pragma warning disable CS0618
+                return hasInventory;
+#pragma warning restore CS0618
             }
         }
 
@@ -739,8 +818,6 @@ namespace Fougerite
                     return structureComponent.transform.position;
                 if (GetObject(out StructureMaster structureMaster))
                     return structureMaster.containedBounds.center;
-                if (GetObject(out BasicDoor basicDoor))
-                    return basicDoor.transform.position;
                 if (GetObject(out LootableObject lootableObject))
                     return lootableObject.transform.position;
                 if (GetObject(out ResourceTarget resourceTarget))
@@ -763,8 +840,6 @@ namespace Fougerite
                     return deployableObject.transform.rotation;
                 if (GetObject(out StructureComponent structureComponent))
                     return structureComponent.transform.rotation;
-                if (GetObject(out BasicDoor basicDoor))
-                    return basicDoor.transform.rotation;
                 if (GetObject(out LootableObject lootableObject))
                     return lootableObject.transform.rotation;
                 if (GetObject(out ResourceTarget resourceTarget))
@@ -867,8 +942,6 @@ namespace Fougerite
                 _instanceId = structureComponent.GetInstanceID();
             else if (GetObject(out StructureMaster structureMaster))
                 _instanceId = structureMaster.GetInstanceID();
-            else if (GetObject(out BasicDoor basicDoor))
-                _instanceId = basicDoor.GetInstanceID();
             else if (GetObject(out LootableObject lootableObject))
                 _instanceId = lootableObject.GetInstanceID();
             else if (GetObject(out ResourceTarget resourceTarget))

@@ -77,8 +77,11 @@ namespace Fougerite.Concurrent
         {
             lock (_padlock)
             {
-                return _dictionary.Remove(key);
+                if (_dictionary.ContainsKey(key))
+                    return _dictionary.Remove(key);
             }
+
+            return false;
         }
 
         internal void Add(TKey key, TValue val)

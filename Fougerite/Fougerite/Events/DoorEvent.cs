@@ -59,8 +59,9 @@
             }
             set
             {
-                if (_cancelled)
-                    return;
+                Logger.Log("changed " + value + " was " + _open);
+                //if (_cancelled)
+                //    return;
                 
                 _open = value;
                 if (_open == false)
