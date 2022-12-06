@@ -49,7 +49,7 @@
         }
 
         /// <summary>
-        /// Gets or Sets wheather we should open the door if the player is not authorized to do it.
+        /// Gets or Sets whether we should open the door if the player is not authorized to do it.
         /// </summary>
         public bool Open
         {
@@ -59,12 +59,11 @@
             }
             set
             {
-                Logger.Log("changed " + value + " was " + _open);
-                //if (_cancelled)
-                //    return;
+                if (_cancelled)
+                    return;
                 
                 _open = value;
-                if (_open == false)
+                if (!_open)
                     _cancelled = true;
             }
         }

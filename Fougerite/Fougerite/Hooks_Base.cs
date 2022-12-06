@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Reflection;
 using Fougerite.Concurrent;
 using Fougerite.Events;
 using UnityEngine;
@@ -541,12 +543,17 @@ namespace Fougerite
                 return;
             }
             
+            // Additional stuff
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic;
+            Binder binder = Type.DefaultBinder;
+            CultureInfo cultureInfo = CultureInfo.CurrentCulture;
+            
             // Iterate all subscribers
             foreach (Delegate x in delegateOfEvent.GetInvocationList())
             {
                 try
                 {
-                    x.DynamicInvoke(parameters);
+                    x.Method.Invoke(x.Target, flags, binder, parameters, cultureInfo);
                 }
                 catch (Exception ex)
                 {
