@@ -8,7 +8,7 @@ namespace Fougerite.PluginLoaders
     {
         public PluginType Type = PluginType.JavaScript;
         public const string Extension = ".js";
-        public readonly DirectoryInfo PluginDirectory = new DirectoryInfo(Path.Combine(Util.GetRootFolder(), "Save\\LuaPlugins"));
+        public readonly DirectoryInfo PluginDirectory = new DirectoryInfo(Path.Combine(Util.GetRootFolder(), "Save\\JsPlugins"));
 
         public JavaScriptPluginLoader()
         {
