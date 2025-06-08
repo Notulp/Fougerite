@@ -193,7 +193,7 @@ namespace Fougerite.Permissions
                     emptygroups.Add(new PermissionGroup()
                     {
                         GroupName = "Group2",
-                        GroupPermissions = new List<string>() {"grouppermission2.gar", "grouppermission2.something"},
+                        GroupPermissions = new List<string>() {"grouppermission2.gar", "grouppermission2.something", "grouppermission2.something.*"},
                         NickName = "SomeNickname"
                     });
 
