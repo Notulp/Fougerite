@@ -60,7 +60,7 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[EntityCache] Failed to add to the entity list. Error: {ex}");
+                Logger.LogError($"[{nameof(EntityCache)}] Failed to add to the entity list. Error: {ex}");
             }
             finally
             {
@@ -86,7 +86,7 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[EntityCache] Failed to remove from the entity list. Error: {ex}");
+                Logger.LogError($"[{nameof(EntityCache)}] Failed to remove from the entity list. Error: {ex}");
             }
             finally
             {
@@ -135,7 +135,7 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[EntityCache] Failed to copy the entity list. Error: {ex}");
+                Logger.LogError($"[{nameof(EntityCache)}] Failed to copy the entity list. Error: {ex}");
                 entities = new List<Entity>();
             }
             finally
@@ -162,7 +162,7 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[EntityCache] Failed to get the entity from list. Error: {ex}");
+                Logger.LogError($"[{nameof(EntityCache)}] Failed to get the entity from list. Error: {ex}");
             }
             finally
             {
@@ -187,7 +187,7 @@ namespace Fougerite.Caches
             // This should never ever happen.
             if (instanceId == 0)
             {
-                Logger.LogWarning("[EntityCache] GrabOrAllocate Received 0 as instanceId");
+                Logger.LogWarning($"[{nameof(EntityCache)}] GrabOrAllocate Received 0 as instanceId");
                 return new Entity(component);
             }
             
@@ -208,7 +208,7 @@ namespace Fougerite.Caches
                     }
                     catch (Exception ex)
                     {
-                        Logger.LogError($"[EntityCache] Failed to allocate entity. Error: {ex}");
+                        Logger.LogError($"[{nameof(EntityCache)}] Failed to allocate entity. Error: {ex}");
                     }
 
                     _allEntities[instanceId] = entity;
@@ -221,7 +221,7 @@ namespace Fougerite.Caches
                 // If this is a negative number, we had an upgrade to the lock which we need to downgrade.
                 if (cookie.ThreadId != int.MinValue)
                     _lock.DowngradeFromWriterLock(ref cookie);
-                Logger.LogError($"[EntityCache] Failed to get the entity from list. Error: {ex}");
+                Logger.LogError($"[{nameof(EntityCache)}] Failed to get the entity from list. Error: {ex}");
             }
             finally
             {

@@ -12,6 +12,7 @@ namespace Fougerite.Caches
     {
         private static PlayerCache _playerCache;
         private readonly string _cachedPlayersPath;
+        private readonly object _cacheLock = new object();
 
         private PlayerCache()
         {
@@ -27,7 +28,7 @@ namespace Fougerite.Caches
         public ConcurrentDictionary<ulong, CachedPlayer> CachedPlayers
         {
             get;
-            set;
+            private set;
         } = new ConcurrentDictionary<ulong, CachedPlayer>();
 
         /// <summary>
@@ -49,17 +50,74 @@ namespace Fougerite.Caches
         /// </summary>
         internal void LoadPlayersCache()
         {
-            try
+            lock (_cacheLock)
             {
-                JsonSerializer serializer = new JsonSerializer();
-                // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
-                serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-                serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-                serializer.NullValueHandling = NullValueHandling.Include;
-
-                if (!File.Exists(_cachedPlayersPath))
+                try
                 {
-                    File.Create(_cachedPlayersPath).Dispose();
+                    JsonSerializer serializer = new JsonSerializer();
+                    // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
+                    serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                    serializer.NullValueHandling = NullValueHandling.Include;
+
+                    if (!File.Exists(_cachedPlayersPath))
+                    {
+                        File.Create(_cachedPlayersPath).Dispose();
+
+                        using (StreamWriter sw = new StreamWriter(_cachedPlayersPath, false, Encoding.UTF8))
+                        {
+                            using (JsonWriter writer = new JsonTextWriter(sw))
+                            {
+                                writer.Formatting = Formatting.Indented;
+                                // We are serializing the original dictionary class
+                                serializer.Serialize(writer, CachedPlayers.GetShallowCopy());
+                            }
+                        }
+                    }
+
+                    var deserializedDict =
+                        JsonConvert.DeserializeObject<Dictionary<ulong, CachedPlayer>>(
+                            File.ReadAllText(_cachedPlayersPath));
+
+                    // Assign deserialized dict.
+                    CachedPlayers = new ConcurrentDictionary<ulong, CachedPlayer>(deserializedDict);
+
+                    Logger.Log("[PlayerCache] Loaded.");
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"[PlayerCache] Error: {ex}");
+                }
+            }
+        }
+        
+        public void SaveToDisk()
+        {
+            lock (_cacheLock)
+            {
+                string cachedplayers = "";
+
+                try
+                {
+                    if (!File.Exists(_cachedPlayersPath))
+                    {
+                        File.Create(_cachedPlayersPath).Dispose();
+                    }
+
+                    // Backup the data from the current files.
+                    cachedplayers = File.ReadAllText(_cachedPlayersPath);
+
+                    // Empty the files.
+                    if (File.Exists(_cachedPlayersPath))
+                    {
+                        File.WriteAllText(_cachedPlayersPath, string.Empty);
+                    }
+
+                    JsonSerializer serializer = new JsonSerializer();
+                    // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
+                    serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+                    serializer.NullValueHandling = NullValueHandling.Include;
 
                     using (StreamWriter sw = new StreamWriter(_cachedPlayersPath, false, Encoding.UTF8))
                     {
@@ -70,64 +128,13 @@ namespace Fougerite.Caches
                             serializer.Serialize(writer, CachedPlayers.GetShallowCopy());
                         }
                     }
+
                 }
-
-                var deserializedDict =
-                    JsonConvert.DeserializeObject<Dictionary<ulong, CachedPlayer>>(
-                        File.ReadAllText(_cachedPlayersPath));
-
-                // Assign deserialized dict.
-                CachedPlayers = new ConcurrentDictionary<ulong, CachedPlayer>(deserializedDict);
-
-                Logger.Log("[PlayerCache] Loaded.");
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"[PlayerCache] Error: {ex}");
-            }
-        }
-        
-        public void SaveToDisk()
-        {
-            string cachedplayers = "";
-
-            try
-            {
-                if (!File.Exists(_cachedPlayersPath))
+                catch (Exception ex)
                 {
-                    File.Create(_cachedPlayersPath).Dispose();
+                    Logger.LogError($"[PlayerCache] SaveToDisk Error: {ex}");
+                    File.WriteAllText(_cachedPlayersPath, cachedplayers);
                 }
-
-                // Backup the data from the current files.
-                cachedplayers = File.ReadAllText(_cachedPlayersPath);
-
-                // Empty the files.
-                if (File.Exists(_cachedPlayersPath))
-                {
-                    File.WriteAllText(_cachedPlayersPath, string.Empty);
-                }
-
-                JsonSerializer serializer = new JsonSerializer();
-                // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
-                serializer.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
-                serializer.DateFormatHandling = DateFormatHandling.IsoDateFormat;
-                serializer.NullValueHandling = NullValueHandling.Include;
-
-                using (StreamWriter sw = new StreamWriter(_cachedPlayersPath, false, Encoding.UTF8))
-                {
-                    using (JsonWriter writer = new JsonTextWriter(sw))
-                    {
-                        writer.Formatting = Formatting.Indented;
-                        // We are serializing the original dictionary class
-                        serializer.Serialize(writer, CachedPlayers.GetShallowCopy());
-                    }
-                }
-                
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"[PlayerCache] SaveToDisk Error: {ex}");
-                File.WriteAllText(_cachedPlayersPath, cachedplayers);
             }
         }
     }

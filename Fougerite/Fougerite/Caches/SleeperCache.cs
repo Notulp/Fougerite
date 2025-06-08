@@ -42,6 +42,10 @@ namespace Fougerite.Caches
                 // Duplicates shouldn't happen, but It's better to handle it this way.
                 _allSleepers[sleeper.InstanceID] = sleeper;
             }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[{nameof(SleeperCache)}] Failed to add to the entity list. Error: {ex}");
+            }
             finally
             {
                 _lock.ReleaseWriterLock();
@@ -64,6 +68,10 @@ namespace Fougerite.Caches
                     result = true;
                 }
             }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[{nameof(SleeperCache)}] Failed to remove from the entity list. Error: {ex}");
+            }
             finally
             {
                 _lock.ReleaseWriterLock();
@@ -79,18 +87,22 @@ namespace Fougerite.Caches
         /// <returns></returns>
         internal bool Contains(int instanceId)
         {
-            bool ret;
+            bool result = false;
             try
             {
                 _lock.AcquireReaderLock(Timeout.Infinite);
-                ret = _allSleepers.ContainsKey(instanceId);
+                result = _allSleepers.ContainsKey(instanceId);
+            }
+            catch (Exception)
+            {
+                // Ignore...
             }
             finally
             {
                 _lock.ReleaseReaderLock();
             }
 
-            return ret;
+            return result;
         }
         
         /// <summary>
@@ -107,7 +119,7 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[SleeperCache] Failed to copy the Sleeper list. Error: {ex}");
+                Logger.LogError($"[{nameof(SleeperCache)}] Failed to copy the Sleeper list. Error: {ex}");
                 entities = new List<Sleeper>();
             }
             finally
@@ -134,7 +146,7 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[SleeperCache] Failed to get the Sleeper from list. Error: {ex}");
+                Logger.LogError($"[{nameof(SleeperCache)}] Failed to get the Sleeper from list. Error: {ex}");
             }
             finally
             {

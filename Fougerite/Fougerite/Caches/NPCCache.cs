@@ -43,6 +43,10 @@ namespace Fougerite.Caches
                 // Duplicates shouldn't happen, but It's better to handle it this way.
                 _allNpcs[npc.GetHashCode()] = npc;
             }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[{nameof(NPCCache)}] Failed to add the entity to the list. Error: {ex}");
+            }
             finally
             {
                 _lock.ReleaseWriterLock();
@@ -65,6 +69,10 @@ namespace Fougerite.Caches
                     result = true;
                 }
             }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[{nameof(NPCCache)}] Failed to remove from the entity list. Error: {ex}");
+            }
             finally
             {
                 _lock.ReleaseWriterLock();
@@ -80,18 +88,22 @@ namespace Fougerite.Caches
         /// <returns></returns>
         internal bool Contains(int instanceId)
         {
-            bool ret;
+            bool result = false;
             try
             {
                 _lock.AcquireReaderLock(Timeout.Infinite);
-                ret = _allNpcs.ContainsKey(instanceId);
+                result = _allNpcs.ContainsKey(instanceId);
+            }
+            catch (Exception)
+            {
+                // Ignore...
             }
             finally
             {
                 _lock.ReleaseReaderLock();
             }
 
-            return ret;
+            return result;
         }
         
         /// <summary>
@@ -108,7 +120,7 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[NPCCache] Failed to copy the NPC list. Error: {ex}");
+                Logger.LogError($"[{nameof(NPCCache)}] Failed to copy the NPC list. Error: {ex}");
                 entities = new List<NPC>();
             }
             finally
@@ -135,7 +147,7 @@ namespace Fougerite.Caches
             }
             catch (Exception ex)
             {
-                Logger.LogError($"[NPCCache] Failed to get the NPC from list. Error: {ex}");
+                Logger.LogError($"[{nameof(NPCCache)}] Failed to get the NPC from list. Error: {ex}");
             }
             finally
             {
