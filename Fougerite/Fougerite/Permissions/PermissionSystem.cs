@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Fougerite.Tools;
 using Newtonsoft.Json;
+using ReaderWriterLock = Fougerite.Concurrent.ReaderWriterLock;
 
 namespace Fougerite.Permissions
 {
@@ -12,13 +14,12 @@ namespace Fougerite.Permissions
     /// The heart of the permission system.
     /// I recommend using groups, and assigning players to them.
     /// TODO: Implement hooks?
-    /// TODO: Support for x.*
     /// </summary>
     public class PermissionSystem
     {
         private static PermissionSystem _instance;
-        private static readonly object _obj = new object();
-        private static readonly object _obj2 = new object();
+        private static readonly ReaderWriterLock PermLock = new ReaderWriterLock();
+        private static readonly ReaderWriterLock DisableLock = new ReaderWriterLock();
         private readonly PermissionHandler _handler;
         private readonly Dictionary<ulong, bool> _disabledpermissions = new Dictionary<ulong, bool>();
         private readonly string _groupPermissionsPath;
@@ -46,7 +47,8 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public bool ForceOffPermissions(ulong steamid, bool removeDefaultGroupPermissions)
         {
-            lock (_obj2)
+            DisableLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 if (!_disabledpermissions.ContainsKey(steamid))
                 {
@@ -55,6 +57,10 @@ namespace Fougerite.Permissions
                 }
 
                 return false;
+            }
+            finally
+            {
+                DisableLock.ReleaseWriterLock();
             }
         }
 
@@ -65,7 +71,8 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public bool RemoveForceOffPermissions(ulong steamid)
         {
-            lock (_obj2)
+            DisableLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 if (_disabledpermissions.ContainsKey(steamid))
                 {
@@ -74,6 +81,10 @@ namespace Fougerite.Permissions
                 }
 
                 return false;
+            }
+            finally
+            {
+                DisableLock.ReleaseWriterLock();
             }
         }
 
@@ -84,9 +95,14 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public bool HasPermissionsForcedOff(ulong steamid)
         {
-            lock (_obj2)
+            DisableLock.AcquireReaderLock(Timeout.Infinite);
+            try
             {
                 return _disabledpermissions.ContainsKey(steamid);
+            }
+            finally
+            {
+                DisableLock.ReleaseReaderLock();
             }
         }
 
@@ -98,7 +114,8 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public bool HasDefaultPermissionsForcedOff(ulong steamid)
         {
-            lock (_obj2)
+            DisableLock.AcquireReaderLock(Timeout.Infinite);
+            try
             {
                 if (_disabledpermissions.ContainsKey(steamid))
                 {
@@ -106,6 +123,10 @@ namespace Fougerite.Permissions
                 }
 
                 return false;
+            }
+            finally
+            {
+                DisableLock.ReleaseReaderLock();
             }
         }
 
@@ -116,9 +137,14 @@ namespace Fougerite.Permissions
         {
             get
             {
-                lock (_obj2)
+                DisableLock.AcquireReaderLock(Timeout.Infinite);
+                try
                 {
                     return new Dictionary<ulong, bool>(_disabledpermissions);
+                }
+                finally
+                {
+                    DisableLock.ReleaseReaderLock();
                 }
             }
         }
@@ -191,7 +217,7 @@ namespace Fougerite.Permissions
                     {
                         SteamID = 76562531000,
                         Permissions = new List<string>()
-                            {"*", "permission", "permission2.something", "permission3"},
+                            {"*", "permission", "permission2.something", "permission3", "permission4.commands.*"},
                         Groups = new List<string>() {"Group1"}
                     });
 
@@ -207,10 +233,15 @@ namespace Fougerite.Permissions
                     }
                 }
 
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     _handler.PermissionGroups = JsonConvert.DeserializeObject<List<PermissionGroup>>(File.ReadAllText(_groupPermissionsPath));
                     _handler.PermissionPlayers = JsonConvert.DeserializeObject<List<PermissionPlayer>>(File.ReadAllText(_playerPermissionsPath));
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
 
                 Logger.Log("[PermissionSystem] Loaded.");
@@ -276,10 +307,15 @@ namespace Fougerite.Permissions
                 List<PermissionPlayer> PermissionPlayers = new List<PermissionPlayer>();
 
                 // Grab the data from the memory using lock.
-                lock (_obj)
+                PermLock.AcquireReaderLock(Timeout.Infinite);
+                try
                 {
-                    PermissionGroups = _handler.PermissionGroups;
-                    PermissionPlayers = _handler.PermissionPlayers;
+                    PermissionGroups  = new List<PermissionGroup>(_handler.PermissionGroups);
+                    PermissionPlayers = new List<PermissionPlayer>(_handler.PermissionPlayers);
+                }
+                finally
+                {
+                    PermLock.ReleaseReaderLock();
                 }
 
                 JsonSerializer serializer = new JsonSerializer();
@@ -321,9 +357,14 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public List<PermissionGroup> GetPermissionGroups()
         {
-            lock (_obj)
+            PermLock.AcquireReaderLock(Timeout.Infinite);
+            try
             {
                 return new List<PermissionGroup>(_handler.PermissionGroups);
+            }
+            finally
+            {
+                PermLock.ReleaseReaderLock();
             }
         }
         
@@ -335,9 +376,14 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public List<PermissionPlayer> GetPermissionPlayers()
         {
-            lock (_obj)
+            PermLock.AcquireReaderLock(Timeout.Infinite);
+            try
             {
                 return new List<PermissionPlayer>(_handler.PermissionPlayers);
+            }
+            finally
+            {
+                PermLock.ReleaseReaderLock();
             }
         }
 
@@ -350,11 +396,16 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public PermissionGroup GetGroupByName(string groupname)
         {
+            PermLock.AcquireReaderLock(Timeout.Infinite);
             groupname = groupname.Trim().ToLower();
             uint uniqueid = GetUniqueID(groupname);
-            lock (_obj)
+            try
             {
                 return _handler.PermissionGroups.FirstOrDefault(x => x.UniqueID == uniqueid);
+            }
+            finally
+            {
+                PermLock.ReleaseReaderLock();
             }
         }
 
@@ -367,9 +418,14 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public PermissionGroup GetGroupByID(int groupid)
         {
-            lock (_obj)
+            PermLock.AcquireReaderLock(Timeout.Infinite);
+            try
             {
                 return _handler.PermissionGroups.FirstOrDefault(x => x.UniqueID == groupid);
+            }
+            finally
+            {
+                PermLock.ReleaseReaderLock();
             }
         }
 
@@ -382,9 +438,14 @@ namespace Fougerite.Permissions
         /// <returns></returns>
         public PermissionPlayer GetPlayerBySteamID(ulong steamid)
         {
-            lock (_obj)
+            PermLock.AcquireReaderLock(Timeout.Infinite);
+            try
             {
                 return _handler.PermissionPlayers.FirstOrDefault(x => x.SteamID == steamid);
+            }
+            finally
+            {
+                PermLock.ReleaseReaderLock();
             }
         }
         
@@ -474,8 +535,9 @@ namespace Fougerite.Permissions
                 PermissionGroup defaul = GetGroupByName("Default");
                 if (defaul != null)
                 {
-                    bool haspermission = defaul.GroupPermissions.Any(x => x.Trim() == "*" || x.Trim().ToLower() == permission);
-                    if (haspermission) return true;
+                    bool haspermission = defaul.GroupPermissions.Any(x => Matches(x, permission));
+                    if (haspermission) 
+                        return true;
                 }
                 
                 return false;
@@ -495,22 +557,15 @@ namespace Fougerite.Permissions
                     continue;
                 }
                 
-                bool haspermission = group.GroupPermissions.Any(x => x.Trim() == "*" || x.Trim().ToLower() == permission);
-                if (haspermission) return true;
+                bool haspermission = group.GroupPermissions.Any(x => Matches(x, permission));
+                if (haspermission) 
+                    return true;
             }
 
             foreach (var x in permissionplayer.Permissions)
             {
-                string pn = x.Trim().ToLower();
-                if (pn == "*")
-                {
+                if (Matches(x, permission)) 
                     return true;
-                }
-                
-                if (pn == permission)
-                {
-                    return true;
-                }
             }
 
             return false;
@@ -571,10 +626,15 @@ namespace Fougerite.Permissions
                     SteamID = steamid
                 };
                 
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     _handler.PermissionPlayers.Add(permissionPlayer);
                     return permissionPlayer;
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
             }
 
@@ -600,10 +660,15 @@ namespace Fougerite.Permissions
                     SteamID = steamid
                 };
                 
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     _handler.PermissionPlayers.Add(permissionPlayer);
                     return permissionPlayer;
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
             }
 
@@ -632,13 +697,18 @@ namespace Fougerite.Permissions
                 return false;
             }
             
-            lock (_obj)
+            PermLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 if (_handler.PermissionPlayers.Contains(permissionPlayer))
                 {
                     _handler.PermissionPlayers.Remove(permissionPlayer);
                     return true;
                 }
+            }
+            finally
+            {
+                PermLock.ReleaseWriterLock();
             }
 
             return false;
@@ -654,10 +724,15 @@ namespace Fougerite.Permissions
             var permissionplayer = GetPlayerBySteamID(steamid);
             if (permissionplayer != null)
             {
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     _handler.PermissionPlayers.Remove(permissionplayer);
                     return true;
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
             }
 
@@ -673,7 +748,8 @@ namespace Fougerite.Permissions
         public bool AddGroupToPlayer(ulong steamid, string groupname)
         {
             groupname = groupname.Trim().ToLower();
-            lock (_obj)
+            PermLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 PermissionPlayer player = _handler.PermissionPlayers.SingleOrDefault(x => x.SteamID == steamid);
                 if (player != null)
@@ -686,6 +762,10 @@ namespace Fougerite.Permissions
                         return true;
                     }
                 }
+            }
+            finally
+            {
+                PermLock.ReleaseWriterLock();
             }
 
             return false;
@@ -701,7 +781,8 @@ namespace Fougerite.Permissions
         {
             groupname = groupname.Trim().ToLower();
 
-            lock (_obj)
+            PermLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 PermissionPlayer player = _handler.PermissionPlayers.SingleOrDefault(x => x.SteamID == steamid);
                 if (player != null)
@@ -714,6 +795,10 @@ namespace Fougerite.Permissions
                         return true;
                     }
                 }
+            }
+            finally
+            {
+                PermLock.ReleaseWriterLock();
             }
 
             return false;
@@ -744,7 +829,8 @@ namespace Fougerite.Permissions
                 return false;
             }
             
-            lock (_obj)
+            PermLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 // Unique ID is set through setter.
                 _handler.PermissionGroups.Add(new PermissionGroup()
@@ -755,6 +841,10 @@ namespace Fougerite.Permissions
                 });
 
                 return true;
+            }
+            finally
+            {
+                PermLock.ReleaseWriterLock();
             }
         }
 
@@ -777,7 +867,8 @@ namespace Fougerite.Permissions
 
             if (group != null)
             {
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     _handler.PermissionGroups.Remove(group);
                     uint id = GetUniqueID(groupname);
@@ -792,6 +883,10 @@ namespace Fougerite.Permissions
                     }
 
                     return true;
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
             }
 
@@ -812,7 +907,8 @@ namespace Fougerite.Permissions
 
             if (group != null)
             {
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     if (!group.GroupPermissions.Contains(permission))
                     {
@@ -820,6 +916,10 @@ namespace Fougerite.Permissions
                     }
                     
                     return true;
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
             }
 
@@ -840,13 +940,18 @@ namespace Fougerite.Permissions
 
             if (group != null)
             {
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     if (group.GroupPermissions.Contains(permission))
                     {
                         group.GroupPermissions.Remove(permission);
                         return true;
                     }
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
             }
 
@@ -867,9 +972,14 @@ namespace Fougerite.Permissions
 
             if (group != null)
             {
-                lock (_obj)
+                PermLock.AcquireReaderLock(Timeout.Infinite);
+                try
                 {
                     return group.GroupPermissions.Contains(permission);
+                }
+                finally
+                {
+                    PermLock.ReleaseReaderLock();
                 }
             }
 
@@ -889,10 +999,15 @@ namespace Fougerite.Permissions
 
             if (group != null)
             {
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     group.NickName = nickname;
                     return true;
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
             }
 
@@ -916,7 +1031,8 @@ namespace Fougerite.Permissions
             if (group != null && newGroup == null)
             {
                 uint id = group.UniqueID;
-                lock (_obj)
+                PermLock.AcquireWriterLock(Timeout.Infinite);
+                try
                 {
                     foreach (var x in _handler.PermissionPlayers)
                     {
@@ -929,6 +1045,10 @@ namespace Fougerite.Permissions
                     }
 
                     return true;
+                }
+                finally
+                {
+                    PermLock.ReleaseWriterLock();
                 }
             }
 
@@ -966,7 +1086,8 @@ namespace Fougerite.Permissions
         public bool AddPermission(ulong steamid, string permission)
         {
             permission = permission.Trim().ToLower();
-            lock (_obj)
+            PermLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 PermissionPlayer permissionPlayer = _handler.PermissionPlayers.SingleOrDefault(x => x.SteamID == steamid);
                 if (permissionPlayer != null)
@@ -981,6 +1102,10 @@ namespace Fougerite.Permissions
                 }
 
                 return false;
+            }
+            finally
+            {
+                PermLock.ReleaseWriterLock();
             }
         }
 
@@ -1015,7 +1140,8 @@ namespace Fougerite.Permissions
         public bool RemovePermission(ulong steamid, string permission)
         {
             permission = permission.Trim().ToLower();
-            lock (_obj)
+            PermLock.AcquireWriterLock(Timeout.Infinite);
+            try
             {
                 PermissionPlayer permissionPlayer = _handler.PermissionPlayers.SingleOrDefault(x => x.SteamID == steamid);
                 if (permissionPlayer != null)
@@ -1030,6 +1156,31 @@ namespace Fougerite.Permissions
 
                 return false;
             }
+            finally
+            {
+                PermLock.ReleaseWriterLock();
+            }
+        }
+
+        /// <summary>
+        /// True if <paramref name="pattern"/> (may contain a trailing ".*" or be "*")
+        /// authorises <paramref name="requested"/>.
+        /// </summary>
+        public bool Matches(string pattern, string requested)
+        {
+            pattern = pattern.Trim().ToLower();
+            requested = requested.Trim().ToLower();
+
+            if (pattern == "*") // global wildcard
+                return true;
+
+            if (pattern.EndsWith(".*")) // hierarchical wildcard
+            {
+                string prefix = pattern.Substring(0, pattern.Length - 2); // drop ".*"
+                return requested == prefix || requested.StartsWith(prefix + ".");
+            }
+
+            return pattern == requested; // exact match
         }
     }
 }
