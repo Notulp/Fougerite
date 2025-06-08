@@ -58,6 +58,10 @@ namespace Fougerite.Caches
                 // Duplicates shouldn't happen, but It's better to handle it this way.
                 _allEntities[entity.InstanceID] = entity;
             }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[EntityCache] Failed to add to the entity list. Error: {ex}");
+            }
             finally
             {
                 _lock.ReleaseWriterLock();
@@ -80,6 +84,10 @@ namespace Fougerite.Caches
                     result = true;
                 }
             }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[EntityCache] Failed to remove from the entity list. Error: {ex}");
+            }
             finally
             {
                 _lock.ReleaseWriterLock();
@@ -95,18 +103,22 @@ namespace Fougerite.Caches
         /// <returns></returns>
         internal bool Contains(int instanceId)
         {
-            bool ret;
+            bool result = false;
             try
             {
                 _lock.AcquireReaderLock(Timeout.Infinite);
-                ret = _allEntities.ContainsKey(instanceId);
+                result = _allEntities.ContainsKey(instanceId);
+            }
+            catch (Exception)
+            {
+                // Ignore...
             }
             finally
             {
                 _lock.ReleaseReaderLock();
             }
 
-            return ret;
+            return result;
         }
 
         /// <summary>
