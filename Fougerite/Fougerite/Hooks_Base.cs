@@ -12,6 +12,8 @@ namespace Fougerite
     public partial class Hooks
     {
         public static ConcurrentDictionary<int, Entity> DecayList = new ConcurrentDictionary<int, Entity>();
+        [Obsolete("Left for backwards compatibility reasons... Do not use. Use DecayList.", false)]
+        public static List<object> decayList = new List<object>();
         public static Hashtable talkerTimers = new Hashtable();
         public static bool ServerInitialized = false;
         public static readonly List<ulong> uLinkDCCache = new List<ulong>();
