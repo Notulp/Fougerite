@@ -82,6 +82,7 @@ namespace Fougerite
         /// <returns>The created TimedEvent instance.</returns>
         public TimedEvent CreateTimer(string name, int timeoutDelay, Action<TimedEvent> callback, bool autoReset = false, int maxElapsedCount = 0)
         {
+            Util.GetUtil().ThreadTimerCheck();
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent != null)
             {
@@ -115,6 +116,7 @@ namespace Fougerite
         /// <returns>The created TimedEvent instance.</returns>
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args, Action<TimedEvent> callback, bool autoReset = false, int maxElapsedCount = 0)
         {
+            Util.GetUtil().ThreadTimerCheck();
             UnityEngine.GameObject go = new UnityEngine.GameObject($"{Name}_Parallel_{name}_{UnityEngine.Random.Range(1, 999999)}");
             UnityEngine.Object.DontDestroyOnLoad(go);
             TimedEvent timedEvent = go.AddComponent<TimedEvent>();

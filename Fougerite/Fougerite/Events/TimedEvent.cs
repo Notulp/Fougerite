@@ -147,6 +147,7 @@ namespace Fougerite.Events
         public void Kill()
         {
             if (_killed) return;
+            Util.GetUtil().ThreadTimerCheck();
             _killed = true;
             Stop();
             OnKilled?.Invoke(_name);

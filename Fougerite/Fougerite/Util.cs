@@ -29,8 +29,12 @@ namespace Fougerite
     {
         private readonly Dictionary<string, Type> _typeCache = new Dictionary<string, Type>();
         private static Util _util;
+        // Unity-based Timers
         public readonly ConcurrentDictionary<string, TimedEvent> Timers = new ConcurrentDictionary<string, TimedEvent>();
         public readonly ConcurrentList<TimedEvent> ParallelTimers = new ConcurrentList<TimedEvent>();
+        // System.Timers.Timer based Timers
+        public readonly ConcurrentDictionary<string, SystemTimerEvent> SystemTimers = new ConcurrentDictionary<string, SystemTimerEvent>();
+        public readonly ConcurrentList<SystemTimerEvent> ParallelSystemTimers = new ConcurrentList<SystemTimerEvent>();
 
         /// <summary>
         /// All unstackable item names in rust legacy.
@@ -1506,6 +1510,7 @@ namespace Fougerite
         /// <returns>The created TimedEvent instance.</returns>
         public TimedEvent CreateTimer(string name, int timeoutDelay, Action<TimedEvent> callback, bool autoReset = false, string pluginName = "", int maxElapsedCount = 0)
         {
+            ThreadTimerCheck();
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent != null)
             {
@@ -1540,6 +1545,7 @@ namespace Fougerite
         /// <returns>The created TimedEvent instance.</returns>
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args, Action<TimedEvent> callback, bool autoReset = false, string pluginName = "", int maxElapsedCount = 0)
         {
+            ThreadTimerCheck();
             UnityEngine.GameObject go = new UnityEngine.GameObject($"{pluginName}_Parallel_{name}_{UnityEngine.Random.Range(1, 999999)}");
             UnityEngine.Object.DontDestroyOnLoad(go);
             TimedEvent timedEvent = go.AddComponent<TimedEvent>();
@@ -1603,7 +1609,107 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Kills the timers.
+        /// Creates a System.Timers.Timer with a callback, avoiding UnityEngine constraints.
+        /// Use this when you need a timer under a new Thread.
+        /// </summary>
+        /// <param name="name">Name of the timer.</param>
+        /// <param name="timeoutDelay">Interval in milliseconds.</param>
+        /// <param name="callback">The callback function to execute when timer fires.</param>
+        /// <param name="autoReset">True if the timer should repeat, false for single execution.</param>
+        /// <param name="pluginName">The name of the plugin creating the event.</param>
+        /// <param name="maxElapsedCount">Optional: Max fires before killing. 0 = infinite.</param>
+        /// <returns>The created SystemTimerEvent instance.</returns>
+        public SystemTimerEvent CreateSystemTimer(string name, int timeoutDelay, Action<SystemTimerEvent> callback, bool autoReset = false, string pluginName = "", int maxElapsedCount = 0)
+        {
+            SystemTimerEvent timer = GetSystemTimer(name);
+            if (timer != null)
+            {
+                return timer;
+            }
+
+            timer = new SystemTimerEvent(name, pluginName, timeoutDelay, autoReset, maxElapsedCount);
+            timer.OnFire += new SystemTimerEvent.SystemTimerFireDelegate(callback);
+            timer.OnKilled += (cbName) => SystemTimers.TryRemove(cbName);
+            
+            SystemTimers.Add(name, timer);
+            timer.Start();
+
+            return timer;
+        }
+
+        /// <summary>
+        /// Creates a parallel System.Timers.Timer with arguments and a callback. Multiple timers with the same name can exist.
+        /// Use this when you need a timer under a new Thread.
+        /// </summary>
+        /// <param name="name">Name of the timer.</param>
+        /// <param name="timeoutDelay">Interval in milliseconds.</param>
+        /// <param name="args">Dictionary of custom arguments to pass to the timer.</param>
+        /// <param name="callback">The callback function to execute when timer fires.</param>
+        /// <param name="autoReset">True if the timer should repeat, false for single execution.</param>
+        /// <param name="pluginName">The name of the plugin creating the event.</param>
+        /// <param name="maxElapsedCount">Optional: Max fires before killing. 0 = infinite.</param>
+        /// <returns>The created SystemTimerEvent instance.</returns>
+        public SystemTimerEvent CreateParallelSystemTimer(string name, int timeoutDelay, Dictionary<string, object> args, Action<SystemTimerEvent> callback, bool autoReset = false, string pluginName = "", int maxElapsedCount = 0)
+        {
+            SystemTimerEvent timer = new SystemTimerEvent(name, pluginName, timeoutDelay, autoReset, maxElapsedCount);
+            timer.Args = args;
+            timer.OnFire += new SystemTimerEvent.SystemTimerFireDelegate(callback);
+            timer.OnKilled += (cbName) => ParallelSystemTimers.Remove(timer);
+            
+            ParallelSystemTimers.Add(timer);
+            timer.Start();
+
+            return timer;
+        }
+
+        /// <summary>
+        /// Gets the System Timer.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public SystemTimerEvent GetSystemTimer(string name)
+        {
+            SystemTimerEvent result = SystemTimers.ContainsKey(name) ? SystemTimers[name] : null;
+            return result;
+        }
+
+        /// <summary>
+        /// Kills the System Timer.
+        /// </summary>
+        /// <param name="name">Name.</param>
+        public void KillSystemTimer(string name)
+        {
+            SystemTimerEvent timer = GetSystemTimer(name);
+            if (timer == null)
+                return;
+            timer.Kill();
+        }
+
+        /// <summary>
+        /// Gets the parallel System Timer.
+        /// </summary>
+        /// <returns>The parallel System Timer list.</returns>
+        /// <param name="name">Name.</param>
+        public List<SystemTimerEvent> GetParallelSystemTimer(string name)
+        {
+            return ParallelSystemTimers.Where(timer => timer.Name == name).ToList();
+        }
+
+        /// <summary>
+        /// Kills the parallel System Timer.
+        /// </summary>
+        /// <param name="name">Name.</param>
+        public void KillParallelSystemTimer(string name)
+        {
+            foreach (SystemTimerEvent timer in GetParallelSystemTimer(name))
+            {
+                timer.Kill();
+                ParallelSystemTimers.Remove(timer);
+            }
+        }
+
+        /// <summary>
+        /// Kills all timers across Unity and System.Timers pools.
         /// </summary>
         public void KillTimers()
         {
@@ -1617,8 +1723,20 @@ namespace Fougerite
                 timer.Kill();
             }
 
+            foreach (SystemTimerEvent current in SystemTimers.Values)
+            {
+                current.Kill();
+            }
+
+            foreach (SystemTimerEvent timer in ParallelSystemTimers)
+            {
+                timer.Kill();
+            }
+
             Timers.Clear();
             ParallelTimers.Clear();
+            SystemTimers.Clear();
+            ParallelSystemTimers.Clear();
         }
 
         /// <summary>
@@ -1671,6 +1789,21 @@ namespace Fougerite
         public int CurrentWorkingThreadID
         {
             get { return Thread.CurrentThread.ManagedThreadId; }
+        }
+
+
+        /// <summary>
+        /// Checks if the current thread matches the main thread and logs warnings if the method is called from a non-main thread.
+        /// Ensures that actions involving GameObject and UnityEngine objects are executed on the main thread to avoid crashes or misuse.
+        /// </summary>
+        internal void ThreadTimerCheck()
+        {
+            if (MainThreadID == CurrentWorkingThreadID)
+                return;
+            
+            Logger.LogWarning($"{nameof(CreateTimer)} or {nameof(CreateParallelTimer)} should be called from the main thread due to GameObject usage.");
+            Logger.LogWarning("Consider using System.Timer when working with other threads to avoid potential issues.");
+            Logger.LogWarning("Accessing UnityEngine objects from System.Timer can also cause crashes, so ensure that any UnityEngine interactions are done on the main thread.");
         }
     }
 }

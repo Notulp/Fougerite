@@ -81,6 +81,7 @@
     <Compile Include="Fougerite\Events\ShootEvent.cs" />
     <Compile Include="Fougerite\Events\ShotgunShootEvent.cs" />
     <Compile Include="Fougerite\Events\SupplySignalExplosionEvent.cs" />
+    <Compile Include="Fougerite\Events\SystemTimerEvent.cs" />
     <Compile Include="Fougerite\Events\TimedExplosiveEvent.cs" />
     <Compile Include="Fougerite\Events\FlareIgniteEvent.cs" />
     <Compile Include="Fougerite\Events\WorkZoneEnterEvent.cs" />

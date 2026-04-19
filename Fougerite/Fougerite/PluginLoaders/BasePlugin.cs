@@ -443,6 +443,7 @@ namespace Fougerite.PluginLoaders
         /// <param name="maxElapsedCount">The maximum number of times the timer should fire. 0 = infinite.</param>
         public TimedEvent CreateTimer(string name, int timeoutDelay, bool autoReset = false, int maxElapsedCount = 0)
         {
+            Util.GetUtil().ThreadTimerCheck();
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
@@ -475,6 +476,7 @@ namespace Fougerite.PluginLoaders
         /// <param name="maxElapsedCount">The maximum number of times the timer should fire. 0 = infinite.</param>
         public TimedEvent CreateTimer(string name, int timeoutDelay, Action<TimedEvent> callback, bool autoReset = false, int maxElapsedCount = 0)
         {
+            Util.GetUtil().ThreadTimerCheck();
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
@@ -507,6 +509,7 @@ namespace Fougerite.PluginLoaders
         /// <param name="maxElapsedCount">The maximum number of times the timer should fire. 0 = infinite.</param>
         public TimedEvent CreateTimer(string name, int timeoutDelay, Dictionary<string, object> args, bool autoReset = false, int maxElapsedCount = 0)
         {
+            Util.GetUtil().ThreadTimerCheck();
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
@@ -541,6 +544,7 @@ namespace Fougerite.PluginLoaders
         public TimedEvent CreateTimer(string name, int timeoutDelay, Dictionary<string, object> args,
             Action<TimedEvent> callback, bool autoReset = false, int maxElapsedCount = 0)
         {
+            Util.GetUtil().ThreadTimerCheck();
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent == null)
             {
@@ -616,6 +620,7 @@ namespace Fougerite.PluginLoaders
         /// <param name="autoReset">True if the timer should raise the elapsed event each time it elapses, false if only once.</param>
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args, bool autoReset = false)
         {
+            Util.GetUtil().ThreadTimerCheck();
             GameObject go = new GameObject($"ParallelTimedEvent_{name}_{UnityEngine.Random.Range(1, 999999)}");
             UnityEngine.Object.DontDestroyOnLoad(go);
             TimedEvent timedEvent = go.AddComponent<TimedEvent>();
@@ -644,6 +649,7 @@ namespace Fougerite.PluginLoaders
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args,
             Action<TimedEvent> callback, bool autoReset = false)
         {
+            Util.GetUtil().ThreadTimerCheck();
             GameObject go = new GameObject($"ParallelTimedEvent_{name}_{UnityEngine.Random.Range(1, 999999)}");
             UnityEngine.Object.DontDestroyOnLoad(go);
             TimedEvent timedEvent = go.AddComponent<TimedEvent>();
