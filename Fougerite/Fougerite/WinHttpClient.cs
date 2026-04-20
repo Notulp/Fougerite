@@ -51,6 +51,10 @@ namespace Fougerite
         public static extern bool WinHttpReadData(IntPtr hRequest, byte[] lpBuffer, uint dwNumberOfBytesToRead,
             out uint lpdwNumberOfBytesRead);
 
+        [DllImport("winhttp.dll", SetLastError = true)]
+        public static extern bool WinHttpWriteData(IntPtr hRequest, byte[] lpBuffer, uint dwNumberOfBytesToWrite, 
+            out uint lpdwNumberOfBytesWritten);
+
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr CreateEventW(IntPtr lpEventAttributes, bool bManualReset, bool bInitialState,
             string lpName);
@@ -488,15 +492,26 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Performs a synchronous HTTP GET request to download binary content from the specified URL directly into a file.
-        /// Blocks the calling thread until the operation completes or times out.
+        /// Backwards compatible wrapper for DownloadFileBlocking that doesn't expose the error string.
+        /// </summary>
+        public bool DownloadFileBlocking(string url, string destinationPath, float timeout = 30f)
+        {
+            string error;
+            return DownloadFileBlocking(url, destinationPath, out error, timeout);
+        }
+
+        /// <summary>
+        /// Performs a synchronous HTTP GET request directly downloading the binary content into a file.
+        /// Blocks the calling thread until completion or timeout.
         /// </summary>
         /// <param name="url">The URL of the file to download.</param>
         /// <param name="destinationPath">The local file path where the downloaded content will be saved.</param>
+        /// <param name="error">Outputs the error message if the operation fails.</param>
         /// <param name="timeout">The maximum time in seconds to wait for the operation to complete. Defaults to 30 seconds.</param>
         /// <returns>True if the file is successfully downloaded, otherwise, false.</returns>
-        public bool DownloadFileBlocking(string url, string destinationPath, float timeout = 30f)
+        public bool DownloadFileBlocking(string url, string destinationPath, out string error, float timeout = 30f)
         {
+            error = string.Empty;
             IntPtr connectHandle = IntPtr.Zero;
             IntPtr requestHandle = IntPtr.Zero;
             GCHandle flagsPin = new GCHandle();
@@ -508,6 +523,7 @@ namespace Fougerite
 
                 if (_sessionHandle == IntPtr.Zero)
                 {
+                    error = "NoSession";
                     return false;
                 }
 
@@ -516,8 +532,9 @@ namespace Fougerite
                 {
                     uri = new Uri(url);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    error = $"BadUrl: {ex.Message}";
                     return false;
                 }
 
@@ -527,6 +544,7 @@ namespace Fougerite
                 connectHandle = WinHttpConnect(_sessionHandle, uri.Host, port, 0);
                 if (connectHandle == IntPtr.Zero)
                 {
+                    error = "ConnectFail";
                     return false;
                 }
 
@@ -536,6 +554,7 @@ namespace Fougerite
                 requestHandle = WinHttpOpenRequest(connectHandle, "GET", path, null, null, IntPtr.Zero, flags);
                 if (requestHandle == IntPtr.Zero)
                 {
+                    error = "RequestFail";
                     return false;
                 }
 
@@ -561,12 +580,14 @@ namespace Fougerite
                 bool sent = WinHttpSendRequest(requestHandle, headersString, (uint)headersString.Length, IntPtr.Zero, 0, 0, IntPtr.Zero);
                 if (!sent)
                 {
+                    error = "SendFail";
                     return false;
                 }
 
                 bool received = WinHttpReceiveResponse(requestHandle, IntPtr.Zero);
                 if (!received)
                 {
+                    error = "RecvFail";
                     return false;
                 }
 
@@ -579,8 +600,15 @@ namespace Fougerite
                 statusCode = (uint)Marshal.ReadInt32(statusCodePin.AddrOfPinnedObject());
                 statusCodePin.Free();
 
-                if (!queryResult || statusCode < 200 || statusCode >= 300)
+                if (!queryResult)
                 {
+                    error = "QueryHeadersFail";
+                    return false;
+                }
+
+                if (statusCode < 200 || statusCode >= 300)
+                {
+                    error = $"HTTP {statusCode}";
                     return false;
                 }
 
@@ -598,6 +626,7 @@ namespace Fougerite
             catch (Exception ex)
             {
                 Logger.Log($"[WinHttp Download] EXCEPTION: {ex}");
+                error = ex.Message;
                 return false;
             }
             finally
@@ -612,6 +641,203 @@ namespace Fougerite
                 if (requestHandle != IntPtr.Zero) WinHttpCloseHandle(requestHandle);
                 if (connectHandle != IntPtr.Zero) WinHttpCloseHandle(connectHandle);
             }
+        }
+
+        /// <summary>
+        /// Performs an asynchronous HTTP GET request to download binary content.
+        /// Returns the success status and error message via a callback on the main thread.
+        /// </summary>
+        public void DownloadFileAsync(string url, string destinationPath, Action<bool, string> onComplete, float timeout = 30f)
+        {
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                string error = string.Empty;
+                bool result = DownloadFileBlocking(url, destinationPath, out error, timeout);
+                if (onComplete != null)
+                {
+                    Loom.QueueOnMainThread(() =>
+                    {
+                        onComplete(result, error);
+                    });
+                }
+            });
+        }
+
+        /// <summary>
+        /// Backwards compatible wrapper for UploadFileBlocking that doesn't expose the error string.
+        /// </summary>
+        public bool UploadFileBlocking(string url, string filePath, float timeout = 30f)
+        {
+            string error;
+            return UploadFileBlocking(url, filePath, out error, timeout);
+        }
+
+        /// <summary>
+        /// Performs a synchronous HTTP POST request directly uploading the binary content of a file.
+        /// Blocks the calling thread until completion or timeout.
+        /// </summary>
+        public bool UploadFileBlocking(string url, string filePath, out string error, float timeout = 30f)
+        {
+            error = string.Empty;
+            if (!File.Exists(filePath))
+            {
+                error = "FileDoesNotExist";
+                return false;
+            }
+
+            IntPtr connectHandle = IntPtr.Zero;
+            IntPtr requestHandle = IntPtr.Zero;
+            GCHandle flagsPin = new GCHandle();
+            FileStream fs = null;
+
+            try
+            {
+                InitSession();
+
+                if (_sessionHandle == IntPtr.Zero)
+                {
+                    error = "NoSession";
+                    return false;
+                }
+
+                Uri uri;
+                try
+                {
+                    uri = new Uri(url);
+                }
+                catch (Exception ex)
+                {
+                    error = $"BadUrl: {ex.Message}";
+                    return false;
+                }
+
+                ushort port = uri.Scheme == "https" ? INTERNET_DEFAULT_HTTPS_PORT : INTERNET_DEFAULT_HTTP_PORT;
+                uint flags = uri.Scheme == "https" ? WINHTTP_FLAG_SECURE : 0;
+
+                connectHandle = WinHttpConnect(_sessionHandle, uri.Host, port, 0);
+                if (connectHandle == IntPtr.Zero)
+                {
+                    error = "ConnectFail";
+                    return false;
+                }
+
+                string path = uri.PathAndQuery;
+                if (!string.IsNullOrEmpty(uri.Fragment)) path += uri.Fragment;
+
+                requestHandle = WinHttpOpenRequest(connectHandle, "POST", path, null, null, IntPtr.Zero, flags);
+                if (requestHandle == IntPtr.Zero)
+                {
+                    error = "RequestFail";
+                    return false;
+                }
+
+                uint timeoutMs = timeout > 0 ? (uint)(timeout * 1000) : 30000;
+                byte[] timeoutBuf = BitConverter.GetBytes(timeoutMs);
+                GCHandle timeoutPin = GCHandle.Alloc(timeoutBuf, GCHandleType.Pinned);
+                WinHttpSetOption(requestHandle, WINHTTP_OPTION_CONNECT_TIMEOUT, timeoutPin.AddrOfPinnedObject(), sizeof(uint));
+                WinHttpSetOption(requestHandle, WINHTTP_OPTION_SEND_TIMEOUT, timeoutPin.AddrOfPinnedObject(), sizeof(uint));
+                WinHttpSetOption(requestHandle, WINHTTP_OPTION_RECEIVE_TIMEOUT, timeoutPin.AddrOfPinnedObject(), sizeof(uint));
+                timeoutPin.Free();
+
+                uint ignoreFlags = SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_CERT_WRONG_USAGE |
+                                   SECURITY_FLAG_IGNORE_CERT_CN_INVALID | SECURITY_FLAG_IGNORE_CERT_DATE_INVALID;
+                byte[] flagsBuffer = BitConverter.GetBytes(ignoreFlags);
+                flagsPin = GCHandle.Alloc(flagsBuffer, GCHandleType.Pinned);
+                WinHttpSetOption(requestHandle, WINHTTP_OPTION_SECURITY_FLAGS, flagsPin.AddrOfPinnedObject(), sizeof(uint));
+
+                FileInfo fi = new FileInfo(filePath);
+                uint fileSize = (uint)fi.Length;
+
+                string headersString = $"Fougerite Mod (v{Bootstrap.Version}; https://fougerite.com)\r\nContent-Type: application/octet-stream\r\n";
+
+                bool sent = WinHttpSendRequest(requestHandle, headersString, (uint)headersString.Length, IntPtr.Zero, 0, fileSize, IntPtr.Zero);
+                if (!sent)
+                {
+                    error = "SendFail";
+                    return false;
+                }
+
+                fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                byte[] buffer = new byte[BUFFER_SIZE];
+                int bytesRead;
+                uint bytesWritten;
+
+                while ((bytesRead = fs.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    if (!WinHttpWriteData(requestHandle, buffer, (uint)bytesRead, out bytesWritten) || bytesWritten == 0)
+                    {
+                        error = "WriteDataFail";
+                        return false;
+                    }
+                }
+
+                bool received = WinHttpReceiveResponse(requestHandle, IntPtr.Zero);
+                if (!received)
+                {
+                    error = "RecvFail";
+                    return false;
+                }
+
+                uint statusCode = 0;
+                uint bufLen = sizeof(uint);
+                uint index = 0;
+
+                GCHandle statusCodePin = GCHandle.Alloc(statusCode, GCHandleType.Pinned);
+                bool queryResult = WinHttpQueryHeaders(requestHandle, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER, null, statusCodePin.AddrOfPinnedObject(), ref bufLen, ref index);
+                statusCode = (uint)Marshal.ReadInt32(statusCodePin.AddrOfPinnedObject());
+                statusCodePin.Free();
+
+                if (!queryResult)
+                {
+                    error = "QueryHeadersFail";
+                    return false;
+                }
+
+                if (statusCode < 200 || statusCode >= 300)
+                {
+                    error = $"HTTP {statusCode}";
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[WinHttp Upload] EXCEPTION: {ex}");
+                error = ex.Message;
+                return false;
+            }
+            finally
+            {
+                if (fs != null)
+                {
+                    fs.Close();
+                    fs.Dispose();
+                }
+                if (flagsPin.IsAllocated) flagsPin.Free();
+                if (requestHandle != IntPtr.Zero) WinHttpCloseHandle(requestHandle);
+                if (connectHandle != IntPtr.Zero) WinHttpCloseHandle(connectHandle);
+            }
+        }
+
+        /// <summary>
+        /// Performs an asynchronous HTTP POST request directly uploading the binary content of a file.
+        /// Returns the success status and error message via a callback on the main thread.
+        /// </summary>
+        public void UploadFileAsync(string url, string filePath, Action<bool, string> onComplete, float timeout = 30f)
+        {
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                string error = string.Empty;
+                bool result = UploadFileBlocking(url, filePath, out error, timeout);
+                if (onComplete != null)
+                {
+                    Loom.QueueOnMainThread(() =>
+                    {
+                        onComplete(result, error);
+                    });
+                }
+            });
         }
     }
 }
