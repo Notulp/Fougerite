@@ -1632,7 +1632,6 @@ namespace Fougerite
             timer.OnKilled += (cbName) => SystemTimers.TryRemove(cbName);
             
             SystemTimers.Add(name, timer);
-            timer.Start();
 
             return timer;
         }
@@ -1657,7 +1656,6 @@ namespace Fougerite
             timer.OnKilled += (cbName) => ParallelSystemTimers.Remove(timer);
             
             ParallelSystemTimers.Add(timer);
-            timer.Start();
 
             return timer;
         }
