@@ -4275,6 +4275,35 @@ namespace Fougerite
                 }
             }
         }
+        
+        /// <summary>
+        /// Triggers the Inter-Plugin communication event.
+        /// </summary>
+        /// <param name="e">The message event container.</param>
+        /// <returns>A response enum indicating the result of the delivery.</returns>
+        internal static PluginMessageResponse PluginMessage(PluginMessageEvent e)
+        {
+            var pl = PluginLoader.GetInstance();
+            
+            if (!pl.Plugins.TryGetValue(e.ReceiverName, out var target))
+            {
+                return PluginMessageResponse.TargetNotFound;
+            }
+
+            if (target.State != PluginState.Loaded)
+            {
+                return PluginMessageResponse.TargetDisabled;
+            }
+
+            // Dispatch to all subscribers
+            bool wasAllSuccessful = ExecuteSubscribers(OnPluginMessage, "OnPluginMessage", e);
+            if (wasAllSuccessful)
+            {
+                return e.Cancelled ? PluginMessageResponse.Rejected : PluginMessageResponse.Success;
+            }
+            
+            return PluginMessageResponse.Error;
+        }
 
         /// <summary>
         /// Runs when a command or console command is being restricted / unrestricted.

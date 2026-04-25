@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Fougerite.Concurrent;
 using Fougerite.Events;
+using Fougerite.Tools;
 using UnityEngine;
 
 namespace Fougerite.PluginLoaders
@@ -688,6 +689,29 @@ namespace Fougerite.PluginLoaders
                 ParallelTimers.Remove(timer);
             }
         }
+        
+        /// <summary>
+        /// Sends a synchronous message to a target plugin.
+        /// </summary>
+        /// <param name="targetName">The name of the target plugin.</param>
+        /// <param name="message">The object payload.</param>
+        /// <returns>Delivery status response.</returns>
+        public PluginMessageResult SendMessage(string targetName, object message)
+        {
+            return PluginMessaging.Send(this, targetName, message);
+        }
+
+        /// <summary>
+        /// Sends an asynchronous message with a callback.
+        /// </summary>
+        /// <param name="targetName">The name of the target plugin.</param>
+        /// <param name="message">The object payload.</param>
+        /// <param name="callback">Action executed when finished, providing the encapsulated result.</param>
+        /// <param name="runInThreadPool">If true, dispatch occurs on a background thread.</param>
+        public void SendMessageAsync(string targetName, object message, Action<PluginMessageResult> callback, bool runInThreadPool = true)
+        {
+            PluginMessaging.SendAsync(this, targetName, message, callback, runInThreadPool);
+        }
 
         public Dictionary<string, object> CreateDict()
         {
@@ -1141,6 +1165,11 @@ namespace Fougerite.PluginLoaders
         public void OnWorkZoneEnter(WorkZoneEnterEvent ev)
         {
             Invoke("On_WorkZoneEnter", ev);
+        }
+
+        public void OnPluginMessage(PluginMessageEvent ev)
+        {
+            Invoke("On_PluginMessage", ev);
         }
     }
 }

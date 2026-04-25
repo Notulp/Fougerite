@@ -77,6 +77,7 @@
     <Compile Include="Fougerite\Events\LoggerEvent.cs" />
     <Compile Include="Fougerite\Events\LootStartEvent.cs" />
     <Compile Include="Fougerite\Events\MedikitUseEvent.cs" />
+    <Compile Include="Fougerite\Events\PluginMessageEvent.cs" />
     <Compile Include="Fougerite\Events\RepairEvent.cs" />
     <Compile Include="Fougerite\Events\ShootEvent.cs" />
     <Compile Include="Fougerite\Events\ShotgunShootEvent.cs" />
@@ -205,6 +206,7 @@
     <Compile Include="Fougerite\Logger.cs" />
     <Compile Include="Fougerite\Tools\Cloner.cs" />
     <Compile Include="Fougerite\Tools\Extensions.cs" />
+    <Compile Include="Fougerite\Tools\PluginMessaging.cs" />
     <Compile Include="Fougerite\WinHttpClient.cs" />
     <Compile Include="Fougerite\Zone3D.cs" />
     <Compile Include="Fougerite\DataStore.cs" />

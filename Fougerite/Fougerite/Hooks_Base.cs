@@ -357,6 +357,11 @@ namespace Fougerite
         /// This delegate runs when a player uses a medical kit or bandage.
         /// </summary>
         public static event MedikitUseEventDelegate OnMedikitUse;
+
+        /// <summary>
+        /// This delegate runs when a plugin sends a message to another plugin.
+        /// </summary>
+        public static event PluginMessageHandlerDelegate OnPluginMessage;
         
         /// <summary>
         /// A central registry used to manage the lifecycle of generic item modification events.
@@ -554,6 +559,7 @@ namespace Fougerite
             OnFlareThrow = delegate {  };
             OnFlareIgnite = delegate {  };
             OnBasicTorchIgnite = delegate {  };
+            OnPluginMessage = delegate {  };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -704,6 +710,8 @@ namespace Fougerite
         
         public delegate void WorkZoneEnterEventDelegate(WorkZoneEnterEvent wze);
         
+        public delegate void PluginMessageHandlerDelegate(PluginMessageEvent e);
+        
         /// <summary>
         /// Flags for Method.Invoke
         /// </summary>
@@ -717,12 +725,12 @@ namespace Fougerite
         /// <param name="delegateOfEvent"></param>
         /// <param name="eventName"></param>
         /// <param name="parameters"></param>
-        public static void ExecuteSubscribers(Delegate delegateOfEvent, string eventName, params object[] parameters)
+        public static bool ExecuteSubscribers(Delegate delegateOfEvent, string eventName, params object[] parameters)
         {
             // Sanity check
             if (delegateOfEvent == null)
             {
-                return;
+                return false;
             }
             
             // Additional stuff
@@ -730,6 +738,7 @@ namespace Fougerite
             CultureInfo cultureInfo = CultureInfo.CurrentCulture;
             
             // Iterate all subscribers
+            bool success = true;
             foreach (Delegate x in delegateOfEvent.GetInvocationList())
             {
                 try
@@ -739,8 +748,11 @@ namespace Fougerite
                 catch (Exception ex)
                 {
                     Logger.LogError($"{eventName} Error: {ex}");
+                    success = false;
                 }
             }
+            
+            return success;
         }
     }
 }

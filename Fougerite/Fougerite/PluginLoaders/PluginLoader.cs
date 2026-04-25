@@ -88,7 +88,8 @@ namespace Fougerite.PluginLoaders
             "On_FlareIgnite",
             "On_TorchIgnite",
             "On_HeatZoneEnter",
-            "On_WorkZoneEnter"
+            "On_WorkZoneEnter",
+            "On_PluginMessage"
         };
 
         public void Initialize()
@@ -438,6 +439,9 @@ namespace Fougerite.PluginLoaders
                                 Hooks.OnWorkZoneEnter += plugin.OnWorkZoneEnter;
                             }
                             break;
+                        case "On_PluginMessage":
+                            Hooks.OnPluginMessage += plugin.OnPluginMessage;
+                            break;
                     }
                 }
             }
@@ -695,6 +699,9 @@ namespace Fougerite.PluginLoaders
                             {
                                 Hooks.OnWorkZoneEnter -= plugin.OnWorkZoneEnter;
                             }
+                            break;
+                        case "On_PluginMessage":
+                            Hooks.OnPluginMessage -= plugin.OnPluginMessage;
                             break;
                     }
                 }
