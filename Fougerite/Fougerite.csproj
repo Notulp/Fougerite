@@ -208,6 +208,7 @@
     <Compile Include="Fougerite\Logger.cs" />
     <Compile Include="Fougerite\Tools\Cloner.cs" />
     <Compile Include="Fougerite\Tools\Extensions.cs" />
+    <Compile Include="Fougerite\Tools\FougeriteTickManager.cs" />
     <Compile Include="Fougerite\Tools\PluginMessaging.cs" />
     <Compile Include="Fougerite\WinHttpClient.cs" />
     <Compile Include="Fougerite\Zone3D.cs" />

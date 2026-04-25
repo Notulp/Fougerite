@@ -340,6 +340,8 @@ namespace Fougerite
 
             Rust.Steam.Server.SetModded();
             Rust.Steam.Server.Official = false;
+            
+            FougeriteTickManager.Initialize();
 
             if (ApplyOptions()) 
             {

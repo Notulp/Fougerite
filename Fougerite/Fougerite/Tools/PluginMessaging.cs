@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using Fougerite.Events;
-using Fougerite.PluginLoaders;
 
 namespace Fougerite.Tools
 {

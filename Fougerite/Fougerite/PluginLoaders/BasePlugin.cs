@@ -1181,5 +1181,10 @@ namespace Fougerite.PluginLoaders
         {
             Invoke("On_CraftingComplete", ev);
         }
+
+        public void OnServerTick()
+        {
+            Invoke("On_ServerTick");
+        }
     }
 }

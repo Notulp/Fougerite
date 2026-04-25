@@ -374,6 +374,12 @@ namespace Fougerite
         public static event CraftingCompleteDelegate OnCraftComplete;
         
         /// <summary>
+        /// This delegate runs on every server tick.
+        /// Use with caution as it can be called multiple times per second and may cause performance issues if used improperly.
+        /// </summary>
+        public static event ServerTickDelegate OnServerTick;
+        
+        /// <summary>
         /// A central registry used to manage the lifecycle of generic item modification events.
         /// Since OnItemMod<T> creates a unique static class for every weapon type, this helper
         /// allows the framework to clear all weapon-specific events simultaneously during a hook reset.
@@ -572,6 +578,7 @@ namespace Fougerite
             OnPluginMessage = delegate {  };
             OnCraftCancel = delegate {  };
             OnCraftComplete = delegate {  };
+            OnServerTick = delegate { };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -727,6 +734,8 @@ namespace Fougerite
         public delegate void CraftingCancelDelegate(CraftCancelEvent e);
         
         public delegate void CraftingCompleteDelegate(CraftCompleteEvent e);
+        
+        public delegate void ServerTickDelegate();
         
         /// <summary>
         /// Flags for Method.Invoke

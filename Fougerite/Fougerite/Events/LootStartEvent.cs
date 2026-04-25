@@ -1,5 +1,4 @@
 ﻿using Fougerite.Caches;
-using UnityEngine;
 
 namespace Fougerite.Events
 {

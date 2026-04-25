@@ -91,7 +91,8 @@ namespace Fougerite.PluginLoaders
             "On_WorkZoneEnter",
             "On_PluginMessage",
             "On_CraftingCancel",
-            "On_CraftingComplete"
+            "On_CraftingComplete",
+            "On_ServerTick"
         };
 
         public void Initialize()
@@ -450,6 +451,12 @@ namespace Fougerite.PluginLoaders
                         case "On_CraftingComplete":
                             Hooks.OnCraftComplete += plugin.OnCraftingComplete;
                             break;
+                        case "On_ServerTick":
+                            if (IsIntensiveEventAllowed(plugin))
+                            {
+                                Hooks.OnServerTick += plugin.OnServerTick;
+                            }
+                            break;
                     }
                 }
             }
@@ -716,6 +723,12 @@ namespace Fougerite.PluginLoaders
                             break;
                         case "On_CraftingComplete":
                             Hooks.OnCraftComplete -= plugin.OnCraftingComplete;
+                            break;
+                        case "On_ServerTick":
+                            if (IsIntensiveEventAllowed(plugin))
+                            {
+                                Hooks.OnServerTick -= plugin.OnServerTick;
+                            }
                             break;
                     }
                 }

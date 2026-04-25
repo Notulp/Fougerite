@@ -4341,6 +4341,14 @@ namespace Fougerite
         }
         
         /// <summary>
+        /// Runs on every server tick, right before the server updates the world state.
+        /// </summary>
+        public static void OnServerTickHook()
+        {
+            ExecuteSubscribers(OnServerTick, "OnServerTick");
+        }
+        
+        /// <summary>
         /// Triggers the Inter-Plugin communication event.
         /// </summary>
         /// <param name="e">The message event container.</param>
