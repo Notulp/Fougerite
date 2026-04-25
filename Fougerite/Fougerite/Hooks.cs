@@ -4283,9 +4283,10 @@ namespace Fougerite
         /// <returns>A response enum indicating the result of the delivery.</returns>
         internal static PluginMessageResponse PluginMessage(PluginMessageEvent e)
         {
-            var pl = PluginLoader.GetInstance();
+            var pluginLoader = PluginLoader.GetInstance();
             
-            if (!pl.Plugins.TryGetValue(e.ReceiverName, out var target))
+            BasePlugin target = pluginLoader.Plugins.Values.FirstOrDefault(p => string.Equals(p.Name, e.ReceiverName, StringComparison.OrdinalIgnoreCase));
+            if (target == null)
             {
                 return PluginMessageResponse.TargetNotFound;
             }
