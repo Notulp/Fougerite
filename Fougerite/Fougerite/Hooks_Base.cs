@@ -364,6 +364,16 @@ namespace Fougerite
         public static event PluginMessageHandlerDelegate OnPluginMessage;
         
         /// <summary>
+        /// This delegate runs when a player attempts to cancel a crafting operation.
+        /// </summary>
+        public static event CraftingCancelDelegate OnCraftCancel;
+
+        /// <summary>
+        /// This delegate runs when a crafting operation completes.
+        /// </summary>
+        public static event CraftingCompleteDelegate OnCraftComplete;
+        
+        /// <summary>
         /// A central registry used to manage the lifecycle of generic item modification events.
         /// Since OnItemMod<T> creates a unique static class for every weapon type, this helper
         /// allows the framework to clear all weapon-specific events simultaneously during a hook reset.
@@ -560,6 +570,8 @@ namespace Fougerite
             OnFlareIgnite = delegate {  };
             OnBasicTorchIgnite = delegate {  };
             OnPluginMessage = delegate {  };
+            OnCraftCancel = delegate {  };
+            OnCraftComplete = delegate {  };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -711,6 +723,10 @@ namespace Fougerite
         public delegate void WorkZoneEnterEventDelegate(WorkZoneEnterEvent wze);
         
         public delegate void PluginMessageHandlerDelegate(PluginMessageEvent e);
+        
+        public delegate void CraftingCancelDelegate(CraftCancelEvent e);
+        
+        public delegate void CraftingCompleteDelegate(CraftCompleteEvent e);
         
         /// <summary>
         /// Flags for Method.Invoke

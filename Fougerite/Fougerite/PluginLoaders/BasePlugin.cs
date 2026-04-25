@@ -1171,5 +1171,15 @@ namespace Fougerite.PluginLoaders
         {
             Invoke("On_PluginMessage", ev);
         }
+
+        public void OnCraftingCancel(CraftCancelEvent ev)
+        {
+            Invoke("On_CraftingCancel", ev);
+        }
+
+        public void OnCraftingComplete(CraftCompleteEvent ev)
+        {
+            Invoke("On_CraftingComplete", ev);
+        }
     }
 }

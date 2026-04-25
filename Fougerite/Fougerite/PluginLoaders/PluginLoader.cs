@@ -89,7 +89,9 @@ namespace Fougerite.PluginLoaders
             "On_TorchIgnite",
             "On_HeatZoneEnter",
             "On_WorkZoneEnter",
-            "On_PluginMessage"
+            "On_PluginMessage",
+            "On_CraftingCancel",
+            "On_CraftingComplete"
         };
 
         public void Initialize()
@@ -442,6 +444,12 @@ namespace Fougerite.PluginLoaders
                         case "On_PluginMessage":
                             Hooks.OnPluginMessage += plugin.OnPluginMessage;
                             break;
+                        case "On_CraftingCancel":
+                            Hooks.OnCraftCancel += plugin.OnCraftingCancel;
+                            break;
+                        case "On_CraftingComplete":
+                            Hooks.OnCraftComplete += plugin.OnCraftingComplete;
+                            break;
                     }
                 }
             }
@@ -702,6 +710,12 @@ namespace Fougerite.PluginLoaders
                             break;
                         case "On_PluginMessage":
                             Hooks.OnPluginMessage -= plugin.OnPluginMessage;
+                            break;
+                        case "On_CraftingCancel":
+                            Hooks.OnCraftCancel -= plugin.OnCraftingCancel;
+                            break;
+                        case "On_CraftingComplete":
+                            Hooks.OnCraftComplete -= plugin.OnCraftingComplete;
                             break;
                     }
                 }

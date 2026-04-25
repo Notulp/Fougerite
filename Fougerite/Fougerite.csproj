@@ -66,6 +66,8 @@
     <Compile Include="Fougerite\Events\CommandRestrictionEvent.cs" />
     <Compile Include="Fougerite\Events\ConsoleEvent.cs" />
     <Compile Include="Fougerite\Events\ConsumableUseEvent.cs" />
+    <Compile Include="Fougerite\Events\CraftCancelEvent.cs" />
+    <Compile Include="Fougerite\Events\CraftCompleteEvent.cs" />
     <Compile Include="Fougerite\Events\DayCycleChangeEvent.cs" />
     <Compile Include="Fougerite\Events\ExtendedTimedEvent.cs" />
     <Compile Include="Fougerite\Events\FireBarrelToggleEvent.cs" />

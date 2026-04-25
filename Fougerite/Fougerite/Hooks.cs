@@ -1632,6 +1632,70 @@ namespace Fougerite
                 }
             }
         }
+        
+        public static void CraftingCancelEvent(CraftingInventory inv)
+        {
+            using (new Stopper(nameof(Hooks), nameof(CraftingCancelEvent)))
+            {
+                try
+                {
+                    if (inv.isCrafting) 
+                    {
+                        CraftCancelEvent e = new CraftCancelEvent(inv);
+                        ExecuteSubscribers(OnCraftCancel, "OnCraftCancel", e);
+                        
+                        if (e.Cancelled) 
+                            return;
+                        
+                        inv.crafting = default(global::CraftingSession);
+                        inv.EndCrafting();
+                        inv.UpdateCraftingDataToOwner();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"CraftingCancelEvent Error: {ex}");
+                }
+            }
+        }
+
+        public static void CraftingCompleteEvent(CraftingInventory inv)
+        {
+            using (new Stopper(nameof(Hooks), nameof(CraftingCompleteEvent)))
+            {
+                try
+                {
+                    if (inv.isCrafting)
+                    {
+                        CraftCompleteEvent e = new CraftCompleteEvent(inv, CraftCompleteEventType.Before);
+                        ExecuteSubscribers(OnCraftComplete, "OnCraftComplete", e);
+
+                        try
+                        {
+                            inv.crafting.blueprint.CompleteWork(inv.crafting.amount, inv);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogError($"{nameof(CraftingCompleteEvent)} Error while completing craft: {ex}");
+                        }
+                        finally
+                        {
+                            // Clean up session as per original code
+                            inv.crafting = default(global::CraftingSession);
+                            inv.EndCrafting();
+                            inv.UpdateCraftingDataToOwner();
+                        }
+                        
+                        CraftCompleteEvent e2 = new CraftCompleteEvent(inv, CraftCompleteEventType.After);
+                        ExecuteSubscribers(OnCraftComplete, "OnCraftComplete", e2);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"CraftingCompleteEvent Error: {ex}");
+                }
+            }
+        }
 
         public static void AnimalMovement(BaseAIMovement m, BasicWildLifeAI ai, ulong simMillis)
         {

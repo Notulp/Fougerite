@@ -1498,6 +1498,37 @@ namespace Fougerite.Patcher
             iLProcessor.InsertBefore(StartCrafting.Body.Instructions[Position], Instruction.Create(OpCodes.Ldarg_0));
         }
 
+        private void CraftingCancelAndCompletePatch()
+        {
+            TypeDefinition CraftingInventory = rustAssembly.MainModule.GetType("CraftingInventory");
+            MethodDefinition UpdateCraftingDataToOwner = CraftingInventory.GetMethod("UpdateCraftingDataToOwner");
+            MethodDefinition CancelCrafting = CraftingInventory.GetMethod("CancelCrafting");
+            MethodDefinition CompleteCrafting = CraftingInventory.GetMethod("CompleteCrafting");
+            MethodDefinition EndCrafting = CraftingInventory.GetMethod("EndCrafting");
+            MethodDefinition cancelHook = hooksClass.GetMethod("CraftingCancelEvent");
+            MethodDefinition completeHook = hooksClass.GetMethod("CraftingCompleteEvent");
+            FieldDefinition crafting = CraftingInventory.GetField("crafting");
+
+            crafting.SetPublic(true);
+            EndCrafting.SetPublic(true);
+            UpdateCraftingDataToOwner.SetPublic(true);
+            
+            CancelCrafting.Body.Instructions.Clear();
+            CancelCrafting.Body.Variables.Clear();
+            CancelCrafting.Body.ExceptionHandlers.Clear();
+            CancelCrafting.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            CancelCrafting.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(cancelHook)));
+            CancelCrafting.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            CompleteCrafting.SetPublic(true);
+            CompleteCrafting.Body.Instructions.Clear();
+            CompleteCrafting.Body.Variables.Clear();
+            CompleteCrafting.Body.ExceptionHandlers.Clear();
+            CompleteCrafting.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            CompleteCrafting.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(completeHook)));
+            CompleteCrafting.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        }
+
         private void NavMeshPatch()
         {
             TypeDefinition BasicWildLifeMovement = rustAssembly.MainModule.GetType("BaseAIMovement");
@@ -3051,6 +3082,7 @@ namespace Fougerite.Patcher
                     this.TalkerNotifications();
                     this.MetaBolismMethodMod();
                     this.CraftingPatch();
+                    this.CraftingCancelAndCompletePatch();
                     this.NavMeshPatch();
                     this.ResourceSpawned();
                     this.InventoryModifications();
