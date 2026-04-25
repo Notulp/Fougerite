@@ -59,13 +59,13 @@ namespace Fougerite.Tools
         /// <summary>
         /// Sends a message to a specific plugin and returns the encapsulated result.
         /// </summary>
-        /// <param name="sender">The plugin instance sending the message.</param>
+        /// <param name="sender">The name of the plugin sending the message.</param>
         /// <param name="targetName">The name of the target plugin.</param>
         /// <param name="message">The object payload.</param>
         /// <returns>A PluginMessageResult containing the delivery status and event data.</returns>
-        public static PluginMessageResult Send(BasePlugin sender, string targetName, object message)
+        public static PluginMessageResult Send(string sender, string targetName, object message)
         {
-            PluginMessageEvent e = new PluginMessageEvent(sender.Name, targetName, message);
+            PluginMessageEvent e = new PluginMessageEvent(sender, targetName, message);
             PluginMessageResponse response = Hooks.PluginMessage(e);
             return new PluginMessageResult(response, e);
         }
@@ -73,12 +73,12 @@ namespace Fougerite.Tools
         /// <summary>
         /// Sends a message asynchronously. The callback provides the encapsulated result on the Unity Main Thread.
         /// </summary>
-        /// <param name="sender">The plugin instance sending the message.</param>
+        /// <param name="sender">The name of the plugin sending the message.</param>
         /// <param name="targetName">The name of the target plugin.</param>
         /// <param name="message">The object payload.</param>
         /// <param name="callback">Action executed when finished (PluginMessageResult).</param>
         /// <param name="runInThreadPool">If true, the Hook dispatch occurs on a background thread.</param>
-        public static void SendAsync(BasePlugin sender, string targetName, object message, Action<PluginMessageResult> callback, bool runInThreadPool = true)
+        public static void SendAsync(string sender, string targetName, object message, Action<PluginMessageResult> callback, bool runInThreadPool = true)
         {
             if (runInThreadPool)
             {
@@ -93,9 +93,9 @@ namespace Fougerite.Tools
             }
         }
 
-        private static void ExecuteInternal(BasePlugin sender, string target, object msg, Action<PluginMessageResult> callback)
+        private static void ExecuteInternal(string sender, string target, object msg, Action<PluginMessageResult> callback)
         {
-            PluginMessageEvent e = new PluginMessageEvent(sender.Name, target, msg);
+            PluginMessageEvent e = new PluginMessageEvent(sender, target, msg);
             PluginMessageResponse result = Hooks.PluginMessage(e);
 
             if (callback != null)

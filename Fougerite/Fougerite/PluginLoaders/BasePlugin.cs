@@ -698,7 +698,7 @@ namespace Fougerite.PluginLoaders
         /// <returns>Delivery status response.</returns>
         public PluginMessageResult SendMessage(string targetName, object message)
         {
-            return PluginMessaging.Send(this, targetName, message);
+            return PluginMessaging.Send(Name, targetName, message);
         }
 
         /// <summary>
@@ -710,7 +710,7 @@ namespace Fougerite.PluginLoaders
         /// <param name="runInThreadPool">If true, dispatch occurs on a background thread.</param>
         public void SendMessageAsync(string targetName, object message, Action<PluginMessageResult> callback, bool runInThreadPool = true)
         {
-            PluginMessaging.SendAsync(this, targetName, message, callback, runInThreadPool);
+            PluginMessaging.SendAsync(Name, targetName, message, callback, runInThreadPool);
         }
 
         public Dictionary<string, object> CreateDict()
