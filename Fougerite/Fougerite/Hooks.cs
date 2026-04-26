@@ -2107,7 +2107,7 @@ namespace Fougerite
                     else if (ca.IsConnected(uid))
                     {
                         PlayerApprovalEvent ape =
-                            new PlayerApprovalEvent(ca, approval, clientConnection, true, uid, ip, name);
+                            new PlayerApprovalEvent(ca, approval, clientConnection, true, uid, ip, name, uLink.NetworkConnectionError.AlreadyConnectedToAnotherServer);
                         try
                         {
                             ExecuteSubscribers(OnPlayerApproval, "PlayerApprovalEvent", ape);
@@ -2132,7 +2132,7 @@ namespace Fougerite
                         }
 
                         Logger.Log($"Denying entry to {uid} because they're already connected");
-                        approval.Deny(uLink.NetworkConnectionError.AlreadyConnectedToAnotherServer);
+                        approval.Deny(ape.DenyReason);
                     }
                     else if (FloodCooldown.ContainsKey(ip))
                     {
@@ -2149,6 +2149,12 @@ namespace Fougerite
                         catch (Exception ex)
                         {
                             Logger.LogError($"PlayerApprovalEvent2 Error: {ex}");
+                        }
+
+                        if (ape.AboutToDeny)
+                        {
+                            approval.Deny(ape.DenyReason);
+                            return;
                         }
 
                         Accept(ca, approval, clientConnection);
