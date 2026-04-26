@@ -489,11 +489,13 @@ namespace Fougerite
         
         /// <summary>
         /// This delegate runs when a player is within the trigger of a HeatZone.
+        /// This event runs continously while the player is inside the trigger, so be careful when using It in script plugins.
         /// </summary>
         public static event HeatZoneEnterEventDelegate OnHeatZoneEnter;
         
         /// <summary>
         /// This delegate runs when a player is within the trigger of a WorkZone.
+        /// This event runs continously while the player is inside the trigger, so be careful when using It in script plugins.
         /// </summary>
         public static event WorkZoneEnterEventDelegate OnWorkZoneEnter;
 

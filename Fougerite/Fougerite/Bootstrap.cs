@@ -312,14 +312,6 @@ namespace Fougerite
                 DateFormatHandling = DateFormatHandling.IsoDateFormat,
                 NullValueHandling = NullValueHandling.Include,
             };
-
-            // Init CTimer
-            _timergo = new GameObject();
-            _timergo.AddComponent<CTimerHandler>();
-            DontDestroyOnLoad(_timergo);
-#pragma warning disable CS0618 // Type or member is obsolete
-            CTimer.StartWatching();
-#pragma warning restore CS0618 // Type or member is obsolete
             
             // Load DataStore
             DataStore.GetInstance().Load();
