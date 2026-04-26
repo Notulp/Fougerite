@@ -1186,5 +1186,10 @@ namespace Fougerite.PluginLoaders
         {
             Invoke("On_ServerTick");
         }
+
+        public void OnMetabolismUpdate(MetabolismEvent ev)
+        {
+            Invoke("On_MetabolismUpdate", ev);
+        }
     }
 }

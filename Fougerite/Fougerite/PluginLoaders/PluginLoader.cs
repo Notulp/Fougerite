@@ -92,7 +92,8 @@ namespace Fougerite.PluginLoaders
             "On_PluginMessage",
             "On_CraftingCancel",
             "On_CraftingComplete",
-            "On_ServerTick"
+            "On_ServerTick",
+            "On_MetabolismUpdate"
         };
 
         public void Initialize()
@@ -457,6 +458,9 @@ namespace Fougerite.PluginLoaders
                                 Hooks.OnServerTick += plugin.OnServerTick;
                             }
                             break;
+                        case "On_MetabolismUpdate":
+                            Hooks.OnMetabolismUpdate += plugin.OnMetabolismUpdate;
+                            break;
                     }
                 }
             }
@@ -729,6 +733,9 @@ namespace Fougerite.PluginLoaders
                             {
                                 Hooks.OnServerTick -= plugin.OnServerTick;
                             }
+                            break;
+                        case "On_MetabolismUpdate":
+                            Hooks.OnMetabolismUpdate -= plugin.OnMetabolismUpdate;
                             break;
                     }
                 }

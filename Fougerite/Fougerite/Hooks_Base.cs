@@ -381,6 +381,12 @@ namespace Fougerite
         public static event ServerTickDelegate OnServerTick;
         
         /// <summary>
+        /// This delegate runs when a player's metabolism updates.
+        /// Called every 3 second for each player, so carefully use It in script plugins.
+        /// </summary>
+        public static event MetabolismUpdateDelegate OnMetabolismUpdate;
+        
+        /// <summary>
         /// A central registry used to manage the lifecycle of generic item modification events.
         /// Since OnItemMod<T> creates a unique static class for every weapon type, this helper
         /// allows the framework to clear all weapon-specific events simultaneously during a hook reset.
@@ -580,6 +586,7 @@ namespace Fougerite
             OnCraftCancel = delegate {  };
             OnCraftComplete = delegate {  };
             OnServerTick = delegate { };
+            OnMetabolismUpdate = delegate { };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -737,6 +744,8 @@ namespace Fougerite
         public delegate void CraftingCompleteDelegate(CraftCompleteEvent e);
         
         public delegate void ServerTickDelegate();
+        
+        public delegate void MetabolismUpdateDelegate(MetabolismEvent e);
         
         /// <summary>
         /// Flags for Method.Invoke

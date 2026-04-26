@@ -4339,6 +4339,69 @@ namespace Fougerite
                 }
             }
         }
+
+
+        /// <summary>
+        /// Updates the metabolism state of the player and triggers metabolism-related events. This includes
+        /// calculations of metabolic vitals, such as hunger and health, and ensures appropriate logic is
+        /// executed depending on the player's current life status.
+        /// </summary>
+        /// <param name="m">The metabolism object representing the player's metabolic state.</param>
+        /// <returns>A <see cref="LifeStatus"/> value indicating the life state of the player after the metabolic update</returns>
+        public static LifeStatus MetabolicUpdateHook(Metabolism m)
+        {
+            using (new Stopper(nameof(Hooks), nameof(MetabolicUpdateHook)))
+            {
+                // Replicate original check, global::LifeStatus lifeStatus = ((!base.alive) ? global::LifeStatus.IsDead : global::LifeStatus.IsAlive);
+                LifeStatus lifeStatus = ((!m.alive) ? LifeStatus.IsDead : LifeStatus.IsAlive);
+        
+                if (lifeStatus == LifeStatus.IsAlive)
+                {
+                    try
+                    {
+                        float time = Time.time;
+                        float delta = time - m._lastTickTime;
+
+                        // Original timing logic
+                        if (delta > 0f && (m.selfTick || delta >= m.tickRate))
+                        {
+                            m._lastTickTime = time;
+                            MetabolismEvent e = new MetabolismEvent(m, delta);
+                            ExecuteSubscribers(OnMetabolismUpdate, "OnMetabolismUpdate", e);
+
+                            if (e.Cancelled) 
+                                return lifeStatus;
+
+                            // Call the now-public CalculateMetabolicVitals
+                            var vitalsUpdate = m.CalculateMetabolicVitals(delta);
+
+                            if (vitalsUpdate.Changed)
+                            {
+                                if (vitalsUpdate.IsHurt)
+                                {
+                                    lifeStatus = TakeDamage.HurtSelf(m, vitalsUpdate.HurtAmount, null);
+                                }
+                                else
+                                {
+                                    m.takeDamage.Heal(m, vitalsUpdate.HealAmount);
+                                }
+                            }
+
+                            if (lifeStatus == LifeStatus.IsAlive)
+                            {
+                                m.DoNetworkUpdate();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError($"MetabolismUpdate Error: {ex}");
+                        lifeStatus = ((!m.dead) ? lifeStatus : LifeStatus.IsDead);
+                    }
+                }
+                return lifeStatus;
+            }
+        }
         
         /// <summary>
         /// Runs on every server tick, right before the server updates the world state.

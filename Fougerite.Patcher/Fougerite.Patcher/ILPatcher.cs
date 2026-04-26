@@ -2975,6 +2975,28 @@ namespace Fougerite.Patcher
             workProcessor.Append(Instruction.Create(OpCodes.Ret));
         }
         
+        private void MetabolismPatch()
+        {
+            TypeDefinition Metabolism = rustAssembly.MainModule.GetType("Metabolism");
+            Metabolism.GetMethod("CalculateMetabolicVitals").SetPublic(true);
+            Metabolism.GetField("_lastTickTime").SetPublic(true);
+            TypeDefinition vitalsUpdate = Metabolism.GetNestedType("VitalsUpdate");
+            vitalsUpdate.IsPublic = true;
+            
+            MethodDefinition MetabolicUpdateFrame = Metabolism.GetMethod("MetabolicUpdateFrame");
+            MetabolicUpdateFrame.SetPublic(true);
+    
+            MethodDefinition metabHook = hooksClass.GetMethod("MetabolicUpdateHook");
+
+            MetabolicUpdateFrame.Body.Instructions.Clear();
+            MetabolicUpdateFrame.Body.Variables.Clear();
+            MetabolicUpdateFrame.Body.ExceptionHandlers.Clear();
+            
+            MetabolicUpdateFrame.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            MetabolicUpdateFrame.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(metabHook)));
+            MetabolicUpdateFrame.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        }
+        
         // uLink Class56.method_36 has been patched here: https://i.imgur.com/WIEQXhX.png
         // I modified using dynspy to avoid the struggle.
 
@@ -3126,6 +3148,7 @@ namespace Fougerite.Patcher
                     this.PatchTorchIgnite();
                     this.PatchBasicTorchIgnite();
                     this.PatchZones();
+                    this.MetabolismPatch();
                 }
                 catch (Exception ex)
                 {
