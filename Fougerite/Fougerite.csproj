@@ -52,6 +52,7 @@
     <Compile Include="Fougerite\Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentEnumerator.cs" />
     <Compile Include="Fougerite\Concurrent\ConcurrentList.cs" />
+    <Compile Include="Fougerite\Concurrent\Lazy.cs" />
     <Compile Include="Fougerite\Concurrent\LockCookie.cs" />
     <Compile Include="Fougerite\Concurrent\LockQueue.cs" />
     <Compile Include="Fougerite\Concurrent\ReadWriterLock.cs" />
