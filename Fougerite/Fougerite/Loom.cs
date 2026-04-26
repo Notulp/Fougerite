@@ -10,8 +10,8 @@ namespace Fougerite
     {
         private static Loom _current;
         private static GameObject _gameObject;
-        internal static int numThreads;
-        internal static bool initialized = false;
+        private static int numThreads;
+        private static bool initialized = false;
         private readonly List<Action> _currentActions = new List<Action>();
         private readonly List<Action> _actions = new List<Action>();
         private readonly List<DelayedQueueItem> _delayed = new List<DelayedQueueItem>();
@@ -62,7 +62,7 @@ namespace Fougerite
             initialized = true;
         }
 
-        private static void Initialize()
+        internal static void Initialize()
         {
             if (!initialized)
             {
@@ -73,6 +73,7 @@ namespace Fougerite
                 }
                 initialized = true;
                 _gameObject = new GameObject("Loom");
+                DontDestroyOnLoad(_gameObject);
                 _current = _gameObject.AddComponent<Loom>();
             }
         }

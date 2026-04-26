@@ -301,6 +301,9 @@ namespace Fougerite
             // Attempt to log unhandled exceptions
             AppDomain.CurrentDomain.UnhandledException += UnhandledException;
             
+            // Loom
+            Loom.Initialize();
+            
             // Initialize a default serializer for the datetime problem
             // https://stackoverflow.com/questions/24025350/xamarin-android-json-net-serilization-fails-on-4-2-2-device-only-timezonenotfoun
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
