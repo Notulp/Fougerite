@@ -4345,6 +4345,9 @@ namespace Fougerite
         /// </summary>
         public static void OnServerTickHook()
         {
+            if (!ServerInitialized || IsShuttingDown)
+                return;
+            
             ExecuteSubscribers(OnServerTick, "OnServerTick");
         }
         

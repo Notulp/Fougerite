@@ -376,6 +376,7 @@ namespace Fougerite
         /// <summary>
         /// This delegate runs on every server tick.
         /// Use with caution as it can be called multiple times per second and may cause performance issues if used improperly.
+        /// It only runs if the server has been fully initialized, and is not shutting down.
         /// </summary>
         public static event ServerTickDelegate OnServerTick;
         
