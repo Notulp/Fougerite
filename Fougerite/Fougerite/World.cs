@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Facepunch;
 using Fougerite.Caches;
+using Fougerite.Concurrent;
 using Fougerite.Tools;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -18,7 +19,7 @@ namespace Fougerite
     public class World
     {
         private static World _world;
-        public readonly Dictionary<string, Zone3D> zones;
+        private readonly ConcurrentDictionary<string, Zone3D> _zones;
         public readonly Dictionary<string, double> cache = new Dictionary<string, double>();
         private List<Entity> _deployables = new List<Entity>();
         private List<Entity> _doors = new List<Entity>();
@@ -28,7 +29,7 @@ namespace Fougerite
 
         public World()
         {
-            zones = new Dictionary<string, Zone3D>();
+            _zones = new ConcurrentDictionary<string, Zone3D>();
         }
 
         /// <summary>
@@ -292,7 +293,7 @@ namespace Fougerite
         public Zone3D CreateZone(string name)
         {
             var zone = new Zone3D(name);
-            zones.Add(name, zone);
+            _zones.Add(name, zone);
             return zone;
         }
         
@@ -303,8 +304,8 @@ namespace Fougerite
         /// <returns>The <see cref="Zone3D"/> object if found,otherwise, null.</returns>
         public Zone3D Get(string name)
         {
-            if (GetWorld().zones.ContainsKey(name))
-                return GetWorld().zones[name];
+            if (GetWorld()._zones.ContainsKey(name))
+                return GetWorld()._zones[name];
             return null;
         }
 
@@ -318,7 +319,7 @@ namespace Fougerite
             if (e == null) 
                 return null;
             
-            foreach (var zone in GetWorld().zones.Values)
+            foreach (var zone in GetWorld()._zones.Values)
             {
                 Zone3D z3d = zone;
                 if (z3d != null && z3d.Contains(e))
@@ -338,7 +339,7 @@ namespace Fougerite
             if (p == null)
                 return null;
             
-            foreach (var zone in GetWorld().zones.Values)
+            foreach (var zone in GetWorld()._zones.Values)
             {
                 Zone3D z3d = zone;
                 if (z3d != null && z3d.Contains(p)) 
@@ -346,6 +347,232 @@ namespace Fougerite
             }
 
             return null;
+        }
+        
+        /// <summary>
+        /// Removes a zone from the world by name and hides its markers.
+        /// </summary>
+        /// <param name="name">The name of the zone to remove.</param>
+        /// <returns>True if the zone was found and removed.</returns>
+        public bool RemoveZone(string name)
+        {
+            if (_zones.ContainsKey(name))
+            {
+                _zones[name].HideMarkers();
+                return _zones.TryRemove(name);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Renames an existing zone.
+        /// </summary>
+        public bool RenameZone(string oldName, string newName)
+        {
+            if (_zones.ContainsKey(oldName) && !_zones.ContainsKey(newName))
+            {
+                Zone3D zone = _zones[oldName];
+                _zones.Remove(oldName);
+                _zones.Add(newName, zone);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Clears all zones and hides their markers.
+        /// </summary>
+        public void ClearAllZones()
+        {
+            foreach (var zone in _zones.Values)
+            {
+                zone.HideMarkers();
+            }
+            _zones.Clear();
+        }
+
+        /// <summary>
+        /// Returns a list of all zones that contain the specified coordinates.
+        /// Since zones can overlap, this is more accurate than GetWorld().GlobalContains().
+        /// </summary>
+        public List<Zone3D> GetZonesAt(Vector3 location)
+        {
+            List<Zone3D> found = new List<Zone3D>();
+            foreach (var zone in _zones.Values)
+            {
+                if (zone.Contains(location))
+                    found.Add(zone);
+            }
+            return found;
+        }
+
+        /// <summary>
+        /// Gets all players currently inside a specific zone.
+        /// </summary>
+        public List<Player> GetPlayersInZone(string name)
+        {
+            List<Player> playersInZone = new List<Player>();
+            Zone3D zone = Get(name);
+            if (zone == null) 
+                return playersInZone;
+
+            foreach (Player p in Server.GetServer().Players)
+            {
+                if (zone.Contains(p))
+                    playersInZone.Add(p);
+            }
+            return playersInZone;
+        }
+
+        /// <summary>
+        /// Gets all entities (structures, deployables, etc.) inside a specific zone.
+        /// Use this for zone-wide cleanups or protection logic.
+        /// </summary>
+        public List<Entity> GetEntitiesInZone(string name)
+        {
+            List<Entity> entitiesInZone = new List<Entity>();
+            Zone3D zone = Get(name);
+            if (zone == null) 
+                return entitiesInZone;
+
+            foreach (Entity e in Entities)
+            {
+                if (zone.Contains(e))
+                    entitiesInZone.Add(e);
+            }
+            return entitiesInZone;
+        }
+
+        /// <summary>
+        /// Returns the name of all currently registered zones.
+        /// </summary>
+        public List<string> ZoneNames
+        {
+            get { return _zones.Keys.ToList(); }
+        }
+
+        /// <summary>
+        /// Returns the number of registered zones.
+        /// </summary>
+        public int ZoneCount
+        {
+            get { return _zones.Count; }
+        }
+
+        /// <summary>
+        /// Finds the closest zone to a specific position based on the distance 
+        /// to the first point of the zone.
+        /// </summary>
+        public Zone3D FindClosestZone(Vector3 pos)
+        {
+            Zone3D closest = null;
+            float dist = float.MaxValue;
+            foreach (var zone in _zones.Values)
+            {
+                if (zone.Points.Count == 0) continue;
+                Vector3 firstPoint = new Vector3(zone.Points[0].x, zone.MinY, zone.Points[0].y);
+                float d = Vector3.Distance(pos, firstPoint);
+                if (d < dist)
+                {
+                    dist = d;
+                    closest = zone;
+                }
+            }
+            return closest;
+        }
+        
+        /// <summary>
+        /// Returns a shallow copy list of all registered zones.
+        /// This is safe to call from any thread.
+        /// </summary>
+        /// <returns>A list of all <see cref="Zone3D"/> objects.</returns>
+        public List<Zone3D> GetZones()
+        {
+            return _zones.Values.ToList();
+        }
+        
+        /// <summary>
+        /// Checks if a zone with the specified name exists.
+        /// </summary>
+        /// <param name="name">The name to check.</param>
+        /// <returns>True if the zone exists.</returns>
+        public bool ContainsZone(string name)
+        {
+            return _zones.ContainsKey(name);
+        }
+
+        /// <summary>
+        /// Gets all NPCs located within a specific zone.
+        /// </summary>
+        /// <param name="name">The name of the zone.</param>
+        /// <returns>A list of NPCs found in the zone.</returns>
+        public List<NPC> GetNPCsInZone(string name)
+        {
+            List<NPC> npcsInZone = new List<NPC>();
+            Zone3D zone = Get(name);
+            if (zone == null)
+            {
+                return npcsInZone;
+            }
+
+            foreach (NPC npc in Animals)
+            {
+                if (zone.Contains(npc.Location))
+                {
+                    npcsInZone.Add(npc);
+                }
+            }
+            return npcsInZone;
+        }
+
+        /// <summary>
+        /// Gets all Sleepers located within a specific zone.
+        /// </summary>
+        /// <param name="name">The name of the zone.</param>
+        /// <returns>A list of Sleepers found in the zone.</returns>
+        public List<Sleeper> GetSleepersInZone(string name)
+        {
+            List<Sleeper> sleepersInZone = new List<Sleeper>();
+            Zone3D zone = Get(name);
+            if (zone == null)
+            {
+                return sleepersInZone;
+            }
+
+            foreach (Sleeper sleeper in Sleepers)
+            {
+                if (zone.Contains(sleeper.Location))
+                {
+                    sleepersInZone.Add(sleeper);
+                }
+            }
+            return sleepersInZone;
+        }
+
+        /// <summary>
+        /// Checks if a specific NPC is within the named zone.
+        /// </summary>
+        public bool IsNPCInZone(NPC npc, string zoneName)
+        {
+            Zone3D zone = Get(zoneName);
+            if (zone == null || npc == null)
+            {
+                return false;
+            }
+            return zone.Contains(npc.Location);
+        }
+
+        /// <summary>
+        /// Checks if a specific Sleeper is within the named zone.
+        /// </summary>
+        public bool IsSleeperInZone(Sleeper sleeper, string zoneName)
+        {
+            Zone3D zone = Get(zoneName);
+            if (zone == null || sleeper == null)
+            {
+                return false;
+            }
+            return zone.Contains(sleeper.Location);
         }
 
         /// <summary>
@@ -961,6 +1188,19 @@ namespace Fougerite
             get
             {
                 return NPCCache.GetInstance().GetNPCs();
+            }
+        }
+        
+        /// <summary>
+        /// Returns all the Sleepers currently in the cache.
+        /// This is safe to call in a thread / timer.
+        /// This list is a shallow copy.
+        /// </summary>
+        public List<Sleeper> Sleepers
+        {
+            get
+            {
+                return SleeperCache.GetInstance().GetSleepers();
             }
         }
 

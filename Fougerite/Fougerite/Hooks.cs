@@ -3218,9 +3218,9 @@ namespace Fougerite
                 Logger.LogError($"ServerShutdownEvent Error: {ex}");
             }
 
-            foreach (var x in World.GetWorld().zones)
+            foreach (var x in World.GetWorld().GetZones())
             {
-                x.Value.HideMarkers();
+                x.HideMarkers();
             }
 
             World.GetWorld().ServerSaveHandler.ManualSave();

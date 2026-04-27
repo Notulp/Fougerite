@@ -42,9 +42,6 @@ namespace Fougerite
             Protected = false;
             _tmpPoints = new List<Entity>();
             Points = new List<Vector2>();
-
-            Dictionary<string, Zone3D> zones = World.GetWorld().zones;
-            zones[name] = this;
         }
 
         /// <summary>
