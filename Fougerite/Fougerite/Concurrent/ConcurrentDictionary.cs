@@ -146,9 +146,22 @@ namespace Fougerite.Concurrent
         }
 
         /// <summary>
+        /// Removes the element with the specified key from the dictionary.
+        /// </summary>
+        /// <param name="key">The key of the element to remove.</param>
+        public void Remove(TKey key)
+        {
+            lock (_padlock)
+            {
+                if (_dictionary.ContainsKey(key))
+                    _dictionary.Remove(key);
+            }
+        }
+
+        /// <summary>
         /// Forcibly adds a key/value pair. Throws exception if key exists.
         /// </summary>
-        internal void Add(TKey key, TValue val)
+        public void Add(TKey key, TValue val)
         {
             lock (_padlock)
             {

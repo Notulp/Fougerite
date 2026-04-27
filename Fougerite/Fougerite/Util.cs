@@ -27,7 +27,7 @@ namespace Fougerite
     /// </summary>
     public class Util
     {
-        private readonly Dictionary<string, Type> _typeCache = new Dictionary<string, Type>();
+        private readonly ConcurrentDictionary<string, Type> _typeCache = new ConcurrentDictionary<string, Type>();
         private static Util _util;
         // Unity-based Timers
         public readonly ConcurrentDictionary<string, TimedEvent> Timers = new ConcurrentDictionary<string, TimedEvent>();

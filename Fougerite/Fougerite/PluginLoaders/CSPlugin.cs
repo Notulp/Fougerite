@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Fougerite.Concurrent;
 
 namespace Fougerite.PluginLoaders
 {
@@ -122,7 +123,7 @@ namespace Fougerite.PluginLoaders
                         #pragma warning restore 618
                         Engine = PluginInstance;
                         Logger.LogDebug($"[Modules] Module added: {FileInfo.Name}");
-                        Globals = type.GetMethods().Select(method => method.Name).ToList();
+                        Globals = new ConcurrentList<string>(type.GetMethods().Select(method => method.Name).ToList());
                         break;
                     }
                 }

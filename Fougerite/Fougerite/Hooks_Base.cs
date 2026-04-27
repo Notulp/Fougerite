@@ -17,8 +17,8 @@ namespace Fougerite
         public static Hashtable talkerTimers = new Hashtable();
         public static bool ServerInitialized = false;
         public static readonly List<ulong> uLinkDCCache = new List<ulong>();
-        internal static Dictionary<string, Flood> FloodChecks = new Dictionary<string, Flood>();
-        internal static Dictionary<string, DateTime> FloodCooldown = new Dictionary<string, DateTime>();
+        internal static ConcurrentDictionary<string, Flood> FloodChecks = new ConcurrentDictionary<string, Flood>();
+        internal static ConcurrentDictionary<string, DateTime> FloodCooldown = new ConcurrentDictionary<string, DateTime>();
         private static bool? _isNight = null;
 
         /// <summary>

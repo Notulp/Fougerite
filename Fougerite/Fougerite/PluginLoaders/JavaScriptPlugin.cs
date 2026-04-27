@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Fougerite.Caches;
+using Fougerite.Concurrent;
 using Fougerite.Permissions;
 using Jint;
 using Jint.Native;
@@ -14,7 +15,7 @@ namespace Fougerite.PluginLoaders
     public class JavaScriptPlugin : BasePlugin
     {
         public Engine Engine;
-        public readonly Dictionary<string, ICallable> CallableGlobals = new Dictionary<string, ICallable>();
+        public readonly ConcurrentDictionary<string, ICallable> CallableGlobals = new ConcurrentDictionary<string, ICallable>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JavaScriptPlugin"/> class.
@@ -133,7 +134,8 @@ namespace Fougerite.PluginLoaders
                 Engine.Execute(code);
 
                 // Get function names from global scope
-                Globals = new List<string>();
+                Globals = new ConcurrentList<string>();
+                CallableGlobals.Clear();
                 
                 foreach (KeyValuePair<string, PropertyDescriptor> property in Engine.Global.GetOwnProperties())
                 {

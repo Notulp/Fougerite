@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Fougerite.Caches;
+using Fougerite.Concurrent;
 using Fougerite.Permissions;
 using IronPython.Hosting;
 using Microsoft.Scripting;
@@ -129,7 +130,7 @@ namespace Fougerite.PluginLoaders
                 compiled.Execute(Scope);
                 
                 Class = Engine.Operations.Invoke(Scope.GetVariable(Name));
-                Globals = Engine.Operations.GetMemberNames(Class);
+                Globals = new ConcurrentList<string>(Engine.Operations.GetMemberNames(Class));
                 
                 foreach (string name in Globals)
                 {

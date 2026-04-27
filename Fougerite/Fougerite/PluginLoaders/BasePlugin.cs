@@ -35,7 +35,7 @@ namespace Fougerite.PluginLoaders
 
         public string LastError = string.Empty;
 
-        public readonly List<string> CommandList;
+        public readonly ConcurrentList<string> CommandList;
 
         /// <summary>
         /// Name of the Plugin.
@@ -53,28 +53,28 @@ namespace Fougerite.PluginLoaders
         /// Global methods of the plugin.
         /// </summary>
         /// <value>The globals.</value>
-        public IList<string> Globals { get; protected set; }
+        public ConcurrentList<string> Globals { get; protected set; }
         
         /// <summary>
         /// Global methods of the plugin along with their functions.
         /// </summary>
         /// <value>The globals.</value>
-        public Dictionary<string, object> CachedGlobals { get; protected set; }
+        public ConcurrentDictionary<string, object> CachedGlobals { get; protected set; }
 
         /// <summary>
         /// Dictionary that holds the timers.
         /// </summary>
-        public readonly Dictionary<string, TimedEvent> Timers;
+        public readonly ConcurrentDictionary<string, TimedEvent> Timers;
 
         /// <summary>
         /// List of parallel timers.
         /// </summary>
-        public readonly List<TimedEvent> ParallelTimers;
+        public readonly ConcurrentList<TimedEvent> ParallelTimers;
 
         /// <summary>
         /// A global storage that any plugin can easily access.
         /// </summary>
-        public static Dictionary<string, object> GlobalData;
+        public static ConcurrentDictionary<string, object> GlobalData;
 
         /// <summary>
         /// The type of the plugin.
@@ -100,12 +100,12 @@ namespace Fougerite.PluginLoaders
         {
             Name = name;
             RootDir = rootdir;
-            Globals = new List<string>();
-            CachedGlobals = new Dictionary<string, object>();
+            Globals = new ConcurrentList<string>();
+            CachedGlobals = new ConcurrentDictionary<string, object>();
 
-            Timers = new Dictionary<string, TimedEvent>();
-            ParallelTimers = new List<TimedEvent>();
-            CommandList = new List<string>();
+            Timers = new ConcurrentDictionary<string, TimedEvent>();
+            ParallelTimers = new ConcurrentList<TimedEvent>();
+            CommandList = new ConcurrentList<string>();
         }
 
         /// <summary>

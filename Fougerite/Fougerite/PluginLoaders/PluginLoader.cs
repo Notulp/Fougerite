@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fougerite.Concurrent;
 
 namespace Fougerite.PluginLoaders
 {
@@ -98,7 +99,7 @@ namespace Fougerite.PluginLoaders
 
         public void Initialize()
         {
-            BasePlugin.GlobalData = new Dictionary<string, object>();
+            BasePlugin.GlobalData = new ConcurrentDictionary<string, object>();
         }
 
         public bool CheckDependencies()

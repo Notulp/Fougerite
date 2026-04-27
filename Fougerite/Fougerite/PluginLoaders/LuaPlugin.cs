@@ -74,6 +74,8 @@ namespace Fougerite.PluginLoaders
         {
             try
             {
+                Globals.Clear();
+                CachedGlobals.Clear();
                 UserData.RegistrationPolicy = InteropRegistrationPolicy.Automatic;
                 script = new Script();
                 script.DoString(code);
@@ -99,7 +101,13 @@ namespace Fougerite.PluginLoaders
                 script.Globals.Set("SleeperCache", UserData.Create(SleeperCache.GetInstance()));
                 foreach (DynValue v in script.Globals.Keys)
                 {
-                    Globals.Add(v.ToString().Replace("\"", ""));
+                    string funcName = v.ToString().Replace("\"", "");
+                    Globals.Add(funcName);
+                    DynValue val = script.Globals.Get(v);
+                    if (val.Type == DataType.Function || val.Type == DataType.ClrFunction)
+                    {
+                        CachedGlobals.Add(funcName, val);
+                    }
                 }
                 Author = string.IsNullOrEmpty(script.Globals.Get("Author").String) ? "Unknown" : script.Globals.Get("Author").String;
                 Version = string.IsNullOrEmpty(script.Globals.Get("Version").String) ? "1.0" : script.Globals.Get("Version").String;
