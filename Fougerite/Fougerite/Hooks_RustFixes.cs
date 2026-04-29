@@ -30,7 +30,7 @@ namespace Fougerite
         private static DateTime _svucInvalidLastLog = DateTime.Now;
 
         private static readonly ConcurrentDictionary<ulong, int> ActionCooldown = new ConcurrentDictionary<ulong, int>();
-        private static ConcurrentDictionary<string, DateTime> AntiDdos = new ConcurrentDictionary<string, DateTime>();
+        private static readonly ConcurrentDictionary<string, DateTime> AntiDdos = new ConcurrentDictionary<string, DateTime>();
 
         private static double CalculateDiff(ref DateTime then)
         {
