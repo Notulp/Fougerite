@@ -4419,6 +4419,28 @@ namespace Fougerite
             
             ExecuteSubscribers(OnServerTick, "OnServerTick");
         }
+
+        /// <summary>
+        /// Invokes a logger event with the specified event type and message.
+        /// </summary>
+        /// <param name="type">The type of logger event (Log, LogError, LogWarning).</param>
+        /// <param name="message">The message associated with the logger event.</
+        public static void LoggerEvent(LoggerEventType type, string message)
+        {
+            LoggerEvent evt = new LoggerEvent(type, message);
+            ExecuteSubscribers(OnLogger, "OnLogger", evt);
+        }
+
+        /// <summary>
+        /// Triggered when loot tables from the game are fully loaded.
+        /// </summary>
+        /// <param name="lists">A dictionary containing the loot tables, where the keys are table names and the values are LootSpawnList objects representing the loot data.</param>
+        /// <returns>Returns the modified dictionary of loot tables after all subscribers have executed.</returns>
+        public static Dictionary<string, LootSpawnList> TablesLoaded(Dictionary<string, LootSpawnList> lists)
+        {
+            ExecuteSubscribers(OnTablesLoaded, "OnTablesLoaded", lists);
+            return lists;
+        }
         
         /// <summary>
         /// Triggers the Inter-Plugin communication event.

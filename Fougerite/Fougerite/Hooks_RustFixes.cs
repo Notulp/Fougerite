@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using Facepunch.MeshBatch;
 using Fougerite.Concurrent;
-using Fougerite.Events;
 using uLink;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -14,19 +12,25 @@ namespace Fougerite
 {
     public partial class Hooks
     {
-        private static DateTime _lasTime = DateTime.Now;
-        private static DateTime _lasTime2 = DateTime.Now;
-        private static DateTime _lasTime3 = DateTime.Now;
-        private static DateTime _lasTime4 = DateTime.Now;
-        private static DateTime _lasTime5 = DateTime.Now;
-        private static DateTime _lasTime6 = DateTime.Now;
-        private static DateTime _lasTime7 = DateTime.Now;
-        private static DateTime _lasTime8 = DateTime.Now;
-        private static DateTime _lasTime9 = DateTime.Now;
-        private static DateTime _lasTime10 = DateTime.Now;
-        private static DateTime _lasTime11 = DateTime.Now;
-        internal static readonly Dictionary<ulong, int> ActionCooldown = new Dictionary<ulong, int>();
-        internal static ConcurrentDictionary<string, DateTime> AntiDdos = new ConcurrentDictionary<string, DateTime>();
+        // Metabolism & Movement Throttling
+        private static DateTime _metabolismLastTick = DateTime.Now;
+        private static DateTime _fallDamageLastLog = DateTime.Now;
+
+        // Voice & Communication Throttling
+        private static DateTime _voiceOverflowLastLog = DateTime.Now;
+
+        // Inventory & Packet Validation Throttling
+        private static DateTime _itspInvalidLastLog = DateTime.Now;
+        private static DateTime _iactInvalidLastLog = DateTime.Now;
+        private static DateTime _iastInvalidLastLog = DateTime.Now;
+        private static DateTime _ismvInvalidLastLog = DateTime.Now;
+        private static DateTime _itmgInvalidLastLog = DateTime.Now;
+        private static DateTime _itmvInvalidLastLog = DateTime.Now;
+        private static DateTime _itsmInvalidLastLog = DateTime.Now;
+        private static DateTime _svucInvalidLastLog = DateTime.Now;
+
+        private static readonly ConcurrentDictionary<ulong, int> ActionCooldown = new ConcurrentDictionary<ulong, int>();
+        private static ConcurrentDictionary<string, DateTime> AntiDdos = new ConcurrentDictionary<string, DateTime>();
 
         private static double CalculateDiff(ref DateTime then)
         {
@@ -38,10 +42,10 @@ namespace Fougerite
         public static void RecieveNetwork(Metabolism m, float cal, float water, float rad, float anti, float temp,
             float poison)
         {
-            double diff = CalculateDiff(ref _lasTime);
+            double diff = CalculateDiff(ref _metabolismLastTick);
             if (diff > 300)
             {
-                _lasTime = DateTime.Now;
+                _metabolismLastTick = DateTime.Now;
                 Logger.LogWarning("[RecieveNetwork] A metabolism hack was prevented.");
             }
         }
@@ -50,12 +54,12 @@ namespace Fougerite
         {
             uLink.NetworkPlayer nplayer = com.networkViewOwner;
 
-            double diff = CalculateDiff(ref _lasTime2);
+            double diff = CalculateDiff(ref _voiceOverflowLastLog);
             if (data == null)
             {
                 if (diff > 10)
                 {
-                    _lasTime2 = DateTime.Now;
+                    _voiceOverflowLastLog = DateTime.Now;
                     Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                     if (player != null)
                     {
@@ -74,7 +78,7 @@ namespace Fougerite
             {
                 if (diff > 10)
                 {
-                    _lasTime2 = DateTime.Now;
+                    _voiceOverflowLastLog = DateTime.Now;
                     Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                     if (player != null)
                     {
@@ -99,7 +103,7 @@ namespace Fougerite
                     {
                         if (diff > 10)
                         {
-                            _lasTime2 = DateTime.Now;
+                            _voiceOverflowLastLog = DateTime.Now;
                             Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                             if (player != null)
                             {
@@ -123,7 +127,7 @@ namespace Fougerite
                 {
                     if (diff > 10)
                     {
-                        _lasTime2 = DateTime.Now;
+                        _voiceOverflowLastLog = DateTime.Now;
                         Player player = Server.GetServer().FindByNetworkPlayer(nplayer);
                         if (player != null)
                         {
@@ -147,11 +151,11 @@ namespace Fougerite
 
         public static void FallDamageCheck(FallDamage fd, float v)
         {
-            double diff = CalculateDiff(ref _lasTime11);
+            double diff = CalculateDiff(ref _fallDamageLastLog);
             if (diff > 10)
             {
                 Logger.LogWarning($"[Legbreak RPC] Bypassed a legbreak RPC possibly sent by a hacker. Value: {v}");
-                _lasTime11 = DateTime.Now;
+                _fallDamageLastLog = DateTime.Now;
             }
             //fd.SetLegInjury(v);
         }
@@ -260,37 +264,6 @@ namespace Fougerite
             }
         }
 
-        public static void LoggerEvent(LoggerEventType type, string message)
-        {
-            try
-            {
-                if (OnLogger != null)
-                {
-                    LoggerEvent evt = new LoggerEvent(type, message);
-                    OnLogger(evt);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogErrorIgnore($"LoggerEvent Error: {ex}", null, true);
-            }
-        }
-
-        public static Dictionary<string, LootSpawnList> TablesLoaded(Dictionary<string, LootSpawnList> lists)
-        {
-            try
-            {
-                if (OnTablesLoaded != null)
-                    OnTablesLoaded(lists);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"TablesLoadedEvent Error: {ex}");
-            }
-
-            return lists;
-        }
-
         public static void ITSPHook(Inventory instance, byte slotNumber, uLink.NetworkMessageInfo info)
         {
             if (info == null)
@@ -298,7 +271,7 @@ namespace Fougerite
                 return;
             }
 
-            double diff = CalculateDiff(ref _lasTime3);
+            double diff = CalculateDiff(ref _itspInvalidLastLog);
             if (float.IsNaN(slotNumber) || float.IsInfinity(slotNumber) || slotNumber > 39)
             {
                 if (diff > 10)
@@ -310,7 +283,7 @@ namespace Fougerite
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ITSP Packet.");
                     }
 
-                    _lasTime3 = DateTime.Now;
+                    _itspInvalidLastLog = DateTime.Now;
                 }
 
                 return;
@@ -330,7 +303,7 @@ namespace Fougerite
                 return;
             }
 
-            double diff = CalculateDiff(ref _lasTime4);
+            double diff = CalculateDiff(ref _iactInvalidLastLog);
             if (float.IsNaN(itemIndex) || float.IsInfinity(itemIndex) || itemIndex > 39
                 || float.IsNaN(action) || float.IsInfinity(action) ||
                 !Enum.IsDefined(typeof(InventoryItem.MenuItem), action))
@@ -344,7 +317,7 @@ namespace Fougerite
                         Server.GetServer().BanPlayer(player, "Console", "Invalid IACT Packet.");
                     }
 
-                    _lasTime4 = DateTime.Now;
+                    _iactInvalidLastLog = DateTime.Now;
                 }
 
                 return;
@@ -375,7 +348,7 @@ namespace Fougerite
                 return;
             }
 
-            double diff = CalculateDiff(ref _lasTime5);
+            double diff = CalculateDiff(ref _iastInvalidLastLog);
             // Just to make sure.
             if (float.IsNaN(itemIndex) || float.IsInfinity(itemIndex) || itemIndex > 39)
             {
@@ -388,7 +361,7 @@ namespace Fougerite
                         Server.GetServer().BanPlayer(player, "Console", "Invalid IAST Packet.");
                     }
 
-                    _lasTime5 = DateTime.Now;
+                    _iastInvalidLastLog = DateTime.Now;
                 }
 
                 return;
@@ -484,7 +457,7 @@ namespace Fougerite
                 return;
             }
 
-            double diff = CalculateDiff(ref _lasTime6);
+            double diff = CalculateDiff(ref _ismvInvalidLastLog);
             if (float.IsNaN(fromSlot) || float.IsInfinity(fromSlot) || fromSlot > 39
                 || float.IsNaN(toSlot) || float.IsInfinity(toSlot) || toSlot > 39)
             {
@@ -497,7 +470,7 @@ namespace Fougerite
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ISMV Packet.");
                     }
 
-                    _lasTime6 = DateTime.Now;
+                    _ismvInvalidLastLog = DateTime.Now;
                 }
 
                 return;
@@ -523,7 +496,7 @@ namespace Fougerite
                 return;
             }
 
-            double diff = CalculateDiff(ref _lasTime7);
+            double diff = CalculateDiff(ref _itmgInvalidLastLog);
             if (float.IsNaN(fromSlot) || float.IsInfinity(fromSlot) || fromSlot > 39
                 || float.IsNaN(toSlot) || float.IsInfinity(toSlot) || toSlot > 39)
             {
@@ -536,7 +509,7 @@ namespace Fougerite
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ITMG Packet.");
                     }
 
-                    _lasTime7 = DateTime.Now;
+                    _itmgInvalidLastLog = DateTime.Now;
                 }
 
                 return;
@@ -563,7 +536,7 @@ namespace Fougerite
                 return;
             }
 
-            double diff = CalculateDiff(ref _lasTime8);
+            double diff = CalculateDiff(ref _itmvInvalidLastLog);
             if (float.IsNaN(fromSlot) || float.IsInfinity(fromSlot) || fromSlot > 39
                 || float.IsNaN(toSlot) || float.IsInfinity(toSlot) || toSlot > 39)
             {
@@ -576,7 +549,7 @@ namespace Fougerite
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ITMV Packet.");
                     }
 
-                    _lasTime8 = DateTime.Now;
+                    _itmvInvalidLastLog = DateTime.Now;
                 }
 
                 return;
@@ -603,7 +576,7 @@ namespace Fougerite
                 return;
             }
 
-            double diff = CalculateDiff(ref _lasTime9);
+            double diff = CalculateDiff(ref _itsmInvalidLastLog);
             if (float.IsNaN(fromSlot) || float.IsInfinity(fromSlot) || fromSlot > 39
                 || float.IsNaN(toSlot) || float.IsInfinity(toSlot) || toSlot > 39)
             {
@@ -617,7 +590,7 @@ namespace Fougerite
                         Server.GetServer().BanPlayer(player, "Console", "Invalid ITSM Packet.");
                     }
 
-                    _lasTime9 = DateTime.Now;
+                    _itsmInvalidLastLog = DateTime.Now;
                 }
 
                 return;
@@ -642,7 +615,7 @@ namespace Fougerite
                 return;
             }
 
-            double diff = CalculateDiff(ref _lasTime10);
+            double diff = CalculateDiff(ref _svucInvalidLastLog);
             if (float.IsNaN(cell) || float.IsInfinity(cell) || cell > 39)
             {
                 if (diff > 10)
@@ -655,7 +628,7 @@ namespace Fougerite
                         Server.GetServer().BanPlayer(player, "Console", "Invalid SVUC Packet.");
                     }
 
-                    _lasTime10 = DateTime.Now;
+                    _svucInvalidLastLog = DateTime.Now;
                 }
 
                 return;
