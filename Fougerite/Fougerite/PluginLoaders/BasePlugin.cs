@@ -689,13 +689,13 @@ namespace Fougerite.PluginLoaders
                 ParallelTimers.Remove(timer);
             }
         }
-        
+
         /// <summary>
         /// Sends a synchronous message to a target plugin.
         /// </summary>
         /// <param name="targetName">The name of the target plugin.</param>
-        /// <param name="message">The object payload.</param>
-        /// <returns>Delivery status response.</returns>
+        /// <param name="message">The object payload being sent.</param>
+        /// <returns>A <see cref="PluginMessageResult"/> indicating the delivery status.</returns
         public PluginMessageResult SendMessage(string targetName, object message)
         {
             return PluginMessaging.Send(Name, targetName, message);
