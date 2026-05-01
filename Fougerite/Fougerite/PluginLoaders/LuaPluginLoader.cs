@@ -16,6 +16,29 @@ namespace Fougerite.PluginLoaders
     /// It uses a Dictionary(string, IMemberDescriptor) to map names to members.
     /// Since a Dictionary cannot have duplicate keys, MoonSharp is hard-coded to throw an ArgumentException,
     /// which I changed to mangle the name of the nth member by appending a prefix of the type name or "Base".
+    ///
+    /// MODIFICATIONS TO MOONSHARP CORE (DispatchingUserDataDescriptor.cs):
+    /// 
+    /// 1. Collision Handling Policy:
+    ///    - Shifted from a "Fail-Fast" approach (throwing ArgumentException on name collisions)
+    ///      to a "First-In, Background-Later" policy.
+    /// 
+    /// 2. Member Shadowing & Mangling:
+    ///    - Derived Type Priority: The most derived member (first encountered during reflection) 
+    ///      retains the primary "clean" name slot (like, 'obj.networkView').
+    ///    - Automatic Backgrounding: Subsequent shadowed members from base classes are 
+    ///      automatically mangled using a 'TypeName_MemberName' schema (e.g., 'obj.Component_networkView').
+    ///    - Null Safety: Implemented null-coalescing on DeclaringType lookups to prevent 
+    ///      mangling failures on compiler-generated or dynamic types.
+    /// 
+    /// 3. Assembly Registration Stability:
+    ///    - Suppressed internal ArgumentExceptions within AddMemberTo, ensuring that a 
+    ///      single collision in a complex class (like PlayerInventory or Bootstrap) 
+    ///      does not terminate the entire assembly registration process.
+    /// 
+    /// This patch allows Fougerite to safely auto-register the entire UnityEngine and 
+    /// Assembly-CSharp namespaces, enabling Lua scripts to access shadowed variables 
+    /// that are otherwise inaccessible in stock MoonSharp.
     /// </summary>
     public class LuaPluginLoader : Singleton<LuaPluginLoader>, ISingleton, IPluginLoader
     {
