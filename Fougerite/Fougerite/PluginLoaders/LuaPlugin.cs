@@ -77,8 +77,11 @@ namespace Fougerite.PluginLoaders
                 Globals.Clear();
                 CachedGlobals.Clear();
                 UserData.RegistrationPolicy = InteropRegistrationPolicy.Automatic;
+                UserData.RegisterAssembly();
+
                 script = new Script();
-                script.DoString(code);
+
+                // Set Globals first
                 script.Globals.Set("Util", UserData.Create(Util.GetUtil()));
                 script.Globals.Set("Plugin", UserData.Create(this));
                 script.Globals.Set("Server", UserData.Create(Server.GetServer()));
@@ -99,6 +102,9 @@ namespace Fougerite.PluginLoaders
                 script.Globals.Set("EntityCache", UserData.Create(EntityCache.GetInstance()));
                 script.Globals.Set("NPCCache", UserData.Create(NPCCache.GetInstance()));
                 script.Globals.Set("SleeperCache", UserData.Create(SleeperCache.GetInstance()));
+                
+                script.DoString(code);
+
                 foreach (DynValue v in script.Globals.Keys)
                 {
                     string funcName = v.ToString().Replace("\"", "");

@@ -27,6 +27,11 @@ namespace Fougerite
         {
             get
             {
+                if (InternalInventory.activeItem == null)
+                {
+                    return null;
+                }
+                
                 return new PlayerItem(ref _inv, InternalInventory.activeItem.slot, this);
             }
         }

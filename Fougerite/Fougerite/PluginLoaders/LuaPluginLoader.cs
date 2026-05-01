@@ -4,6 +4,19 @@ using System.IO;
 
 namespace Fougerite.PluginLoaders
 {
+    /// <summary>
+    /// The LuaPluginLoader class is responsible for managing the loading, unloading, reloading,
+    /// and initialization of Lua-based plugins for the application. It provides methods to
+    /// handle plugin file paths, read plugin source files, and manage plugin instances during runtime.
+    /// The MoonSharp 2.0.0.0 was manually edited to work with shadowed declarations.
+    /// https://gist.github.com/dretax/baf77c26c3e0fc4c497eea427577e556
+    /// Interpreters like IronPython and Jint work differently because they are built on the DLR or use highly dynamic reflection.
+    /// They resolve member access at runtime and if they find multiple members with the same name, they use a binder to pick the "best" match or provide a collection.
+    /// MoonSharp is a static-mapping engine designed for raw speed.
+    /// It uses a Dictionary(string, IMemberDescriptor) to map names to members.
+    /// Since a Dictionary cannot have duplicate keys, MoonSharp is hard-coded to throw an ArgumentException,
+    /// which I changed to mangle the name of the nth member by appending a prefix of the type name or "Base".
+    /// </summary>
     public class LuaPluginLoader : Singleton<LuaPluginLoader>, ISingleton, IPluginLoader
     {
         public PluginType Type = PluginType.Lua;
