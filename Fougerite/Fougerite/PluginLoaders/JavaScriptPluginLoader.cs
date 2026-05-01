@@ -4,6 +4,37 @@ using System.IO;
 
 namespace Fougerite.PluginLoaders
 {
+    /// <summary>
+    /// Patched Jint.Runtime.Interop.ObjectWrapper (v2.7.1.0)
+    /// 
+    /// MODIFICATIONS:
+    /// 1. Put(string, JsValue, bool):
+    ///    - Disabled strict "Unknown member" exceptions.
+    ///    - Modified IL flow to allow value assignment even if the member isn't explicitly 
+    ///      defined in the initial property map, enabling dynamic-style assignment 
+    ///      to underlying .NET descriptors.
+    /// 
+    /// 2. GetOwnProperty(string):
+    ///    - Added "Auto-Marshalling" for .NET Collections:
+    ///       - IDictionary Support: Automatically converts .NET Dictionaries to JsObjects 
+    ///         populated with native JS values and a 'Count' property.
+    ///       - IEnumerable Support: Automatically converts .NET Enumerables/Lists to 
+    ///         JsArrays with indexed access and a 'length' property.
+    ///    - Flattened Reflection: Optimized the lookup for Properties, Fields, and Methods 
+    ///      by removing overhead-heavy Linq-delegates and anonymous methods (b__6 to b__12) 
+    ///      in favor of direct IL branch logic.
+    /// 
+    /// Patched Jint.Runtime.StatementInterpreter (v2.7.1.0)
+    /// 
+    /// MODIFICATIONS:
+    /// 1. ExecuteForInStatement(ForInStatement):
+    ///    - Enhanced Descriptor Resolution: Updated the 'for...in' iteration logic to 
+    ///      check for PropertyDescriptor.Value availability.
+    ///    - Logic: If a descriptor exists but doesn't have a direct value, it now 
+    ///      triggers a fallback to ObjectInstance.Get(name). This ensures that 
+    ///      Specialized Descriptors (used in Fougerite/Rust interop) return 
+    ///      correct values during loops.
+    /// </summary>
     public class JavaScriptPluginLoader : Singleton<JavaScriptPluginLoader>, ISingleton, IPluginLoader
     {
         public PluginType Type = PluginType.JavaScript;
