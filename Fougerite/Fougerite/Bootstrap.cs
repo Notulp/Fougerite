@@ -71,7 +71,6 @@ namespace Fougerite
         
         internal static readonly Thread CurrentThread = Thread.CurrentThread;
         private static readonly FileSystemWatcher IgnoredWatcher = new FileSystemWatcher(Path.Combine(Util.GetRootFolder(), "Save"), "IgnoredPlugins.txt");
-        private static GameObject _timergo;
 
         /// <summary>
         /// Called by a patched function.
@@ -250,11 +249,13 @@ namespace Fougerite
             else
             {
                 NetCull.Callbacks.beforeEveryUpdate += EnvDecay.Callbacks.RunDecayThink;
+                NetCull.Callbacks.beforeEveryUpdate += new NetCull.UpdateFunctor(StructureMaster.Callbacks.RunDecayThink);
                 Logger.LogWarning("[RustDecay] The default Rust Decay is enabled. (Config option not found)");
             }
             if (EnableDefaultRustDecay)
             {
                 NetCull.Callbacks.beforeEveryUpdate += EnvDecay.Callbacks.RunDecayThink;
+                NetCull.Callbacks.beforeEveryUpdate += new NetCull.UpdateFunctor(StructureMaster.Callbacks.RunDecayThink);
                 Logger.LogWarning("[RustDecay] The default Rust Decay is enabled.");
             }
             else

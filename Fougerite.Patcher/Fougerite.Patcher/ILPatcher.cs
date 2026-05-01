@@ -2437,6 +2437,16 @@ namespace Fougerite.Patcher
             md.Body.ExceptionHandlers.Clear();
             md.Body.Variables.Clear();
             md.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            TypeDefinition StructureMaster = rustAssembly.MainModule.GetType("StructureMaster");
+            TypeDefinition Callbacks = StructureMaster.GetNestedType("Callbacks");
+            Callbacks.IsPublic = true;
+            MethodDefinition RunDecayThink = Callbacks.GetMethod("RunDecayThink");
+            RunDecayThink.SetPublic(true);
+            MethodDefinition constructor = Callbacks.GetStaticConstructor();
+            constructor.Body.Instructions.Clear();
+            constructor.Body.ExceptionHandlers.Clear();
+            constructor.Body.Variables.Clear();
         }
 
         private void GenericSpawnerPatch()
