@@ -695,7 +695,7 @@ namespace Fougerite.PluginLoaders
         /// </summary>
         /// <param name="targetName">The name of the target plugin.</param>
         /// <param name="message">The object payload being sent.</param>
-        /// <returns>A <see cref="PluginMessageResult"/> indicating the delivery status.</returns
+        /// <returns>A <see cref="PluginMessageResult"/> indicating the delivery status.</returns>
         public PluginMessageResult SendMessage(string targetName, object message)
         {
             return PluginMessaging.Send(Name, targetName, message);
