@@ -64,7 +64,25 @@ namespace Fougerite
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+        
+        [DllImport("winhttp.dll", SetLastError = true)]
+        public static extern IntPtr WinHttpWebSocketCompleteUpgrade(IntPtr hRequest, IntPtr pContext);
 
+        [DllImport("winhttp.dll", SetLastError = true)]
+        public static extern uint WinHttpWebSocketSend(IntPtr hWebSocket, uint eBufferType, IntPtr pvBuffer, uint dwBufferLength);
+
+        [DllImport("winhttp.dll", SetLastError = true)]
+        public static extern uint WinHttpWebSocketReceive(IntPtr hWebSocket, IntPtr pvBuffer, uint dwBufferLength, out uint pdwBytesRead, out uint peBufferType);
+
+        [DllImport("winhttp.dll", SetLastError = true)]
+        public static extern uint WinHttpWebSocketClose(IntPtr hWebSocket, ushort usStatus, IntPtr pvReason, uint dwReasonLength);
+
+        public const uint WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET = 114;
+        public const uint WINHTTP_WEB_SOCKET_BINARY_MESSAGE_BUFFER_TYPE = 0;
+        public const uint WINHTTP_WEB_SOCKET_BINARY_FRAGMENT_BUFFER_TYPE = 1;
+        public const uint WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE = 2;
+        public const uint WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE = 3;
+        public const uint WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE = 4;
         public const uint WINHTTP_ACCESS_TYPE_DEFAULT_PROXY = 0;
         public const uint WINHTTP_FLAG_SECURE = 0x00800000;
         public const ushort INTERNET_DEFAULT_HTTPS_PORT = 443;

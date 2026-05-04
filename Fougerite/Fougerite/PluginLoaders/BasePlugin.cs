@@ -713,6 +713,17 @@ namespace Fougerite.PluginLoaders
             PluginMessaging.SendAsync(Name, targetName, message, callback, runInThreadPool);
         }
 
+        /// <summary>
+        /// Creates a new instance of the <see cref="ScriptWebSocket"/> class with the specified socket ID and URL.
+        /// </summary>
+        /// <param name="socketId">The unique identifier for the WebSocket.</param>
+        /// <param name="url">The destination URL for the WebSocket connection.</param>
+        /// <returns>A new instance of the <see cref="ScriptWebSocket"/>.</returns>
+        public ScriptWebSocket CreateWebSocket(string socketId, string url)
+        {
+            return new ScriptWebSocket(Name, socketId, url);
+        }
+
         public Dictionary<string, object> CreateDict()
         {
             return new Dictionary<string, object>();
@@ -1190,6 +1201,26 @@ namespace Fougerite.PluginLoaders
         public void OnMetabolismUpdate(MetabolismEvent ev)
         {
             Invoke(PluginLoaderEvents.OnMetabolismUpdate, ev);
+        }
+        
+        public void OnWebSocketMessage(WebSocketEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnWebSocketMessage, ev);
+        }
+
+        public void OnWebSocketConnected(WebSocketEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnWebSocketConnected, ev);
+        }
+
+        public void OnWebSocketClosed(WebSocketEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnWebSocketClosed, ev);
+        }
+
+        public void OnWebSocketError(WebSocketEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnWebSocketError, ev);
         }
     }
 }

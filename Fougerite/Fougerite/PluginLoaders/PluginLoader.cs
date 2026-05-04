@@ -127,7 +127,11 @@ namespace Fougerite.PluginLoaders
             PluginLoaderEvents.OnCraftingCancel,
             PluginLoaderEvents.OnCraftingComplete,
             PluginLoaderEvents.OnServerTick,
-            PluginLoaderEvents.OnMetabolismUpdate
+            PluginLoaderEvents.OnMetabolismUpdate,
+            PluginLoaderEvents.OnWebSocketMessage,
+            PluginLoaderEvents.OnWebSocketConnected,
+            PluginLoaderEvents.OnWebSocketClosed,
+            PluginLoaderEvents.OnWebSocketError
         };
 
         /// <summary>
@@ -547,6 +551,18 @@ namespace Fougerite.PluginLoaders
                         case PluginLoaderEvents.OnMetabolismUpdate:
                             Hooks.OnMetabolismUpdate += plugin.OnMetabolismUpdate;
                             break;
+                        case PluginLoaderEvents.OnWebSocketMessage:
+                            Hooks.OnWebSocketMessage += plugin.OnWebSocketMessage;
+                            break;
+                        case PluginLoaderEvents.OnWebSocketConnected:
+                            Hooks.OnWebSocketConnected += plugin.OnWebSocketConnected;
+                            break;
+                        case PluginLoaderEvents.OnWebSocketClosed:
+                            Hooks.OnWebSocketClosed += plugin.OnWebSocketClosed;
+                            break;
+                        case PluginLoaderEvents.OnWebSocketError:
+                            Hooks.OnWebSocketError += plugin.OnWebSocketError;
+                            break;
                     }
                 }
             }
@@ -826,6 +842,18 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnMetabolismUpdate:
                             Hooks.OnMetabolismUpdate -= plugin.OnMetabolismUpdate;
+                            break;
+                        case PluginLoaderEvents.OnWebSocketMessage:
+                            Hooks.OnWebSocketMessage -= plugin.OnWebSocketMessage;
+                            break;
+                        case PluginLoaderEvents.OnWebSocketConnected:
+                            Hooks.OnWebSocketConnected -= plugin.OnWebSocketConnected;
+                            break;
+                        case PluginLoaderEvents.OnWebSocketClosed:
+                            Hooks.OnWebSocketClosed -= plugin.OnWebSocketClosed;
+                            break;
+                        case PluginLoaderEvents.OnWebSocketError:
+                            Hooks.OnWebSocketError -= plugin.OnWebSocketError;
                             break;
                     }
                 }
