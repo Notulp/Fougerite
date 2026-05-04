@@ -1207,5 +1207,15 @@ namespace Fougerite.PluginLoaders
         {
             Invoke(PluginLoaderEvents.OnWebSocketMessage, ev);
         }
+
+        public void OnWebSocketConnected(WebSocketEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnWebSocketConnected, ev);
+        }
+
+        public void OnWebSocketClosed(WebSocketEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnWebSocketClosed, ev);
+        }
     }
 }

@@ -503,6 +503,16 @@ namespace Fougerite
         /// This delegate runs when a websocket message is received.
         /// </summary>
         public static event WebSocketEventHandlerDelegate OnWebSocketMessage;
+        
+        /// <summary>
+        /// This delegate runs when a websocket connection is established.
+        /// </summary>
+        public static event WebSocketEventHandlerDelegate OnWebSocketConnected;
+
+        /// <summary>
+        /// This delegate runs when a websocket connection is closed.
+        /// </summary>
+        public static event WebSocketEventHandlerDelegate OnWebSocketClosed;
 
         /// <summary>
         /// This value returns if the server is shutting down.
@@ -595,6 +605,8 @@ namespace Fougerite
             OnServerTick = delegate { };
             OnMetabolismUpdate = delegate { };
             OnWebSocketMessage = delegate { };
+            OnWebSocketConnected = delegate { };
+            OnWebSocketClosed = delegate { };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);

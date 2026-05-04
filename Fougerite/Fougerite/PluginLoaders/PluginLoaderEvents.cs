@@ -87,5 +87,7 @@ namespace Fougerite.PluginLoaders
         public const string OnMetabolismUpdate = "On_MetabolismUpdate";
         public const string OnPluginInit = "On_PluginInit";
         public const string OnWebSocketMessage = "On_WebSocketMessage";
+        public const string OnWebSocketClosed = "On_WebSocketClosed";
+        public const string OnWebSocketConnected = "On_WebSocketConnected";
     }
 }

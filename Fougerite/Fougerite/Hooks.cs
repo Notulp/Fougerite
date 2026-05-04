@@ -4441,6 +4441,24 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Triggered when a WebSocket connection is established.
+        /// </summary>
+        /// <param name="e">The event containing details about the WebSocket connection.</param>
+        public static void SocketConnected(WebSocketEvent e)
+        {
+            ExecuteSubscribers(OnWebSocketConnected, "OnWebSocketConnected", e);
+        }
+
+        /// <summary>
+        /// Invoked when a WebSocket connection is closed.
+        /// </summary>
+        /// <param name="e">The event object containing information about the closed WebSocket connection.</param>
+        public static void SocketClosed(WebSocketEvent e)
+        {
+            ExecuteSubscribers(OnWebSocketClosed, "OnWebSocketClosed", e);
+        }
+
+        /// <summary>
         /// Triggered when loot tables from the game are fully loaded.
         /// </summary>
         /// <param name="lists">A dictionary containing the loot tables, where the keys are table names and the values are LootSpawnList objects representing the loot data.</param>

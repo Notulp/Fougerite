@@ -16,8 +16,17 @@ namespace Fougerite
         /// The name of the plugin that owns this WebSocket connection.
         /// </summary>
         private readonly string _pluginName;
+        
+        /// <summary>
+        /// The unique identifier assigned to this WebSocket connection.
+        /// </summary>
         private readonly string _socketId;
+        
+        /// <summary>
+        /// The target URL for the WebSocket.
+        /// </summary>
         private readonly string _url;
+        
         private IntPtr _hSession = IntPtr.Zero;
         private IntPtr _hConnect = IntPtr.Zero;
         private IntPtr _hRequest = IntPtr.Zero;
@@ -38,7 +47,7 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// The unique identifier assigned to this WebSocket connection.
+        /// Gets the unique identifier assigned to this WebSocket connection.
         /// </summary>
         public string SocketId
         {
@@ -46,11 +55,27 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// The name of the plugin that owns this WebSocket connection.
+        /// Gets the name of the plugin that owns this WebSocket connection.
         /// </summary>
         public string PluginName
         {
             get { return _pluginName; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the WebSocket is currently connected and open.
+        /// </summary>
+        public bool IsConnected
+        {
+            get { return _isConnected; }
+        }
+
+        /// <summary>
+        /// Gets the target URL of the WebSocket connection.
+        /// </summary>
+        public string Url
+        {
+            get { return _url; }
         }
 
         /// <summary>
@@ -90,7 +115,7 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Closes the WebSocket connection and releases all associated unmanaged WinHTTP handles.
+        /// Closes the WebSocket connection, releases WinHTTP handles, and fires the Disconnected event.
         /// </summary>
         public void Close()
         {
@@ -117,6 +142,13 @@ namespace Fougerite
                 WinHttpClient.WinHttpCloseHandle(_hSession);
                 _hSession = IntPtr.Zero;
             }
+
+            // Dispatch Socket Closed Event
+            Loom.QueueOnMainThread(() =>
+            {
+                WebSocketEvent closedEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty);
+                Hooks.SocketClosed(closedEvent);
+            });
         }
 
         /// <summary>
@@ -152,6 +184,14 @@ namespace Fougerite
                 _hRequest = IntPtr.Zero;
 
                 _isConnected = true;
+
+                // Dispatch Socket Connected Event
+                Loom.QueueOnMainThread(() =>
+                {
+                    WebSocketEvent connectedEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty);
+                    Hooks.SocketConnected(connectedEvent);
+                });
+
                 new Thread(ReceiveLoop)
                 {
                     IsBackground = true
