@@ -346,7 +346,7 @@ namespace Fougerite.PluginLoaders
                             Hooks.OnSupplySignalExpode += plugin.OnSupplySignalExploded;
                             break;
                         case "On_PlayerMove":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnPlayerMove += plugin.OnPlayerMove;
                             }
@@ -382,25 +382,25 @@ namespace Fougerite.PluginLoaders
                             Hooks.OnDayCycleChanged += plugin.OnDayCycleChange;
                             break;
                         case "On_Shoot":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnShoot += plugin.OnShoot;
                             }
                             break;
                         case "On_ShotgunShoot":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnShotgunShoot += plugin.OnShotgunShoot;
                             }
                             break;
                         case "On_BowShoot":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnBowShoot += plugin.OnBowShoot;
                             }
                             break;
                         case "On_AnimalMovement":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnAnimalMovement += plugin.OnAnimalMovement;
                             }
@@ -433,13 +433,13 @@ namespace Fougerite.PluginLoaders
                             Hooks.OnBasicTorchIgnite += plugin.OnTorchIgnite;
                             break;
                         case "On_HeatZoneEnter":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnHeatZoneEnter += plugin.OnHeatZoneEnter;
                             }
                             break;
                         case "On_WorkZoneEnter":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnWorkZoneEnter += plugin.OnWorkZoneEnter;
                             }
@@ -454,7 +454,7 @@ namespace Fougerite.PluginLoaders
                             Hooks.OnCraftComplete += plugin.OnCraftingComplete;
                             break;
                         case "On_ServerTick":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnServerTick += plugin.OnServerTick;
                             }
@@ -622,7 +622,7 @@ namespace Fougerite.PluginLoaders
                             Hooks.OnSupplySignalExpode -= plugin.OnSupplySignalExploded;
                             break;
                         case "On_PlayerMove":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnPlayerMove -= plugin.OnPlayerMove;
                             }
@@ -658,25 +658,25 @@ namespace Fougerite.PluginLoaders
                             Hooks.OnDayCycleChanged -= plugin.OnDayCycleChange;
                             break;
                         case "On_Shoot":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnShoot -= plugin.OnShoot;
                             }
                             break;
                         case "On_ShotgunShoot":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnShotgunShoot -= plugin.OnShotgunShoot;
                             }
                             break;
                         case "On_BowShoot":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnBowShoot -= plugin.OnBowShoot;
                             }
                             break;
                         case "On_AnimalMovement":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnAnimalMovement -= plugin.OnAnimalMovement;
                             }
@@ -709,13 +709,13 @@ namespace Fougerite.PluginLoaders
                             Hooks.OnBasicTorchIgnite -= plugin.OnTorchIgnite;
                             break;
                         case "On_HeatZoneEnter":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnHeatZoneEnter -= plugin.OnHeatZoneEnter;
                             }
                             break;
                         case "On_WorkZoneEnter":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnWorkZoneEnter -= plugin.OnWorkZoneEnter;
                             }
@@ -730,7 +730,7 @@ namespace Fougerite.PluginLoaders
                             Hooks.OnCraftComplete -= plugin.OnCraftingComplete;
                             break;
                         case "On_ServerTick":
-                            if (IsIntensiveEventAllowed(plugin))
+                            if (IsIntensiveEventAllowed(plugin, method))
                             {
                                 Hooks.OnServerTick -= plugin.OnServerTick;
                             }
@@ -746,10 +746,20 @@ namespace Fougerite.PluginLoaders
             }
         }
 
-        private bool IsIntensiveEventAllowed(BasePlugin plugin)
+        /// Checks if an intensive event is allowed to be hooked by a plugin.
+        /// <param name="plugin">The plugin attempting to hook into the event. Must be an instance of BasePlugin.</param>
+        /// <param name="hookName">The name of the event hook that the plugin is trying to access.</param>
+        /// <returns>Returns true if the intensive event is allowed for the plugin, otherwise false.</returns>
+        private bool IsIntensiveEventAllowed(BasePlugin plugin, string hookName)
         {
-            return plugin.Type == PluginType.CSharp || plugin.Type == PluginType.CSScript ||
-                   Bootstrap.EnableScriptPluginsIntensiveEvents;
+            bool allowed = plugin.Type == PluginType.CSharp || plugin.Type == PluginType.CSScript ||
+                           Bootstrap.EnableScriptPluginsIntensiveEvents;
+            if (!allowed)
+            {
+                Logger.LogWarning($"[{nameof(PluginLoader)}] {plugin.Name} is trying to hook into {hookName}, which is an intensive event. This is not allowed for {plugin.Type} plugins. To enable this, set EnableScriptPluginsIntensiveEvents to true in the config.");
+            }
+
+            return allowed;
         }
     }
 }
