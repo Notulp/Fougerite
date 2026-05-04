@@ -2447,6 +2447,7 @@ namespace Fougerite.Patcher
             constructor.Body.Instructions.Clear();
             constructor.Body.ExceptionHandlers.Clear();
             constructor.Body.Variables.Clear();
+            constructor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         }
 
         private void GenericSpawnerPatch()
