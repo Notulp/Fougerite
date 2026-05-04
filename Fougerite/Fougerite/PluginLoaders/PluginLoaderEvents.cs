@@ -89,5 +89,6 @@ namespace Fougerite.PluginLoaders
         public const string OnWebSocketMessage = "On_WebSocketMessage";
         public const string OnWebSocketClosed = "On_WebSocketClosed";
         public const string OnWebSocketConnected = "On_WebSocketConnected";
+        public const string OnWebSocketError = "On_WebSocketError";
     }
 }

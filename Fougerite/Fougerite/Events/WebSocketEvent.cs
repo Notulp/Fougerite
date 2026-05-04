@@ -26,16 +26,23 @@ namespace Fougerite.Events
         private readonly string _message;
 
         /// <summary>
+        /// Represents the error message if the WebSocket event is an error or a dirty close.
+        /// </summary>
+        private readonly string _errorMessage;
+
+        /// <summary>
         /// Initializes a new instance of the WebSocketEvent class.
         /// </summary>
         /// <param name="pluginName">The name of the plugin associated with the event.</param>
         /// <param name="socketId">The unique identifier of the WebSocket connection.</param>
         /// <param name="message">The message payload received or transmitted.</param>
-        public WebSocketEvent(string pluginName, string socketId, string message)
+        /// <param name="errorMessage">The error message if an error occurred.</param>
+        public WebSocketEvent(string pluginName, string socketId, string message, string errorMessage = null)
         {
             _pluginName = pluginName;
             _socketId = socketId;
             _message = message;
+            _errorMessage = errorMessage;
         }
 
         /// <summary>
@@ -60,6 +67,15 @@ namespace Fougerite.Events
         public string Message
         {
             get { return _message; }
+        }
+
+        /// <summary>
+        /// Gets the error message associated with a failed WebSocket operation or connection close.
+        /// Might be null.
+        /// </summary>
+        public string ErrorMessage
+        {
+            get { return _errorMessage; }
         }
     }
 }

@@ -94,7 +94,10 @@ namespace Fougerite
         public bool Send(string message)
         {
             if (!_isConnected || _hWebSocket == IntPtr.Zero)
+            {
+                DispatchError("Failed to send message: Socket is not connected or initialized.");
                 return false;
+            }
             
             ThreadPool.QueueUserWorkItem(_ =>
             {
@@ -104,6 +107,10 @@ namespace Fougerite
                 {
                     Marshal.Copy(data, 0, unmanagedPointer, data.Length);
                     WinHttpClient.WinHttpWebSocketSend(_hWebSocket, WinHttpClient.WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE, unmanagedPointer, (uint)data.Length);
+                }
+                catch (Exception ex)
+                {
+                    DispatchError($"Exception during send: {ex.Message}");
                 }
                 finally
                 {
@@ -117,7 +124,8 @@ namespace Fougerite
         /// <summary>
         /// Closes the WebSocket connection, releases WinHTTP handles, and fires the Disconnected event.
         /// </summary>
-        public void Close()
+        /// <param name="errorMessage">Optional error message explaining why the socket was closed.</param>
+        public void Close(string errorMessage = null)
         {
             if (!_isConnected) 
                 return;
@@ -143,11 +151,24 @@ namespace Fougerite
                 _hSession = IntPtr.Zero;
             }
 
+            WebSocketEvent closedEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty, errorMessage);
             // Dispatch Socket Closed Event
             Loom.QueueOnMainThread(() =>
             {
-                WebSocketEvent closedEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty);
                 Hooks.SocketClosed(closedEvent);
+            });
+        }
+
+        /// <summary>
+        /// Dispatches a socket error event to the main thread.
+        /// </summary>
+        /// <param name="errorMsg">The error string to pass to the plugin.</param>
+        private void DispatchError(string errorMsg)
+        {
+            WebSocketEvent errorEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty, errorMsg);
+            Loom.QueueOnMainThread(() =>
+            {
+                Hooks.SocketErrorEvent(errorEvent);
             });
         }
 
@@ -200,7 +221,7 @@ namespace Fougerite
             catch (Exception ex)
             {
                 Logger.LogError($"[ScriptWebSocket] Connection Error: {ex}");
-                Close();
+                Close(ex.Message);
             }
         }
 
@@ -213,6 +234,7 @@ namespace Fougerite
             int bufferSize = 8192;
             IntPtr buffer = Marshal.AllocHGlobal(bufferSize);
             StringBuilder messageBuilder = new StringBuilder();
+            string closeErrorMsg = null;
 
             try
             {
@@ -225,6 +247,8 @@ namespace Fougerite
                     
                     if (error != 0 || bufferType == WinHttpClient.WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE)
                     {
+                        if (error != 0) 
+                            closeErrorMsg = $"Receive failed with WinHTTP error code: {error}";
                         break; 
                     }
 
@@ -251,13 +275,16 @@ namespace Fougerite
             }
             catch (Exception ex)
             {
-                if (_isConnected) 
+                if (_isConnected)
+                {
                     Logger.LogError($"[ScriptWebSocket] Receive Error: {ex}");
+                    closeErrorMsg = ex.Message;
+                }
             }
             finally
             {
                 Marshal.FreeHGlobal(buffer);
-                Close();
+                Close(closeErrorMsg);
             }
         }
     }

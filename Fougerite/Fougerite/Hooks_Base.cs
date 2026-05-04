@@ -513,6 +513,11 @@ namespace Fougerite
         /// This delegate runs when a websocket connection is closed.
         /// </summary>
         public static event WebSocketEventHandlerDelegate OnWebSocketClosed;
+        
+        /// <summary>
+        /// This delegate runs when a websocket encounters an error.
+        /// </summary>
+        public static event WebSocketEventHandlerDelegate OnWebSocketError;
 
         /// <summary>
         /// This value returns if the server is shutting down.
@@ -607,6 +612,7 @@ namespace Fougerite
             OnWebSocketMessage = delegate { };
             OnWebSocketConnected = delegate { };
             OnWebSocketClosed = delegate { };
+            OnWebSocketError = delegate { };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);

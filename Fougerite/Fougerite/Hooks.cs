@@ -4459,6 +4459,15 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Triggers when a WebSocket error occurs.
+        /// </summary>
+        /// <param name="e">The WebSocketEvent containing the error details.</param>
+        public static void SocketErrorEvent(WebSocketEvent e)
+        {
+            ExecuteSubscribers(OnWebSocketError, "OnWebSocketError", e);
+        }
+
+        /// <summary>
         /// Triggered when loot tables from the game are fully loaded.
         /// </summary>
         /// <param name="lists">A dictionary containing the loot tables, where the keys are table names and the values are LootSpawnList objects representing the loot data.</param>
