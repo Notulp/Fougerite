@@ -770,22 +770,22 @@ namespace Fougerite.PluginLoaders
 
         public void OnTablesLoaded(Dictionary<string, LootSpawnList> tables)
         {
-            Invoke("On_TablesLoaded", tables);
+            Invoke(PluginLoaderEvents.OnTablesLoaded, tables);
         }
 
         public void OnAllPluginsLoaded()
         {
-            Invoke("On_AllPluginsLoaded");
+            Invoke(PluginLoaderEvents.OnAllPluginsLoaded);
         }
 
         public void OnBlueprintUse(Player player, BPUseEvent evt)
         {
-            Invoke("On_BlueprintUse", player, evt);
+            Invoke(PluginLoaderEvents.OnBlueprintUse, player, evt);
         }
 
         public void OnChat(Player player, ref ChatString text)
         {
-            Invoke("On_Chat", player, text);
+            Invoke(PluginLoaderEvents.OnChat, player, text);
         }
 
         public void OnCommand(Player player, string command, string[] args)
@@ -796,7 +796,7 @@ namespace Fougerite.PluginLoaders
                 return;
             }
 
-            Invoke("On_Command", player, command, args);
+            Invoke(PluginLoaderEvents.OnCommand, player, command, args);
         }
 
         public void OnConsole(ref ConsoleSystem.Arg arg, bool external)
@@ -807,12 +807,12 @@ namespace Fougerite.PluginLoaders
             {
                 Player player = Server.GetServer().FindPlayer(arg.argUser.userID);
                 arg.ReplyWith($"{player.Name} executed: {clss}.{func}");
-                Invoke("On_Console", player, arg);
+                Invoke(PluginLoaderEvents.OnConsole, player, arg);
             }
             else
             {
                 arg.ReplyWith($"Rcon: {clss}.{func}");
-                Invoke("On_Console", null, arg);
+                Invoke(PluginLoaderEvents.OnConsole, null, arg);
             }
         }
         
@@ -824,30 +824,30 @@ namespace Fougerite.PluginLoaders
             {
                 Player player = Server.GetServer().FindPlayer(arg.argUser.userID);
                 arg.ReplyWith($"{player.Name} executed: {clss}.{func}");
-                Invoke("On_ConsoleWithCancel", player, arg, consoleEvent);
+                Invoke(PluginLoaderEvents.OnConsoleWithCancel, player, arg, consoleEvent);
             }
             else
             {
                 arg.ReplyWith($"Rcon: {clss}.{func}");
-                Invoke("On_ConsoleWithCancel", null, arg, consoleEvent);
+                Invoke(PluginLoaderEvents.OnConsoleWithCancel, null, arg, consoleEvent);
             }
         }
 
         public void OnDoorUse(Player player, DoorEvent evt)
         {
-            Invoke("On_DoorUse", player, evt);
+            Invoke(PluginLoaderEvents.OnDoorUse, player, evt);
         }
 
         public void OnEntityDecay(DecayEvent evt)
         {
-            Invoke("On_EntityDecay", evt);
+            Invoke(PluginLoaderEvents.OnEntityDecay, evt);
         }
 
         public void OnEntityDeployed(Player player, Entity entity, Player actualplacer)
         {
             try
             {
-                Invoke("On_EntityDeployed", player, entity, actualplacer);
+                Invoke(PluginLoaderEvents.OnEntityDeployed, player, entity, actualplacer);
             }
             catch (Exception ex)
             {
@@ -858,338 +858,338 @@ namespace Fougerite.PluginLoaders
 
         public void OnEntityDestroyed(DestroyEvent evt)
         {
-            Invoke("On_EntityDestroyed", evt);
+            Invoke(PluginLoaderEvents.OnEntityDestroyed, evt);
         }
 
         public void OnEntityHurt(HurtEvent evt)
         {
-            Invoke("On_EntityHurt", evt);
+            Invoke(PluginLoaderEvents.OnEntityHurt, evt);
         }
 
         public void OnItemsLoaded(ItemsBlocks items)
         {
-            Invoke("On_ItemsLoaded", items);
+            Invoke(PluginLoaderEvents.OnItemsLoaded, items);
         }
 
         public void OnNPCHurt(HurtEvent evt)
         {
-            Invoke("On_NPCHurt", evt);
+            Invoke(PluginLoaderEvents.OnNPCHurt, evt);
         }
 
         public void OnNPCKilled(DeathEvent evt)
         {
-            Invoke("On_NPCKilled", evt);
+            Invoke(PluginLoaderEvents.OnNPCKilled, evt);
         }
 
         public void OnPlayerConnected(Player player)
         {
-            Invoke("On_PlayerConnected", player);
+            Invoke(PluginLoaderEvents.OnPlayerConnected, player);
         }
 
         public void OnPlayerDisconnected(Player player)
         {
-            Invoke("On_PlayerDisconnected", player);
+            Invoke(PluginLoaderEvents.OnPlayerDisconnected, player);
         }
 
         public void OnPlayerGathering(Player player, GatherEvent evt)
         {
-            Invoke("On_PlayerGathering", player, evt);
+            Invoke(PluginLoaderEvents.OnPlayerGathering, player, evt);
         }
 
         public void OnPlayerHurt(HurtEvent evt)
         {
-            Invoke("On_PlayerHurt", evt);
+            Invoke(PluginLoaderEvents.OnPlayerHurt, evt);
         }
 
         public void OnPlayerKilled(DeathEvent evt)
         {
-            Invoke("On_PlayerKilled", evt);
+            Invoke(PluginLoaderEvents.OnPlayerKilled, evt);
         }
 
         public void OnPlayerTeleport(Player player, Vector3 from, Vector3 dest)
         {
-            Invoke("On_PlayerTeleport", player, from, dest);
+            Invoke(PluginLoaderEvents.OnPlayerTeleport, player, from, dest);
         }
 
         public void OnPlayerSpawn(Player player, SpawnEvent evt)
         {
-            Invoke("On_PlayerSpawning", player, evt);
+            Invoke(PluginLoaderEvents.OnPlayerSpawning, player, evt);
         }
 
         public void OnPlayerSpawned(Player player, SpawnEvent evt)
         {
-            Invoke("On_PlayerSpawned", player, evt);
+            Invoke(PluginLoaderEvents.OnPlayerSpawned, player, evt);
         }
 
         public void OnResearch(ResearchEvent evt)
         {
-            Invoke("On_Research", evt);
+            Invoke(PluginLoaderEvents.OnResearch, evt);
         }
 
         public void OnServerInit()
         {
-            Invoke("On_ServerInit");
+            Invoke(PluginLoaderEvents.OnServerInit);
         }
 
         public void OnServerShutdown()
         {
-            Invoke("On_ServerShutdown");
+            Invoke(PluginLoaderEvents.OnServerShutdown);
         }
 
         public void OnServerSaved(int amount, double seconds)
         {
-            Invoke("On_ServerSaved", amount, seconds);
+            Invoke(PluginLoaderEvents.OnServerSaved, amount, seconds);
         }
 
         public void OnCrafting(CraftingEvent e)
         {
-            Invoke("On_Crafting", e);
+            Invoke(PluginLoaderEvents.OnCrafting, e);
         }
 
         public void OnResourceSpawned(ResourceTarget t)
         {
-            Invoke("On_ResourceSpawn", t);
+            Invoke(PluginLoaderEvents.OnResourceSpawn, t);
         }
 
         public void OnItemAdded(InventoryModEvent e)
         {
-            Invoke("On_ItemAdded", e);
+            Invoke(PluginLoaderEvents.OnItemAdded, e);
         }
 
         public void OnItemRemoved(InventoryModEvent e)
         {
-            Invoke("On_ItemRemoved", e);
+            Invoke(PluginLoaderEvents.OnItemRemoved, e);
         }
 
         public void OnItemPickup(ItemPickupEvent e)
         {
-            Invoke("On_ItemPickup", e);
+            Invoke(PluginLoaderEvents.OnItemPickup, e);
         }
 
         public void OnFallDamage(FallDamageEvent e)
         {
-            Invoke("On_FallDamage", e);
+            Invoke(PluginLoaderEvents.OnFallDamage, e);
         }
 
         public void OnAirdrop(Vector3 v)
         {
-            Invoke("On_Airdrop", v);
+            Invoke(PluginLoaderEvents.OnAirdrop, v);
         }
 
         public void OnAirdropCrateDropped(SupplyDropPlane plane, Entity supplyCrate)
         {
-            Invoke("On_AirdropCrateDropped", plane, supplyCrate);
+            Invoke(PluginLoaderEvents.OnAirdropCrateDropped, plane, supplyCrate);
         }
 
         public void OnSteamDeny(SteamDenyEvent e)
         {
-            Invoke("On_SteamDeny", e);
+            Invoke(PluginLoaderEvents.OnSteamDeny, e);
         }
 
         public void OnPlayerApproval(PlayerApprovalEvent e)
         {
-            Invoke("On_PlayerApproval", e);
+            Invoke(PluginLoaderEvents.OnPlayerApproval, e);
         }
 
         public void OnPluginShutdown()
         {
-            Invoke("On_PluginShutdown");
+            Invoke(PluginLoaderEvents.OnPluginShutdown);
         }
 
         public void OnShowTalker(uLink.NetworkPlayer np, Player player)
         {
-            Invoke("On_VoiceChat", np, player);
+            Invoke(PluginLoaderEvents.OnVoiceChat, np, player);
         }
 
         public void OnLootUse(LootStartEvent le)
         {
-            Invoke("On_LootUse", le);
+            Invoke(PluginLoaderEvents.OnLootUse, le);
         }
 
         public void OnBanEvent(BanEvent be)
         {
-            Invoke("On_PlayerBan", be);
+            Invoke(PluginLoaderEvents.OnPlayerBan, be);
         }
 
         public void OnRepairBench(Fougerite.Events.RepairEvent be)
         {
-            Invoke("On_RepairBench", be);
+            Invoke(PluginLoaderEvents.OnRepairBench, be);
         }
 
         public void OnItemMove(ItemMoveEvent be)
         {
-            Invoke("On_ItemMove", be);
+            Invoke(PluginLoaderEvents.OnItemMove, be);
         }
 
         public void OnGenericSpawnLoad(GenericSpawner gs)
         {
-            Invoke("On_GenericSpawnLoad", gs);
+            Invoke(PluginLoaderEvents.OnGenericSpawnLoad, gs);
         }
 
         public void OnServerLoaded()
         {
-            Invoke("On_ServerLoaded");
+            Invoke(PluginLoaderEvents.OnServerLoaded);
         }
 
         public void OnSupplySignalExploded(SupplySignalExplosionEvent evt)
         {
-            Invoke("On_SupplySignalExploded", evt);
+            Invoke(PluginLoaderEvents.OnSupplySignalExploded, evt);
         }
 
         public void OnPlayerMove(HumanController hc, Vector3 v, int p, ushort p2,
             uLink.NetworkMessageInfo networkMessageInfo, Util.PlayerActions action)
         {
-            Invoke("On_PlayerMove", hc, v, p, p2, networkMessageInfo, action);
+            Invoke(PluginLoaderEvents.OnPlayerMove, hc, v, p, p2, networkMessageInfo, action);
         }
 
         public void OnBeltUse(BeltUseEvent ev)
         {
-            Invoke("On_BeltUse", ev);
+            Invoke(PluginLoaderEvents.OnBeltUse, ev);
         }
 
         public void OnLogger(LoggerEvent ev)
         {
-            Invoke("On_Logger", ev);
+            Invoke(PluginLoaderEvents.OnLogger, ev);
         }
 
         public void OnGrenade(GrenadeThrowEvent ev)
         {
-            Invoke("On_GrenadeThrow", ev);
+            Invoke(PluginLoaderEvents.OnGrenadeThrow, ev);
         }
 
         public void OnSupplyDropPlaneCreated(SupplyDropPlane plane)
         {
-            Invoke("On_SupplyDropPlaneCreated", plane);
+            Invoke(PluginLoaderEvents.OnSupplyDropPlaneCreated, plane);
         }
         
         public void OnNPCSpawn(NPC npc)
         {
-            Invoke("On_NPCSpawned", npc);
+            Invoke(PluginLoaderEvents.OnNPCSpawned, npc);
         }
 
         public void OnTimedExplosiveSpawned(TimedExplosiveEvent ev)
         {
-            Invoke("On_TimedExplosiveSpawned", ev);
+            Invoke(PluginLoaderEvents.OnTimedExplosiveSpawned, ev);
         }
 
         public void OnSleeperSpawned(Sleeper sleeper)
         {
-            Invoke("On_SleeperSpawned", sleeper);
+            Invoke(PluginLoaderEvents.OnSleeperSpawned, sleeper);
         }
 
         public void OnCommandRestriction(CommandRestrictionEvent ev)
         {
-            Invoke("On_CommandRestriction", ev);
+            Invoke(PluginLoaderEvents.OnCommandRestriction, ev);
         }
 
         public void OnFireBarrelToggle(FireBarrelToggleEvent ev)
         {
-            Invoke("On_FireBarrelToggle", ev);
+            Invoke(PluginLoaderEvents.OnFireBarrelToggle, ev);
         }
 
         public void OnDayCycleChange(DayCycleChangeEvent ev)
         {
-            Invoke("On_DayCycleChanged", ev);
+            Invoke(PluginLoaderEvents.OnDayCycleChanged, ev);
         }
 
         public void OnShoot(ShootEvent ev)
         {
-            Invoke("On_Shoot", ev);
+            Invoke(PluginLoaderEvents.OnShoot, ev);
         }
 
         public void OnShotgunShoot(ShotgunShootEvent ev)
         {
-            Invoke("On_ShotgunShoot", ev);
+            Invoke(PluginLoaderEvents.OnShotgunShoot, ev);
         }
 
         public void OnBowShoot(BowShootEvent ev)
         {
-            Invoke("On_BowShoot", ev);
+            Invoke(PluginLoaderEvents.OnBowShoot, ev);
         }
 
         public void OnAnimalMovement(AnimalMovementEvent ev)
         {
-            Invoke("On_AnimalMovement", ev);
+            Invoke(PluginLoaderEvents.OnAnimalMovement, ev);
         }
 
         public void OnConsumableUse(ConsumableUseEvent ev)
         {
-            Invoke("On_ConsumableUse", ev);
+            Invoke(PluginLoaderEvents.OnConsumableUse, ev);
         }
 
         public void OnMedikitUse(MedikitUseEvent ev)
         {
-            Invoke("On_MedikitUse", ev);
+            Invoke(PluginLoaderEvents.OnMedikitUse, ev);
         }
 
         public void OnItemModInstall(ItemModInstallEvent<BulletWeaponDataBlock> ev)
         {
-            Invoke("On_ItemModInstall", ev);
+            Invoke(PluginLoaderEvents.OnItemModInstall, ev);
         }
 
         public void OnBloodDraw(BloodDrawEvent ev)
         {
-            Invoke("On_BloodDraw", ev);
+            Invoke(PluginLoaderEvents.OnBloodDraw, ev);
         }
         
         public void OnArmorEquip(ArmorEquipEvent ev)
         {
-            Invoke("On_ArmorEquip", ev);
+            Invoke(PluginLoaderEvents.OnArmorEquip, ev);
         }
 
         public void OnArmorUnEquip(ArmorEquipEvent ev)
         {
-            Invoke("On_ArmorUnEquip", ev);
+            Invoke(PluginLoaderEvents.OnArmorUnEquip, ev);
         }
 
         public void OnFlareThrow(FlareThrowEvent ev)
         {
-            Invoke("On_FlareThrow", ev);
+            Invoke(PluginLoaderEvents.OnFlareThrow, ev);
         }
 
         public void FlareIgnite(FlareIgniteEvent ev)
         {
-            Invoke("On_FlareIgnite", ev);
+            Invoke(PluginLoaderEvents.OnFlareIgnite, ev);
         }
 
         public void OnTorchIgnite(BasicTorchIgniteEvent ev)
         {
-            Invoke("On_TorchIgnite", ev);
+            Invoke(PluginLoaderEvents.OnTorchIgnite, ev);
         }
 
         public void OnHeatZoneEnter(HeatZoneEnterEvent ev)
         {
-            Invoke("On_HeatZoneEnter", ev);
+            Invoke(PluginLoaderEvents.OnHeatZoneEnter, ev);
         }
 
         public void OnWorkZoneEnter(WorkZoneEnterEvent ev)
         {
-            Invoke("On_WorkZoneEnter", ev);
+            Invoke(PluginLoaderEvents.OnWorkZoneEnter, ev);
         }
 
         public void OnPluginMessage(PluginMessageEvent ev)
         {
-            Invoke("On_PluginMessage", ev);
+            Invoke(PluginLoaderEvents.OnPluginMessage, ev);
         }
 
         public void OnCraftingCancel(CraftCancelEvent ev)
         {
-            Invoke("On_CraftingCancel", ev);
+            Invoke(PluginLoaderEvents.OnCraftingCancel, ev);
         }
 
         public void OnCraftingComplete(CraftCompleteEvent ev)
         {
-            Invoke("On_CraftingComplete", ev);
+            Invoke(PluginLoaderEvents.OnCraftingComplete, ev);
         }
 
         public void OnServerTick()
         {
-            Invoke("On_ServerTick");
+            Invoke(PluginLoaderEvents.OnServerTick);
         }
 
         public void OnMetabolismUpdate(MetabolismEvent ev)
         {
-            Invoke("On_MetabolismUpdate", ev);
+            Invoke(PluginLoaderEvents.OnMetabolismUpdate, ev);
         }
     }
 }

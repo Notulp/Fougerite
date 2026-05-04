@@ -46,6 +46,15 @@ namespace Fougerite
             return FougeriteConfig.GetBoolSetting(Section, Setting);
         }
 
+        /// <summary>
+        /// Retrieves the absolute path to the modules folder by replacing
+        /// placeholders within the configuration string and normalizing the path
+        /// for use within the application.
+        /// </summary>
+        /// <returns>
+        /// A fully resolved and normalized string representing the modules folder
+        /// path as defined in the <c>FougeriteDirectoryConfig</c>.
+        /// </returns>
         public static string GetModulesFolder()
         {
             Regex root = new Regex(@"^%RootFolder%", RegexOptions.IgnoreCase);
@@ -54,6 +63,15 @@ namespace Fougerite
             return Util.NormalizePath(path);
         }
 
+        /// <summary>
+        /// Retrieves the absolute path to the public folder, replacing
+        /// placeholders if necessary, and prepares the path for use.
+        /// </summary>
+        /// <returns>
+        /// A normalized string representing the full path to the public folder.
+        /// The value is derived from the configuration specified in
+        /// <c>FougeriteDirectoryConfig</c>.
+        /// </returns>
         public static string GetPublicFolder()
         {
             Regex root = new Regex(@"^%RootFolder%", RegexOptions.IgnoreCase);
