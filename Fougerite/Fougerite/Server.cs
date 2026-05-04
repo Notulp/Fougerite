@@ -720,6 +720,31 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Indicates whether the server is in the process of shutting down.
+        /// This property retrieves its value from the Hooks.IsShuttingDown field.
+        /// </summary>
+        public bool IsShuttingDown
+        {
+            get
+            {
+                return Hooks.IsShuttingDown;
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether the server has been fully initialized.
+        /// This property relies on the state of Hooks.ServerInitialized
+        /// and is typically used internally to check server readiness.
+        /// </summary>
+        public bool ServerInitialized
+        {
+            get
+            {
+                return Hooks.ServerInitialized;
+            }
+        }
+
+        /// <summary>
         /// Tries to Grab the current Rust++ API.
         /// </summary>
         /// <returns></returns>
