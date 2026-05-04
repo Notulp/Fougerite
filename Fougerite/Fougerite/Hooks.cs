@@ -4424,11 +4424,20 @@ namespace Fougerite
         /// Invokes a logger event with the specified event type and message.
         /// </summary>
         /// <param name="type">The type of logger event (Log, LogError, LogWarning).</param>
-        /// <param name="message">The message associated with the logger event.</
+        /// <param name="message">The message associated with the logger event.</param>
         public static void LoggerEvent(LoggerEventType type, string message)
         {
             LoggerEvent evt = new LoggerEvent(type, message);
             ExecuteSubscribers(OnLogger, "OnLogger", evt);
+        }
+
+        /// <summary>
+        /// Triggers when a WebSocket message is received.
+        /// </summary>
+        /// <param name="wsEvent">The WebSocketEvent containing the details of the received message.</param>
+        public static void SocketMessageReceived(WebSocketEvent wsEvent)
+        {
+            ExecuteSubscribers(OnWebSocketMessage, "OnWebSocketMessage", wsEvent);
         }
 
         /// <summary>

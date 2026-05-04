@@ -498,6 +498,11 @@ namespace Fougerite
         /// This event runs continously while the player is inside the trigger, so be careful when using It in script plugins.
         /// </summary>
         public static event WorkZoneEnterEventDelegate OnWorkZoneEnter;
+        
+        /// <summary>
+        /// This delegate runs when a websocket message is received.
+        /// </summary>
+        public static event WebSocketEventHandlerDelegate OnWebSocketMessage;
 
         /// <summary>
         /// This value returns if the server is shutting down.
@@ -589,6 +594,7 @@ namespace Fougerite
             OnCraftComplete = delegate {  };
             OnServerTick = delegate { };
             OnMetabolismUpdate = delegate { };
+            OnWebSocketMessage = delegate { };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -748,6 +754,8 @@ namespace Fougerite
         public delegate void ServerTickDelegate();
         
         public delegate void MetabolismUpdateDelegate(MetabolismEvent e);
+        
+        public delegate void WebSocketEventHandlerDelegate(WebSocketEvent e);
         
         /// <summary>
         /// Flags for Method.Invoke

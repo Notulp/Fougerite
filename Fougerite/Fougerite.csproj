@@ -88,6 +88,7 @@
     <Compile Include="Fougerite\Events\SystemTimerEvent.cs" />
     <Compile Include="Fougerite\Events\TimedExplosiveEvent.cs" />
     <Compile Include="Fougerite\Events\FlareIgniteEvent.cs" />
+    <Compile Include="Fougerite\Events\WebSocketEvent.cs" />
     <Compile Include="Fougerite\Events\WorkZoneEnterEvent.cs" />
     <Compile Include="Fougerite\Flood.cs" />
     <Compile Include="Fougerite\Hooks_Base.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="Fougerite\PluginLoaders\PythonPluginLoader.cs" />
     <Compile Include="Fougerite\PluginLoaders\Singleton.cs" />
     <Compile Include="Fougerite\ReflectionExtensions.cs" />
+    <Compile Include="Fougerite\ScriptWebSocket.cs" />
     <Compile Include="Fougerite\ServerSaveHandler.cs" />
     <Compile Include="Fougerite\ShutdownCatcher.cs" />
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">

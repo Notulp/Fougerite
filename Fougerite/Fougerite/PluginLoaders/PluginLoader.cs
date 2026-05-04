@@ -127,7 +127,8 @@ namespace Fougerite.PluginLoaders
             PluginLoaderEvents.OnCraftingCancel,
             PluginLoaderEvents.OnCraftingComplete,
             PluginLoaderEvents.OnServerTick,
-            PluginLoaderEvents.OnMetabolismUpdate
+            PluginLoaderEvents.OnMetabolismUpdate,
+            PluginLoaderEvents.OnWebSocketMessage
         };
 
         /// <summary>
@@ -547,6 +548,9 @@ namespace Fougerite.PluginLoaders
                         case PluginLoaderEvents.OnMetabolismUpdate:
                             Hooks.OnMetabolismUpdate += plugin.OnMetabolismUpdate;
                             break;
+                        case PluginLoaderEvents.OnWebSocketMessage:
+                            Hooks.OnWebSocketMessage += plugin.OnWebSocketMessage;
+                            break;
                     }
                 }
             }
@@ -826,6 +830,9 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnMetabolismUpdate:
                             Hooks.OnMetabolismUpdate -= plugin.OnMetabolismUpdate;
+                            break;
+                        case PluginLoaderEvents.OnWebSocketMessage:
+                            Hooks.OnWebSocketMessage -= plugin.OnWebSocketMessage;
                             break;
                     }
                 }
