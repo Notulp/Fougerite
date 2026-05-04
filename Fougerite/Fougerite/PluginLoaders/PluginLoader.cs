@@ -846,7 +846,7 @@ namespace Fougerite.PluginLoaders
             if (!allowed)
             {
                 Logger.LogWarning($"[{nameof(PluginLoader)}] {plugin.Name} is trying to hook into {hookName}, which is an intensive event. This is not allowed for {plugin.Type} plugins. To enable this, set EnableScriptPluginsIntensiveEvents to true in the config.");
-                Logger.LogWarning("Script plugins using intensive events can cause performance issues, so they are disabled by default on high player count / bad CPU. Enable the setting if you understand the risks.");
+                Logger.LogWarning("Script plugins using intensive events can cause performance issues, so they are disabled by default, they could perform bad on high player count / bad CPU. Enable the setting if you understand the risks.");
                 Logger.LogWarning("The plugin will still load, but the hook will not be registered, so some features may not work as intended.");
             }
 
