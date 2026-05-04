@@ -207,9 +207,9 @@ namespace Fougerite
                 _isConnected = true;
 
                 // Dispatch Socket Connected Event
+                WebSocketEvent connectedEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty);
                 Loom.QueueOnMainThread(() =>
                 {
-                    WebSocketEvent connectedEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty);
                     Hooks.SocketConnected(connectedEvent);
                 });
 
