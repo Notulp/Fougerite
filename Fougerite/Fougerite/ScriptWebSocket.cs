@@ -10,7 +10,7 @@ namespace Fougerite
     /// Represents a WebSocket client implementation using native WinHTTP.
     /// Designed to provide secure, background-threaded WebSocket connections for plugins.
     /// </summary>
-    public class ScriptWebSocket
+    public class ScriptWebSocket : IDisposable
     {
         /// <summary>
         /// The name of the plugin that owns this WebSocket connection.
@@ -36,6 +36,7 @@ namespace Fougerite
         private IntPtr _hRequest = IntPtr.Zero;
         private IntPtr _hWebSocket = IntPtr.Zero;
         private bool _isConnected;
+        private bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the ScriptWebSocket class.
@@ -98,6 +99,12 @@ namespace Fougerite
         /// </summary>
         public void Connect()
         {
+            if (_disposed)
+            {
+                DispatchError("Cannot connect: The WebSocket object has been disposed.");
+                return;
+            }
+
             ThreadPool.QueueUserWorkItem(_ => ConnectInternal());
         }
 
@@ -108,7 +115,7 @@ namespace Fougerite
         /// <returns>True if the send operation was queued successfully; otherwise, false if disconnected or uninitialized.</returns>
         public bool Send(string message)
         {
-            if (!_isConnected || _hWebSocket == IntPtr.Zero)
+            if (!_isConnected || _hWebSocket == IntPtr.Zero || _disposed)
             {
                 DispatchError("Failed to send message: Socket is not connected or initialized.");
                 return false;
@@ -138,6 +145,7 @@ namespace Fougerite
 
         /// <summary>
         /// Closes the WebSocket connection, releases WinHTTP handles, and fires the Disconnected event.
+        /// Does NOT dispose the object, meaning it can potentially be reconnected later.
         /// </summary>
         /// <param name="errorMessage">Optional error message explaining why the socket was closed.</param>
         public void Close(string errorMessage = null)
@@ -147,11 +155,73 @@ namespace Fougerite
             
             _isConnected = false;
 
+            ReleaseUnmanagedHandles();
+
+            WebSocketEvent closedEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty, errorMessage);
+            
+            // Dispatch Socket Closed Event
+            Loom.QueueOnMainThread(() =>
+            {
+                Hooks.SocketClosed(closedEvent);
+            });
+        }
+
+        /// <summary>
+        /// Disposes the WebSocket connection, releasing all unmanaged resources and preventing further use.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true, "Object disposed.");
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Internal implementation of the dispose pattern.
+        /// </summary>
+        protected virtual void Dispose(bool disposing, string errorMessage = null)
+        {
+            if (_disposed) 
+                return;
+
+            if (disposing)
+            {
+                // Cleanly disconnect and fire the event if called via explicit Dispose()
+                Close(errorMessage);
+            }
+            else
+            {
+                // Called from the finalizer. Just silently release memory, NO Loom dispatching.
+                _isConnected = false;
+                ReleaseUnmanagedHandles();
+            }
+
+            _disposed = true;
+        }
+
+        /// <summary>
+        /// Finalizer to ensure unmanaged WinHTTP handles are released if the object is garbage collected without being disposed.
+        /// </summary>
+        ~ScriptWebSocket()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Helper to cleanly wipe out all native WinHTTP pointers.
+        /// </summary>
+        private void ReleaseUnmanagedHandles()
+        {
             if (_hWebSocket != IntPtr.Zero)
             {
                 WinHttpClient.WinHttpWebSocketClose(_hWebSocket, 1000, IntPtr.Zero, 0);
                 WinHttpClient.WinHttpCloseHandle(_hWebSocket);
                 _hWebSocket = IntPtr.Zero;
+            }
+
+            if (_hRequest != IntPtr.Zero)
+            {
+                WinHttpClient.WinHttpCloseHandle(_hRequest);
+                _hRequest = IntPtr.Zero;
             }
 
             if (_hConnect != IntPtr.Zero)
@@ -165,13 +235,6 @@ namespace Fougerite
                 WinHttpClient.WinHttpCloseHandle(_hSession);
                 _hSession = IntPtr.Zero;
             }
-
-            WebSocketEvent closedEvent = new WebSocketEvent(_pluginName, _socketId, string.Empty, errorMessage);
-            // Dispatch Socket Closed Event
-            Loom.QueueOnMainThread(() =>
-            {
-                Hooks.SocketClosed(closedEvent);
-            });
         }
 
         /// <summary>
@@ -253,7 +316,7 @@ namespace Fougerite
             {
                 using (System.IO.MemoryStream messageStream = new System.IO.MemoryStream())
                 {
-                    while (_isConnected)
+                    while (_isConnected && !_disposed)
                     {
                         uint bytesRead = 0;
                         uint bufferType = 0;

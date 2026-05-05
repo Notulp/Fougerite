@@ -70,6 +70,11 @@ namespace Fougerite.PluginLoaders
         /// List of parallel timers.
         /// </summary>
         public readonly ConcurrentList<TimedEvent> ParallelTimers;
+        
+        /// <summary>
+        /// List of WebSockets created by the plugin.
+        /// </summary>
+        public readonly ConcurrentList<ScriptWebSocket> WebSockets;
 
         /// <summary>
         /// A global storage that any plugin can easily access.
@@ -106,6 +111,7 @@ namespace Fougerite.PluginLoaders
             Timers = new ConcurrentDictionary<string, TimedEvent>();
             ParallelTimers = new ConcurrentList<TimedEvent>();
             CommandList = new ConcurrentList<string>();
+            WebSockets = new ConcurrentList<ScriptWebSocket>();
         }
 
         /// <summary>
@@ -721,7 +727,27 @@ namespace Fougerite.PluginLoaders
         /// <returns>A new instance of the <see cref="ScriptWebSocket"/>.</returns>
         public ScriptWebSocket CreateWebSocket(string socketId, string url)
         {
-            return new ScriptWebSocket(Name, socketId, url);
+            ScriptWebSocket socket = new ScriptWebSocket(Name, socketId, url);
+            WebSockets.Add(socket);
+            return socket;
+        }
+
+        /// <summary>
+        /// Removes and disposes of a WebSocket connection associated with the specified identifier.
+        /// </summary>
+        /// <param name="socketId">The unique identifier of the WebSocket to remove.</param>
+        /// <returns>True if the WebSocket was found and successfully removed, otherwise, false.</returns>
+        public bool RemoveWebSocket(string socketId)
+        {
+            ScriptWebSocket socket = WebSockets.FirstOrDefault(s => s.SocketId == socketId);
+            if (socket != null)
+            {
+                WebSockets.Remove(socket);
+                socket.Dispose();
+                return true;
+            }
+
+            return false;
         }
 
         public Dictionary<string, object> CreateDict()
