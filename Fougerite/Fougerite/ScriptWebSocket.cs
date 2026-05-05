@@ -26,7 +26,11 @@ namespace Fougerite
         /// The target URL for the WebSocket.
         /// </summary>
         private readonly string _url;
-        
+
+        /// <summary>
+        /// The size of the buffer, in bytes, allocated for receiving WebSocket messages.
+        /// </summary>
+        private readonly int _bufferSize;
         private IntPtr _hSession = IntPtr.Zero;
         private IntPtr _hConnect = IntPtr.Zero;
         private IntPtr _hRequest = IntPtr.Zero;
@@ -39,11 +43,13 @@ namespace Fougerite
         /// <param name="pluginName">The name of the plugin creating the socket.</param>
         /// <param name="socketId">A unique identifier for the socket.</param>
         /// <param name="url">The target WebSocket URL (ws:// or wss://).</param>
-        public ScriptWebSocket(string pluginName, string socketId, string url)
+        /// <param name="bufferSize">The chuck size to read whole message with. Default is 32kb.</param>
+        public ScriptWebSocket(string pluginName, string socketId, string url, int bufferSize = 32768)
         {
             _pluginName = pluginName;
             _socketId = socketId;
             _url = url;
+            _bufferSize = bufferSize;
         }
 
         /// <summary>
@@ -76,6 +82,15 @@ namespace Fougerite
         public string Url
         {
             get { return _url; }
+        }
+
+        /// <summary>
+        /// Gets the buffer size used for reading WebSocket messages.
+        /// Specifies the maximum chunk size, in bytes, that can be read in a single operation.
+        /// </summary>
+        public int BufferSize
+        {
+            get { return _bufferSize; }
         }
 
         /// <summary>
@@ -231,45 +246,47 @@ namespace Fougerite
         /// </summary>
         private void ReceiveLoop()
         {
-            int bufferSize = 8192;
-            IntPtr buffer = Marshal.AllocHGlobal(bufferSize);
-            StringBuilder messageBuilder = new StringBuilder();
+            IntPtr buffer = Marshal.AllocHGlobal(_bufferSize);
             string closeErrorMsg = null;
 
             try
             {
-                while (_isConnected)
+                using (System.IO.MemoryStream messageStream = new System.IO.MemoryStream())
                 {
-                    uint bytesRead = 0;
-                    uint bufferType = 0;
-                    
-                    uint error = WinHttpClient.WinHttpWebSocketReceive(_hWebSocket, buffer, (uint)bufferSize, out bytesRead, out bufferType);
-                    
-                    if (error != 0 || bufferType == WinHttpClient.WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE)
+                    while (_isConnected)
                     {
-                        if (error != 0) 
-                            closeErrorMsg = $"Receive failed with WinHTTP error code: {error}";
-                        break; 
-                    }
+                        uint bytesRead = 0;
+                        uint bufferType = 0;
 
-                    if (bytesRead > 0)
-                    {
-                        byte[] data = new byte[bytesRead];
-                        Marshal.Copy(buffer, data, 0, (int)bytesRead);
-                        messageBuilder.Append(Encoding.UTF8.GetString(data));
-                    }
+                        uint error = WinHttpClient.WinHttpWebSocketReceive(_hWebSocket, buffer, (uint)_bufferSize, out bytesRead, out bufferType);
 
-                    if (bufferType == WinHttpClient.WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE || 
-                        bufferType == WinHttpClient.WINHTTP_WEB_SOCKET_BINARY_MESSAGE_BUFFER_TYPE)
-                    {
-                        string msg = messageBuilder.ToString();
-                        messageBuilder.Length = 0; 
-                        WebSocketEvent wsEvent = new WebSocketEvent(_pluginName, _socketId, msg);
-                        
-                        Loom.QueueOnMainThread(() =>
+                        if (error != 0 || bufferType == WinHttpClient.WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE)
                         {
-                            Hooks.SocketMessageReceived(wsEvent);
-                        });
+                            if (error != 0)
+                                closeErrorMsg = $"Receive failed with WinHTTP error code: {error}";
+                            break;
+                        }
+
+                        if (bytesRead > 0)
+                        {
+                            byte[] data = new byte[bytesRead];
+                            Marshal.Copy(buffer, data, 0, (int)bytesRead);
+                            messageStream.Write(data, 0, (int)bytesRead);
+                        }
+
+                        if (bufferType == WinHttpClient.WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE 
+                            || bufferType == WinHttpClient.WINHTTP_WEB_SOCKET_BINARY_MESSAGE_BUFFER_TYPE)
+                        {
+                            string msg = Encoding.UTF8.GetString(messageStream.ToArray());
+                            messageStream.SetLength(0);
+
+                            WebSocketEvent wsEvent = new WebSocketEvent(_pluginName, _socketId, msg);
+
+                            Loom.QueueOnMainThread(() =>
+                            {
+                                Hooks.SocketMessageReceived(wsEvent);
+                            });
+                        }
                     }
                 }
             }
