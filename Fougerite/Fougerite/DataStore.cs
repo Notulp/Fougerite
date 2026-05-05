@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Fougerite.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using ReaderWriterLock = System.Threading.ReaderWriterLock;
 
 namespace Fougerite
 {
@@ -16,7 +18,7 @@ namespace Fougerite
     public class DataStore
     {
         private Hashtable _datastore = new Hashtable();
-        private static DataStore _instance;
+        private static readonly Lazy<DataStore> Instance = new Lazy<DataStore>(() => new DataStore());
         private readonly ReaderWriterLock _rwLock = new ReaderWriterLock();
         public static string PATH = Path.Combine(Config.GetPublicFolder(), "FougeriteDatastore.ds");
         private readonly JsonSerializerSettings _jsonSettings;
@@ -43,12 +45,7 @@ namespace Fougerite
         /// <returns></returns>
         public static DataStore GetInstance()
         {
-            if (_instance == null)
-            {
-                _instance = new DataStore();
-            }
-
-            return _instance;
+            return Instance.Value;
         }
 
         /// <summary>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using Fougerite.Concurrent;
 
 namespace Fougerite
 {
@@ -15,7 +16,7 @@ namespace Fougerite
     /// </summary>
     public class WinHttpClient
     {
-        private static WinHttpClient _instance;
+        private static readonly Lazy<WinHttpClient> Instance = new Lazy<WinHttpClient>(() => new WinHttpClient());
 
         [DllImport("winhttp.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr WinHttpOpen(string pszAgentW, uint dwAccessType, string pszProxyW,
@@ -134,12 +135,7 @@ namespace Fougerite
         /// <returns></returns>
         public static WinHttpClient GetInstance()
         {
-            if (_instance == null)
-            {
-                _instance = new WinHttpClient();
-            }
-
-            return _instance;
+            return Instance.Value;
         }
 
         /// <summary>

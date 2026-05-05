@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SQLite;
 using System.IO;
+using Fougerite.Concurrent;
 
 namespace Fougerite
 {
@@ -9,7 +10,7 @@ namespace Fougerite
     /// </summary>
     public class SQLiteConnector
     {
-        private static SQLiteConnector _inst;
+        private static readonly Lazy<SQLiteConnector> Instance = new Lazy<SQLiteConnector>(() => new SQLiteConnector());
         public string SQLitePath = $"{Directory.GetCurrentDirectory()}\\Save\\FougeriteSQL.sqlite";
         private SQLiteConnection _dbConnection;
 
@@ -78,11 +79,7 @@ namespace Fougerite
         {
             get
             {
-                if (_inst == null)
-                {
-                    _inst = new SQLiteConnector();
-                }
-                return _inst;
+                return Instance.Value;
             }
         }
     }

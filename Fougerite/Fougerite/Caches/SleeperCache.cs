@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Fougerite.Concurrent;
+using ReaderWriterLock = System.Threading.ReaderWriterLock;
 
 namespace Fougerite.Caches
 {
     public class SleeperCache
     {
-        private static SleeperCache _sleeperCache;
+        private static readonly Lazy<SleeperCache> Instance = new Lazy<SleeperCache>(() => new SleeperCache());
         private readonly Dictionary<int, Sleeper> _allSleepers = new Dictionary<int, Sleeper>(100);
         private readonly ReaderWriterLock _lock = new ReaderWriterLock();
 
@@ -22,12 +24,7 @@ namespace Fougerite.Caches
         /// <returns></returns>
         public static SleeperCache GetInstance()
         {
-            if (_sleeperCache == null)
-            {
-                _sleeperCache = new SleeperCache();
-            }
-
-            return _sleeperCache;
+            return Instance.Value;
         }
         
         /// <summary>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Fougerite.Concurrent;
 using Fougerite.Tools;
 using Newtonsoft.Json;
 using ReaderWriterLock = Fougerite.Concurrent.ReaderWriterLock;
@@ -19,7 +20,7 @@ namespace Fougerite.Permissions
     /// </summary>
     public class PermissionSystem
     {
-        private static PermissionSystem _instance;
+        private static readonly Lazy<PermissionSystem> Instance = new Lazy<PermissionSystem>(() => new PermissionSystem());
         private static readonly ReaderWriterLock PermLock = new ReaderWriterLock();
         private static readonly ReaderWriterLock DisableLock = new ReaderWriterLock();
         private readonly PermissionHandler _handler;
@@ -289,12 +290,7 @@ namespace Fougerite.Permissions
         /// <returns>The active PermissionSystem instance.</returns>
         public static PermissionSystem GetPermissionSystem()
         {
-            if (_instance == null)
-            {
-                _instance = new PermissionSystem();
-            }
-
-            return _instance;
+            return Instance.Value;
         }
 
         /// <summary>

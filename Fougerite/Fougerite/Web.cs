@@ -6,6 +6,7 @@ using System.Net.Security;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Fougerite.Concurrent;
 using Stream = System.IO.Stream;
 
 namespace Fougerite
@@ -16,7 +17,7 @@ namespace Fougerite
     /// </summary>
     public class Web
     {
-        private static Web _webInstance;
+        private static readonly Lazy<Web> Instance = new Lazy<Web>(() => new Web());
         
         /// <summary>
         /// SSL Protocols.
@@ -62,12 +63,7 @@ namespace Fougerite
         /// <returns></returns>
         public static Web GetInstance()
         {
-            if (_webInstance == null)
-            {
-                _webInstance = new Web();
-            }
-
-            return _webInstance;
+            return Instance.Value;
         }
 
         /// <summary>

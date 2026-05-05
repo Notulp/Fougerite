@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Fougerite.Concurrent;
 using ReaderWriterLock = Fougerite.Concurrent.ReaderWriterLock;
 
 namespace Fougerite.Caches
@@ -17,7 +18,7 @@ namespace Fougerite.Caches
     /// </summary>
     public class EntityCache
     {
-        private static EntityCache _entityCache;
+        private static readonly Lazy<EntityCache> Instance = new Lazy<EntityCache>(() => new EntityCache());
         /// <summary>
         /// https://forum.unity.com/threads/getinstanceid-v-gethashcode.1005546/
         /// Although in Unity 4.5.5f this doesn't seem to be the case yet to check for threads, although I'm not sure of the native
@@ -38,12 +39,7 @@ namespace Fougerite.Caches
         /// <returns></returns>
         public static EntityCache GetInstance()
         {
-            if (_entityCache == null)
-            {
-                _entityCache = new EntityCache();
-            }
-
-            return _entityCache;
+            return Instance.Value;
         }
 
         /// <summary>

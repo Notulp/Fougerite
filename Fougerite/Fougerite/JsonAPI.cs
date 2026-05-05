@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Fougerite.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
@@ -10,7 +11,7 @@ namespace Fougerite
 {
     public class JsonAPI
     {
-        private static JsonAPI _inst;
+        private static readonly Lazy<JsonAPI> Instance = new Lazy<JsonAPI>(() => new JsonAPI());
 
         public string SerializeObjectToJson(object target)
         {
@@ -126,7 +127,10 @@ namespace Fougerite
 
         public static JsonAPI GetInstance
         {
-            get { return _inst ?? (_inst = new JsonAPI()); }
+            get
+            {
+                return Instance.Value;
+            }
         }
     }
 }

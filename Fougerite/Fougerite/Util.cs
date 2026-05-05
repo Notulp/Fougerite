@@ -28,7 +28,7 @@ namespace Fougerite
     public class Util
     {
         private readonly ConcurrentDictionary<string, Type> _typeCache = new ConcurrentDictionary<string, Type>();
-        private static Util _util;
+        private static readonly Lazy<Util> Instance = new Lazy<Util>(() => new Util());
         // Unity-based Timers
         public readonly ConcurrentDictionary<string, TimedEvent> Timers = new ConcurrentDictionary<string, TimedEvent>();
         public readonly ConcurrentList<TimedEvent> ParallelTimers = new ConcurrentList<TimedEvent>();
@@ -324,12 +324,7 @@ namespace Fougerite
         /// <returns></returns>
         public static Util GetUtil()
         {
-            if (_util == null)
-            {
-                _util = new Util();
-            }
-
-            return _util;
+            return Instance.Value;
         }
 
         /// <summary>

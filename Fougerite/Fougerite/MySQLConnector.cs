@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Fougerite.Concurrent;
 using MySql.Data.MySqlClient;
 
 namespace Fougerite
@@ -9,7 +10,7 @@ namespace Fougerite
     /// </summary>
     public class MySQLConnector
     {
-        private static MySQLConnector _inst;
+        private static readonly Lazy<MySQLConnector> Instance = new Lazy<MySQLConnector>(() => new MySQLConnector());
 
         private MySqlConnection connection;
         public string ServerAddress;
@@ -202,11 +203,7 @@ namespace Fougerite
         {
             get
             {
-                if (_inst == null)
-                {
-                    _inst = new MySQLConnector();
-                }
-                return _inst;
+                return Instance.Value;
             }
         }
     }

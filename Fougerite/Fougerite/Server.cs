@@ -15,7 +15,7 @@ namespace Fougerite
         private ItemsBlocks _items;
         private readonly ConcurrentDictionary<ulong, Player> _players = new ConcurrentDictionary<ulong, Player>();
         private readonly object _playersCacheLock = new object();
-        private static Server _server;
+        private static readonly Lazy<Server> Instance = new Lazy<Server>(() => new Server());
         private bool _serverLoaded;
         private bool HRustPP;
         [Obsolete("The bans were moved into the DataStore ages ago.", false)]
@@ -503,11 +503,7 @@ namespace Fougerite
         /// <returns></returns>
         public static Server GetServer()
         {
-            if (_server == null)
-            {
-                _server = new Server();
-            }
-            return _server;
+            return Instance.Value;
         }
 
         /// <summary>

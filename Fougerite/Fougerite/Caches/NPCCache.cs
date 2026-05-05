@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Fougerite.Concurrent;
 using ReaderWriterLock = Fougerite.Concurrent.ReaderWriterLock;
 
 namespace Fougerite.Caches
 {
     public class NPCCache
     {
-        private static NPCCache _npcCache;
+        private static readonly Lazy<NPCCache> Instance = new Lazy<NPCCache>(() => new NPCCache());
         private readonly Dictionary<int, NPC> _allNpcs = new Dictionary<int, NPC>(300);
         private readonly ReaderWriterLock _lock = new ReaderWriterLock();
 
@@ -23,12 +24,7 @@ namespace Fougerite.Caches
         /// <returns></returns>
         public static NPCCache GetInstance()
         {
-            if (_npcCache == null)
-            {
-                _npcCache = new NPCCache();
-            }
-
-            return _npcCache;
+            return Instance.Value;
         }
         
         /// <summary>

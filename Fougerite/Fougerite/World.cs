@@ -18,7 +18,7 @@ namespace Fougerite
     /// </summary>
     public class World
     {
-        private static World _world;
+        private static readonly Lazy<World> Instance = new Lazy<World>(() => new World());
         private readonly ConcurrentDictionary<string, Zone3D> _zones;
         public readonly Dictionary<string, double> cache = new Dictionary<string, double>();
         private List<Entity> _deployables = new List<Entity>();
@@ -47,11 +47,7 @@ namespace Fougerite
         /// <returns></returns>
         public static World GetWorld()
         {
-            if (_world == null)
-            {
-                _world = new World();
-            }
-            return _world;
+            return Instance.Value;
         }
 
         /// <summary>

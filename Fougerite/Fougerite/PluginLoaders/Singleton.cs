@@ -1,22 +1,21 @@
-﻿using System;
+﻿using Fougerite.Concurrent;
 
 namespace Fougerite.PluginLoaders
 {
-    public abstract class Singleton<T> : CountedInstance where T : ISingleton
+    public abstract class Singleton<T> : CountedInstance where T : ISingleton, new()
     {
-        private static readonly T Instance;
+        private static readonly Lazy<T> Instance = new Lazy<T>(() => new T());
 
         public static T GetInstance()
         {
-            return Instance;
+            return Instance.Value;
         }
 
         static Singleton()
         {
-            Instance = Activator.CreateInstance<T>();
-            if (Instance.CheckDependencies())
+            if (Instance.Value.CheckDependencies())
             {
-                Instance.Initialize();
+                Instance.Value.Initialize();
             }
             else
             {

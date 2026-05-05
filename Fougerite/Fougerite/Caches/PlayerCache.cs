@@ -11,7 +11,7 @@ namespace Fougerite.Caches
 {
     public class PlayerCache
     {
-        private static PlayerCache _playerCache;
+        private static readonly Lazy<PlayerCache> Instance = new Lazy<PlayerCache>(() => new PlayerCache());
         private readonly string _cachedPlayersPath;
         private readonly object _cacheLock = new object();
 
@@ -38,12 +38,7 @@ namespace Fougerite.Caches
         /// <returns></returns>
         public static PlayerCache GetPlayerCache()
         {
-            if (_playerCache == null)
-            {
-                _playerCache = new PlayerCache();
-            }
-            
-            return _playerCache;
+            return Instance.Value;
         }
         
         /// <summary>
