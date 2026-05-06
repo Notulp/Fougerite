@@ -10,6 +10,7 @@ namespace Fougerite
     /// Represents a WebSocket client implementation using native WinHTTP.
     /// Designed to provide secure, background-threaded WebSocket connections for plugins.
     /// Warning: This class is not thread safe. Only Connect and Close from the main thread ideally from a single plugin.
+    /// Send operation can be called from any thread.
     /// </summary>
     public class ScriptWebSocket : IDisposable
     {
