@@ -4,6 +4,11 @@ using System.IO;
 
 namespace Fougerite.PluginLoaders
 {
+    /// <summary>
+    /// (Iron)Python is the most versatile plugin engine, and also the fastest.
+    /// You can make reliable coding with It, and It is possible to handle most of the C# and UnityEngine
+    /// weirdness with It. Works well if you don't want to develop C#.
+    /// </summary>
     public class PythonPluginLoader : Singleton<PythonPluginLoader>, ISingleton, IPluginLoader
     {
         public PluginType Type = PluginType.Python;

@@ -34,6 +34,8 @@ namespace Fougerite.PluginLoaders
     ///      triggers a fallback to ObjectInstance.Get(name). This ensures that 
     ///      Specialized Descriptors (used in Fougerite/Rust interop) return 
     ///      correct values during loops.
+    ///
+    /// Javascript (Jint 2.7.1) is currently the slowest script language in the framework.
     /// </summary>
     public class JavaScriptPluginLoader : Singleton<JavaScriptPluginLoader>, ISingleton, IPluginLoader
     {

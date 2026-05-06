@@ -39,6 +39,8 @@ namespace Fougerite.PluginLoaders
     /// This patch allows Fougerite to safely auto-register the entire UnityEngine and 
     /// Assembly-CSharp namespaces, enabling Lua scripts to access shadowed variables 
     /// that are otherwise inaccessible in stock MoonSharp.
+    ///
+    /// Lua (MoonSharp) is currently the second fastest script language in the framework, after Python (IronPython).
     /// </summary>
     public class LuaPluginLoader : Singleton<LuaPluginLoader>, ISingleton, IPluginLoader
     {

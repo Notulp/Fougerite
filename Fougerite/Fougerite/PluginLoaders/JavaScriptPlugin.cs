@@ -106,6 +106,11 @@ namespace Fougerite.PluginLoaders
                         writable: true,
                         configurable: true
                     });
+
+                    Object.defineProperty(Array.prototype, 'Count', {
+                        get: function () { return this.length; },
+                        configurable: true
+                    });
                 ");
 
                 Engine.SetValue("Plugin", this);
