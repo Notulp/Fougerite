@@ -150,7 +150,7 @@ namespace Fougerite
         /// Does NOT dispose the object, meaning it can potentially be reconnected later.
         /// </summary>
         /// <param name="errorMessage">Optional error message explaining why the socket was closed.</param>
-        public void Close(string errorMessage = null)
+        public void Close(string errorMessage)
         {
             if (!_isConnected) 
                 return;
@@ -166,6 +166,15 @@ namespace Fougerite
             {
                 Hooks.SocketClosed(closedEvent);
             });
+        }
+
+        /// <summary>
+        /// Closes the WebSocket connection, releases WinHTTP handles, and fires the Disconnected event.
+        /// Does NOT dispose the object, meaning it can potentially be reconnected later.
+        /// </summary>
+        public void Close()
+        {
+            Close("Disconnected by plugin");
         }
 
         /// <summary>
