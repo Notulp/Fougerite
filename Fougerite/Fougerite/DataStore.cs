@@ -8,7 +8,7 @@ using Fougerite.Concurrent;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using ReaderWriterLock = System.Threading.ReaderWriterLock;
+using ReaderWriterLock = Fougerite.Concurrent.ReaderWriterLock;
 
 namespace Fougerite
 {

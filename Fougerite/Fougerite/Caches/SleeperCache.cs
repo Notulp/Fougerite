@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Fougerite.Concurrent;
-using ReaderWriterLock = System.Threading.ReaderWriterLock;
+using ReaderWriterLock = Fougerite.Concurrent.ReaderWriterLock;
 
 namespace Fougerite.Caches
 {
