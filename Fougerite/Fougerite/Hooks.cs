@@ -192,8 +192,7 @@ namespace Fougerite
                     string s = Regex.Replace(newchat, @"\[/?color\b.*?\]", string.Empty);
                     if (s.Length <= 100)
                     {
-                        Data.GetData().chat_history.Add(chatstr);
-                        Data.GetData().chat_history_username.Add(quotedName);
+                        AddChatToHistory(player.UID, quotedName, chatstr.NewText);
                         ConsoleNetworker.Broadcast($"chat.add {quotedName} {newchat}");
                         return;
                     }
@@ -211,8 +210,7 @@ namespace Fougerite
 
                     foreach (string x in ns)
                     {
-                        Data.GetData().chat_history.Add(x);
-                        Data.GetData().chat_history_username.Add(quotedName);
+                        AddChatToHistory(player.UID, quotedName, x);
 
                         ConsoleNetworker.Broadcast(i == 1
                             ? $"chat.add {quotedName} \"{arr[arr.Length - 1]}{x}"
@@ -220,6 +218,51 @@ namespace Fougerite
 
                         i++;
                     }
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Helper to handle thread-safe history additions and enforce a strict 2000 entry boundary limit.
+        /// Clamps sizes down to 1000 entries immediately upon breach.
+        /// </summary>
+        private static void AddChatToHistory(ulong steamId, string quotedName, string message)
+        {
+            var dataInstance = Data.GetData();
+            var utilInstance = Util.GetUtil();
+          
+#pragma warning disable CS0618 // Type or member is obsolete
+            Data.GetData().chat_history.Add(message);
+            Data.GetData().chat_history_username.Add(quotedName);
+            Util.GetUtil().ChatHistory[steamId] = message;
+            
+            if (dataInstance.chat_history.Count > 2000)
+            {
+                int removeCount = dataInstance.chat_history.Count - 1000;
+                if (removeCount > 0)
+                {
+                    dataInstance.chat_history.RemoveRange(0, removeCount);
+                }
+            }
+
+            if (dataInstance.chat_history_username.Count > 2000)
+            {
+                int removeCount = dataInstance.chat_history_username.Count - 1000;
+                if (removeCount > 0)
+                {
+                    dataInstance.chat_history_username.RemoveRange(0, removeCount);
+                }
+            }
+#pragma warning restore CS0618 // Type or member is obsolete
+            
+            if (utilInstance.ChatHistory.Count > 2000)
+            {
+                var keys = utilInstance.ChatHistory.Keys.ToArray();
+                int overflowCount = keys.Length - 1000;
+
+                for (int i = 0; i < overflowCount; i++)
+                {
+                    utilInstance.ChatHistory.TryRemove(keys[i]);
                 }
             }
         }

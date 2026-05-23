@@ -35,6 +35,11 @@ namespace Fougerite
         // System.Timers.Timer based Timers
         public readonly ConcurrentDictionary<string, SystemTimerEvent> SystemTimers = new ConcurrentDictionary<string, SystemTimerEvent>();
         public readonly ConcurrentList<SystemTimerEvent> ParallelSystemTimers = new ConcurrentList<SystemTimerEvent>();
+        
+        /// <summary>
+        /// Chat history of the server. Key is the player's steamid, value is the last message sent by the player.
+        /// </summary>
+        public readonly ConcurrentDictionary<ulong, string> ChatHistory = new ConcurrentDictionary<ulong, string>();
 
         /// <summary>
         /// All unstackable item names in rust legacy.

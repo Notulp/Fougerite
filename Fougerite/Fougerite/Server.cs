@@ -521,7 +521,7 @@ namespace Fougerite
         {
             get
             {
-                return Data.GetData().chat_history;
+                return Util.GetUtil().ChatHistory.ValuesCopy;
             }
         }
 
@@ -532,7 +532,9 @@ namespace Fougerite
         {
             get
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 return Data.GetData().chat_history_username;
+#pragma warning restore CS0618 // Type or member is obsolete
             }
         }
 
