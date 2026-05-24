@@ -1437,7 +1437,10 @@ namespace Fougerite
             //) + terrainPos;
             
             // You could also do: WoodBlockerTemp wbt = WoodBlockerTemp.GetBlockerForPoint(worldPos);
-            // But careful because it's a heavy call
+            // But careful because it's a heavy call for all objects
+            // Also WoodBlockerTempAwake basically destroys this object after 5 minutes
+            // because It was used client side originally to reset the tree
+            // wood contents
             
             return instances.ToList();
         }
