@@ -1411,7 +1411,7 @@ namespace Fougerite
         /// <returns>A list of tree instances from the active terrain.</returns>
         public List<TreeInstance> GetAllTreeInstances()
         {
-            List<TreeInstance> positions = new List<TreeInstance>();
+            List<TreeInstance> positions = new List<TreeInstance>(29050);
 
             Terrain terrain = Terrain.activeTerrain;
             if (terrain == null || terrain.terrainData == null)
