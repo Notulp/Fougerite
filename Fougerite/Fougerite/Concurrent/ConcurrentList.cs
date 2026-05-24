@@ -308,5 +308,40 @@ namespace Fougerite.Concurrent
         {
             get { return false; }
         }
+        
+        /// <summary>
+        /// Adds the elements of the specified collection to the end of the list. Requires an exclusive writer lock.
+        /// </summary>
+        /// <param name="collection">The collection whose elements should be added to the end of the list.</param>
+        public void AddRange(IEnumerable<T> collection)
+        {
+            try
+            {
+                _lock.AcquireWriterLock(Timeout.Infinite);
+                _list.AddRange(collection);
+            }
+            finally
+            {
+                _lock.ReleaseWriterLock();
+            }
+        }
+        
+        /// <summary>
+        /// Removes a range of elements from the list. Requires an exclusive writer lock.
+        /// </summary>
+        /// <param name="index">The zero-based starting index of the range of elements to remove.</param>
+        /// <param name="count">The number of elements to remove.</param>
+        public void RemoveRange(int index, int count)
+        {
+            try
+            {
+                _lock.AcquireWriterLock(Timeout.Infinite);
+                _list.RemoveRange(index, count);
+            }
+            finally
+            {
+                _lock.ReleaseWriterLock();
+            }
+        }
     }
 }

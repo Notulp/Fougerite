@@ -1532,34 +1532,173 @@ namespace Fougerite
                 }
             }
         }
-
-        public static void PlayerGatherWood(IMeleeWeaponItem rec, ResourceTarget rt, ref ItemDataBlock db,
-            ref int amount, ref string name)
+        
+        public static void PlayerGatherWood(MeleeWeaponDataBlock weaponDataBlock, uLink.BitStream stream,
+            ItemRepresentation rep, ref uLink.NetworkMessageInfo info)
         {
             using (new Stopper(nameof(Hooks), nameof(PlayerGatherWood)))
             {
-                Player player = Player.FindByNetworkPlayer(rec.inventory.networkView.owner);
-                GatherEvent ge = new GatherEvent(rt, db, amount)
+                NetCull.VerifyRPC(ref info, false);
+                GameObject gameObject;
+                NetEntityID netEntityID;
+                if (stream.ReadBoolean())
                 {
-                    Item = "Wood"
-                };
-
-                try
-                {
-                    ExecuteSubscribers(OnPlayerGathering, "PlayerGatherWoodEvent", player, ge);
-
-                    ItemDataBlock item = Server.GetServer().Items.Find(ge.Item);
-                    if (item != null)
-                        db = item;
-                    
-                    amount = ge.Quantity;
-                    name = ge.Item;
+                    netEntityID = stream.Read<NetEntityID>(new object[0]);
+                    if (!netEntityID.isUnassigned)
+                    {
+                        gameObject = netEntityID.gameObject;
+                        if (!gameObject)
+                        {
+                            netEntityID = NetEntityID.unassigned;
+                        }
+                    }
+                    else
+                    {
+                        gameObject = null;
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Logger.LogError($"PlayerGatherWoodEvent Error: {ex}");
+                    netEntityID = NetEntityID.unassigned;
+                    gameObject = null;
+                }
+
+                Vector3 hitPos = stream.ReadVector3();
+                bool flag = stream.ReadBoolean();
+                IMeleeWeaponItem meleeWeaponItem;
+                if (!rep.Item<global::IMeleeWeaponItem>(out meleeWeaponItem))
+                {
+                    return;
+                }
+
+                TakeDamage local = meleeWeaponItem.inventory.GetLocal<TakeDamage>();
+                if (local && local.dead)
+                {
+                    return;
+                }
+
+                if (!meleeWeaponItem.ValidatePrimaryMessageTime(info.timestamp))
+                {
+                    return;
+                }
+
+                IDBase idbase = gameObject ? IDBase.Get(gameObject) : null;
+                TakeDamage takeDamage = idbase ? idbase.idMain.GetLocal<TakeDamage>() : null;
+
+                if (gameObject)
+                {
+                    float num = Vector3.Distance(local.transform.position, gameObject.transform.position);
+                    if (num >= 6f)
+                    {
+                        return;
+                    }
+                }
+
+                Metabolism component = meleeWeaponItem.inventory.GetComponent<Metabolism>();
+                if (component)
+                {
+                    component.SubtractCalories(global::UnityEngine.Random.Range(weaponDataBlock.caloriesPerSwing * 0.8f,
+                        weaponDataBlock.caloriesPerSwing * 1.2f));
+                }
+
+                rep.ActionStream(1, global::uLink.RPCMode.AllExceptOwner, stream);
+                ResourceTarget resourceTarget = ((!(idbase == null) || !(gameObject == null))
+                    ? ((!(idbase == null)) ? idbase.gameObject : gameObject).GetComponent<ResourceTarget>()
+                    : null);
+
+                if (flag || (resourceTarget && (takeDamage == null || takeDamage.dead)))
+                {
+                    if (flag)
+                    {
+                        Collider[] hitColliders = Facepunch.MeshBatch.MeshBatchPhysics.OverlapSphere(hitPos, 4.5f);
+                        GameObject treeGameObject = null; 
+                        foreach (var col in hitColliders)
+                        {
+                            if (col != null && col.tag == "Tree Collider")
+                            {
+                                treeGameObject = col.gameObject;
+                                break;
+                            }
+                        }
+                        
+                        // Player sent a position for farming a tree, but there is no tree collider
+                        // Could be a potential tree farming cheat
+                        if (treeGameObject == null) 
+                            return;
+                        
+                        Player player = Player.FindByNetworkPlayer(info.sender);
+                        // Sanity check
+                        if (player == null) 
+                            return;
+                        
+                        // Player is too far from the position, potential tree farming cheat
+                        if (Vector3.Distance(player.Location, hitPos) >= 6f) 
+                            return;
+                        
+                        WoodBlockerTemp wbt = WoodBlockerTemp.GetBlockerForPoint(hitPos);
+                        if (wbt != null && wbt.HasWood())
+                        {
+                            float efficiency =
+                                weaponDataBlock.efficiencies[(int)ResourceTarget.ResourceTargetType.StaticTree];
+                            weaponDataBlock.resourceGatherLevel += efficiency;
+
+                            if (weaponDataBlock.resourceGatherLevel >= 1f)
+                            {
+                                int qty = Mathf.FloorToInt(weaponDataBlock.resourceGatherLevel);
+                                string itemName = "Wood";
+                                ItemDataBlock db = DatablockDictionary.GetByName(itemName);
+
+                                GatherEvent ge = new GatherEvent(resourceTarget, db, qty, wbt, treeGameObject);
+
+                                ExecuteSubscribers(OnPlayerGathering, "PlayerGatherWoodEvent",
+                                    Player.FindByNetworkPlayer(info.sender), ge);
+
+                                ItemDataBlock item = Server.GetServer().Items.Find(ge.Item);
+                                if (item != null)
+                                    db = item;
+                                qty = ge.Quantity;
+
+                                int numAdded = meleeWeaponItem.inventory.AddItemAmount(db, qty);
+                                int numGiven = qty - numAdded;
+
+                                if (numGiven > 0)
+                                {
+                                    weaponDataBlock.resourceGatherLevel -= (float)numGiven;
+                                    wbt.ConsumeWood((float)numGiven);
+                                    Notice.Inventory(info.sender, numGiven.ToString() + " x " + db.name);
+                                }
+                            }
+                        }
+                    }
+                    else if (resourceTarget)
+                    {
+                        resourceTarget.DoGather(meleeWeaponItem.inventory,
+                            weaponDataBlock.efficiencies[(int)resourceTarget.type]);
+                    }
+                }
+
+                if (idbase)
+                {
+                    float damage = weaponDataBlock.GetDamage();
+                    TakeDamage.Hurt(meleeWeaponItem.inventory, idbase, new DamageTypeList(0f, 0f, damage, 0f, 0f, 0f),
+                        new WeaponImpact(weaponDataBlock, meleeWeaponItem, rep));
+                }
+
+                if (gameObject)
+                {
+                    meleeWeaponItem.TryConditionLoss(0.25f, 0.025f);
                 }
             }
+        }
+
+        public static void WoodBlockerTempAwake(WoodBlockerTemp woodBlockerTemp)
+        {
+            WoodBlockerTemp.TryInitBlockers();
+            var maxWood = UnityEngine.Random.Range(10, 15);
+            woodBlockerTemp.numWood = maxWood;
+            woodBlockerTemp.maxWood = maxWood;
+            WoodBlockerTemp._blockers.Add(woodBlockerTemp);
+            UnityEngine.Object.Destroy(woodBlockerTemp.gameObject, 300f);
         }
 
         public static bool PlayerKilled(ref DamageEvent de)
@@ -2850,6 +2989,7 @@ namespace Fougerite
             
             Logger.Log("Server Initialized.");
             UnityEngine.Object.Destroy(init.gameObject);
+            World.GetWorld().AllTrees.AddRange(World.GetWorld().GetAllTreeInstances());
             yield break;
         }
 

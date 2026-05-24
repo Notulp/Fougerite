@@ -26,6 +26,7 @@ namespace Fougerite
         private List<Entity> _structurems = new List<Entity>();
         private List<Entity> _structures = new List<Entity>();
         public int CacheUpdateTime = 120;
+        public ConcurrentList<TreeInstance> AllTrees = new ConcurrentList<TreeInstance>();
 
         public World()
         {
@@ -1401,6 +1402,44 @@ namespace Fougerite
                     // Ignore?
                 }
             }
+        }
+
+        /// <summary>
+        /// Retrieves all tree instances present in the active terrain of the game.
+        /// Do not use this under a Thread.
+        /// </summary>
+        /// <returns>A list of tree instances from the active terrain.</returns>
+        public List<TreeInstance> GetAllTreeInstances()
+        {
+            List<TreeInstance> positions = new List<TreeInstance>();
+
+            Terrain terrain = Terrain.activeTerrain;
+            if (terrain == null || terrain.terrainData == null)
+            {
+                return positions;
+            }
+
+            TerrainData data = terrain.terrainData;
+            // Vector3 terrainPos = terrain.transform.position;
+            // Vector3 terrainSize = data.size;
+
+            TreeInstance[] instances = data.treeInstances;
+            if (instances == null || instances.Length == 0)
+            {
+                return positions;
+            }
+
+            // Depending on what you want to do, you could do
+            // Vector3 worldPos = new Vector3(
+            //    instance.position.x * terrainSize.x,
+            //    instance.position.y * terrainSize.y,
+            //    instance.position.z * terrainSize.z
+            //) + terrainPos;
+            
+            // You could also do: WoodBlockerTemp wbt = WoodBlockerTemp.GetBlockerForPoint(worldPos);
+            // But careful because it's a heavy call
+            
+            return instances.ToList();
         }
     }
 }

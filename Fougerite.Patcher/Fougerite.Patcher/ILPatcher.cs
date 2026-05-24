@@ -1788,17 +1788,39 @@ namespace Fougerite.Patcher
         private void PlayerGatherWoodPatch()
         {
             TypeDefinition type = rustAssembly.MainModule.GetType("MeleeWeaponDataBlock");
-            MethodDefinition orig = type.GetMethod("DoAction1");
+            type.GetField("resourceGatherLevel").SetPublic(true);
+            MethodDefinition DoAction1 = type.GetMethod("DoAction1");
             MethodDefinition method = hooksClass.GetMethod("PlayerGatherWood");
 
-            this.CloneMethod(orig);
-            ILProcessor iLProcessor = orig.Body.GetILProcessor(); // 184 - if (byName != null)
-            iLProcessor.InsertBefore(orig.Body.Instructions[184], Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(method)));
-            iLProcessor.InsertBefore(orig.Body.Instructions[184], Instruction.Create(OpCodes.Ldloca_S, orig.Body.Variables[16]));
-            iLProcessor.InsertBefore(orig.Body.Instructions[184], Instruction.Create(OpCodes.Ldloca_S, orig.Body.Variables[14]));
-            iLProcessor.InsertBefore(orig.Body.Instructions[184], Instruction.Create(OpCodes.Ldloca_S, orig.Body.Variables[17]));
-            iLProcessor.InsertBefore(orig.Body.Instructions[184], Instruction.Create(OpCodes.Ldloc_S, orig.Body.Variables[11]));
-            iLProcessor.InsertBefore(orig.Body.Instructions[184], Instruction.Create(OpCodes.Ldloc_S, orig.Body.Variables[5]));
+            ILProcessor iLProcessor = DoAction1.Body.GetILProcessor();
+            iLProcessor.Body.Instructions.Clear();
+            iLProcessor.Body.ExceptionHandlers.Clear();
+            iLProcessor.Body.Variables.Clear();
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_3));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(method)));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        }
+        
+        private void PatchWoodBlockerTemp()
+        {
+            TypeDefinition wbt = rustAssembly.MainModule.GetType("WoodBlockerTemp");
+            wbt.GetMethod("TryInitBlockers").SetPublic(true);
+            FieldDefinition maxWoodField = new FieldDefinition("maxWood", FieldAttributes.Public, rustAssembly.MainModule.TypeSystem.Single);
+            wbt.Fields.Add(maxWoodField);
+            
+            MethodDefinition method = hooksClass.GetMethod("WoodBlockerTempAwake");
+
+            MethodDefinition awake = wbt.GetMethod("Awake");
+            ILProcessor iLProcessor = awake.Body.GetILProcessor();
+            iLProcessor.Body.Instructions.Clear();
+            iLProcessor.Body.ExceptionHandlers.Clear();
+            iLProcessor.Body.Variables.Clear();
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(method)));
+            iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         }
 
         private void PlayerGatherPatch()
@@ -3102,6 +3124,7 @@ namespace Fougerite.Patcher
                     this.BlueprintUsePatch();
                     this.EntityDeployedPatch_DeployableItemDataBlock();
                     //this.EntityDeployedPatch_StructureComponentDataBlock();
+                    this.PatchWoodBlockerTemp();
                     this.PlayerGatherWoodPatch();
                     this.PlayerGatherPatch();
                     this.PlayerSpawningSpawnedPatch();

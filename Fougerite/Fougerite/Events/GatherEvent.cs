@@ -1,4 +1,6 @@
-﻿namespace Fougerite.Events
+﻿using UnityEngine;
+
+namespace Fougerite.Events
 {
     /// <summary>
     /// This class is created when a player is gathering from an animal or from a resource.
@@ -12,6 +14,9 @@
         private readonly ResourceTarget _res;
         private readonly ItemDataBlock _dataBlock;
         private readonly ResourceGivePair _resourceGivePair;
+        private readonly WoodBlockerTemp _wbt;
+        private readonly GameObject _treeGameObject;
+        private readonly ResourceTarget.ResourceTargetType _resType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GatherEvent"/> class for Tree gathering.
@@ -19,14 +24,19 @@
         /// <param name="r">The resource target being hit.</param>
         /// <param name="db">The datablock of the item being gathered.</param>
         /// <param name="qty">The initial quantity to be gathered.</param>
-        public GatherEvent(ResourceTarget r, ItemDataBlock db, int qty)
+        /// <param name="wbt">The WoodBlockerTemp instance associated with this tree gathering event.</param>
+        /// <param name="treeGameObject">The collider gameobject of the tree being farmed.</param>
+        public GatherEvent(ResourceTarget r, ItemDataBlock db, int qty, WoodBlockerTemp wbt, GameObject treeGameObject)
         {
             _res = r;
+            _wbt = wbt;
+            _treeGameObject = treeGameObject;
             _qty = qty;
             _item = db.name;
             _type = "Tree";
             _dataBlock = db;
             Override = false;
+            _resType = ResourceTarget.ResourceTargetType.StaticTree;
         }
 
         /// <summary>
@@ -44,6 +54,7 @@
             _type = _res.type.ToString();
             _resourceGivePair = gp;
             Override = false;
+            _resType = r.type;
         }
 
         /// <summary>
@@ -53,7 +64,12 @@
         {
             get
             {
-                return _res.GetTotalResLeft();
+                if (_wbt != null)
+                    return (int) _wbt.GetWoodLeft();
+                if (_res != null)
+                    return _res.GetTotalResLeft();
+
+                return 0;
             }
         }
 
@@ -97,7 +113,12 @@
         {
             get
             {
-                return _res.GetPercentFull();
+                if (_wbt != null)
+                    return _wbt.GetWoodLeft() / _wbt.maxWood;
+                if (_res != null)
+                    return _res.GetPercentFull();
+
+                return 0f;
             }
         }
 
@@ -119,7 +140,7 @@
         }
 
         /// <summary>
-        /// Gets the type of resource we are hitting.
+        /// Gets the name of type of resource we are hitting.
         /// </summary>
         public string Type
         {
@@ -131,6 +152,7 @@
 
         /// <summary>
         /// Gets the original <see cref="ResourceTarget"/> object being interacted with.
+        /// This is NULL when you farm a tree by the logic of rust legacy.
         /// </summary>
         public ResourceTarget ResourceTarget
         {
@@ -153,13 +175,54 @@
 
         /// <summary>
         /// Gets the original <see cref="ResourceGivePair"/> associated with this gather.
-        /// Null if gathering from a Tree.
+        /// This is NULL when you farm a tree by the logic of rust legacy.
         /// </summary>
         public ResourceGivePair ResourceGivePair
         {
             get
             {
                 return _resourceGivePair;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="WoodBlockerTemp"/> instance associated with this gather event, if applicable.
+        /// Only non-null for tree gathering events. Originally Rust legacy server doesn't know where trees are
+        /// so the client side decides which tree you are gathering. The gather is then broadcasted to all players
+        /// server side for local WoodBlockerTemp instance, so multiple players cannot farm the same tree at the same time.
+        /// By default the trees reload after 5 minutes.
+        /// Fougerite adds server side check by using WoodBlockerTemp that Facepunch implemented so It is also
+        /// verified, and tree farming cheats do not work anymore.
+        /// Plugins can now also access the content of the tree being farmed.
+        /// </summary>
+        public WoodBlockerTemp WoodBlockerTemp
+        {
+            get
+            {
+                return _wbt;
+            }
+        }
+
+        /// <summary>
+        /// The collider GameObject of the tree being farmed.
+        /// This is NULL when you farm a resource that is not a tree.
+        /// </summary>
+        public GameObject TreeGameObject
+        {
+            get
+            {
+                return _treeGameObject;
+            }
+        }
+
+        /// <summary>
+        /// Gets the enum type of the resource we are hitting.
+        /// </summary>
+        public ResourceTarget.ResourceTargetType ResourceTargetType
+        {
+            get
+            {
+                return _resType;
             }
         }
     }
