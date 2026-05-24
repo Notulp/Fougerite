@@ -31,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DocumentationFile>Fougerite.xml</DocumentationFile>
+    <NoWarn>1570;1571;1572;1573;1574;1587;1591;1711</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'SERVER|AnyCPU'">
     <OutputPath>..\bin\</OutputPath>

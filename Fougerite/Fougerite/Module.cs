@@ -112,7 +112,7 @@ namespace Fougerite
         /// <param name="args">Dictionary of custom arguments to pass to the timer.</param>
         /// <param name="callback">The callback function to execute when timer fires.</param>
         /// <param name="autoReset">True if the timer should repeat, false for single execution.</param>
-        /// <param name="maxElapsedCount = 0">Optional: Max fires before killing. 0 = infinite.</param>
+        /// <param name="maxElapsedCount">Optional: Max fires before killing. 0 = infinite.</param>
         /// <returns>The created TimedEvent instance.</returns>
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args, Action<TimedEvent> callback, bool autoReset = false, int maxElapsedCount = 0)
         {
