@@ -29,6 +29,8 @@
     <DefineConstants>TRACE;SERVER</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DocumentationFile>Fougerite.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'SERVER|AnyCPU'">
     <OutputPath>..\bin\</OutputPath>
