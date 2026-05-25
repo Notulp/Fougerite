@@ -532,9 +532,25 @@ namespace Fougerite
         {
             get
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                return Data.GetData().chat_history_username;
-#pragma warning restore CS0618 // Type or member is obsolete
+                var chatHistory = Util.GetUtil().ChatHistory.GetShallowCopy();
+                List<string> users = new List<string>(chatHistory.Count);
+
+                foreach (var entry in chatHistory)
+                {
+                    ulong steamId = entry.Key;
+                    var cachedPlayer = PlayerCache.GetPlayerCache().GetPlayerBySteamId(steamId);
+                    
+                    if (cachedPlayer != null && !string.IsNullOrEmpty(cachedPlayer.Name))
+                    {
+                        users.Add(cachedPlayer.Name);
+                    }
+                    else
+                    {
+                        users.Add("Unknown Player");
+                    }
+                }
+
+                return users;
             }
         }
 
