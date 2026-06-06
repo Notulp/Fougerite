@@ -232,10 +232,19 @@ namespace Fougerite
             var utilInstance = Util.GetUtil();
           
 #pragma warning disable CS0618 // Type or member is obsolete
-            Data.GetData().chat_history.Add(message);
-            Data.GetData().chat_history_username.Add(quotedName);
-            Util.GetUtil().ChatHistory[steamId] = message;
+            dataInstance.chat_history.Add(message);
+            dataInstance.chat_history_username.Add(quotedName);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            utilInstance.ChatHistory.Add(new ChatEntry
+            {
+                SteamID = steamId,
+                Username = quotedName,
+                Message = message,
+                Timestamp = DateTime.UtcNow
+            });
             
+#pragma warning disable CS0618 // Type or member is obsolete
             if (dataInstance.chat_history.Count > 2000)
             {
                 int removeCount = dataInstance.chat_history.Count - 1000;
@@ -257,12 +266,10 @@ namespace Fougerite
             
             if (utilInstance.ChatHistory.Count > 2000)
             {
-                var keys = utilInstance.ChatHistory.Keys.ToArray();
-                int overflowCount = keys.Length - 1000;
-
+                int overflowCount = utilInstance.ChatHistory.Count - 1000;
                 for (int i = 0; i < overflowCount; i++)
                 {
-                    utilInstance.ChatHistory.TryRemove(keys[i]);
+                    utilInstance.ChatHistory.RemoveAt(0);
                 }
             }
         }

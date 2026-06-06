@@ -37,9 +37,9 @@ namespace Fougerite
         public readonly ConcurrentList<SystemTimerEvent> ParallelSystemTimers = new ConcurrentList<SystemTimerEvent>();
         
         /// <summary>
-        /// Chat history of the server. Key is the player's steamid, value is the last message sent by the player.
+        /// Chat history of the server.
         /// </summary>
-        public readonly ConcurrentDictionary<ulong, string> ChatHistory = new ConcurrentDictionary<ulong, string>();
+        public readonly ConcurrentList<ChatEntry> ChatHistory = new ConcurrentList<ChatEntry>();
 
         /// <summary>
         /// All unstackable item names in rust legacy.

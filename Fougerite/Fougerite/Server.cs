@@ -521,7 +521,18 @@ namespace Fougerite
         {
             get
             {
-                return Util.GetUtil().ChatHistory.ValuesCopy;
+                var chatHistory = Util.GetUtil().ChatHistory.ToArray();
+                List<string> messages = new List<string>(chatHistory.Length);
+
+                foreach (var entry in chatHistory)
+                {
+                    if (entry != null)
+                    {
+                        messages.Add(entry.Message ?? string.Empty);
+                    }
+                }
+
+                return messages;
             }
         }
 
@@ -532,17 +543,14 @@ namespace Fougerite
         {
             get
             {
-                var chatHistory = Util.GetUtil().ChatHistory.GetShallowCopy();
-                List<string> users = new List<string>(chatHistory.Count);
+                var chatHistory = Util.GetUtil().ChatHistory.ToArray();
+                List<string> users = new List<string>(chatHistory.Length);
 
                 foreach (var entry in chatHistory)
                 {
-                    ulong steamId = entry.Key;
-                    var cachedPlayer = PlayerCache.GetPlayerCache().GetPlayerBySteamId(steamId);
-                    
-                    if (cachedPlayer != null && !string.IsNullOrEmpty(cachedPlayer.Name))
+                    if (entry != null && !string.IsNullOrEmpty(entry.Username))
                     {
-                        users.Add(cachedPlayer.Name);
+                        users.Add(entry.Username);
                     }
                     else
                     {
