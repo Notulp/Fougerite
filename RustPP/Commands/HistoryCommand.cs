@@ -20,8 +20,8 @@ namespace RustPP.Commands
             }
 
             var utilInstance = Util.GetUtil();
-            var historyKeys = utilInstance.ChatHistory.KeysCopy;
-            int totalEntries = historyKeys.Count;
+            var historySnapshot = utilInstance.ChatHistory.GetShallowCopy();
+            int totalEntries = historySnapshot.Count;
             int displayCount = Math.Min(historyLimit, totalEntries);
 
             if (displayCount <= 0)
@@ -33,9 +33,14 @@ namespace RustPP.Commands
             int startIndex = totalEntries - displayCount;
             for (int i = startIndex; i < totalEntries; i++)
             {
-                ulong steamId = historyKeys[i];
+                var entry = historySnapshot[i];
+                if (entry == null)
+                    continue;
+
+                ulong steamId = entry.SteamID;
+                string chatMessage = entry.Message;
                 
-                if (utilInstance.ChatHistory.TryGetValue(steamId, out string chatMessage) && chatMessage != null)
+                if (chatMessage != null)
                 {
                     string playername;
                     
