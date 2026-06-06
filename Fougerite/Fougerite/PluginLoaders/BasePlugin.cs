@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Fougerite.Concurrent;
 using Fougerite.Events;
 using Fougerite.Tools;
@@ -41,13 +42,13 @@ namespace Fougerite.PluginLoaders
         /// Name of the Plugin.
         /// </summary>
         /// <value>The name.</value>
-        public string Name { get; private set; }
+        public string Name { get; protected set; }
 
         /// <summary>
         /// DirectoryInfo of the directory in which the plugin is in.
         /// </summary>
         /// <value>The root dir.</value>
-        public DirectoryInfo RootDir { get; private set; }
+        public DirectoryInfo RootDir { get; internal set; }
 
         /// <summary>
         /// Global methods of the plugin.
@@ -95,7 +96,33 @@ namespace Fougerite.PluginLoaders
         public virtual void Load(string code = "")
         {
         }
+        
+        /// <summary>
+        /// Empty constructor for backward compatibility with old C# Modules.
+        /// </summary>
+        public BasePlugin()
+        {
+            Globals = new ConcurrentList<string>();
+            CachedGlobals = new ConcurrentDictionary<string, object>();
+            Timers = new ConcurrentDictionary<string, TimedEvent>();
+            ParallelTimers = new ConcurrentList<TimedEvent>();
+            CommandList = new ConcurrentList<string>();
+            WebSockets = new ConcurrentList<ScriptWebSocket>();
 
+            if (Type != PluginType.CSharp && Type != PluginType.CSScript) 
+                return;
+            
+            var nameProp = GetType().GetProperty("Name", BindingFlags.Public | BindingFlags.Instance);
+            if (nameProp != null)
+            {
+                Name = nameProp.GetValue(this, null) as string;
+            }
+            else
+            {
+                throw new Exception("Name property could not be retrieved via reflection. Please ensure the plugin has a public instance property named 'Name'.");
+            }
+        }
+            
         /// <summary>
         /// Initializes a new instance of the <see cref="BasePlugin"/> class.
         /// </summary>
@@ -653,8 +680,9 @@ namespace Fougerite.PluginLoaders
         /// <param name="args">Arguments.</param>
         /// <param name="callback">The callback function.</param>
         /// <param name="autoReset">True if the timer should raise the elapsed event each time it elapses, false if only once.</param>
+        /// <param name="maxElapsedCount">Optional: Max fires before killing. 0 = infinite.</param>
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args,
-            Action<TimedEvent> callback, bool autoReset = false)
+            Action<TimedEvent> callback, bool autoReset = false, int maxElapsedCount = 0)
         {
             Util.GetUtil().ThreadTimerCheck();
             GameObject go = new GameObject($"ParallelTimedEvent_{name}_{UnityEngine.Random.Range(1, 999999)}");
@@ -666,6 +694,7 @@ namespace Fougerite.PluginLoaders
             timedEvent.Interval = timeoutDelay;
             timedEvent.Args = args;
             timedEvent.AutoReset = autoReset;
+            timedEvent.MaxElapsedCount = maxElapsedCount;
             timedEvent.OnFire += new TimedEvent.TimedEventFireDelegate(callback);
             timedEvent.OnKilled += (cbName) => Timers.Remove(cbName);
     

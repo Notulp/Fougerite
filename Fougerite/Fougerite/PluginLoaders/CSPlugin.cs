@@ -90,6 +90,7 @@ namespace Fougerite.PluginLoaders
                     {
                         PluginInstance = (Module) Activator.CreateInstance(type);
                         PluginInstance.ModuleFolder = Path.Combine(Util.GetRootFolder(), $"Save\\{Name}");
+                        PluginInstance.RootDir = new DirectoryInfo(PluginInstance.ModuleFolder);
                         
                         if (Config.GetValue("Modules", PluginInstance.Name) != null)
                         {
