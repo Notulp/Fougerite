@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Fougerite.Concurrent;
 
 namespace Fougerite.PluginLoaders
@@ -14,7 +15,6 @@ namespace Fougerite.PluginLoaders
     {
         public Module Engine;
         public string ModuleFolder;
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CSPlugin"/> class.
@@ -74,10 +74,28 @@ namespace Fougerite.PluginLoaders
             {
                 byte[] bin = File.ReadAllBytes(code);
                 FileInfo FileInfo = new FileInfo(Path.Combine(RootDir.FullName, $"{Name}.dll"));
-                //LoadReferences();
+                
+                IntPtr pluginMem = Marshal.AllocHGlobal(bin.Length);
+                Assembly assembly;
+                try
+                {
+                    Marshal.Copy(bin, 0, pluginMem, bin.Length);
+                    var icalls = new Icalls();
+                    assembly = icalls.mono_fg_load_plugin(Name, pluginMem, (uint)bin.Length);
+                }
+                finally
+                {
+                    if (pluginMem != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(pluginMem);
+                    }
+                }
 
+                if (assembly == null)
+                {
+                    throw new Exception("Native mono plugin domain loading returned null.");
+                }
 
-                Assembly assembly = Assembly.Load(bin);
                 foreach (Type type in assembly.GetExportedTypes())
                 {
                     if (!type.IsSubclassOf(typeof(Module)) || !type.IsPublic || type.IsAbstract)

@@ -195,6 +195,35 @@ namespace Fougerite.PluginLoaders
         {
             PluginLoaders[t].LoadPlugin(name);
         }
+        
+        /// Loads a plugin of a specified type into the runtime environment.
+        /// This method identifies the appropriate plugin loader by the given type
+        /// and delegates the loading of the plugin to it.
+        /// <param name="name">The name of the plugin to load.</param>
+        /// <param name="callInit">If we should call the initialize function or not. Only for C# plugins.</param>
+        public void LoadPlugin(string name, bool callInit)
+        {
+            foreach (var pluginLoader in PluginLoaders)
+            {
+                var plugins = pluginLoader.Value.GetPluginNames();
+                foreach (var plugin in plugins)
+                {
+                    if (string.Equals(plugin, name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (pluginLoader.Key == PluginType.CSharp || pluginLoader.Key == PluginType.CSScript)
+                        {
+                            CSharpPluginLoader csharpLoader = (CSharpPluginLoader) pluginLoader.Value;
+                            csharpLoader.LoadPlugin(plugin, callInit);
+                        }
+                        else
+                        {
+                            pluginLoader.Value.LoadPlugin(plugin);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
 
         /// Loads all plugins using the registered plugin loaders.
         /// This method iterates through the registered plugin loaders

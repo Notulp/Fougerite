@@ -524,7 +524,7 @@ namespace Fougerite
             {
                 StringComparison ic = StringComparison.InvariantCultureIgnoreCase;
                 bool external = a.argUser == null;
-                bool adminRights = (a.argUser != null && a.argUser.admin) || external;
+                bool adminRights = (a.argUser != null && (a.argUser.admin || PermissionSystem.GetPermissionSystem().PlayerHasPermission(a.argUser.userID, "RCON"))) || external;
                 string Class = a.Class;
                 string Function = a.Function;
                 
@@ -619,20 +619,57 @@ namespace Fougerite
                         if (a.HasArgs(1))
                         {
                             string plugin = a.ArgsStr;
+                            bool found = false;
                             foreach (string x in PluginLoader.GetInstance().Plugins.Keys)
                             {
                                 if (string.Equals(x, plugin, StringComparison.OrdinalIgnoreCase))
                                 {
+                                    found = true;
                                     PluginLoader.GetInstance().ReloadPlugin(x);
                                     a.ReplyWith($"Fougerite: Plugin {x} reloaded!");
                                     break;
                                 }
+                            }
+                            
+                            if (!found)
+                            {
+                                a.ReplyWith($"Fougerite: {plugin} not found!");
                             }
                         }
                         else
                         {
                             PluginLoader.GetInstance().ReloadPlugins();
                             a.ReplyWith("Fougerite: Reloaded!");
+                        }
+                    }
+                }
+                else if (Class.Equals("fougerite", ic) && Function.Equals("load", ic))
+                {
+                    if (adminRights)
+                    {
+                        if (a.HasArgs(1))
+                        {
+                            string plugin = a.ArgsStr;
+                            bool alreadyLoaded = false;
+                            foreach (string x in PluginLoader.GetInstance().Plugins.Keys)
+                            {
+                                if (string.Equals(x, plugin, StringComparison.OrdinalIgnoreCase) && PluginLoader.GetInstance().Plugins[x].State == PluginState.Loaded)
+                                {
+                                    alreadyLoaded = true;
+                                    a.ReplyWith($"Fougerite: {x} is already loaded!");
+                                    break;
+                                }
+                            }
+
+                            if (!alreadyLoaded)
+                            {
+                                PluginLoader.GetInstance().LoadPlugin(plugin, true);
+                                a.ReplyWith($"Fougerite: Loaded plugin {plugin}!");
+                            }
+                        }
+                        else
+                        {
+                            a.ReplyWith("Fougerite: Please specify a plugin name to load.");
                         }
                     }
                 }
@@ -643,22 +680,25 @@ namespace Fougerite
                         if (a.HasArgs(1))
                         {
                             string plugin = a.ArgsStr;
+                            bool found = false;
                             foreach (string x in PluginLoader.GetInstance().Plugins.Keys)
                             {
                                 if (string.Equals(x, plugin, StringComparison.OrdinalIgnoreCase))
                                 {
                                     if (PluginLoader.GetInstance().Plugins[x].State == PluginState.Loaded)
                                     {
+                                        found = true;
                                         PluginLoader.GetInstance().UnloadPlugin(x);
                                         a.ReplyWith($"Fougerite: UnLoaded {x}!");
-                                    }
-                                    else
-                                    {
-                                        a.ReplyWith($"Fougerite: {x} is already unloaded!");
                                     }
 
                                     break;
                                 }
+                            }
+
+                            if (!found)
+                            {
+                                a.ReplyWith($"Fougerite: {plugin} is already unloaded!");
                             }
                         }
                     }

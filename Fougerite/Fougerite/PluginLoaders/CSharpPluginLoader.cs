@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Fougerite.PluginLoaders
 {
@@ -49,8 +50,13 @@ namespace Fougerite.PluginLoaders
 
             return Data;
         }
-
+        
         public void LoadPlugin(string name)
+        {
+            LoadPlugin(name, false);
+        }
+        
+        public void LoadPlugin(string name, bool init)
         {
             if (Bootstrap.IgnoredPlugins.Contains(name.ToLower()))
             {
@@ -81,7 +87,21 @@ namespace Fougerite.PluginLoaders
 
                 PluginLoader.GetInstance().CurrentlyLoadingPlugins.Add(name);
 
-                new CSPlugin(name, code, path);
+                CSPlugin plugin = new CSPlugin(name, code, path);
+
+                // Initialize immediately if requested
+                if (init && plugin.State == PluginState.Loaded && plugin.Engine != null)
+                {
+                    try
+                    {
+                        plugin.Engine.Initialize();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(
+                            $"[CSharpPlugin] Module \"{plugin.Engine.Name}\" has thrown an exception during initialization. {ex}");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -98,6 +118,21 @@ namespace Fougerite.PluginLoaders
         {
             if (Config.GetBoolValue("Engines", "EnableCSharp"))
             {
+                try
+                {
+                    int domaincreation = NativeMono.mono_fg_create_domain();
+                    if (domaincreation == 0)
+                    {
+                        Logger.LogError("[CSharpPluginLoader] Failed to create unmanaged Fougerite Mono domain.");
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"[CSharpPluginLoader] Exception while creating Fougerite domain: {ex}");
+                    return;
+                }
+
                 foreach (string name in GetPluginNames())
                 {
                     LoadPlugin(name);
@@ -145,7 +180,7 @@ namespace Fougerite.PluginLoaders
             if (PluginLoader.GetInstance().Plugins.ContainsKey(name))
             {
                 UnloadPlugin(name);
-                LoadPlugin(name);
+                LoadPlugin(name, true);
             }
         }
 
@@ -204,6 +239,9 @@ namespace Fougerite.PluginLoaders
                     }
                 }
 
+                var icalls = new Icalls();
+                icalls.mono_fg_unload_plugin(name);
+
                 Logger.LogDebug($"[CSharpPluginLoader] {name} plugin was unloaded successfuly.");
             }
             else
@@ -218,12 +256,27 @@ namespace Fougerite.PluginLoaders
             #pragma warning disable 618
             ModuleManager.Modules.Clear();
             #pragma warning restore 618
-            foreach (string name in PluginLoader.GetInstance().Plugins.Keys)
-                UnloadPlugin(name);
+            foreach (string name in PluginLoader.GetInstance().Plugins.Keys.ToArray())
+            {
+                if (PluginLoader.GetInstance().Plugins[name].Type == Type)
+                {
+                    UnloadPlugin(name);
+                }
+            }
+
+            try
+            {
+                NativeMono.mono_fg_unload_domain();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[CSharpPluginLoader] Exception while unloading Fougerite domain: {ex}");
+            }
         }
 
         public void Initialize()
         {
+            AppDomain.CurrentDomain.AssemblyResolve += OnRootDomainAssemblyResolve;
             PluginWatcher.GetInstance().AddWatcher(Type, Extension, Path.Combine(Util.GetRootFolder(), "Modules"));
             PluginLoader.GetInstance().PluginLoaders.Add(Type, this);
             LoadPlugins();
@@ -232,6 +285,31 @@ namespace Fougerite.PluginLoaders
         public bool CheckDependencies()
         {
             return Config.GetBoolValue("Engines", "EnableCSharp");
+        }
+        
+        private Assembly OnRootDomainAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(args.Name)) 
+                    return null;
+
+                string asmName = args.Name.Split(',')[0].Trim();
+
+                if (PluginLoader.GetInstance().Plugins.TryGetValue(asmName, out BasePlugin plugin))
+                {
+                    if (plugin is CSPlugin csPlugin && csPlugin.Engine != null)
+                    {
+                        return csPlugin.Engine.GetType().Assembly;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[CSharpPluginLoader] Assembly resolution error: {ex}");
+            }
+
+            return null;
         }
     }
 }
