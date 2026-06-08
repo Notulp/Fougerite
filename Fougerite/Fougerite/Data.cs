@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Fougerite.Concurrent;
+using Fougerite.Tools;
 
 namespace Fougerite
 {
@@ -135,6 +136,26 @@ namespace Fougerite
         public string[] SplitQuoteStrings(string str)
         {
             return Facepunch.Utility.String.SplitQuotesStrings(str);
+        }
+
+        /// <summary>
+        /// Determines whether the given string is null or an empty string.
+        /// </summary>
+        /// <param name="str">The string to evaluate.</param>
+        /// <returns>True if the string is null or empty, otherwise false.</returns>
+        public bool IsStringNullOrEmpty(string str)
+        {
+            return string.IsNullOrEmpty(str);
+        }
+
+        /// <summary>
+        /// Determines whether the specified string is null, empty, or consists only of white-space characters.
+        /// </summary>
+        /// <param name="str">The string to check for null, empty, or white-space content.</param>
+        /// <returns>Returns true if the string is null, empty, or contains only white-space characters, otherwise, false.</returns>
+        public bool IsStringNullOrWhiteSpace(string str)
+        {
+            return str.IsNullOrWhiteSpace();
         }
 
         /// <summary>
