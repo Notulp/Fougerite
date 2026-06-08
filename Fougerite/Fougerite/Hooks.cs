@@ -307,7 +307,7 @@ namespace Fougerite
                     return false;
                 }
 
-                if (bWantReply)
+                if (bWantReply && !Bootstrap.SilentConsoleCommands)
                 {
                     string[] textArray1 = { "command ", arg.Class, ".", arg.Function, " was executed" };
                     arg.ReplyWith(string.Concat(textArray1));
@@ -750,7 +750,7 @@ namespace Fougerite
                     }
                 }
 
-                if (string.IsNullOrEmpty(a.Reply))
+                if (string.IsNullOrEmpty(a.Reply) && !Bootstrap.SilentConsoleCommands)
                 {
                     a.ReplyWith($"Fougerite: {Class}.{Function} was executed!");
                 }

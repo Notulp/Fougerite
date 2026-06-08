@@ -68,6 +68,11 @@ namespace Fougerite
         /// Use at your own risk.
         /// </summary>
         public static bool EnableScriptPluginsIntensiveEvents;
+        /// <summary>
+        /// Suppress the default "Fougerite: Class.Function was executed!" response 
+        /// when a console command doesn't explicitly specify a reply text?
+        /// </summary>
+        public static bool SilentConsoleCommands;
         
         internal static readonly Thread CurrentThread = Thread.CurrentThread;
         private static readonly FileSystemWatcher IgnoredWatcher = new FileSystemWatcher(Path.Combine(Util.GetRootFolder(), "Save"), "IgnoredPlugins.txt");
@@ -143,10 +148,19 @@ namespace Fougerite
             {
                 EnableScriptPluginsIntensiveEvents = Config.GetBoolValue("Fougerite", "EnableScriptPluginsIntensiveEvents");
             }
+            if (Config.GetValue("Fougerite", "SilentConsoleCommands") != null)
+            {
+                SilentConsoleCommands = Config.GetBoolValue("Fougerite", "SilentConsoleCommands");
+            }
 
             if (!RustChat)
             {
                 Logger.LogWarning("[RustChat] The default Rust Chat is disabled for the Player.Message methods.");
+            }
+
+            if (SilentConsoleCommands)
+            {
+                Logger.LogWarning("[SilentConsoleCommands] The default console command response is disabled for commands that don't explicitly specify a reply text.");
             }
             
             if (Config.GetValue("Fougerite", "FloodConnections") != null)
@@ -262,6 +276,78 @@ namespace Fougerite
             {
                 Logger.LogWarning("[RustDecay] The default Rust Decay is disabled.");
             }
+            
+            var combinedDump = new
+            {
+                fougerite = new
+                {
+                    RemovePlayersFromCache = CR,
+                    BanOnInvalidPacket = BI,
+                    AutoBanCraft = AutoBanCraft,
+                    FloodConnections = FloodConnections - 1,
+                    SaveTime = ServerSaveHandler.ServerSaveTime,
+                    SaveCopies = ServerSaveHandler.SaveCopies,
+                    StopServerOnSaveFail = ServerSaveHandler.StopServerOnSaveFail,
+                    CrucialSavePoint = ServerSaveHandler.CrucialSavePoint,
+                    EnableScriptPluginsIntensiveEvents = EnableScriptPluginsIntensiveEvents,
+                    IgnoredPluginsCount = IgnoredPlugins.Count,
+                    SilentConsoleCommands = SilentConsoleCommands,
+                    RustChat = RustChat,
+                    RPCChat = RPCChat,
+                    RPCChatMethod = RPCChatMethod,
+                    EnableDefaultRustDecay = EnableDefaultRustDecay
+                },
+                decay = new { decay.deploy_maxhealth_sec, decay.decaytickrate, decay.maxperframe, decay.maxtestperframe },
+                structure = new { structure.minpercentdmg, structure.framelimit, structure.maxframeattempt },
+                save = new { save.friendly, save.autosavetime, save.profile },
+                chat = new { chat.enabled, chat.serverlog },
+                airdrop = new { airdrop.min_players },
+                dmg = new { dmg.godadmins },
+                env = new { env.daylength, env.nightlength },
+                falldamage = new { falldamage.min_vel, falldamage.max_vel, falldamage.enabled, falldamage.injury_length },
+                footsteps = new { footsteps.quality },
+                gametip = new { gametip.scale },
+                global = new { global.logprint, global.fpslog },
+                gunshots = new { gunshots.aiscared },
+                interp = new { interp.ratio, interp.delayms },
+                inv = new { inv.loglevel, inv.clientupdates },
+                netcull = new { netcull.log },
+                packet = new { packet.loglevel, packet.dropclockthresh, packet.verify, packet.dropms, packet.dropsec },
+                player = new {
+                    backpackLockTime = Util.GetUtil().GetStaticField("player", "backpackLockTime")
+                },
+                server = new 
+                { 
+                    server.framerate, 
+                    server.clienttimeout, 
+                    server.hostname, 
+                    server.maxplayers, 
+                    server.port, 
+                    server.pvp, 
+                    server.map, 
+                    server.datadir,
+                    server.sendrate,
+                    server.lan,
+                    server.ip,
+                    server.timesrc,
+                    server.sendbuffer,
+                    server.receivebuffer,
+                    server.log,
+                    server.steamgroup
+                },
+                sleepers = new { sleepers.loglevel, sleepers.pointsolver, sleepers.on },
+                terrain = new {
+                    manual = Util.GetUtil().GetStaticField("terrain", "manual"),
+                    idleinterval = Util.GetUtil().GetStaticField("terrain", "idleinterval")
+                },
+                truth = new { truth.punish, truth.threshold },
+                voice = new { voice.distance },
+                wildlife = new {
+                    forceupdate = Util.GetUtil().GetStaticField("wildlife", "forceupdate")
+                }
+            };
+
+            Logger.Log($"[EngineMetricsDump] {JsonConvert.SerializeObject(combinedDump, Formatting.Indented)}");
             return true;
         }
 
