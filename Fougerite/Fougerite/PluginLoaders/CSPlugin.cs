@@ -9,8 +9,25 @@ using Fougerite.Concurrent;
 namespace Fougerite.PluginLoaders
 {
     /// <summary>
-    /// C# plugin.
+    /// Internal engine-side lifetime proxy and isolated AppDomain workspace manager for C# plugins.
     /// </summary>
+    /// <remarks>
+    /// Architecture Layout:
+    /// <code>
+    ///        BasePlugin
+    ///         /      \
+    ///        /        \
+    ///     Module    CSPlugin 
+    ///                  │
+    ///                  └──> (Wraps via field) ──> public Module Engine;
+    /// </code>
+    /// This design is the result of a core plugin loader subsystem rework implemented years ago. 
+    /// To preserve strict backwards compatibility with legacy scripts compiled against the <see cref="Module"/> class, 
+    /// the system shifts engine-side registration logic into this proxy layer.
+    /// 
+    /// <see cref="CSPlugin"/> fulfills the internal runtime lifecycle, unmanaged tracking, and memory assembly layout mechanics, 
+    /// encapsulating the custom developer context via composition using the <see cref="Engine"/> reference field.
+    /// </remarks>
     public class CSPlugin : BasePlugin
     {
         public Module Engine;
