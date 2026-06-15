@@ -3448,6 +3448,10 @@ namespace Fougerite
                 Logger.LogError($"ServerShutdownEvent Error: {ex}");
             }
 
+            // For early quit
+            if (!Server.GetServer().ServerLoaded) 
+                return;
+            
             foreach (var x in World.GetWorld().GetZones())
             {
                 x.HideMarkers();
