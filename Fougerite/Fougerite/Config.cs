@@ -38,11 +38,29 @@ namespace Fougerite
 
         public static string GetValue(string Section, string Setting)
         {
+            if (FougeriteConfig == null)
+            {
+                Debug.LogError("Fougerite.cfg failed to load. " +
+                               "Either you are missing a FougeriteDirectory.cfg, " +
+                               "missing the content of the file, " +
+                               "or you are starting rust_server.exe wrong in a batch file.");
+                return null;
+            }
+
             return FougeriteConfig.GetSetting(Section, Setting);
         }
 
         public static bool GetBoolValue(string Section, string Setting)
         {
+            if (FougeriteConfig == null)
+            {
+                Debug.LogError("Fougerite.cfg failed to load. " +
+                               "Either you are missing a FougeriteDirectory.cfg, " +
+                               "missing the content of the file, " +
+                               "or you are starting rust_server.exe wrong in a batch file.");
+                return false;
+            }
+
             return FougeriteConfig.GetBoolSetting(Section, Setting);
         }
 
@@ -57,6 +75,15 @@ namespace Fougerite
         /// </returns>
         public static string GetModulesFolder()
         {
+            if (FougeriteDirectoryConfig == null)
+            {
+                Debug.LogError("FougeriteDirectory.cfg failed to load. " +
+                               "Either you are missing a FougeriteDirectory.cfg, " +
+                               "missing the content of the file, " +
+                               "or you are starting rust_server.exe wrong in a batch file.");
+                return Util.NormalizePath(Path.Combine(Util.GetRootFolder(), "Modules"));
+            }
+
             Regex root = new Regex(@"^%RootFolder%", RegexOptions.IgnoreCase);
             string path = $@"{root.Replace(FougeriteDirectoryConfig.GetSetting("Settings", "ModulesFolder"),
                 Util.GetRootFolder())}\";
@@ -74,6 +101,15 @@ namespace Fougerite
         /// </returns>
         public static string GetPublicFolder()
         {
+            if (FougeriteDirectoryConfig == null)
+            {
+                Debug.LogError("FougeriteDirectory.cfg failed to load. " +
+                               "Either you are missing a FougeriteDirectory.cfg, " +
+                               "missing the content of the file, " +
+                               "or you are starting rust_server.exe wrong in a batch file.");
+                return Util.NormalizePath(Path.Combine(Util.GetRootFolder(), "Save"));
+            }
+
             Regex root = new Regex(@"^%RootFolder%", RegexOptions.IgnoreCase);
             string path = $@"{root.Replace(FougeriteDirectoryConfig.GetSetting("Settings", "PublicFolder"),
                 Util.GetRootFolder())}\";
