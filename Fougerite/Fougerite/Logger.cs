@@ -13,7 +13,7 @@ namespace Fougerite
             public string DateTime;
         }
 
-        private static readonly string LogsFolder = Path.Combine(Config.GetPublicFolder(), "Logs");
+        private static string LogsFolder;
         private static Writer RPCLogWriter;
         private static Writer LogWriter;
         private static Writer ChatWriter;
@@ -26,6 +26,7 @@ namespace Fougerite
         {
             try
             {
+                LogsFolder = Path.Combine(Config.GetPublicFolder(), "Logs");
                 showDebug = Config.GetBoolValue("Logging", "debug");
                 showErrors = Config.GetBoolValue("Logging", "error");
                 showException = Config.GetBoolValue("Logging", "exception");
