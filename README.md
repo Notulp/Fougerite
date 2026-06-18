@@ -26,29 +26,59 @@ It is hard to believe that over a decade has passed since I first started messin
 I see Fougerite as complete now. It has everything it needs to stand on its own. While I am moving on to other challenges, my heart stays with the years we spent together in the wasteland. Thank you to everyone who stayed, everyone who tested, and everyone who challenged me to make this better. This is my final goodbye to the active development of Fougerite. I wish I knew then what I know now, but I am proud of the legacy we leave behind. Keep the servers running and keep the community alive. I'll be deploying Rustbuster 3.0 as my time allows for the final time, and then it's time to say farewell.
 Goodbye, and thank you for 12 incredible years.
 
+## x64 Upgrade (v1.9.7+)
+
+Starting from version **1.9.7**, Fougerite ships [Fougerite_LibRust_x64](https://github.com/Notulp/Fougerite_LibRust_x64) for testing, a full x64 reimplementation of the original x86 `librust.dll`, alongside x64 builds of `rust_server.exe` and `mono.dll`.
+
+### Setup
+
+**Delete these files from the server root**, they are x86-only Steam redistributables that do not belong in an x64 process:
+
+- `steamclient.dll`
+- `steam_api.dll`
+- `tier0_s.dll`
+- `vstdlib_s.dll`
+
+**Overwrite these files** with the x64 versions from the release:
+
+- `librust.dll`
+- `rust_server.exe`
+- `mono.dll`
+
+### Why x64 on a 2013 Unity 4.5.5f Engine
+
+- **No 4 GB memory ceiling.** x86 processes are limited to roughly 4 GB of virtual address space. x64 removes that cap entirely, meaning large maps, high player counts, and heavy plugin loads no longer risk out-of-memory crashes that previously required server restarts.
+- **More CPU registers.** x64 doubles the number of general-purpose registers over x86. The Mono (Mini) JIT compiler can keep more values in registers rather than spilling to the stack, reducing memory traffic on hot paths like the game loop, plugin execution, and networking.
+- **Native on modern operating systems.** Running natively x64 removes the WOW64 compatibility layer that every x86 process runs under on modern Windows, eliminating a layer of overhead on every system call.
+- **Better calling convention.** The x64 calling convention passes more arguments in registers rather than on the stack, which is more efficient than the x86 stdcall/cdecl conventions used by the original server.
+- **Stability.** Address space exhaustion is one of the leading causes of long-running Rust Legacy server crashes.
+- **Future compatibility.** x86 tooling, runtimes, and OS support will continue to erode. The x64 build ensures Fougerite can run on whatever comes next without requiring a compatibility update hopefully for the next 20 years..
+
+---
+
 ## Compilation
 1. First you need to decide wheather you are going to modify the patcher or not. If you are only here to modify or compile
-the Fougerite project, or one of the engines skip to step 7.
+   the Fougerite project, or one of the engines skip to step 7.
 2. Open the SLN, and compile the Fougerite patcher.
 3. Please go to the Fougerite\References\CleanPatchTargetDlls\ directory, and read the ReadMe.txt file.
 4. Select the 3 dlls that you are going to patch (Assembly-CSharp.dll, uLink.dll, Facepunch.MeshBatch.dll)
-, and copy to the patcher's output directory. You may need other files as reference
-such as UnityEngine.dll
+   , and copy to the patcher's output directory. You may need other files as reference
+   such as UnityEngine.dll
 5. Run the patcher, and enter 0. If all is well, then the dlls that you have copied to the directory are now patched.
-If something went wrong, try to find out from the patcher's logs.
+   If something went wrong, try to find out from the patcher's logs.
 6. Copy the 3 patched dlls to \Fougerite\References\PatchedRustDlls\ directory, and overwrite the existing ones.
 7. You can now build all the projects using JetBrains Rider, or Visual Studio as you like.
 
 ## Installation
 Please see a release file from the releases tab to see how a release file should look like.
 The release file also contains extra Python files, that you may want to grab.
-It's in the Save\Lib folder. Not all of the python files can be used due to the version of 
+It's in the Save\Lib folder. Not all of the python files can be used due to the version of
 mono or IronPython. The issue has been resolved on a newer IronPython version, however when I tried It
 It didn't work. (The issue page doesn't exist, they moved to github.)
 Once you have copied all of your files accordingly, you may run your server. (You also have to overwrite some server files)
 There is also a clean steam server available on this repository for you to download.
 
-Use Git Issues system to report bugs, please. 
+Use Git Issues system to report bugs, please.
 Please visit [our forum](http://fougerite.com/) for more information.
 
 [![Watch the video](https://img.youtube.com/vi/FHjaZjCdfLI/maxresdefault.jpg)](https://youtu.be/FHjaZjCdfLI)
