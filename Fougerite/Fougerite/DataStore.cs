@@ -340,6 +340,52 @@ namespace Fougerite
                 _rwLock.ReleaseWriterLock();
             }
         }
+        
+        /// <summary>
+        /// Wipes the entire DataStore with options to exclude specific tables and optionally preserve ban data.
+        /// </summary>
+        /// <param name="tablesToSkip">An optional list of table names that should not be deleted.</param>
+        /// <param name="cleanBans">If true, the "Ips" and "Ids" tables will be wiped (unless explicitely added to tablesToSkip), otherwise, they are preserved.</param>
+        /// <returns>A List of string containing the names of the tables that were successfully removed.</returns>
+        public List<string> Wipe(List<string> tablesToSkip = null, bool cleanBans = false)
+        {
+            List<string> cleanedTables = new List<string>();
+            tablesToSkip = tablesToSkip ?? new List<string>();
+
+            _rwLock.AcquireWriterLock(Timeout.Infinite);
+            try
+            {
+                // Collect all current table keys from the main datastore
+                List<string> allTables = _datastore.Keys.Cast<string>().ToList();
+
+                foreach (string tablename in allTables)
+                {
+                    // Skip tables
+                    if (tablesToSkip.Contains(tablename))
+                        continue;
+
+                    // Handle ban infrastructure tables safely based on the boolean flag
+                    if (!cleanBans && (tablename == "Ips" || tablename == "Ids"))
+                        continue;
+
+                    if (_datastore[tablename] is Hashtable)
+                    {
+                        _datastore.Remove(tablename);
+                        cleanedTables.Add(tablename);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[DataStore] Wipe error: {ex}");
+            }
+            finally
+            {
+                _rwLock.ReleaseWriterLock();
+            }
+
+            return cleanedTables;
+        }
 
         /// <summary>
         /// It gets the value of the specified key in the specified table.
