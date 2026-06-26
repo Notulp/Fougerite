@@ -71,7 +71,7 @@ namespace GlitchFix
 
         public override uint Order
         {
-            get { return 2; }
+            get { return 100000; }
         }
 
         public override void Initialize()
