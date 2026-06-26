@@ -459,7 +459,7 @@ namespace Fougerite.PluginLoaders
         /// Runs when a Timer is fired.
         /// </summary>
         /// <param name="evt"></param>
-        public void OnTimerCB(TimedEvent evt)
+        public void BaseOnTimerCB(TimedEvent evt)
         {
             if (Globals.Contains($"{evt.Name}Callback"))
             {
@@ -490,7 +490,7 @@ namespace Fougerite.PluginLoaders
                 timedEvent.Interval = timeoutDelay;
                 timedEvent.AutoReset = autoReset;
                 timedEvent.MaxElapsedCount = maxElapsedCount;
-                timedEvent.OnFire += OnTimerCB;
+                timedEvent.OnFire += BaseOnTimerCB;
                 timedEvent.OnKilled += (cbName) => Timers.Remove(name);
 
                 Timers.Add(name, timedEvent);
@@ -557,7 +557,7 @@ namespace Fougerite.PluginLoaders
                 timedEvent.Args = args;
                 timedEvent.AutoReset = autoReset;
                 timedEvent.MaxElapsedCount = maxElapsedCount;
-                timedEvent.OnFire += OnTimerCB;
+                timedEvent.OnFire += BaseOnTimerCB;
                 timedEvent.OnKilled += (cbName) => Timers.Remove(cbName);
                 Timers.Add(name, timedEvent);
             }
@@ -664,7 +664,7 @@ namespace Fougerite.PluginLoaders
             timedEvent.Interval = timeoutDelay;
             timedEvent.Args = args;
             timedEvent.AutoReset = autoReset;
-            timedEvent.OnFire += OnTimerCB;
+            timedEvent.OnFire += BaseOnTimerCB;
             timedEvent.OnKilled += (cbName) => Timers.Remove(cbName);
     
             ParallelTimers.Add(timedEvent);
@@ -834,27 +834,27 @@ namespace Fougerite.PluginLoaders
             return new ConcurrentList<string>();
         }
 
-        public void OnTablesLoaded(Dictionary<string, LootSpawnList> tables)
+        public void BaseOnTablesLoaded(Dictionary<string, LootSpawnList> tables)
         {
             Invoke(PluginLoaderEvents.OnTablesLoaded, tables);
         }
 
-        public void OnAllPluginsLoaded()
+        public void BaseOnAllPluginsLoaded()
         {
             Invoke(PluginLoaderEvents.OnAllPluginsLoaded);
         }
 
-        public void OnBlueprintUse(Player player, BPUseEvent evt)
+        public void BaseOnBlueprintUse(Player player, BPUseEvent evt)
         {
             Invoke(PluginLoaderEvents.OnBlueprintUse, player, evt);
         }
 
-        public void OnChat(Player player, ref ChatString text)
+        public void BaseOnChat(Player player, ref ChatString text)
         {
             Invoke(PluginLoaderEvents.OnChat, player, text);
         }
 
-        public void OnCommand(Player player, string command, string[] args)
+        public void BaseOnCommand(Player player, string command, string[] args)
         {
             if (CommandList.Count != 0 && !CommandList.Contains(command) &&
                 !Server.ForceCallForCommands.Contains(command))
@@ -865,7 +865,7 @@ namespace Fougerite.PluginLoaders
             Invoke(PluginLoaderEvents.OnCommand, player, command, args);
         }
 
-        public void OnConsole(ref ConsoleSystem.Arg arg, bool external)
+        public void BaseOnConsole(ref ConsoleSystem.Arg arg, bool external)
         {
             string clss = arg.Class.ToLower();
             string func = arg.Function.ToLower();
@@ -882,7 +882,7 @@ namespace Fougerite.PluginLoaders
             }
         }
         
-        public void OnConsoleWithCancel(ref ConsoleSystem.Arg arg, bool external, ConsoleEvent consoleEvent)
+        public void BaseOnConsoleWithCancel(ref ConsoleSystem.Arg arg, bool external, ConsoleEvent consoleEvent)
         {
             string clss = arg.Class.ToLower();
             string func = arg.Function.ToLower();
@@ -899,17 +899,17 @@ namespace Fougerite.PluginLoaders
             }
         }
 
-        public void OnDoorUse(Player player, DoorEvent evt)
+        public void BaseOnDoorUse(Player player, DoorEvent evt)
         {
             Invoke(PluginLoaderEvents.OnDoorUse, player, evt);
         }
 
-        public void OnEntityDecay(DecayEvent evt)
+        public void BaseOnEntityDecay(DecayEvent evt)
         {
             Invoke(PluginLoaderEvents.OnEntityDecay, evt);
         }
 
-        public void OnEntityDeployed(Player player, Entity entity, Player actualplacer)
+        public void BaseOnEntityDeployed(Player player, Entity entity, Player actualplacer)
         {
             try
             {
@@ -922,293 +922,293 @@ namespace Fougerite.PluginLoaders
             }
         }
 
-        public void OnEntityDestroyed(DestroyEvent evt)
+        public void BaseOnEntityDestroyed(DestroyEvent evt)
         {
             Invoke(PluginLoaderEvents.OnEntityDestroyed, evt);
         }
 
-        public void OnEntityHurt(HurtEvent evt)
+        public void BaseOnEntityHurt(HurtEvent evt)
         {
             Invoke(PluginLoaderEvents.OnEntityHurt, evt);
         }
 
-        public void OnItemsLoaded(ItemsBlocks items)
+        public void BaseOnItemsLoaded(ItemsBlocks items)
         {
             Invoke(PluginLoaderEvents.OnItemsLoaded, items);
         }
 
-        public void OnNPCHurt(HurtEvent evt)
+        public void BaseOnNPCHurt(HurtEvent evt)
         {
             Invoke(PluginLoaderEvents.OnNPCHurt, evt);
         }
 
-        public void OnNPCKilled(DeathEvent evt)
+        public void BaseOnNPCKilled(DeathEvent evt)
         {
             Invoke(PluginLoaderEvents.OnNPCKilled, evt);
         }
 
-        public void OnPlayerConnected(Player player)
+        public void BaseOnPlayerConnected(Player player)
         {
             Invoke(PluginLoaderEvents.OnPlayerConnected, player);
         }
 
-        public void OnPlayerDisconnected(Player player)
+        public void BaseOnPlayerDisconnected(Player player)
         {
             Invoke(PluginLoaderEvents.OnPlayerDisconnected, player);
         }
 
-        public void OnPlayerGathering(Player player, GatherEvent evt)
+        public void BaseOnPlayerGathering(Player player, GatherEvent evt)
         {
             Invoke(PluginLoaderEvents.OnPlayerGathering, player, evt);
         }
 
-        public void OnPlayerHurt(HurtEvent evt)
+        public void BaseOnPlayerHurt(HurtEvent evt)
         {
             Invoke(PluginLoaderEvents.OnPlayerHurt, evt);
         }
 
-        public void OnPlayerKilled(DeathEvent evt)
+        public void BaseOnPlayerKilled(DeathEvent evt)
         {
             Invoke(PluginLoaderEvents.OnPlayerKilled, evt);
         }
 
-        public void OnPlayerTeleport(Player player, Vector3 from, Vector3 dest)
+        public void BaseOnPlayerTeleport(Player player, Vector3 from, Vector3 dest)
         {
             Invoke(PluginLoaderEvents.OnPlayerTeleport, player, from, dest);
         }
 
-        public void OnPlayerSpawn(Player player, SpawnEvent evt)
+        public void BaseOnPlayerSpawn(Player player, SpawnEvent evt)
         {
             Invoke(PluginLoaderEvents.OnPlayerSpawning, player, evt);
         }
 
-        public void OnPlayerSpawned(Player player, SpawnEvent evt)
+        public void BaseOnPlayerSpawned(Player player, SpawnEvent evt)
         {
             Invoke(PluginLoaderEvents.OnPlayerSpawned, player, evt);
         }
 
-        public void OnResearch(ResearchEvent evt)
+        public void BaseOnResearch(ResearchEvent evt)
         {
             Invoke(PluginLoaderEvents.OnResearch, evt);
         }
 
-        public void OnServerInit()
+        public void BaseOnServerInit()
         {
             Invoke(PluginLoaderEvents.OnServerInit);
         }
 
-        public void OnServerShutdown()
+        public void BaseOnServerShutdown()
         {
             Invoke(PluginLoaderEvents.OnServerShutdown);
         }
 
-        public void OnServerSaved(int amount, double seconds)
+        public void BaseOnServerSaved(int amount, double seconds)
         {
             Invoke(PluginLoaderEvents.OnServerSaved, amount, seconds);
         }
 
-        public void OnCrafting(CraftingEvent e)
+        public void BaseOnCrafting(CraftingEvent e)
         {
             Invoke(PluginLoaderEvents.OnCrafting, e);
         }
 
-        public void OnResourceSpawned(ResourceTarget t)
+        public void BaseOnResourceSpawned(ResourceTarget t)
         {
             Invoke(PluginLoaderEvents.OnResourceSpawn, t);
         }
 
-        public void OnItemAdded(InventoryModEvent e)
+        public void BaseOnItemAdded(InventoryModEvent e)
         {
             Invoke(PluginLoaderEvents.OnItemAdded, e);
         }
 
-        public void OnItemRemoved(InventoryModEvent e)
+        public void BaseOnItemRemoved(InventoryModEvent e)
         {
             Invoke(PluginLoaderEvents.OnItemRemoved, e);
         }
 
-        public void OnItemPickup(ItemPickupEvent e)
+        public void BaseOnItemPickup(ItemPickupEvent e)
         {
             Invoke(PluginLoaderEvents.OnItemPickup, e);
         }
 
-        public void OnFallDamage(FallDamageEvent e)
+        public void BaseOnFallDamage(FallDamageEvent e)
         {
             Invoke(PluginLoaderEvents.OnFallDamage, e);
         }
 
-        public void OnAirdrop(Vector3 v)
+        public void BaseOnAirdrop(Vector3 v)
         {
             Invoke(PluginLoaderEvents.OnAirdrop, v);
         }
 
-        public void OnAirdropCrateDropped(SupplyDropPlane plane, Entity supplyCrate)
+        public void BaseOnAirdropCrateDropped(SupplyDropPlane plane, Entity supplyCrate)
         {
             Invoke(PluginLoaderEvents.OnAirdropCrateDropped, plane, supplyCrate);
         }
 
-        public void OnSteamDeny(SteamDenyEvent e)
+        public void BaseOnSteamDeny(SteamDenyEvent e)
         {
             Invoke(PluginLoaderEvents.OnSteamDeny, e);
         }
 
-        public void OnPlayerApproval(PlayerApprovalEvent e)
+        public void BaseOnPlayerApproval(PlayerApprovalEvent e)
         {
             Invoke(PluginLoaderEvents.OnPlayerApproval, e);
         }
 
-        public void OnPluginShutdown()
+        public void BaseOnPluginShutdown()
         {
             Invoke(PluginLoaderEvents.OnPluginShutdown);
         }
 
-        public void OnShowTalker(uLink.NetworkPlayer np, Player player)
+        public void BaseOnShowTalker(uLink.NetworkPlayer np, Player player)
         {
             Invoke(PluginLoaderEvents.OnVoiceChat, np, player);
         }
 
-        public void OnLootUse(LootStartEvent le)
+        public void BaseOnLootUse(LootStartEvent le)
         {
             Invoke(PluginLoaderEvents.OnLootUse, le);
         }
 
-        public void OnBanEvent(BanEvent be)
+        public void BaseOnBanEvent(BanEvent be)
         {
             Invoke(PluginLoaderEvents.OnPlayerBan, be);
         }
 
-        public void OnRepairBench(Fougerite.Events.RepairEvent be)
+        public void BaseOnRepairBench(Fougerite.Events.RepairEvent be)
         {
             Invoke(PluginLoaderEvents.OnRepairBench, be);
         }
 
-        public void OnItemMove(ItemMoveEvent be)
+        public void BaseOnItemMove(ItemMoveEvent be)
         {
             Invoke(PluginLoaderEvents.OnItemMove, be);
         }
 
-        public void OnGenericSpawnLoad(GenericSpawner gs)
+        public void BaseOnGenericSpawnLoad(GenericSpawner gs)
         {
             Invoke(PluginLoaderEvents.OnGenericSpawnLoad, gs);
         }
 
-        public void OnServerLoaded()
+        public void BaseOnServerLoaded()
         {
             Invoke(PluginLoaderEvents.OnServerLoaded);
         }
 
-        public void OnSupplySignalExploded(SupplySignalExplosionEvent evt)
+        public void BaseOnSupplySignalExploded(SupplySignalExplosionEvent evt)
         {
             Invoke(PluginLoaderEvents.OnSupplySignalExploded, evt);
         }
 
-        public void OnPlayerMove(HumanController hc, Vector3 v, int p, ushort p2,
+        public void BaseOnPlayerMove(HumanController hc, Vector3 v, int p, ushort p2,
             uLink.NetworkMessageInfo networkMessageInfo, Util.PlayerActions action)
         {
             Invoke(PluginLoaderEvents.OnPlayerMove, hc, v, p, p2, networkMessageInfo, action);
         }
 
-        public void OnBeltUse(BeltUseEvent ev)
+        public void BaseOnBeltUse(BeltUseEvent ev)
         {
             Invoke(PluginLoaderEvents.OnBeltUse, ev);
         }
 
-        public void OnLogger(LoggerEvent ev)
+        public void BaseOnLogger(LoggerEvent ev)
         {
             Invoke(PluginLoaderEvents.OnLogger, ev);
         }
 
-        public void OnGrenade(GrenadeThrowEvent ev)
+        public void BaseOnGrenade(GrenadeThrowEvent ev)
         {
             Invoke(PluginLoaderEvents.OnGrenadeThrow, ev);
         }
 
-        public void OnSupplyDropPlaneCreated(SupplyDropPlane plane)
+        public void BaseOnSupplyDropPlaneCreated(SupplyDropPlane plane)
         {
             Invoke(PluginLoaderEvents.OnSupplyDropPlaneCreated, plane);
         }
         
-        public void OnNPCSpawn(NPC npc)
+        public void BaseOnNPCSpawn(NPC npc)
         {
             Invoke(PluginLoaderEvents.OnNPCSpawned, npc);
         }
 
-        public void OnTimedExplosiveSpawned(TimedExplosiveEvent ev)
+        public void BaseOnTimedExplosiveSpawned(TimedExplosiveEvent ev)
         {
             Invoke(PluginLoaderEvents.OnTimedExplosiveSpawned, ev);
         }
 
-        public void OnSleeperSpawned(Sleeper sleeper)
+        public void BaseOnSleeperSpawned(Sleeper sleeper)
         {
             Invoke(PluginLoaderEvents.OnSleeperSpawned, sleeper);
         }
 
-        public void OnCommandRestriction(CommandRestrictionEvent ev)
+        public void BaseOnCommandRestriction(CommandRestrictionEvent ev)
         {
             Invoke(PluginLoaderEvents.OnCommandRestriction, ev);
         }
 
-        public void OnFireBarrelToggle(FireBarrelToggleEvent ev)
+        public void BaseOnFireBarrelToggle(FireBarrelToggleEvent ev)
         {
             Invoke(PluginLoaderEvents.OnFireBarrelToggle, ev);
         }
 
-        public void OnDayCycleChange(DayCycleChangeEvent ev)
+        public void BaseOnDayCycleChange(DayCycleChangeEvent ev)
         {
             Invoke(PluginLoaderEvents.OnDayCycleChanged, ev);
         }
 
-        public void OnShoot(ShootEvent ev)
+        public void BaseOnShoot(ShootEvent ev)
         {
             Invoke(PluginLoaderEvents.OnShoot, ev);
         }
 
-        public void OnShotgunShoot(ShotgunShootEvent ev)
+        public void BaseOnShotgunShoot(ShotgunShootEvent ev)
         {
             Invoke(PluginLoaderEvents.OnShotgunShoot, ev);
         }
 
-        public void OnBowShoot(BowShootEvent ev)
+        public void BaseOnBowShoot(BowShootEvent ev)
         {
             Invoke(PluginLoaderEvents.OnBowShoot, ev);
         }
 
-        public void OnAnimalMovement(AnimalMovementEvent ev)
+        public void BaseOnAnimalMovement(AnimalMovementEvent ev)
         {
             Invoke(PluginLoaderEvents.OnAnimalMovement, ev);
         }
 
-        public void OnConsumableUse(ConsumableUseEvent ev)
+        public void BaseOnConsumableUse(ConsumableUseEvent ev)
         {
             Invoke(PluginLoaderEvents.OnConsumableUse, ev);
         }
 
-        public void OnMedikitUse(MedikitUseEvent ev)
+        public void BaseOnMedikitUse(MedikitUseEvent ev)
         {
             Invoke(PluginLoaderEvents.OnMedikitUse, ev);
         }
 
-        public void OnItemModInstall(ItemModInstallEvent<BulletWeaponDataBlock> ev)
+        public void BaseOnItemModInstall(ItemModInstallEvent<BulletWeaponDataBlock> ev)
         {
             Invoke(PluginLoaderEvents.OnItemModInstall, ev);
         }
 
-        public void OnBloodDraw(BloodDrawEvent ev)
+        public void BaseOnBloodDraw(BloodDrawEvent ev)
         {
             Invoke(PluginLoaderEvents.OnBloodDraw, ev);
         }
         
-        public void OnArmorEquip(ArmorEquipEvent ev)
+        public void BaseOnArmorEquip(ArmorEquipEvent ev)
         {
             Invoke(PluginLoaderEvents.OnArmorEquip, ev);
         }
 
-        public void OnArmorUnEquip(ArmorEquipEvent ev)
+        public void BaseOnArmorUnEquip(ArmorEquipEvent ev)
         {
             Invoke(PluginLoaderEvents.OnArmorUnEquip, ev);
         }
 
-        public void OnFlareThrow(FlareThrowEvent ev)
+        public void BaseOnFlareThrow(FlareThrowEvent ev)
         {
             Invoke(PluginLoaderEvents.OnFlareThrow, ev);
         }
@@ -1218,62 +1218,62 @@ namespace Fougerite.PluginLoaders
             Invoke(PluginLoaderEvents.OnFlareIgnite, ev);
         }
 
-        public void OnTorchIgnite(BasicTorchIgniteEvent ev)
+        public void BaseOnTorchIgnite(BasicTorchIgniteEvent ev)
         {
             Invoke(PluginLoaderEvents.OnTorchIgnite, ev);
         }
 
-        public void OnHeatZoneEnter(HeatZoneEnterEvent ev)
+        public void BaseOnHeatZoneEnter(HeatZoneEnterEvent ev)
         {
             Invoke(PluginLoaderEvents.OnHeatZoneEnter, ev);
         }
 
-        public void OnWorkZoneEnter(WorkZoneEnterEvent ev)
+        public void BaseOnWorkZoneEnter(WorkZoneEnterEvent ev)
         {
             Invoke(PluginLoaderEvents.OnWorkZoneEnter, ev);
         }
 
-        public void OnPluginMessage(PluginMessageEvent ev)
+        public void BaseOnPluginMessage(PluginMessageEvent ev)
         {
             Invoke(PluginLoaderEvents.OnPluginMessage, ev);
         }
 
-        public void OnCraftingCancel(CraftCancelEvent ev)
+        public void BaseOnCraftingCancel(CraftCancelEvent ev)
         {
             Invoke(PluginLoaderEvents.OnCraftingCancel, ev);
         }
 
-        public void OnCraftingComplete(CraftCompleteEvent ev)
+        public void BaseOnCraftingComplete(CraftCompleteEvent ev)
         {
             Invoke(PluginLoaderEvents.OnCraftingComplete, ev);
         }
 
-        public void OnServerTick()
+        public void BaseOnServerTick()
         {
             Invoke(PluginLoaderEvents.OnServerTick);
         }
 
-        public void OnMetabolismUpdate(MetabolismEvent ev)
+        public void BaseOnMetabolismUpdate(MetabolismEvent ev)
         {
             Invoke(PluginLoaderEvents.OnMetabolismUpdate, ev);
         }
         
-        public void OnWebSocketMessage(WebSocketEvent ev)
+        public void BaseOnWebSocketMessage(WebSocketEvent ev)
         {
             Invoke(PluginLoaderEvents.OnWebSocketMessage, ev);
         }
 
-        public void OnWebSocketConnected(WebSocketEvent ev)
+        public void BaseOnWebSocketConnected(WebSocketEvent ev)
         {
             Invoke(PluginLoaderEvents.OnWebSocketConnected, ev);
         }
 
-        public void OnWebSocketClosed(WebSocketEvent ev)
+        public void BaseOnWebSocketClosed(WebSocketEvent ev)
         {
             Invoke(PluginLoaderEvents.OnWebSocketClosed, ev);
         }
 
-        public void OnWebSocketError(WebSocketEvent ev)
+        public void BaseOnWebSocketError(WebSocketEvent ev)
         {
             Invoke(PluginLoaderEvents.OnWebSocketError, ev);
         }

@@ -326,271 +326,271 @@ namespace Fougerite.PluginLoaders
                     switch (method)
                     {
                         case PluginLoaderEvents.OnServerInit:
-                            Hooks.OnServerInit += plugin.OnServerInit;
+                            Hooks.OnServerInit += plugin.BaseOnServerInit;
                             break;
                         case PluginLoaderEvents.OnServerShutdown:
-                            Hooks.OnServerShutdown += plugin.OnServerShutdown;
+                            Hooks.OnServerShutdown += plugin.BaseOnServerShutdown;
                             break;
                         case PluginLoaderEvents.OnItemsLoaded:
-                            Hooks.OnItemsLoaded += plugin.OnItemsLoaded;
+                            Hooks.OnItemsLoaded += plugin.BaseOnItemsLoaded;
                             break;
                         case PluginLoaderEvents.OnTablesLoaded:
-                            Hooks.OnTablesLoaded += plugin.OnTablesLoaded;
+                            Hooks.OnTablesLoaded += plugin.BaseOnTablesLoaded;
                             break;
                         case PluginLoaderEvents.OnChat:
-                            Hooks.OnChat += plugin.OnChat;
+                            Hooks.OnChat += plugin.BaseOnChat;
                             break;
                         case PluginLoaderEvents.OnConsole:
 #pragma warning disable CS0618
-                            Hooks.OnConsoleReceived += plugin.OnConsole;
+                            Hooks.OnConsoleReceived += plugin.BaseOnConsole;
 #pragma warning restore CS0618
                             break;
                         case PluginLoaderEvents.OnConsoleWithCancel:
-                            Hooks.OnConsoleReceivedWithCancel += plugin.OnConsoleWithCancel;
+                            Hooks.OnConsoleReceivedWithCancel += plugin.BaseOnConsoleWithCancel;
                             break;
                         case PluginLoaderEvents.OnCommand:
-                            Hooks.OnCommand += plugin.OnCommand;
+                            Hooks.OnCommand += plugin.BaseOnCommand;
                             break;
                         case PluginLoaderEvents.OnPlayerConnected:
-                            Hooks.OnPlayerConnected += plugin.OnPlayerConnected;
+                            Hooks.OnPlayerConnected += plugin.BaseOnPlayerConnected;
                             break;
                         case PluginLoaderEvents.OnPlayerDisconnected:
-                            Hooks.OnPlayerDisconnected += plugin.OnPlayerDisconnected;
+                            Hooks.OnPlayerDisconnected += plugin.BaseOnPlayerDisconnected;
                             break;
                         case PluginLoaderEvents.OnPlayerKilled:
-                            Hooks.OnPlayerKilled += plugin.OnPlayerKilled;
+                            Hooks.OnPlayerKilled += plugin.BaseOnPlayerKilled;
                             break;
                         case PluginLoaderEvents.OnPlayerHurt:
-                            Hooks.OnPlayerHurt += plugin.OnPlayerHurt;
+                            Hooks.OnPlayerHurt += plugin.BaseOnPlayerHurt;
                             break;
                         case PluginLoaderEvents.OnPlayerSpawning:
-                            Hooks.OnPlayerSpawning += plugin.OnPlayerSpawn;
+                            Hooks.OnPlayerSpawning += plugin.BaseOnPlayerSpawn;
                             break;
                         case PluginLoaderEvents.OnPlayerSpawned:
-                            Hooks.OnPlayerSpawned += plugin.OnPlayerSpawned;
+                            Hooks.OnPlayerSpawned += plugin.BaseOnPlayerSpawned;
                             break;
                         case PluginLoaderEvents.OnPlayerGathering:
-                            Hooks.OnPlayerGathering += plugin.OnPlayerGathering;
+                            Hooks.OnPlayerGathering += plugin.BaseOnPlayerGathering;
                             break;
                         case PluginLoaderEvents.OnEntityHurt:
-                            Hooks.OnEntityHurt += plugin.OnEntityHurt;
+                            Hooks.OnEntityHurt += plugin.BaseOnEntityHurt;
                             break;
                         case PluginLoaderEvents.OnEntityDecay:
-                            Hooks.OnEntityDecay += plugin.OnEntityDecay;
+                            Hooks.OnEntityDecay += plugin.BaseOnEntityDecay;
                             break;
                         case PluginLoaderEvents.OnEntityDestroyed:
-                            Hooks.OnEntityDestroyed += plugin.OnEntityDestroyed;
+                            Hooks.OnEntityDestroyed += plugin.BaseOnEntityDestroyed;
                             break;
                         case PluginLoaderEvents.OnEntityDeployed:
-                            Hooks.OnEntityDeployedWithPlacer += plugin.OnEntityDeployed;
+                            Hooks.OnEntityDeployedWithPlacer += plugin.BaseOnEntityDeployed;
                             break;
                         case PluginLoaderEvents.OnNPCHurt:
-                            Hooks.OnNPCHurt += plugin.OnNPCHurt;
+                            Hooks.OnNPCHurt += plugin.BaseOnNPCHurt;
                             break;
                         case PluginLoaderEvents.OnNPCKilled:
-                            Hooks.OnNPCKilled += plugin.OnNPCKilled;
+                            Hooks.OnNPCKilled += plugin.BaseOnNPCKilled;
                             break;
                         case PluginLoaderEvents.OnBlueprintUse:
-                            Hooks.OnBlueprintUse += plugin.OnBlueprintUse;
+                            Hooks.OnBlueprintUse += plugin.BaseOnBlueprintUse;
                             break;
                         case PluginLoaderEvents.OnDoorUse:
-                            Hooks.OnDoorUse += plugin.OnDoorUse;
+                            Hooks.OnDoorUse += plugin.BaseOnDoorUse;
                             break;
                         case PluginLoaderEvents.OnAllPluginsLoaded:
-                            Hooks.OnAllPluginsLoaded += plugin.OnAllPluginsLoaded;
+                            Hooks.OnAllPluginsLoaded += plugin.BaseOnAllPluginsLoaded;
                             break;
                         case PluginLoaderEvents.OnPlayerTeleport:
-                            Hooks.OnPlayerTeleport += plugin.OnPlayerTeleport;
+                            Hooks.OnPlayerTeleport += plugin.BaseOnPlayerTeleport;
                             break;
                         //case PluginEvent.OnPluginInit: plugin.Invoke(PluginEvent.OnPluginInit, new object[0]); break;
                         case PluginLoaderEvents.OnCrafting:
-                            Hooks.OnCrafting += plugin.OnCrafting;
+                            Hooks.OnCrafting += plugin.BaseOnCrafting;
                             break;
                         case PluginLoaderEvents.OnResourceSpawn:
-                            Hooks.OnResourceSpawned += plugin.OnResourceSpawned;
+                            Hooks.OnResourceSpawned += plugin.BaseOnResourceSpawned;
                             break;
                         case PluginLoaderEvents.OnItemAdded:
-                            Hooks.OnItemAdded += plugin.OnItemAdded;
+                            Hooks.OnItemAdded += plugin.BaseOnItemAdded;
                             break;
                         case PluginLoaderEvents.OnItemRemoved:
-                            Hooks.OnItemRemoved += plugin.OnItemRemoved;
+                            Hooks.OnItemRemoved += plugin.BaseOnItemRemoved;
                             break;
                         case PluginLoaderEvents.OnAirdrop:
-                            Hooks.OnAirdropCalled += plugin.OnAirdrop;
+                            Hooks.OnAirdropCalled += plugin.BaseOnAirdrop;
                             break;
                         case PluginLoaderEvents.OnAirdropCrateDropped: 
-                            Hooks.OnAirdropCrateDropped += plugin.OnAirdropCrateDropped;
+                            Hooks.OnAirdropCrateDropped += plugin.BaseOnAirdropCrateDropped;
                             break;
                         case PluginLoaderEvents.OnSteamDeny:
-                            Hooks.OnSteamDeny += plugin.OnSteamDeny;
+                            Hooks.OnSteamDeny += plugin.BaseOnSteamDeny;
                             break;
                         case PluginLoaderEvents.OnPlayerApproval:
-                            Hooks.OnPlayerApproval += plugin.OnPlayerApproval;
+                            Hooks.OnPlayerApproval += plugin.BaseOnPlayerApproval;
                             break;
                         case PluginLoaderEvents.OnResearch:
-                            Hooks.OnResearch += plugin.OnResearch;
+                            Hooks.OnResearch += plugin.BaseOnResearch;
                             break;
                         case PluginLoaderEvents.OnServerSaved:
-                            Hooks.OnServerSaved += plugin.OnServerSaved;
+                            Hooks.OnServerSaved += plugin.BaseOnServerSaved;
                             break;
                         case PluginLoaderEvents.OnVoiceChat:
-                            Hooks.OnShowTalker += plugin.OnShowTalker;
+                            Hooks.OnShowTalker += plugin.BaseOnShowTalker;
                             break;
                         case PluginLoaderEvents.OnItemPickup:
-                            Hooks.OnItemPickup += plugin.OnItemPickup;
+                            Hooks.OnItemPickup += plugin.BaseOnItemPickup;
                             break;
                         case PluginLoaderEvents.OnFallDamage:
-                            Hooks.OnFallDamage += plugin.OnFallDamage;
+                            Hooks.OnFallDamage += plugin.BaseOnFallDamage;
                             break;
                         case PluginLoaderEvents.OnLootUse:
-                            Hooks.OnLootUse += plugin.OnLootUse;
+                            Hooks.OnLootUse += plugin.BaseOnLootUse;
                             break;
                         case PluginLoaderEvents.OnPlayerBan:
-                            Hooks.OnPlayerBan += plugin.OnBanEvent;
+                            Hooks.OnPlayerBan += plugin.BaseOnBanEvent;
                             break;
                         case PluginLoaderEvents.OnRepairBench:
-                            Hooks.OnRepairBench += plugin.OnRepairBench;
+                            Hooks.OnRepairBench += plugin.BaseOnRepairBench;
                             break;
                         case PluginLoaderEvents.OnItemMove:
-                            Hooks.OnItemMove += plugin.OnItemMove;
+                            Hooks.OnItemMove += plugin.BaseOnItemMove;
                             break;
                         case PluginLoaderEvents.OnGenericSpawnLoad:
-                            Hooks.OnGenericSpawnerLoad += plugin.OnGenericSpawnLoad;
+                            Hooks.OnGenericSpawnerLoad += plugin.BaseOnGenericSpawnLoad;
                             break;
                         case PluginLoaderEvents.OnServerLoaded:
-                            Hooks.OnServerLoaded += plugin.OnServerLoaded;
+                            Hooks.OnServerLoaded += plugin.BaseOnServerLoaded;
                             break;
                         case PluginLoaderEvents.OnSupplySignalExploded:
-                            Hooks.OnSupplySignalExpode += plugin.OnSupplySignalExploded;
+                            Hooks.OnSupplySignalExpode += plugin.BaseOnSupplySignalExploded;
                             break;
                         case PluginLoaderEvents.OnPlayerMove:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnPlayerMove += plugin.OnPlayerMove;
+                                Hooks.OnPlayerMove += plugin.BaseOnPlayerMove;
                             }
                             break;
                         case PluginLoaderEvents.OnBeltUse:
-                            Hooks.OnBeltUse += plugin.OnBeltUse;
+                            Hooks.OnBeltUse += plugin.BaseOnBeltUse;
                             break;
                         case PluginLoaderEvents.OnLogger:
-                            Hooks.OnLogger += plugin.OnLogger;
+                            Hooks.OnLogger += plugin.BaseOnLogger;
                             break;
                         case PluginLoaderEvents.OnGrenadeThrow:
-                            Hooks.OnGrenadeThrow += plugin.OnGrenade;
+                            Hooks.OnGrenadeThrow += plugin.BaseOnGrenade;
                             break;
                         case PluginLoaderEvents.OnSupplyDropPlaneCreated:
-                            Hooks.OnSupplyDropPlaneCreated += plugin.OnSupplyDropPlaneCreated;
+                            Hooks.OnSupplyDropPlaneCreated += plugin.BaseOnSupplyDropPlaneCreated;
                             break;
                         case PluginLoaderEvents.OnNPCSpawned:
-                            Hooks.OnNPCSpawned += plugin.OnNPCSpawn;
+                            Hooks.OnNPCSpawned += plugin.BaseOnNPCSpawn;
                             break;
                         case PluginLoaderEvents.OnTimedExplosiveSpawned:
-                            Hooks.OnTimedExplosiveSpawned += plugin.OnTimedExplosiveSpawned;
+                            Hooks.OnTimedExplosiveSpawned += plugin.BaseOnTimedExplosiveSpawned;
                             break;
                         case PluginLoaderEvents.OnSleeperSpawned:
-                            Hooks.OnSleeperSpawned += plugin.OnSleeperSpawned;
+                            Hooks.OnSleeperSpawned += plugin.BaseOnSleeperSpawned;
                             break;
                         case PluginLoaderEvents.OnCommandRestriction:
-                            Hooks.OnCommandRestriction += plugin.OnCommandRestriction;
+                            Hooks.OnCommandRestriction += plugin.BaseOnCommandRestriction;
                             break;
                         case PluginLoaderEvents.OnFireBarrelToggle:
-                            Hooks.OnFireBarrelToggle += plugin.OnFireBarrelToggle;
+                            Hooks.OnFireBarrelToggle += plugin.BaseOnFireBarrelToggle;
                             break;
                         case PluginLoaderEvents.OnDayCycleChanged:
-                            Hooks.OnDayCycleChanged += plugin.OnDayCycleChange;
+                            Hooks.OnDayCycleChanged += plugin.BaseOnDayCycleChange;
                             break;
                         case PluginLoaderEvents.OnShoot:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnShoot += plugin.OnShoot;
+                                Hooks.OnShoot += plugin.BaseOnShoot;
                             }
                             break;
                         case PluginLoaderEvents.OnShotgunShoot:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnShotgunShoot += plugin.OnShotgunShoot;
+                                Hooks.OnShotgunShoot += plugin.BaseOnShotgunShoot;
                             }
                             break;
                         case PluginLoaderEvents.OnBowShoot:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnBowShoot += plugin.OnBowShoot;
+                                Hooks.OnBowShoot += plugin.BaseOnBowShoot;
                             }
                             break;
                         case PluginLoaderEvents.OnAnimalMovement:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnAnimalMovement += plugin.OnAnimalMovement;
+                                Hooks.OnAnimalMovement += plugin.BaseOnAnimalMovement;
                             }
                             break;
                         case PluginLoaderEvents.OnConsumableUse:
-                            Hooks.OnConsumableUse += plugin.OnConsumableUse;
+                            Hooks.OnConsumableUse += plugin.BaseOnConsumableUse;
                             break;
                         case PluginLoaderEvents.OnMedikitUse:
-                            Hooks.OnMedikitUse += plugin.OnMedikitUse;
+                            Hooks.OnMedikitUse += plugin.BaseOnMedikitUse;
                             break;
                         case PluginLoaderEvents.OnItemModInstall:
-                            Hooks.OnItemMod<BulletWeaponDataBlock>.OnItemModInstall += plugin.OnItemModInstall;
+                            Hooks.OnItemMod<BulletWeaponDataBlock>.OnItemModInstall += plugin.BaseOnItemModInstall;
                             break;
                         case PluginLoaderEvents.OnBloodDraw:
-                            Hooks.OnBloodDraw += plugin.OnBloodDraw;
+                            Hooks.OnBloodDraw += plugin.BaseOnBloodDraw;
                             break;
                         case PluginLoaderEvents.OnArmorEquip:
-                            Hooks.OnArmorEquip += plugin.OnArmorEquip;
+                            Hooks.OnArmorEquip += plugin.BaseOnArmorEquip;
                             break;
                         case PluginLoaderEvents.OnArmorUnEquip:
-                            Hooks.OnArmorUnEquip += plugin.OnArmorUnEquip;
+                            Hooks.OnArmorUnEquip += plugin.BaseOnArmorUnEquip;
                             break;
                         case PluginLoaderEvents.OnFlareThrow:
-                            Hooks.OnFlareThrow += plugin.OnFlareThrow;
+                            Hooks.OnFlareThrow += plugin.BaseOnFlareThrow;
                             break;
                         case PluginLoaderEvents.OnFlareIgnite:
                             Hooks.OnFlareIgnite += plugin.FlareIgnite;
                             break;
                         case PluginLoaderEvents.OnTorchIgnite:
-                            Hooks.OnBasicTorchIgnite += plugin.OnTorchIgnite;
+                            Hooks.OnBasicTorchIgnite += plugin.BaseOnTorchIgnite;
                             break;
                         case PluginLoaderEvents.OnHeatZoneEnter:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnHeatZoneEnter += plugin.OnHeatZoneEnter;
+                                Hooks.OnHeatZoneEnter += plugin.BaseOnHeatZoneEnter;
                             }
                             break;
                         case PluginLoaderEvents.OnWorkZoneEnter:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnWorkZoneEnter += plugin.OnWorkZoneEnter;
+                                Hooks.OnWorkZoneEnter += plugin.BaseOnWorkZoneEnter;
                             }
                             break;
                         case PluginLoaderEvents.OnPluginMessage:
-                            Hooks.OnPluginMessage += plugin.OnPluginMessage;
+                            Hooks.OnPluginMessage += plugin.BaseOnPluginMessage;
                             break;
                         case PluginLoaderEvents.OnCraftingCancel:
-                            Hooks.OnCraftCancel += plugin.OnCraftingCancel;
+                            Hooks.OnCraftCancel += plugin.BaseOnCraftingCancel;
                             break;
                         case PluginLoaderEvents.OnCraftingComplete:
-                            Hooks.OnCraftComplete += plugin.OnCraftingComplete;
+                            Hooks.OnCraftComplete += plugin.BaseOnCraftingComplete;
                             break;
                         case PluginLoaderEvents.OnServerTick:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnServerTick += plugin.OnServerTick;
+                                Hooks.OnServerTick += plugin.BaseOnServerTick;
                             }
                             break;
                         case PluginLoaderEvents.OnMetabolismUpdate:
-                            Hooks.OnMetabolismUpdate += plugin.OnMetabolismUpdate;
+                            Hooks.OnMetabolismUpdate += plugin.BaseOnMetabolismUpdate;
                             break;
                         case PluginLoaderEvents.OnWebSocketMessage:
-                            Hooks.OnWebSocketMessage += plugin.OnWebSocketMessage;
+                            Hooks.OnWebSocketMessage += plugin.BaseOnWebSocketMessage;
                             break;
                         case PluginLoaderEvents.OnWebSocketConnected:
-                            Hooks.OnWebSocketConnected += plugin.OnWebSocketConnected;
+                            Hooks.OnWebSocketConnected += plugin.BaseOnWebSocketConnected;
                             break;
                         case PluginLoaderEvents.OnWebSocketClosed:
-                            Hooks.OnWebSocketClosed += plugin.OnWebSocketClosed;
+                            Hooks.OnWebSocketClosed += plugin.BaseOnWebSocketClosed;
                             break;
                         case PluginLoaderEvents.OnWebSocketError:
-                            Hooks.OnWebSocketError += plugin.OnWebSocketError;
+                            Hooks.OnWebSocketError += plugin.BaseOnWebSocketError;
                             break;
                     }
                 }
@@ -618,277 +618,277 @@ namespace Fougerite.PluginLoaders
                     switch (method)
                     {
                         case PluginLoaderEvents.OnServerInit:
-                            Hooks.OnServerInit -= plugin.OnServerInit;
+                            Hooks.OnServerInit -= plugin.BaseOnServerInit;
                             break;
                         case PluginLoaderEvents.OnServerShutdown:
-                            Hooks.OnServerShutdown -= plugin.OnServerShutdown;
+                            Hooks.OnServerShutdown -= plugin.BaseOnServerShutdown;
                             break;
                         case PluginLoaderEvents.OnItemsLoaded:
-                            Hooks.OnItemsLoaded -= plugin.OnItemsLoaded;
+                            Hooks.OnItemsLoaded -= plugin.BaseOnItemsLoaded;
                             break;
                         case PluginLoaderEvents.OnTablesLoaded:
-                            Hooks.OnTablesLoaded -= plugin.OnTablesLoaded;
+                            Hooks.OnTablesLoaded -= plugin.BaseOnTablesLoaded;
                             break;
                         case PluginLoaderEvents.OnChat:
-                            Hooks.OnChat -= plugin.OnChat;
+                            Hooks.OnChat -= plugin.BaseOnChat;
                             break;
                         case PluginLoaderEvents.OnConsole:
 #pragma warning disable CS0618
-                            Hooks.OnConsoleReceived -= plugin.OnConsole;
+                            Hooks.OnConsoleReceived -= plugin.BaseOnConsole;
 #pragma warning restore CS0618
                             break;
                         case PluginLoaderEvents.OnConsoleWithCancel:
-                            Hooks.OnConsoleReceivedWithCancel -= plugin.OnConsoleWithCancel;
+                            Hooks.OnConsoleReceivedWithCancel -= plugin.BaseOnConsoleWithCancel;
                             break;
                         case PluginLoaderEvents.OnCommand:
-                            Hooks.OnCommand -= plugin.OnCommand;
+                            Hooks.OnCommand -= plugin.BaseOnCommand;
                             break;
                         case PluginLoaderEvents.OnPlayerConnected:
-                            Hooks.OnPlayerConnected -= plugin.OnPlayerConnected;
+                            Hooks.OnPlayerConnected -= plugin.BaseOnPlayerConnected;
                             break;
                         case PluginLoaderEvents.OnPlayerDisconnected:
-                            Hooks.OnPlayerDisconnected -= plugin.OnPlayerDisconnected;
+                            Hooks.OnPlayerDisconnected -= plugin.BaseOnPlayerDisconnected;
                             break;
                         case PluginLoaderEvents.OnPlayerKilled:
-                            Hooks.OnPlayerKilled -= plugin.OnPlayerKilled;
+                            Hooks.OnPlayerKilled -= plugin.BaseOnPlayerKilled;
                             break;
                         case PluginLoaderEvents.OnPlayerHurt:
-                            Hooks.OnPlayerHurt -= plugin.OnPlayerHurt;
+                            Hooks.OnPlayerHurt -= plugin.BaseOnPlayerHurt;
                             break;
                         case PluginLoaderEvents.OnPlayerSpawning:
-                            Hooks.OnPlayerSpawning -= plugin.OnPlayerSpawn;
+                            Hooks.OnPlayerSpawning -= plugin.BaseOnPlayerSpawn;
                             break;
                         case PluginLoaderEvents.OnPlayerSpawned:
-                            Hooks.OnPlayerSpawned -= plugin.OnPlayerSpawned;
+                            Hooks.OnPlayerSpawned -= plugin.BaseOnPlayerSpawned;
                             break;
                         case PluginLoaderEvents.OnPlayerGathering:
-                            Hooks.OnPlayerGathering -= plugin.OnPlayerGathering;
+                            Hooks.OnPlayerGathering -= plugin.BaseOnPlayerGathering;
                             break;
                         case PluginLoaderEvents.OnEntityHurt:
-                            Hooks.OnEntityHurt -= plugin.OnEntityHurt;
+                            Hooks.OnEntityHurt -= plugin.BaseOnEntityHurt;
                             break;
                         case PluginLoaderEvents.OnEntityDecay:
-                            Hooks.OnEntityDecay -= plugin.OnEntityDecay;
+                            Hooks.OnEntityDecay -= plugin.BaseOnEntityDecay;
                             break;
                         case PluginLoaderEvents.OnEntityDestroyed:
-                            Hooks.OnEntityDestroyed -= plugin.OnEntityDestroyed;
+                            Hooks.OnEntityDestroyed -= plugin.BaseOnEntityDestroyed;
                             break;
                         case PluginLoaderEvents.OnEntityDeployed:
-                            Hooks.OnEntityDeployedWithPlacer -= plugin.OnEntityDeployed;
+                            Hooks.OnEntityDeployedWithPlacer -= plugin.BaseOnEntityDeployed;
                             break;
                         case PluginLoaderEvents.OnNPCHurt:
-                            Hooks.OnNPCHurt -= plugin.OnNPCHurt;
+                            Hooks.OnNPCHurt -= plugin.BaseOnNPCHurt;
                             break;
                         case PluginLoaderEvents.OnNPCKilled:
-                            Hooks.OnNPCKilled -= plugin.OnNPCKilled;
+                            Hooks.OnNPCKilled -= plugin.BaseOnNPCKilled;
                             break;
                         case PluginLoaderEvents.OnBlueprintUse:
-                            Hooks.OnBlueprintUse -= plugin.OnBlueprintUse;
+                            Hooks.OnBlueprintUse -= plugin.BaseOnBlueprintUse;
                             break;
                         case PluginLoaderEvents.OnDoorUse:
-                            Hooks.OnDoorUse -= plugin.OnDoorUse;
+                            Hooks.OnDoorUse -= plugin.BaseOnDoorUse;
                             break;
                         case PluginLoaderEvents.OnAllPluginsLoaded:
-                            Hooks.OnAllPluginsLoaded -= plugin.OnAllPluginsLoaded;
+                            Hooks.OnAllPluginsLoaded -= plugin.BaseOnAllPluginsLoaded;
                             break;
                         case PluginLoaderEvents.OnPlayerTeleport:
-                            Hooks.OnPlayerTeleport -= plugin.OnPlayerTeleport;
+                            Hooks.OnPlayerTeleport -= plugin.BaseOnPlayerTeleport;
                             break;
                         //case PluginEvent.OnPluginInit: plugin.Invoke(PluginEvent.OnPluginInit, new object[0]); break;
                         case PluginLoaderEvents.OnCrafting:
-                            Hooks.OnCrafting -= plugin.OnCrafting;
+                            Hooks.OnCrafting -= plugin.BaseOnCrafting;
                             break;
                         case PluginLoaderEvents.OnResourceSpawn:
-                            Hooks.OnResourceSpawned -= plugin.OnResourceSpawned;
+                            Hooks.OnResourceSpawned -= plugin.BaseOnResourceSpawned;
                             break;
                         case PluginLoaderEvents.OnItemAdded:
-                            Hooks.OnItemAdded -= plugin.OnItemAdded;
+                            Hooks.OnItemAdded -= plugin.BaseOnItemAdded;
                             break;
                         case PluginLoaderEvents.OnItemRemoved:
-                            Hooks.OnItemRemoved -= plugin.OnItemRemoved;
+                            Hooks.OnItemRemoved -= plugin.BaseOnItemRemoved;
                             break;
                         case PluginLoaderEvents.OnAirdrop:
-                            Hooks.OnAirdropCalled -= plugin.OnAirdrop;
+                            Hooks.OnAirdropCalled -= plugin.BaseOnAirdrop;
                             break;
                         case PluginLoaderEvents.OnAirdropCrateDropped: 
-                            Hooks.OnAirdropCrateDropped -= plugin.OnAirdropCrateDropped;
+                            Hooks.OnAirdropCrateDropped -= plugin.BaseOnAirdropCrateDropped;
                             break;
                         case PluginLoaderEvents.OnSteamDeny:
-                            Hooks.OnSteamDeny -= plugin.OnSteamDeny;
+                            Hooks.OnSteamDeny -= plugin.BaseOnSteamDeny;
                             break;
                         case PluginLoaderEvents.OnPlayerApproval:
-                            Hooks.OnPlayerApproval -= plugin.OnPlayerApproval;
+                            Hooks.OnPlayerApproval -= plugin.BaseOnPlayerApproval;
                             break;
                         case PluginLoaderEvents.OnResearch:
-                            Hooks.OnResearch -= plugin.OnResearch;
+                            Hooks.OnResearch -= plugin.BaseOnResearch;
                             break;
                         case PluginLoaderEvents.OnServerSaved:
-                            Hooks.OnServerSaved -= plugin.OnServerSaved;
+                            Hooks.OnServerSaved -= plugin.BaseOnServerSaved;
                             break;
                         case PluginLoaderEvents.OnVoiceChat:
-                            Hooks.OnShowTalker -= plugin.OnShowTalker;
+                            Hooks.OnShowTalker -= plugin.BaseOnShowTalker;
                             break;
                         case PluginLoaderEvents.OnItemPickup:
-                            Hooks.OnItemPickup -= plugin.OnItemPickup;
+                            Hooks.OnItemPickup -= plugin.BaseOnItemPickup;
                             break;
                         case PluginLoaderEvents.OnFallDamage:
-                            Hooks.OnFallDamage -= plugin.OnFallDamage;
+                            Hooks.OnFallDamage -= plugin.BaseOnFallDamage;
                             break;
                         case PluginLoaderEvents.OnLootUse:
-                            Hooks.OnLootUse -= plugin.OnLootUse;
+                            Hooks.OnLootUse -= plugin.BaseOnLootUse;
                             break;
                         case PluginLoaderEvents.OnPlayerBan:
-                            Hooks.OnPlayerBan -= plugin.OnBanEvent;
+                            Hooks.OnPlayerBan -= plugin.BaseOnBanEvent;
                             break;
                         case PluginLoaderEvents.OnRepairBench:
-                            Hooks.OnRepairBench -= plugin.OnRepairBench;
+                            Hooks.OnRepairBench -= plugin.BaseOnRepairBench;
                             break;
                         case PluginLoaderEvents.OnItemMove:
-                            Hooks.OnItemMove -= plugin.OnItemMove;
+                            Hooks.OnItemMove -= plugin.BaseOnItemMove;
                             break;
                         case PluginLoaderEvents.OnGenericSpawnLoad:
-                            Hooks.OnGenericSpawnerLoad -= plugin.OnGenericSpawnLoad;
+                            Hooks.OnGenericSpawnerLoad -= plugin.BaseOnGenericSpawnLoad;
                             break;
                         case PluginLoaderEvents.OnServerLoaded:
-                            Hooks.OnServerLoaded -= plugin.OnServerLoaded;
+                            Hooks.OnServerLoaded -= plugin.BaseOnServerLoaded;
                             break;
                         case PluginLoaderEvents.OnSupplySignalExploded:
-                            Hooks.OnSupplySignalExpode -= plugin.OnSupplySignalExploded;
+                            Hooks.OnSupplySignalExpode -= plugin.BaseOnSupplySignalExploded;
                             break;
                         case PluginLoaderEvents.OnPlayerMove:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnPlayerMove -= plugin.OnPlayerMove;
+                                Hooks.OnPlayerMove -= plugin.BaseOnPlayerMove;
                             }
                             break;
                         case PluginLoaderEvents.OnBeltUse:
-                            Hooks.OnBeltUse -= plugin.OnBeltUse;
+                            Hooks.OnBeltUse -= plugin.BaseOnBeltUse;
                             break;
                         case PluginLoaderEvents.OnLogger:
-                            Hooks.OnLogger -= plugin.OnLogger;
+                            Hooks.OnLogger -= plugin.BaseOnLogger;
                             break;
                         case PluginLoaderEvents.OnGrenadeThrow:
-                            Hooks.OnGrenadeThrow -= plugin.OnGrenade;
+                            Hooks.OnGrenadeThrow -= plugin.BaseOnGrenade;
                             break;
                         case PluginLoaderEvents.OnSupplyDropPlaneCreated:
-                            Hooks.OnSupplyDropPlaneCreated -= plugin.OnSupplyDropPlaneCreated;
+                            Hooks.OnSupplyDropPlaneCreated -= plugin.BaseOnSupplyDropPlaneCreated;
                             break;
                         case PluginLoaderEvents.OnNPCSpawned:
-                            Hooks.OnNPCSpawned -= plugin.OnNPCSpawn;
+                            Hooks.OnNPCSpawned -= plugin.BaseOnNPCSpawn;
                             break;
                         case PluginLoaderEvents.OnTimedExplosiveSpawned:
-                            Hooks.OnTimedExplosiveSpawned -= plugin.OnTimedExplosiveSpawned;
+                            Hooks.OnTimedExplosiveSpawned -= plugin.BaseOnTimedExplosiveSpawned;
                             break;
                         case PluginLoaderEvents.OnSleeperSpawned:
-                            Hooks.OnSleeperSpawned -= plugin.OnSleeperSpawned;
+                            Hooks.OnSleeperSpawned -= plugin.BaseOnSleeperSpawned;
                             break;
                         case PluginLoaderEvents.OnCommandRestriction:
-                            Hooks.OnCommandRestriction -= plugin.OnCommandRestriction;
+                            Hooks.OnCommandRestriction -= plugin.BaseOnCommandRestriction;
                             break;
                         case PluginLoaderEvents.OnFireBarrelToggle:
-                            Hooks.OnFireBarrelToggle -= plugin.OnFireBarrelToggle;
+                            Hooks.OnFireBarrelToggle -= plugin.BaseOnFireBarrelToggle;
                             break;
                         case PluginLoaderEvents.OnDayCycleChanged:
-                            Hooks.OnDayCycleChanged -= plugin.OnDayCycleChange;
+                            Hooks.OnDayCycleChanged -= plugin.BaseOnDayCycleChange;
                             break;
                         case PluginLoaderEvents.OnShoot:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnShoot -= plugin.OnShoot;
+                                Hooks.OnShoot -= plugin.BaseOnShoot;
                             }
                             break;
                         case PluginLoaderEvents.OnShotgunShoot:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnShotgunShoot -= plugin.OnShotgunShoot;
+                                Hooks.OnShotgunShoot -= plugin.BaseOnShotgunShoot;
                             }
                             break;
                         case PluginLoaderEvents.OnBowShoot:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnBowShoot -= plugin.OnBowShoot;
+                                Hooks.OnBowShoot -= plugin.BaseOnBowShoot;
                             }
                             break;
                         case PluginLoaderEvents.OnAnimalMovement:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnAnimalMovement -= plugin.OnAnimalMovement;
+                                Hooks.OnAnimalMovement -= plugin.BaseOnAnimalMovement;
                             }
                             break;
                         case PluginLoaderEvents.OnConsumableUse:
-                            Hooks.OnConsumableUse -= plugin.OnConsumableUse;
+                            Hooks.OnConsumableUse -= plugin.BaseOnConsumableUse;
                             break;
                         case PluginLoaderEvents.OnMedikitUse:
-                            Hooks.OnMedikitUse -= plugin.OnMedikitUse;
+                            Hooks.OnMedikitUse -= plugin.BaseOnMedikitUse;
                             break;
                         case PluginLoaderEvents.OnItemModInstall:
-                            Hooks.OnItemMod<BulletWeaponDataBlock>.OnItemModInstall -= plugin.OnItemModInstall;
+                            Hooks.OnItemMod<BulletWeaponDataBlock>.OnItemModInstall -= plugin.BaseOnItemModInstall;
                             break;
                         case PluginLoaderEvents.OnBloodDraw:
-                            Hooks.OnBloodDraw -= plugin.OnBloodDraw;
+                            Hooks.OnBloodDraw -= plugin.BaseOnBloodDraw;
                             break;
                         case PluginLoaderEvents.OnArmorEquip:
-                            Hooks.OnArmorEquip -= plugin.OnArmorEquip;
+                            Hooks.OnArmorEquip -= plugin.BaseOnArmorEquip;
                             break;
                         case PluginLoaderEvents.OnArmorUnEquip:
-                            Hooks.OnArmorUnEquip -= plugin.OnArmorUnEquip;
+                            Hooks.OnArmorUnEquip -= plugin.BaseOnArmorUnEquip;
                             break;
                         case PluginLoaderEvents.OnFlareThrow:
-                            Hooks.OnFlareThrow -= plugin.OnFlareThrow;
+                            Hooks.OnFlareThrow -= plugin.BaseOnFlareThrow;
                             break;
                         case PluginLoaderEvents.OnFlareIgnite:
                             Hooks.OnFlareIgnite -= plugin.FlareIgnite;
                             break;
                         case PluginLoaderEvents.OnTorchIgnite:
-                            Hooks.OnBasicTorchIgnite -= plugin.OnTorchIgnite;
+                            Hooks.OnBasicTorchIgnite -= plugin.BaseOnTorchIgnite;
                             break;
                         case PluginLoaderEvents.OnHeatZoneEnter:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnHeatZoneEnter -= plugin.OnHeatZoneEnter;
+                                Hooks.OnHeatZoneEnter -= plugin.BaseOnHeatZoneEnter;
                             }
                             break;
                         case PluginLoaderEvents.OnWorkZoneEnter:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnWorkZoneEnter -= plugin.OnWorkZoneEnter;
+                                Hooks.OnWorkZoneEnter -= plugin.BaseOnWorkZoneEnter;
                             }
                             break;
                         case PluginLoaderEvents.OnPluginMessage:
-                            Hooks.OnPluginMessage -= plugin.OnPluginMessage;
+                            Hooks.OnPluginMessage -= plugin.BaseOnPluginMessage;
                             break;
                         case PluginLoaderEvents.OnCraftingCancel:
-                            Hooks.OnCraftCancel -= plugin.OnCraftingCancel;
+                            Hooks.OnCraftCancel -= plugin.BaseOnCraftingCancel;
                             break;
                         case PluginLoaderEvents.OnCraftingComplete:
-                            Hooks.OnCraftComplete -= plugin.OnCraftingComplete;
+                            Hooks.OnCraftComplete -= plugin.BaseOnCraftingComplete;
                             break;
                         case PluginLoaderEvents.OnServerTick:
                             if (IsIntensiveEventAllowed(plugin, method))
                             {
-                                Hooks.OnServerTick -= plugin.OnServerTick;
+                                Hooks.OnServerTick -= plugin.BaseOnServerTick;
                             }
                             break;
                         case PluginLoaderEvents.OnMetabolismUpdate:
-                            Hooks.OnMetabolismUpdate -= plugin.OnMetabolismUpdate;
+                            Hooks.OnMetabolismUpdate -= plugin.BaseOnMetabolismUpdate;
                             break;
                         case PluginLoaderEvents.OnWebSocketMessage:
-                            Hooks.OnWebSocketMessage -= plugin.OnWebSocketMessage;
+                            Hooks.OnWebSocketMessage -= plugin.BaseOnWebSocketMessage;
                             break;
                         case PluginLoaderEvents.OnWebSocketConnected:
-                            Hooks.OnWebSocketConnected -= plugin.OnWebSocketConnected;
+                            Hooks.OnWebSocketConnected -= plugin.BaseOnWebSocketConnected;
                             break;
                         case PluginLoaderEvents.OnWebSocketClosed:
-                            Hooks.OnWebSocketClosed -= plugin.OnWebSocketClosed;
+                            Hooks.OnWebSocketClosed -= plugin.BaseOnWebSocketClosed;
                             break;
                         case PluginLoaderEvents.OnWebSocketError:
-                            Hooks.OnWebSocketError -= plugin.OnWebSocketError;
+                            Hooks.OnWebSocketError -= plugin.BaseOnWebSocketError;
                             break;
                     }
                 }
 
                 if (plugin.Globals.Contains(PluginLoaderEvents.OnPluginShutdown))
-                    plugin.OnPluginShutdown();
+                    plugin.BaseOnPluginShutdown();
             }
         }
 
