@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Fougerite.Events;
 using UnityEngine;
 
@@ -21,9 +23,48 @@ namespace Fougerite
         private static bool showErrors = false;
         private static bool showException = false;
         internal static bool showRPC = false;
+        private static int _mainThreadId;
+
+        /// <summary>
+        /// Native export from Fougerite LibRust x64 (Notulp/Fougerite_LibRust_x64).
+        /// Writes a log line directly to the dedicated server's console window.
+        /// Used here so logs from background threads also show up in the console,
+        /// since Unity's log callback only reaches the console on the main thread.
+        /// </summary>
+        [DllImport("librust.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        private static extern void ConsoleLog(string log, string trace, int type);
+
+        /// <summary>
+        /// Forwards a log message to the native LibRust x64 console.
+        /// Skips on x86 builds (I don't trust facepunch code) and
+        /// skips on the main thread, since the existing Unity log hook already
+        /// covers that case and would otherwise print every line twice.
+        /// </summary>
+        /// <param name="message">Already-formatted log line to print.</param>
+        /// <param name="unityLogType">Maps to UnityEngine.LogType (Error=0, Warning=2, Log=3, Exception=4).</param>
+        private static void ForwardToNativeConsole(string message, int unityLogType)
+        {
+            // Not our x64 bit custom build
+            if (IntPtr.Size != 8) 
+                return;
+            
+            if (Thread.CurrentThread.ManagedThreadId == _mainThreadId) 
+                return;
+
+            try
+            {
+                ConsoleLog(message, string.Empty, unityLogType);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+            }
+        }
 
         public static void Init()
         {
+            _mainThreadId = Util.GetUtil().MainThreadID;
+
             try
             {
                 LogsFolder = Path.Combine(Config.GetPublicFolder(), "Logs");
@@ -143,7 +184,8 @@ namespace Fougerite
             Debug.Log(Message, Context);
             Message = $"[Console] {Message}";
             WriteLog(Message);
-            
+            ForwardToNativeConsole(Message, 3);
+
             Hooks.LoggerEvent(LoggerEventType.Log, Message);
         }
         
@@ -167,6 +209,7 @@ namespace Fougerite
                     RPCTracerInit();
                 Message = $"[RPC Debug] {Message}";
                 RPCLogWriter.LogWriter.WriteLine(LogFormat(Message));
+                ForwardToNativeConsole(Message, 3);
             }
             catch (Exception ex)
             {
@@ -181,6 +224,7 @@ namespace Fougerite
             Debug.LogWarning(Message, Context);
             Message = $"[Warning] {Message}";
             WriteLog(Message);
+            ForwardToNativeConsole(Message, 2);
             
             Hooks.LoggerEvent(LoggerEventType.LogWarning, Message);
         }
@@ -191,6 +235,7 @@ namespace Fougerite
                 Debug.LogError(Message, Context);
             Message = $"[Error] {Message}";
             WriteLog(Message);
+            ForwardToNativeConsole(Message, 0);
             
             Hooks.LoggerEvent(LoggerEventType.LogError, Message);
         }
@@ -201,6 +246,7 @@ namespace Fougerite
                 Debug.LogError(Message, Context);
             Message = $"[Error] {Message}";
             WriteLog(Message);
+            ForwardToNativeConsole(Message, 0);
 
             if (!IgnoreHook)
             {
@@ -224,6 +270,7 @@ namespace Fougerite
 
             string Message = $"[Exception] [ {Trace}]\r\n{Ex}";
             WriteLog(Message);
+            ForwardToNativeConsole(Message, 4);
             
             Hooks.LoggerEvent(LoggerEventType.LogException, Message);
         }
@@ -234,6 +281,7 @@ namespace Fougerite
                 Debug.Log($"[DEBUG] {Message}", Context);
             Message = $"[Debug] {Message}";
             WriteLog(Message);
+            ForwardToNativeConsole(Message, 3);
             
             Hooks.LoggerEvent(LoggerEventType.LogDebug, Message);
         }
@@ -243,6 +291,7 @@ namespace Fougerite
             Message = $"[CHAT] {Sender}: {Message}";
             Debug.Log(Message);
             WriteChat(Message);
+            ForwardToNativeConsole(Message, 3);
             
             Hooks.LoggerEvent(LoggerEventType.ChatLog, Message);
         }
