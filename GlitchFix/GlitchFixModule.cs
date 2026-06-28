@@ -34,7 +34,6 @@ namespace GlitchFix
         private float PillarRadius = 0.40f;
         private float RampRadius = 3.5f;
         
-        private string SystemName = "Server";
         private string FoundationHideMessage = "You cannot place structures on deployables here ({0})";
         private string RockBuildMessage = "You are not allowed to build in rocks";
         private string PillarBarricadeMessage = "Pillar Barricade glitching is not allowed!";
@@ -131,8 +130,7 @@ namespace GlitchFix
                 FoundHideRadius = GetFloatSetting("FoundationHideRadius", 4.5f);
                 PillarRadius = GetFloatSetting("PillarStashRadius", 0.40f);
                 RampRadius = GetFloatSetting("RampObjectRadius", 3.5f);
-
-                SystemName = GetStringSetting("SystemName", "Server");
+                
                 FoundationHideMessage = GetStringSetting("FoundationHideMessage",
                     "You cannot place structures on deployables here ({0})");
                 RockBuildMessage = GetStringSetting("RockBuildMessage", "You are not allowed to build in rocks");
