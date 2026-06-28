@@ -53,7 +53,7 @@ namespace Fougerite
 
             try
             {
-                ConsoleLog(message, string.Empty, unityLogType);
+                ConsoleLog($"[SUBTHREAD_LOG:{Thread.CurrentThread.ManagedThreadId}] {message}", string.Empty, unityLogType);
             }
             catch (Exception ex)
             {
