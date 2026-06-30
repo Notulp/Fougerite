@@ -203,16 +203,20 @@ namespace GlitchFix
                 return;
             if (!he.AttackerIsPlayer || he.Attacker == null)
                 return;
-            if (he.Entity == null)
+            if (he.Victim == null)
                 return;
             if (HasBypass(he.Attacker as Fougerite.Player))
                 return;
 
-            var td = he.Entity.GetTakeDamage();
+            NPC npc = he.Victim as NPC;
+            if (npc == null)
+                return;
+            
+            var td = npc.Character.takeDamage;
             if (td == null || td.health > 0f)
                 return;
 
-            Vector3 pos = he.Entity.Location;
+            Vector3 pos = npc.Location;
             if (!AnimalHits.ContainsKey(pos))
                 AnimalHits[pos] = 1;
             else
@@ -220,7 +224,7 @@ namespace GlitchFix
 
             if (AnimalHits[pos] >= AnimalHitsBeforeDestroy)
             {
-                he.Entity.Destroy();
+                NetCull.Destroy(td.gameObject);
                 AnimalHits.Remove(pos);
             }
         }
