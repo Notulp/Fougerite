@@ -28,6 +28,9 @@ namespace GlitchFix
         private bool AntiAnimalGlitch = false;
         private bool RockGlitchDestroySleepingBag = true;
         private bool PreventBuildInRock = true;
+        private bool ShouldTeleportPlayerOutOfRock = false;
+        private bool AntiShacking = true;
+        private bool AntiBarricadeOnPillar = true;
         private int RampStackMax = 1;
         private int AnimalHitsBeforeDestroy = 5;
         private float FoundHideRadius = 4.5f;
@@ -37,6 +40,7 @@ namespace GlitchFix
         private string FoundationHideMessage = "You cannot place structures on deployables here ({0})";
         private string RockBuildMessage = "You are not allowed to build in rocks";
         private string PillarBarricadeMessage = "Pillar Barricade glitching is not allowed!";
+        private string ShackingMessage = "Griefing is not allowed on this server";
 
         private const string BypassPermission = "glitchfix.bypass";
         private const string ReloadPermission = "glitchfix.reload";
@@ -47,6 +51,17 @@ namespace GlitchFix
 
         // animal-glitch hit tracking, keyed by victim position
         private readonly Dictionary<Vector3, int> AnimalHits = new Dictionary<Vector3, int>();
+        private readonly Dictionary<Vector3, DateTime> AnimalHitTimes = new Dictionary<Vector3, DateTime>();
+
+        // shacking check: deployable name (partial, case-insensitive), door-proximity radius in meters.
+        // 0.0 disables the check for that deployable type.
+        private Dictionary<string, float> defaultObjects = new Dictionary<string, float>
+        {
+            { "Shelter",   5f },
+            { "Spike",     2f },
+            { "Barricade", 0f },
+            { "Gate",      5f }
+        };
 
         public override string Name
         {
@@ -65,7 +80,7 @@ namespace GlitchFix
 
         public override Version Version
         {
-            get { return new Version("2.0.0"); }
+            get { return new Version("2.0.1"); }
         }
 
         public override uint Order
@@ -85,6 +100,7 @@ namespace GlitchFix
                 Fougerite.Hooks.OnCommand += OnCommand;
                 if (AntiAnimalGlitch)
                     Fougerite.Hooks.OnNPCHurt += OnNPCHurt;
+                CreateTimer("AnimalHitsCleanup", 30 * 60 * 1000, CleanupAnimalHits, true).Start();
             }
         }
 
@@ -98,6 +114,7 @@ namespace GlitchFix
                 Fougerite.Hooks.OnCommand -= OnCommand;
                 if (AntiAnimalGlitch)
                     Fougerite.Hooks.OnNPCHurt -= OnNPCHurt;
+                KillTimer("AnimalHitsCleanup");
             }
         }
 
@@ -124,6 +141,9 @@ namespace GlitchFix
                 AntiAnimalGlitch = Config.GetBoolSetting("Settings", "AntiAnimalGlitch");
                 RockGlitchDestroySleepingBag = Config.GetBoolSetting("Settings", "RockGlitchDestroySleepingBag");
                 PreventBuildInRock = Config.GetBoolSetting("Settings", "PreventBuildInRock");
+                ShouldTeleportPlayerOutOfRock = Config.GetBoolSetting("Settings", "ShouldTeleportPlayerOutOfRock");
+                AntiShacking = Config.GetBoolSetting("Settings", "AntiShacking");
+                AntiBarricadeOnPillar = Config.GetBoolSetting("Settings", "AntiBarricadeOnPillar");
 
                 RampStackMax = GetIntSetting("RampStackMax", 1);
                 AnimalHitsBeforeDestroy = GetIntSetting("AnimalHitsBeforeDestroy", 5);
@@ -136,6 +156,16 @@ namespace GlitchFix
                 RockBuildMessage = GetStringSetting("RockBuildMessage", "You are not allowed to build in rocks");
                 PillarBarricadeMessage =
                     GetStringSetting("PillarBarricadeMessage", "Pillar Barricade glitching is not allowed!");
+                ShackingMessage = GetStringSetting("ShackingMessage", "Griefing is not allowed on this server");
+
+                defaultObjects = new Dictionary<string, float>();
+                foreach (string key in Config.EnumSection("Shacking"))
+                {
+                    string raw = Config.GetSetting("Shacking", key);
+                    float radius;
+                    if (float.TryParse(raw, out radius))
+                        defaultObjects[key] = radius;
+                }
             }
             catch (Exception e)
             {
@@ -221,11 +251,24 @@ namespace GlitchFix
                 AnimalHits[pos] = 1;
             else
                 AnimalHits[pos]++;
+            AnimalHitTimes[pos] = DateTime.UtcNow;
 
             if (AnimalHits[pos] >= AnimalHitsBeforeDestroy)
             {
                 NetCull.Destroy(td.gameObject);
                 AnimalHits.Remove(pos);
+                AnimalHitTimes.Remove(pos);
+            }
+        }
+        
+        private void CleanupAnimalHits(TimedEvent evt)
+        {
+            DateTime cutoff = DateTime.UtcNow.AddMinutes(-30);
+            var stale = AnimalHitTimes.Where(p => p.Value < cutoff).Select(p => p.Key).ToList();
+            foreach (var key in stale)
+            {
+                AnimalHits.Remove(key);
+                AnimalHitTimes.Remove(key);
             }
         }
 
@@ -257,6 +300,12 @@ namespace GlitchFix
                     if (collider.gameObject.name == "SleepingBagA(Clone)")
                         TakeDamage.KillSelf(collider.GetComponent<IDMain>());
                 }
+            }
+
+            if (ShouldTeleportPlayerOutOfRock)
+            {
+                Vector3 safePos = GetSafePosition(player.Location);
+                player.TeleportTo(safePos);
             }
 
             if (RockGlitchKill)
@@ -294,6 +343,12 @@ namespace GlitchFix
                     if (collider.gameObject.name == "SleepingBagA(Clone)")
                         TakeDamage.KillSelf(collider.GetComponent<IDMain>());
                 }
+            }
+
+            if (ShouldTeleportPlayerOutOfRock)
+            {
+                Vector3 safePos = GetSafePosition(player.Location);
+                player.TeleportTo(safePos);
             }
 
             if (RockGlitchKill)
@@ -375,6 +430,44 @@ namespace GlitchFix
             return false;
         }
 
+        // returns the door-proximity radius for this entity name from defaultObjects,
+        // or 0 if the name doesn't match any key or the radius is 0 (disabled).
+        private float GetShackingRadius(string entityName)
+        {
+            foreach (KeyValuePair<string, float> pair in defaultObjects)
+            {
+                if (entityName.ToLower().Contains(pair.Key.ToLower()))
+                    return pair.Value;
+            }
+            return 0f;
+        }
+
+        // checks whether there is a pillar mesh directly below the given position.
+        // used to catch barricade-on-pillar glitch.
+        private bool IsOnPillar(Vector3 pos)
+        {
+            Vector3 offset = new Vector3(0f, 1.15f, 0f);
+            RaycastHit hit;
+            bool casted;
+            Facepunch.MeshBatch.MeshBatchInstance instance;
+            if (!Facepunch.MeshBatch.MeshBatchPhysics.Raycast(
+                    pos + offset, Vector3Down, out hit, out casted, out instance))
+                return false;
+            if (instance == null)
+                return false;
+            return instance.ToString().ToLower().Contains("pillar");
+        }
+
+        // finds the highest safe terrain point above the given position.
+        private Vector3 GetSafePosition(Vector3 pos)
+        {
+            RaycastHit hit;
+            Vector3 origin = pos + new Vector3(0f, 1000f, 0f);
+            if (Physics.Raycast(origin, Vector3.down, out hit))
+                return new Vector3(pos.x, origin.y - hit.distance + 0.5f, pos.z);
+            return pos;
+        }
+
         public void EntityDeployed(Fougerite.Player Player, Fougerite.Entity Entity, Fougerite.Player actualplacer)
         {
             try
@@ -388,10 +481,12 @@ namespace GlitchFix
                 // SmallStash is admitted too, purely so the legacy Struct check
                 // further down (which blocks a stash placed next to a woodbox/
                 // another stash/a door) can actually run on it.
-                if (!(Entity.Name.Contains("Foundation") || Entity.Name.Contains("Ramp")
-                                                         || Entity.Name.Contains("Pillar") ||
-                                                         Entity.Name == "WoodDoor" || Entity.Name == "MetalDoor" ||
-                                                         Entity.Name.ToLower().Contains("smallstash")))
+                bool isStructureType = Entity.Name.Contains("Foundation") || Entity.Name.Contains("Ramp")
+                                       || Entity.Name.Contains("Pillar") || Entity.Name == "WoodDoor"
+                                       || Entity.Name == "MetalDoor" || Entity.Name.ToLower().Contains("smallstash");
+                bool isShackingTarget = AntiShacking && GetShackingRadius(Entity.Name) > 0f;
+                bool isBarricade = AntiBarricadeOnPillar && Entity.Name.ToLower().Contains("barricade");
+                if (!isStructureType && !isShackingTarget && !isBarricade)
                     return;
 
                 string name = Entity.Name;
@@ -399,8 +494,8 @@ namespace GlitchFix
                 string foundName = "Unknown";
 
                 // ROCK GLITCH BUILD PREVENTION
-                // block foundations / ramps placed inside a rock (empty-name collider above)
-                if (PreventBuildInRock && (name.Contains("Foundation") || name.Contains("Ramp")))
+                // block foundations / ramps / deployables placed inside a rock (empty-name collider above)
+                if (PreventBuildInRock)
                 {
                     if (InRock(location, actualplacer))
                     {
@@ -411,6 +506,37 @@ namespace GlitchFix
                         return;
                     }
                 }
+
+                // ANTI SHACKING
+                // blocks deployables (shelter, spike, gate etc.) placed near a door to grief it.
+                // each type has its own radius configured in the [Shacking] cfg section (0 = disabled for that type).
+                if (isShackingTarget)
+                {
+                    if (SphereContainsNamed(location, GetShackingRadius(name), "door", ref foundName))
+                    {
+                        actualplacer.Message(ShackingMessage);
+                        Entity.Destroy();
+                        RefundItem(actualplacer, name);
+                        return;
+                    }
+                }
+
+                // ANTI BARRICADE ON PILLAR
+                // blocks barricades placed directly on top of a pillar.
+                // separate from ANTI PILLAR BARRICADE below (which blocks a pillar placed near a fence).
+                if (isBarricade)
+                {
+                    if (IsOnPillar(location))
+                    {
+                        actualplacer.Message(PillarBarricadeMessage);
+                        Entity.Destroy();
+                        RefundItem(actualplacer, name);
+                        return;
+                    }
+                }
+
+                if (!isStructureType)
+                    return;
 
                 // ANTI DOOR STASH
                 // only block a SmallStash hidden in a doorway, not the whole base.
