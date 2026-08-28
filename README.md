@@ -28,6 +28,11 @@ Goodbye, and thank you for 12 incredible years.
 
 ## x64 Upgrade (v1.9.7+)
 
+> [!WARNING]
+> **Install the latest Microsoft Visual C++ Redistributable before running the x64 server.**
+> Without it, the server may fail to start or crash unexpectedly.
+> Download the latest x64 version here: [Latest Microsoft Visual C++ Redistributable (x64)](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
+
 Starting from version **1.9.7**, Fougerite ships [Fougerite_LibRust_x64](https://github.com/Notulp/Fougerite_LibRust_x64) for testing, a full x64 reimplementation of the original x86 `librust.dll`, alongside x64 builds of `rust_server.exe` and `mono.dll`.
 
 ### Setup
