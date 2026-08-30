@@ -841,13 +841,20 @@ namespace Fougerite
             return result;
         }
 
-        public bool ContainsString(string str, string key)
+        /// <summary>
+        /// Determines whether a specified substring exists within a given string, with an optional case-insensitivity check.
+        /// </summary>
+        /// <param name="str">The string to search within.</param>
+        /// <param name="key">The substring to search for.</param>
+        /// <param name="ignoreCase">Indicates whether the search should be case-insensitive. Defaults to false.</param>
+        /// <returns>True if the substring is found within the string; otherwise, false.</returns>
+        public bool ContainsString(string str, string key, bool ignoreCase = false)
         {
-            if (str.Contains(key))
+            if (str.Contains(key, ignoreCase))
             {
                 return true;
             }
-
+            
             return false;
         }
 
