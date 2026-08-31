@@ -21,6 +21,7 @@ namespace Fougerite
         [Obsolete("The bans were moved into the DataStore ages ago.", false)]
         private readonly string _globalBanListIni = Path.Combine(Util.GetRootFolder(), Path.Combine("Save", "GlobalBanList.ini"));
         private readonly ConcurrentList<string> _ConsoleCommandCancelList = new ConcurrentList<string>();
+        private readonly ConcurrentList<string> _CommandCancelList = new ConcurrentList<string>();
         [Obsolete("Use DataStore, this is used in old Javascript plugins from years ago.", false)]
         public Data data = new Data();
         public string server_message_name = "Fougerite";
@@ -650,6 +651,60 @@ namespace Fougerite
         internal bool ContainsPlayer(ulong id)
         {
             return _players.ContainsKey(id);
+        }
+
+        /// <summary>
+        /// Restricts the specified command globally. (Doesn't modify Player's own Restriction table)
+        /// Use "*" to restrict all commands globally.
+        /// </summary>
+        /// <param name="cmd"></param>
+        public void RestrictCommand(string cmd)
+        {
+            if (!_CommandCancelList.Contains(cmd))
+            {
+                bool result = Hooks.RestrictionChange(null, CommandRestrictionType.Command, 
+                    CommandRestrictionScale.Global, cmd, true);
+                
+                if (!result)
+                    _CommandCancelList.Add(cmd);
+            }
+        }
+
+        /// <summary>
+        /// UnRestricts the specified command globally. (Doesn't modify Player's own Restriction table)
+        /// Use "*" to unrestrict all commands if they were globally restricted with "*".
+        /// CleanRestrictedCommands to clear the global restriction list.
+        /// </summary>
+        /// <param name="cmd"></param>
+        public void UnRestrictCommand(string cmd)
+        {
+            if (_CommandCancelList.Contains(cmd))
+            {
+                bool result = Hooks.RestrictionChange(null, CommandRestrictionType.Command, 
+                    CommandRestrictionScale.Global, cmd, false);
+                
+                if (!result)
+                    _CommandCancelList.Remove(cmd);
+            }
+        }
+
+        /// <summary>
+        /// Clears all globally restricted commands. (Doesn't modify Player's own Restriction table)
+        /// </summary>
+        public void CleanRestrictedCommands()
+        {
+            foreach (string x in CommandCancelList)
+            {
+                UnRestrictCommand(x);
+            }
+        }
+
+        /// <summary>
+        /// Returns all globally restricted commands.
+        /// </summary>
+        public List<string> CommandCancelList
+        {
+            get { return _CommandCancelList.GetShallowCopy(); }
         }
 
         /// <summary>

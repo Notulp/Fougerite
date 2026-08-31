@@ -110,6 +110,13 @@ namespace Fougerite
                         player.Message("[color #0C86AE]Pluton Team: www.pluton-team.org");
                     }
                     
+                    // Check global command restrictions first
+                    if (Server.GetServer().CommandCancelList.Contains("*", StringComparer.OrdinalIgnoreCase) || Server.GetServer().CommandCancelList.Contains(command, StringComparer.OrdinalIgnoreCase))
+                    {
+                        player.Message($"The command {command} is globally restricted!");
+                        return;
+                    }
+                    
                     // If player has *, restrict all commands.
                     if (player.CommandCancelList.Contains("*", StringComparer.OrdinalIgnoreCase) || player.CommandCancelList.Contains(command, StringComparer.OrdinalIgnoreCase))
                     {

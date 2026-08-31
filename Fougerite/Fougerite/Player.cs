@@ -270,6 +270,7 @@ namespace Fougerite
 
         /// <summary>
         /// The specified command cannot be used by this player.
+        /// Use "*" to restrict all commands for this player.
         /// </summary>
         /// <param name="cmd"></param>
         public void RestrictCommand(string cmd)
@@ -286,6 +287,8 @@ namespace Fougerite
 
         /// <summary>
         /// The specified command will be unrestricted and the player will be able to use It again.
+        /// Use "*" to unrestrict "all" commands if they were restricted with "*".
+        /// Use CleanRestrictedCommands to actually clear all of it.
         /// </summary>
         /// <param name="cmd"></param>
         public void UnRestrictCommand(string cmd)
