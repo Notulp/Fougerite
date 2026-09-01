@@ -7,6 +7,7 @@ using Facepunch.MeshBatch;
 using Fougerite.Caches;
 using Fougerite.Concurrent;
 using Fougerite.Events;
+using Fougerite.Tools;
 using UnityEngine;
 using String = Facepunch.Utility.String;
 
@@ -86,6 +87,38 @@ namespace Fougerite
                 }
 
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether the player is a Steam user.
+        /// </summary>
+        public bool IsSteamUser
+        {
+            get
+            {
+                if (IsOnline)
+                {
+                    return Util.GetUtil().IsSteamUser(UID);
+                }
+                
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Determines the type of Steam application the user is associated with, represented by a SteamAppId.
+        /// </summary>
+        public SteamUserRegistry.SteamAppId SteamUserType
+        {
+            get
+            {
+                if (IsOnline)
+                {
+                    return SteamUserRegistry.GetType(UID);
+                }
+                
+                return SteamUserRegistry.SteamAppId.None;
             }
         }
 

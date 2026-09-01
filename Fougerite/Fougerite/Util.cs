@@ -1745,6 +1745,16 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Determines if a given Steam ID belongs to a valid Steam user.
+        /// </summary>
+        /// <param name="steamId">The unique ID of the Steam user to check.</param>
+        /// <returns>True if the given Steam ID belongs to a valid Steam user, otherwise, false.</returns>
+        public bool IsSteamUser(ulong steamId)
+        {
+            return SteamUserRegistry.Contains(steamId);
+        }
+
+        /// <summary>
         /// Returns the current server time in milliseconds.
         /// </summary>
         public ulong TimeInMillis

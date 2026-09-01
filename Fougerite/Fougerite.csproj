@@ -219,6 +219,8 @@
     <Compile Include="Fougerite\Tools\Extensions.cs" />
     <Compile Include="Fougerite\Tools\FougeriteTickManager.cs" />
     <Compile Include="Fougerite\Tools\PluginMessaging.cs" />
+    <Compile Include="Fougerite\Tools\SteamAPITools.cs" />
+    <Compile Include="Fougerite\Tools\SteamUserRegistry.cs" />
     <Compile Include="Fougerite\WinHttpClient.cs" />
     <Compile Include="Fougerite\Zone3D.cs" />
     <Compile Include="Fougerite\DataStore.cs" />

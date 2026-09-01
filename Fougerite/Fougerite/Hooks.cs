@@ -2192,6 +2192,21 @@ namespace Fougerite
             using (new Stopper(nameof(Hooks), nameof(SteamDeny)))
             {
                 SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum);
+                if (cc != null && cc.SteamTicket != null && cc.SteamTicket.Length > 0)
+                {
+                    byte[] ticket = cc.SteamTicket;
+                    bool isRust = SteamAPITools.FindSequence(ticket, SteamAPITools.RustAppIdBytes);
+                    bool isSpacewar = SteamAPITools.FindSequence(ticket, SteamAPITools.SpacewarAppIdBytes);
+
+                    if (isRust || isSpacewar)
+                    {
+                        if (!SteamUserRegistry.Contains(cc.UserID))
+                        {
+                            SteamUserRegistry.Add(cc.UserID, isRust ? SteamUserRegistry.SteamAppId.Rust : SteamUserRegistry.SteamAppId.SpaceWars);
+                        }
+                    }
+                }
+                
                 try
                 {
                     ExecuteSubscribers(OnSteamDeny, "SteamDenyEvent", sde);
@@ -2211,6 +2226,10 @@ namespace Fougerite
                 approval.Deny((uLink.NetworkConnectionError)errornum);
                 ConnectionAcceptor.CloseConnection(cc);
                 Rust.Steam.Server.OnUserLeave(cc.UserID);
+                if (SteamUserRegistry.Contains(cc.UserID))
+                {
+                    SteamUserRegistry.Remove(cc.UserID);
+                }
             }
         }
 
@@ -2229,6 +2248,10 @@ namespace Fougerite
                             ulong id = user.userID;
                             PlayerClient client = user.playerClient;
                             Vector3 loc = user.playerClient.lastKnownPosition;
+                            if (SteamUserRegistry.Contains(id))
+                            {
+                                SteamUserRegistry.Remove(id);
+                            }
 
                             Player player = Server.GetServer().GetCachePlayer(id);
                             // Sanity check
