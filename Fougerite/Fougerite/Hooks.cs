@@ -2191,22 +2191,17 @@ namespace Fougerite
         {
             using (new Stopper(nameof(Hooks), nameof(SteamDeny)))
             {
-                SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum);
+                // We want to check if the user is a valid Steam user, just maybe from a different appid
+                bool isRust = false;
+                bool isSpacewar = false;
                 if (cc != null && cc.SteamTicket != null && cc.SteamTicket.Length > 0)
                 {
                     byte[] ticket = cc.SteamTicket;
-                    bool isRust = SteamAPITools.FindSequence(ticket, SteamAPITools.RustAppIdBytes);
-                    bool isSpacewar = SteamAPITools.FindSequence(ticket, SteamAPITools.SpacewarAppIdBytes);
-
-                    if (isRust || isSpacewar)
-                    {
-                        if (!SteamUserRegistry.Contains(cc.UserID))
-                        {
-                            SteamUserRegistry.Add(cc.UserID, isRust ? SteamUserRegistry.SteamAppId.Rust : SteamUserRegistry.SteamAppId.SpaceWars);
-                        }
-                    }
+                    isRust = SteamAPITools.FindSequence(ticket, SteamAPITools.RustAppIdBytes);
+                    isSpacewar = SteamAPITools.FindSequence(ticket, SteamAPITools.SpacewarAppIdBytes);
                 }
                 
+                SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum, isRust || isSpacewar);
                 try
                 {
                     ExecuteSubscribers(OnSteamDeny, "SteamDenyEvent", sde);
@@ -2218,6 +2213,10 @@ namespace Fougerite
 
                 if (sde.ForceAllow)
                 {
+                    if ((isRust || isSpacewar) && !SteamUserRegistry.Contains(cc.UserID))
+                    {
+                        SteamUserRegistry.Add(cc.UserID, isRust ? SteamUserRegistry.SteamAppId.Rust : SteamUserRegistry.SteamAppId.SpaceWars);
+                    }
                     return;
                 }
 
@@ -2425,6 +2424,21 @@ namespace Fougerite
         private static void Accept(ConnectionAcceptor ca, NetworkPlayerApproval approval,
             ClientConnection clientConnection)
         {
+            if (clientConnection != null && clientConnection.SteamTicket != null && clientConnection.SteamTicket.Length > 0)
+            {
+                byte[] ticket = clientConnection.SteamTicket;
+                bool isRust = SteamAPITools.FindSequence(ticket, SteamAPITools.RustAppIdBytes);
+                bool isSpacewar = SteamAPITools.FindSequence(ticket, SteamAPITools.SpacewarAppIdBytes);
+                
+                if (isRust || isSpacewar)
+                {
+                    if (!SteamUserRegistry.Contains(clientConnection.UserID))
+                    {
+                        SteamUserRegistry.Add(clientConnection.UserID, isRust ? SteamUserRegistry.SteamAppId.Rust : SteamUserRegistry.SteamAppId.SpaceWars);
+                    }
+                }
+            }
+            
             ca.m_Connections.Add(clientConnection);
             ca.StartCoroutine(clientConnection.AuthorisationRoutine(approval));
             approval.Wait();

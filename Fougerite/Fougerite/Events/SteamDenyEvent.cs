@@ -11,14 +11,17 @@ namespace Fougerite.Events
         private readonly NetworkPlayerApproval _approval;
         private readonly string _strReason;
         private readonly NetError _errornum;
+        private readonly bool _isValidSteamUser;
         private bool _forceallow = false;
 
-        public SteamDenyEvent(ClientConnection cc, NetworkPlayerApproval approval, string strReason, NetError errornum)
+        public SteamDenyEvent(ClientConnection cc, NetworkPlayerApproval approval, string strReason, NetError errornum,
+            bool isValidSteamUser)
         {
             _cc = cc;
             _approval = approval;
             _strReason = strReason;
             _errornum = errornum;
+            _isValidSteamUser = isValidSteamUser;
         }
 
         /// <summary>
@@ -68,6 +71,16 @@ namespace Fougerite.Events
         {
             get { return _forceallow; }
             set { _forceallow = value; }
+        }
+        
+        /// <summary>
+        /// Returns true if the player is a valid Steam user, false otherwise.
+        /// User can have any APPID.
+        /// You can find more info in ClientConnection.SteamTicket.
+        /// </summary>
+        public bool IsValidSteamUser
+        {
+            get { return _isValidSteamUser; }
         }
     }
 }
