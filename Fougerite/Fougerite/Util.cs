@@ -1755,6 +1755,16 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Retrieves the Steam application type for a given Steam user ID.
+        /// </summary>
+        /// <param name="steamId">The ID of the Steam user whose application type is being determined.</param>
+        /// <returns>The Steam application type as a <see cref="Fougerite.Tools.SteamUserRegistry.SteamAppId"/>.</returns>
+        public SteamUserRegistry.SteamAppId GetSteamUserType(ulong steamId)
+        {
+            return SteamUserRegistry.GetType(steamId);
+        }
+
+        /// <summary>
         /// Returns the current server time in milliseconds.
         /// </summary>
         public ulong TimeInMillis
