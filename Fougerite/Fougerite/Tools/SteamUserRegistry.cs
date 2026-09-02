@@ -25,7 +25,7 @@ namespace Fougerite.Tools
         public enum SteamAppId
         {
             None = -1,
-            SpaceWars = 440,
+            SpaceWars = 480,
             Rust = 252490,
         }
 
