@@ -1,3 +1,4 @@
+using Fougerite.Concurrent;
 using UnityEngine;
 
 namespace Fougerite
@@ -10,17 +11,15 @@ namespace Fougerite
     public class CoroutineHost : MonoBehaviour
     {
         /// <summary>
-        /// Represents the singleton instance of the <see cref="CoroutineHost"/> class.
-        /// This variable ensures there is only one active instance of <see cref="CoroutineHost"/>,
-        /// which serves as a host for running Unity coroutines outside of a specific MonoBehaviour context.
+        /// Lazily initialized singleton instance of the <see cref="CoroutineHost"/> class.
+        /// Uses <see cref="Lazy{T}"/> to ensure thread-safe initialization.
         /// </summary>
-        private static volatile CoroutineHost _instance;
-
-        /// <summary>
-        /// A private static object used as a thread synchronization lock to ensure safe initialization
-        /// of the singleton <see cref="CoroutineHost"/> instance in a multithreaded environment.
-        /// </summary>
-        private static object _lockObject = new object();
+        private static readonly Lazy<CoroutineHost> InstanceC = new Lazy<CoroutineHost>(() =>
+        {
+            GameObject go = new GameObject("Fougerite_CoroutineHost");
+            Object.DontDestroyOnLoad(go);
+            return go.AddComponent<CoroutineHost>();
+        });
 
         /// <summary>
         /// Gets the singleton instance of the CoroutineHost class.
@@ -31,23 +30,7 @@ namespace Fougerite
         /// </summary>
         public static CoroutineHost Instance
         {
-            get
-            {
-                if (_instance != null)
-                    return _instance;
-                
-                lock (_lockObject)
-                {
-                    if (_instance == null)
-                    {
-                        GameObject go = new GameObject("Fougerite_CoroutineHost");
-                        UnityEngine.Object.DontDestroyOnLoad(go);
-                        _instance = go.AddComponent<CoroutineHost>();
-                    }
-                }
-
-                return _instance;
-            }
+            get { return InstanceC.Value; }
         }
     }
 }
