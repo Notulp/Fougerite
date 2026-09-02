@@ -131,7 +131,8 @@ namespace Fougerite.PluginLoaders
             PluginLoaderEvents.OnWebSocketMessage,
             PluginLoaderEvents.OnWebSocketConnected,
             PluginLoaderEvents.OnWebSocketClosed,
-            PluginLoaderEvents.OnWebSocketError
+            PluginLoaderEvents.OnWebSocketError,
+            PluginLoaderEvents.OnPermissionChange
         };
 
         /// <summary>
@@ -592,6 +593,9 @@ namespace Fougerite.PluginLoaders
                         case PluginLoaderEvents.OnWebSocketError:
                             Hooks.OnWebSocketError += plugin.BaseOnWebSocketError;
                             break;
+                        case PluginLoaderEvents.OnPermissionChange:
+                            Hooks.OnPermissionChange += plugin.BaseOnPermissionChange;
+                            break;
                     }
                 }
             }
@@ -883,6 +887,9 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnWebSocketError:
                             Hooks.OnWebSocketError -= plugin.BaseOnWebSocketError;
+                            break;
+                        case PluginLoaderEvents.OnPermissionChange:
+                            Hooks.OnPermissionChange -= plugin.BaseOnPermissionChange;
                             break;
                     }
                 }

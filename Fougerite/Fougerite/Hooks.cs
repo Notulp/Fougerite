@@ -4744,6 +4744,18 @@ namespace Fougerite
         {
             ExecuteSubscribers(OnWebSocketError, "OnWebSocketError", e);
         }
+        
+        /// <summary>
+        /// Fires before a permission system action is executed.
+        /// Plugins can cancel the action by calling Cancel() on the event.
+        /// </summary>
+        /// <param name="permissionEvent">The permission event containing action details.</param>
+        /// <returns>True if the event was cancelled by a plugin, otherwise false.</returns>
+        public static bool OnPermissionChangeHook(PermissionEvent permissionEvent)
+        {
+            ExecuteSubscribers(OnPermissionChange, "OnPermissionChange", permissionEvent);
+            return permissionEvent.Cancelled;
+        }
 
         /// <summary>
         /// Triggered when loot tables from the game are fully loaded.

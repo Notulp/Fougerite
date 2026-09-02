@@ -520,6 +520,11 @@ namespace Fougerite
         public static event WebSocketEventHandlerDelegate OnWebSocketError;
 
         /// <summary>
+        /// This delegate runs when a permission system action is about to be performed.
+        /// </summary>
+        public static event PermissionEventDelegate OnPermissionChange;
+
+        /// <summary>
         /// This value returns if the server is shutting down.
         /// </summary>
         public static bool IsShuttingDown { get; set; }
@@ -613,6 +618,7 @@ namespace Fougerite
             OnWebSocketConnected = delegate { };
             OnWebSocketClosed = delegate { };
             OnWebSocketError = delegate { };
+            OnPermissionChange = delegate { };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -774,6 +780,8 @@ namespace Fougerite
         public delegate void MetabolismUpdateDelegate(MetabolismEvent e);
         
         public delegate void WebSocketEventHandlerDelegate(WebSocketEvent e);
+
+        public delegate void PermissionEventDelegate(PermissionEvent e);
         
         /// <summary>
         /// Flags for Method.Invoke

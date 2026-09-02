@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Fougerite.Concurrent;
+using Fougerite.Events;
 using Fougerite.Tools;
 using Newtonsoft.Json;
 using ReaderWriterLock = Fougerite.Concurrent.ReaderWriterLock;
@@ -16,7 +17,6 @@ namespace Fougerite.Permissions
     /// and player-specific access controls.
     /// The heart of the permission system.
     /// I recommend using groups, and assigning players to them.
-    /// TODO: Implement hooks?
     /// </summary>
     public class PermissionSystem
     {
@@ -656,6 +656,12 @@ namespace Fougerite.Permissions
         /// <returns>The newly created or existing PermissionPlayer record.</returns>
         public PermissionPlayer CreatePermissionPlayer(ulong steamid)
         {
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.CreatePermissionPlayer, steamId: steamid);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return null;
+            }
+            
             var permissionplayer = GetPlayerBySteamID(steamid);
             if (permissionplayer == null)
             {
@@ -694,6 +700,12 @@ namespace Fougerite.Permissions
         /// <returns>The newly created or existing PermissionPlayer record.</returns>
         public PermissionPlayer CreatePermissionPlayer(ulong steamid, List<string> groups, List<string> permissions)
         {
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.CreatePermissionPlayer, steamId: steamid);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return null;
+            }
+            
             var permissionplayer = GetPlayerBySteamID(steamid);
             if (permissionplayer == null)
             {
@@ -775,6 +787,12 @@ namespace Fougerite.Permissions
         /// <returns>True if the record was found and removed, otherwise, false.</returns>
         public bool RemovePermissionPlayer(ulong steamid)
         {
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.RemovePermissionPlayer, steamId: steamid);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
+            
             var permissionplayer = GetPlayerBySteamID(steamid);
             if (permissionplayer != null)
             {
@@ -806,6 +824,12 @@ namespace Fougerite.Permissions
         public bool AddGroupToPlayer(ulong steamid, string groupname)
         {
             groupname = groupname.Trim().ToLower();
+            
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.AddGroupToPlayer, steamId: steamid, groupName: groupname);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
             PermLock.AcquireWriterLock(Timeout.Infinite);
             try
             {
@@ -844,6 +868,12 @@ namespace Fougerite.Permissions
         public bool RemoveGroupFromPlayer(ulong steamid, string groupname)
         {
             groupname = groupname.Trim().ToLower();
+            
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.RemoveGroupFromPlayer, steamId: steamid, groupName: groupname);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
 
             PermLock.AcquireWriterLock(Timeout.Infinite);
             try
@@ -883,6 +913,12 @@ namespace Fougerite.Permissions
         /// <returns>True if the group was created, false if it already exists.</returns>
         public bool CreateGroup(string groupname, List<string> permissions = null, string nickname = null)
         {
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.CreateGroup, groupName: groupname, nickName: nickname);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
+            
             if (permissions == null)
             {
                 permissions = new List<string>();
@@ -932,6 +968,12 @@ namespace Fougerite.Permissions
         public bool RemoveGroup(string groupname)
         {
             groupname = groupname.Trim().ToLower();
+            
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.RemoveGroup, groupName: groupname);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
             
             // Disable the removal of the default group.
             if (groupname == "default")
@@ -983,6 +1025,13 @@ namespace Fougerite.Permissions
         {
             groupname = groupname.Trim().ToLower();
             permission = permission.Trim().ToLower();
+
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.AddPermissionToGroup, groupName: groupname, permission: permission);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
+
             PermissionGroup group = GetGroupByName(groupname);
 
             if (group != null)
@@ -1020,6 +1069,12 @@ namespace Fougerite.Permissions
         {
             groupname = groupname.Trim().ToLower();
             permission = permission.Trim().ToLower();
+            
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.RemovePermissionFromGroup, groupName: groupname, permission: permission);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
             PermissionGroup group = GetGroupByName(groupname);
 
             if (group != null)
@@ -1187,6 +1242,12 @@ namespace Fougerite.Permissions
         public bool AddPermission(ulong steamid, string permission)
         {
             permission = permission.Trim().ToLower();
+            
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.AddPermission, steamId: steamid, permission: permission);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
             PermLock.AcquireWriterLock(Timeout.Infinite);
             try
             {
@@ -1247,6 +1308,12 @@ namespace Fougerite.Permissions
         public bool RemovePermission(ulong steamid, string permission)
         {
             permission = permission.Trim().ToLower();
+            
+            PermissionEvent pe = new PermissionEvent(PermissionActionType.RemovePermission, steamId: steamid, permission: permission);
+            if (Hooks.OnPermissionChangeHook(pe))
+            {
+                return false;
+            }
             PermLock.AcquireWriterLock(Timeout.Infinite);
             try
             {

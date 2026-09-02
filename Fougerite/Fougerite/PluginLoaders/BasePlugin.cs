@@ -1277,5 +1277,10 @@ namespace Fougerite.PluginLoaders
         {
             Invoke(PluginLoaderEvents.OnWebSocketError, ev);
         }
+
+        public void BaseOnPermissionChange(PermissionEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnPermissionChange, ev);
+        }
     }
 }
