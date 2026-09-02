@@ -709,6 +709,8 @@ namespace Fougerite
 
         /// <summary>
         /// Restricts the specified command globally. (Doesn't modify Player's own Restriction table)
+        /// Use "*" to restrict all console commands if they were globally restricted with "*".
+        /// CleanRestrictedConsoleCommands to clear the global restriction list.
         /// </summary>
         /// <param name="cmd"></param>
         public void RestrictConsoleCommand(string cmd)
@@ -725,6 +727,8 @@ namespace Fougerite
 
         /// <summary>
         /// UnRestricts the specified command globally. (Doesn't modify Player's own Restriction table)
+        /// Use "*" to unrestrict all console commands if they were globally restricted with "*".
+        /// CleanRestrictedConsoleCommands to clear the global restriction list.
         /// </summary>
         /// <param name="cmd"></param>
         public void UnRestrictConsoleCommand(string cmd)
@@ -740,7 +744,7 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Clears all globally restricted commands. (Doesn't modify Player's own Restriction table)
+        /// Clears all globally restricted console commands. (Doesn't modify Player's own Restriction table)
         /// </summary>
         public void CleanRestrictedConsoleCommands()
         {
