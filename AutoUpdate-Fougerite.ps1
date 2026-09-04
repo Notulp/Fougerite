@@ -49,6 +49,86 @@ if (-not (Test-Path $serverExe)) {
 Write-Host "[INFO] rust_server.exe found - correct server root folder confirmed." -ForegroundColor Green
 
 # ------------------------------------------------------------------------------
+# Legacy 32-bit Steam DLL check
+# Fougerite now runs the Rust server under 64-bit; the old Steam shim DLLs
+# must be removed or the server will fail to start correctly.
+# ------------------------------------------------------------------------------
+$legacyDlls = @("steam_api.dll", "steamclient.dll", "tier0_s.dll", "vstdlib_s.dll")
+$foundLegacyDlls = @()
+foreach ($dll in $legacyDlls) {
+    $dllPath = Join-Path $scriptDir $dll
+    if (Test-Path $dllPath) {
+        $foundLegacyDlls += $dll
+    }
+}
+
+if ($foundLegacyDlls.Count -gt 0) {
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Yellow
+    Write-Host "  IMPORTANT: Legacy 32-bit Steam DLLs detected!" -ForegroundColor Yellow
+    Write-Host "============================================================" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  Fougerite is now capable of running the Rust server under" -ForegroundColor White
+    Write-Host "  64-bit. The following legacy Steam DLL(s) are present in" -ForegroundColor White
+    Write-Host "  this folder and MUST be deleted for the server to work:" -ForegroundColor White
+    Write-Host ""
+    foreach ($dll in $foundLegacyDlls) {
+        Write-Host "    - $dll" -ForegroundColor Red
+    }
+    Write-Host ""
+    Write-Host "  These files are no longer needed and keeping them will" -ForegroundColor White
+    Write-Host "  cause conflicts with the 64-bit runtime." -ForegroundColor White
+    Write-Host ""
+    Write-Host "  Can this script delete them now? [Y] Yes / [N] No (exit)" -ForegroundColor Cyan
+    Write-Host ""
+
+    $deleteDllChoice = $null
+    while ($null -eq $deleteDllChoice) {
+        $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        switch ($key.Character.ToString().ToUpper()) {
+            "Y" { $deleteDllChoice = $true;  Write-Host "  > Proceeding with deletion..." -ForegroundColor Green }
+            "N" { $deleteDllChoice = $false; Write-Host "  > Aborted by user." -ForegroundColor Yellow }
+            default { Write-Host "  Please press Y or N." -ForegroundColor Gray }
+        }
+    }
+
+    if (-not $deleteDllChoice) {
+        Write-Host ""
+        Write-Host "  Please remove the listed DLL(s) manually and run the" -ForegroundColor Yellow
+        Write-Host "  updater again." -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Press any key to exit..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        exit 1
+    }
+
+    $deleteErrors = 0
+    foreach ($dll in $foundLegacyDlls) {
+        $dllPath = Join-Path $scriptDir $dll
+        try {
+            Remove-Item -Path $dllPath -Force
+            Write-Host "    [DELETED] $dll" -ForegroundColor Green
+        } catch {
+            Write-Host "    [ERROR] Could not delete $dll : $_" -ForegroundColor Red
+            $deleteErrors++
+        }
+    }
+
+    if ($deleteErrors -gt 0) {
+        Write-Host ""
+        Write-Host "[ERROR] $deleteErrors file(s) could not be deleted." -ForegroundColor Red
+        Write-Host "        Please delete them manually and run the updater again." -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Press any key to exit..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        exit 1
+    }
+
+    Write-Host "[INFO] All legacy Steam DLLs removed successfully." -ForegroundColor Green
+    Write-Host ""
+}
+
+# ------------------------------------------------------------------------------
 # Step 2 - Fetch the latest release metadata from GitHub API
 # ------------------------------------------------------------------------------
 Write-Host ""
@@ -162,6 +242,36 @@ while ($null -eq $globalCfgChoice) {
 Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
 Write-Host ""
 
+# -- Ask the user upfront how to handle example plugin folders --
+Write-Host ""
+Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
+Write-Host "  Example plugin folders" -ForegroundColor Magenta
+Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
+Write-Host "  The release ships with three example/sample plugins:" -ForegroundColor White
+Write-Host "    - Save\JsPlugins\PlayerLog\" -ForegroundColor White
+Write-Host "    - Save\Magma\Drop++\" -ForegroundColor White
+Write-Host "    - Save\PyPlugins\Advertise\" -ForegroundColor White
+Write-Host ""
+Write-Host "  If you already customised these plugins, overwriting them" -ForegroundColor White
+Write-Host "  will discard your changes." -ForegroundColor White
+Write-Host ""
+Write-Host "  [A] Overwrite ALL  (RECOMMENDED - get the latest example code," -ForegroundColor Green
+Write-Host "                      but you will lose any edits you made)" -ForegroundColor Green
+Write-Host "  [S] Skip ALL       (keep your current plugin files untouched)" -ForegroundColor Yellow
+Write-Host ""
+
+$globalPluginChoice = $null
+while ($null -eq $globalPluginChoice) {
+    $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    switch ($key.Character.ToString().ToUpper()) {
+        "A" { $globalPluginChoice = "OVERWRITE_ALL"; Write-Host "  > You chose: Overwrite example plugin folders (recommended)." -ForegroundColor Green }
+        "S" { $globalPluginChoice = "SKIP_ALL";      Write-Host "  > You chose: Skip example plugin folders." -ForegroundColor Yellow }
+        default { Write-Host "  Please press A or S." -ForegroundColor Gray }
+    }
+}
+Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
+Write-Host ""
+
 # Helper: read a single-key Yes/No answer
 function Read-YesNo {
     param([string]$Prompt)
@@ -203,9 +313,25 @@ try {
             New-Item -ItemType Directory -Path $destDir -Force | Out-Null
         }
 
-        # -- Check if this is a Save-folder config/ini file --
+        # -- Check if this file belongs to an example plugin folder --
         $normalised = $entry.FullName.Replace("\", "/")
         $ext        = [System.IO.Path]::GetExtension($entry.Name).ToLower()
+        $isExamplePlugin = ($normalised -match "(?i)^Save/JsPlugins/PlayerLog/") -or `
+                           ($normalised -match "(?i)^Save/Magma/Drop\+\+/") -or `
+                           ($normalised -match "(?i)^Save/PyPlugins/Advertise/")
+
+        if ($isExamplePlugin) {
+            if ($globalPluginChoice -eq "SKIP_ALL") {
+                $skippedCfg++
+                Write-Host "    [PLUGIN] Skipped  : $($entry.FullName)" -ForegroundColor Yellow
+                continue
+            } else {
+                # OVERWRITE_ALL - fall through to normal extraction below
+                Write-Host "    [PLUGIN] Overwriting: $($entry.FullName)" -ForegroundColor Gray
+            }
+        }
+
+        # -- Check if this is a Save-folder config/ini file --
         $isSaveCfg  = ($normalised -match "(?i)^Save/") -and ($ext -eq ".cfg" -or $ext -eq ".ini")
 
         if ($isSaveCfg) {
