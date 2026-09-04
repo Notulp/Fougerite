@@ -247,25 +247,29 @@ Write-Host ""
 Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
 Write-Host "  Example plugin folders" -ForegroundColor Magenta
 Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
-Write-Host "  The release ships with three example/sample plugins:" -ForegroundColor White
+Write-Host "  The release ships with example/sample plugins:" -ForegroundColor White
 Write-Host "    - Save\JsPlugins\PlayerLog\" -ForegroundColor White
-Write-Host "    - Save\Magma\Drop++\" -ForegroundColor White
+Write-Host "    - Save\JsPlugins\Drop++\" -ForegroundColor White
 Write-Host "    - Save\PyPlugins\Advertise\" -ForegroundColor White
+Write-Host "    - Save\LuaPlugins\Test\" -ForegroundColor White
 Write-Host ""
-Write-Host "  If you already customised these plugins, overwriting them" -ForegroundColor White
-Write-Host "  will discard your changes." -ForegroundColor White
+Write-Host "  These are useful for learning the basics but are NOT needed" -ForegroundColor White
+Write-Host "  on a normal production server. It is recommended to SKIP them" -ForegroundColor White
+Write-Host "  unless you are setting up for the first time or want the latest" -ForegroundColor White
+Write-Host "  example code. Overwriting will discard any edits you made." -ForegroundColor White
 Write-Host ""
-Write-Host "  [A] Overwrite ALL  (RECOMMENDED - get the latest example code," -ForegroundColor Green
-Write-Host "                      but you will lose any edits you made)" -ForegroundColor Green
-Write-Host "  [S] Skip ALL       (keep your current plugin files untouched)" -ForegroundColor Yellow
+Write-Host "  [S] Skip ALL       (RECOMMENDED for production - keep your" -ForegroundColor Green
+Write-Host "                      current plugin files untouched)" -ForegroundColor Green
+Write-Host "  [A] Overwrite ALL  (useful for first-time setup / learning;" -ForegroundColor Yellow
+Write-Host "                      you will lose any edits you made)" -ForegroundColor Yellow
 Write-Host ""
 
 $globalPluginChoice = $null
 while ($null -eq $globalPluginChoice) {
     $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     switch ($key.Character.ToString().ToUpper()) {
-        "A" { $globalPluginChoice = "OVERWRITE_ALL"; Write-Host "  > You chose: Overwrite example plugin folders (recommended)." -ForegroundColor Green }
-        "S" { $globalPluginChoice = "SKIP_ALL";      Write-Host "  > You chose: Skip example plugin folders." -ForegroundColor Yellow }
+        "S" { $globalPluginChoice = "SKIP_ALL";      Write-Host "  > You chose: Skip example plugin folders (recommended for production)." -ForegroundColor Green }
+        "A" { $globalPluginChoice = "OVERWRITE_ALL"; Write-Host "  > You chose: Overwrite example plugin folders." -ForegroundColor Yellow }
         default { Write-Host "  Please press A or S." -ForegroundColor Gray }
     }
 }
@@ -299,40 +303,48 @@ try {
         $current++
         $destPath = Join-Path $scriptDir $entry.FullName
 
+        # -- Compute normalised path and example-plugin flag up front --
+        $normalised = $entry.FullName.Replace("\", "/")
+        $isExamplePlugin = ($normalised -match "(?i)(^|/)Save/JsPlugins/PlayerLog/") -or `
+                           ($normalised -match "(?i)(^|/)Save/JsPlugins/Drop\+\+/") -or `
+                           ($normalised -match "(?i)(^|/)Save/PyPlugins/Advertise/") -or `
+                           ($normalised -match "(?i)(^|/)Save/LuaPlugins/Test/")
+
         # -- Directory entries --
         if ($entry.FullName.EndsWith("/") -or $entry.FullName.EndsWith("\")) {
+            # Skip creating plugin directories when the user chose to skip plugins
+            if ($isExamplePlugin -and $globalPluginChoice -eq "SKIP_ALL") {
+                continue
+            }
             if (-not (Test-Path $destPath)) {
                 New-Item -ItemType Directory -Path $destPath -Force | Out-Null
             }
             continue
         }
 
-        # Ensure parent directory exists
-        $destDir = Split-Path -Parent $destPath
-        if (-not (Test-Path $destDir)) {
-            New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-        }
-
         # -- Check if this file belongs to an example plugin folder --
-        $normalised = $entry.FullName.Replace("\", "/")
-        $ext        = [System.IO.Path]::GetExtension($entry.Name).ToLower()
-        $isExamplePlugin = ($normalised -match "(?i)^Save/JsPlugins/PlayerLog/") -or `
-                           ($normalised -match "(?i)^Save/Magma/Drop\+\+/") -or `
-                           ($normalised -match "(?i)^Save/PyPlugins/Advertise/")
+        $ext = [System.IO.Path]::GetExtension($entry.Name).ToLower()
+        # ($isExamplePlugin already computed above for this entry)
 
         if ($isExamplePlugin) {
             if ($globalPluginChoice -eq "SKIP_ALL") {
                 $skippedCfg++
                 Write-Host "    [PLUGIN] Skipped  : $($entry.FullName)" -ForegroundColor Yellow
-                continue
+                continue   # <-- skip BEFORE the parent-dir is created
             } else {
                 # OVERWRITE_ALL - fall through to normal extraction below
                 Write-Host "    [PLUGIN] Overwriting: $($entry.FullName)" -ForegroundColor Gray
             }
         }
 
+        # Ensure parent directory exists (only reached for files we will actually extract)
+        $destDir = Split-Path -Parent $destPath
+        if (-not (Test-Path $destDir)) {
+            New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+        }
+
         # -- Check if this is a Save-folder config/ini file --
-        $isSaveCfg  = ($normalised -match "(?i)^Save/") -and ($ext -eq ".cfg" -or $ext -eq ".ini")
+        $isSaveCfg  = ($normalised -match "(?i)(^|/)Save/") -and ($ext -eq ".cfg" -or $ext -eq ".ini")
 
         if ($isSaveCfg) {
             $fileExists = Test-Path $destPath
