@@ -54,7 +54,11 @@ namespace Fougerite.PluginLoaders
 
         public string GetSource(string pluginname)
         {
-            return File.ReadAllText(GetMainFilePath(pluginname));
+            using (FileStream fs = new FileStream(GetMainFilePath(pluginname), FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (StreamReader reader = new StreamReader(fs))
+            {
+                return reader.ReadToEnd();
+            }
         }
 
         public string GetMainFilePath(string pluginname)

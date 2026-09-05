@@ -308,7 +308,13 @@ namespace Fougerite.PluginLoaders
         {
             path = ValidateRelativePath($"{path}.json");
             if (JsonFileExists(path))
-                return File.ReadAllText(path);
+            {
+                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (StreamReader reader = new StreamReader(fs))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
 
             return null;
         }
