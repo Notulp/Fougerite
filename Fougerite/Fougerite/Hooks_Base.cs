@@ -11,11 +11,31 @@ namespace Fougerite
 {
     public partial class Hooks
     {
+        /// <summary>
+        /// A thread-safe dictionary mapping entity IDs to their respective <see cref="Entity"/> wrappers.
+        /// Primarily used to track and manage entity decay.
+        /// </summary>
         public static ConcurrentDictionary<int, Entity> DecayList = new ConcurrentDictionary<int, Entity>();
+
+        /// <summary>
+        /// Legacy list for entity decay tracking. Obsolete: Use <see cref="DecayList"/> instead.
+        /// </summary>
         [Obsolete("Left for backwards compatibility reasons... Do not use. Use DecayList.", false)]
         public static List<object> decayList = new List<object>();
+
+        /// <summary>
+        /// Stores timers related to players currently speaking.
+        /// </summary>
         public static Hashtable talkerTimers = new Hashtable();
+
+        /// <summary>
+        /// Gets a value indicating whether the server has finished its initialization process.
+        /// </summary>
         public static bool ServerInitialized = false;
+
+        /// <summary>
+        /// A cache of Steam IDs for recently disconnected players, used to handle uLink disconnection cleanup.
+        /// </summary>
         public static readonly List<ulong> uLinkDCCache = new List<ulong>();
         internal static ConcurrentDictionary<string, Flood> FloodChecks = new ConcurrentDictionary<string, Flood>();
         internal static ConcurrentDictionary<string, DateTime> FloodCooldown = new ConcurrentDictionary<string, DateTime>();

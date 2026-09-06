@@ -19,6 +19,10 @@ namespace Fougerite
 {
     public partial class Hooks
     {
+        /// <summary>
+        /// Called when all plugins have been successfully loaded for the first time.
+        /// Triggers the <see cref="OnAllPluginsLoaded"/> event.
+        /// </summary>
         public static void AllPluginsLoaded()
         {
             using (new Stopper(nameof(Hooks), nameof(AllPluginsLoaded)))
@@ -34,6 +38,12 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when a player attempts to use a blueprint item.
+        /// Triggers the <see cref="OnBlueprintUse"/> event and handles the blueprint binding logic.
+        /// </summary>
+        /// <param name="item">The blueprint item being used.</param>
+        /// <param name="bdb">The blueprint data block associated with the item.</param>
         public static void BlueprintUse(IBlueprintItem item, BlueprintDataBlock bdb)
         {
             using (new Stopper(nameof(Hooks), nameof(BlueprintUse)))
@@ -77,6 +87,12 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when a chat message is received from a player.
+        /// Handles command parsing, global and player-specific command restrictions, 
+        /// and triggers chat-related events.
+        /// </summary>
+        /// <param name="arg">The console arguments containing the chat message and sender information.</param>
         public static void ChatReceived(ref ConsoleSystem.Arg arg)
         {
             using (new Stopper(nameof(Hooks), nameof(ChatReceived)))
@@ -281,6 +297,13 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Processes a command execution request.
+        /// Checks for command restrictions and triggers command-related events.
+        /// </summary>
+        /// <param name="arg">The console arguments for the command.</param>
+        /// <param name="bWantReply">Whether a reply is expected.</param>
+        /// <returns>True if the command was handled, false otherwise.</returns>
         public static bool HandleRunCommand(ref ConsoleSystem.Arg arg, bool bWantReply = true)
         {
             using (new Stopper(nameof(Hooks), nameof(HandleRunCommand)))
@@ -799,6 +822,13 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when an entity is undergoing decay damage.
+        /// Triggers the <see cref="OnEntityDecay"/> event and allows for modification of the decay damage.
+        /// </summary>
+        /// <param name="entity">The entity being decayed.</param>
+        /// <param name="dmg">The amount of decay damage being applied.</param>
+        /// <returns>The adjusted decay damage amount.</returns>
         public static float EntityDecay(object entity, float dmg)
         {
             using (new Stopper(nameof(Hooks), nameof(EntityDecay)))
@@ -847,6 +877,12 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when an entity has been successfully deployed (placed) by a player.
+        /// Triggers the <see cref="OnEntityDeployedWithPlacer"/> event.
+        /// </summary>
+        /// <param name="entity">The entity that was deployed.</param>
+        /// <param name="info">Network message information related to the deployment.</param>
         public static void EntityDeployed(object entity, ref uLink.NetworkMessageInfo info)
         {
             using (new Stopper(nameof(Hooks), nameof(EntityDeployed)))
@@ -902,6 +938,12 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when an entity takes damage from any source.
+        /// Triggers the <see cref="OnEntityHurt"/> event and allows for modification or cancellation of the damage.
+        /// </summary>
+        /// <param name="tkd">The TakeDamage component of the entity.</param>
+        /// <param name="e">The damage event data.</param>
         public static void EntityHurt2(TakeDamage tkd, ref DamageEvent e)
         {
             using (new Stopper(nameof(Hooks), nameof(EntityHurt2)))
@@ -1320,6 +1362,12 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when a player takes damage from falling.
+        /// Triggers the <see cref="OnFallDamage"/> event and allows for modification of the fall damage.
+        /// </summary>
+        /// <param name="fd">The FallDamage component of the player.</param>
+        /// <param name="speed">The speed at which the player hit the ground.</param>
         public static void FallDamage(FallDamage fd, float speed)
         {
             using (new Stopper(nameof(Hooks), nameof(FallDamage)))
@@ -1364,6 +1412,12 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when a player is attempting to connect to the server.
+        /// Performs initial validation (e.g., bans, whitelist) and triggers the <see cref="OnPlayerConnected"/> event.
+        /// </summary>
+        /// <param name="user">The NetUser object representing the connecting player.</param>
+        /// <returns>True if the connection is allowed, false if the player was rejected.</returns>
         public static bool PlayerConnect(NetUser user)
         {
             using (new Stopper(nameof(Hooks), nameof(PlayerConnect)))
@@ -1509,6 +1563,11 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when a player disconnects from the server.
+        /// Cleans up player-related resources and triggers the <see cref="OnPlayerDisconnected"/> event.
+        /// </summary>
+        /// <param name="nplayer">The network player that is disconnecting.</param>
         public static void PlayerDisconnect(uLink.NetworkPlayer nplayer)
         {
             using (new Stopper(nameof(Hooks), nameof(PlayerDisconnect)))
@@ -1560,6 +1619,14 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when a player gathers resources from a resource target (e.g., wood from a tree, ore from a rock).
+        /// Triggers the <see cref="OnPlayerGathering"/> event.
+        /// </summary>
+        /// <param name="rec">The inventory receiving the resources.</param>
+        /// <param name="rt">The resource target being gathered from.</param>
+        /// <param name="rg">The resource give pair defining what and how much is being given.</param>
+        /// <param name="amount">The quantity of the resource being gathered.</param>
         public static void PlayerGather(Inventory rec, ResourceTarget rt, ResourceGivePair rg, ref int amount)
         {
             using (new Stopper(nameof(Hooks), nameof(PlayerGather)))
@@ -1755,6 +1822,13 @@ namespace Fougerite
             UnityEngine.Object.Destroy(woodBlockerTemp.gameObject, 300f);
         }
 
+        /// <summary>
+        /// Called when a player is killed.
+        /// Handles death logging, triggers the <see cref="OnPlayerKilled"/> event, 
+        /// and manages the <see cref="DeathEvent"/> data.
+        /// </summary>
+        /// <param name="de">The damage event that caused the death.</param>
+        /// <returns>True if the event should continue, false if it was cancelled.</returns>
         public static bool PlayerKilled(ref DamageEvent de)
         {
             using (new Stopper(nameof(Hooks), nameof(PlayerKilled)))
@@ -1782,6 +1856,13 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when a player has successfully spawned into the game world.
+        /// Triggers the <see cref="OnPlayerSpawned"/> event.
+        /// </summary>
+        /// <param name="pc">The player client that spawned.</param>
+        /// <param name="pos">The position where the player spawned.</param>
+        /// <param name="camp">Indicates if the player spawned at a camp/sleeping bag.</param>
         public static void PlayerSpawned(PlayerClient pc, Vector3 pos, bool camp)
         {
             using (new Stopper(nameof(Hooks), nameof(PlayerSpawned)))
@@ -2122,6 +2203,11 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when an airdrop event is triggered.
+        /// Triggers the <see cref="OnAirdrop"/> event and handles airdrop positioning.
+        /// </summary>
+        /// <param name="v">The target position for the airdrop.</param>
         public static void Airdrop(Vector3 v)
         {
             using (new Stopper(nameof(Hooks), nameof(Airdrop)))
@@ -3480,6 +3566,10 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when the server is initiating a shutdown.
+        /// Triggers the <see cref="OnServerShutdown"/> event and ensures all plugins and modules are notified.
+        /// </summary>
         public static void ServerShutdown()
         {
             IsShuttingDown = true;
@@ -3519,6 +3609,10 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Called when the server has finished starting up and is ready to accept connections.
+        /// Triggers the <see cref="OnServerStarted"/> event.
+        /// </summary>
         public static void ServerStarted()
         {
             using (new Stopper(nameof(Hooks), nameof(ServerStarted)))

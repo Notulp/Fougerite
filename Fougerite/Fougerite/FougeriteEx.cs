@@ -54,11 +54,25 @@ public static class LevenshteinDistance
         return d[n, m];
     }
 
+    /// <summary>
+    /// Computes the Levenshtein distance between two strings, representing the number of single-character 
+    /// edits required to change one string into the other.
+    /// </summary>
+    /// <param name="self">The first string to compare.</param>
+    /// <param name="test">The second string to compare.</param>
+    /// <returns>The Levenshtein distance as an integer.</returns>
     public static int Distance(this string self, string test)
     {
         return Compute(self.ToUpperInvariant(), test.ToUpperInvariant());
     }
 
+    /// <summary>
+    /// Calculates the similarity ratio between two strings based on their Levenshtein distance.
+    /// A value of 1.0 indicates equality, while 0.0 indicates no similarity.
+    /// </summary>
+    /// <param name="self">The first string to compare.</param>
+    /// <param name="test">The second string to compare.</param>
+    /// <returns>A double representing the similarity ratio (0.0 to 1.0).</returns>
     public static double Similarity(this string self, string test)
     {
         int distance = Compute(self.ToUpperInvariant(), test.ToUpperInvariant());
@@ -68,8 +82,20 @@ public static class LevenshteinDistance
 
 public static class FougeriteEx
 {
+    /// <summary>
+    /// Standard string comparison using invariant culture and ignoring case.
+    /// </summary>
     public static StringComparison ic = StringComparison.InvariantCultureIgnoreCase;
 
+    /// <summary>
+    /// Returns a sub-array of the source array, starting at the specified index and ending at the specified index.
+    /// Supports negative end values to index from the end of the array.
+    /// </summary>
+    /// <typeparam name="T">The type of elements in the array.</typeparam>
+    /// <param name="source">The source array.</param>
+    /// <param name="start">The inclusive starting index.</param>
+    /// <param name="end">The exclusive ending index (can be negative).</param>
+    /// <returns>A new array containing the sliced elements.</returns>
     public static T[] Slice<T>(this T[] source, int start, int end)
     {
         // Handles negative ends.
@@ -87,6 +113,12 @@ public static class FougeriteEx
         return res;
     }
 
+    /// <summary>
+    /// Finds the longest common substring between two strings.
+    /// </summary>
+    /// <param name="self">The first string.</param>
+    /// <param name="test">The second string to compare against.</param>
+    /// <returns>The longest common substring found.</returns>
     public static string LongestCommonSubstring(this string self, string test)
     {
         int[,] lengths = new int[self.Length, test.Length];
@@ -126,6 +158,11 @@ public static class FougeriteEx
         return lcs;
     }
 
+    /// <summary>
+    /// Checks if the string contains terms related to "Blueprint" or "BP".
+    /// </summary>
+    /// <param name="self">The string to check.</param>
+    /// <returns>True if a blueprint term is found, otherwise false.</returns>
     public static bool HasBPTerm(this string self)
     {
         bool flag = false;
@@ -143,6 +180,11 @@ public static class FougeriteEx
         return flag;
     }
 
+    /// <summary>
+    /// Extracts the base item name by removing blueprint-related terms from the string.
+    /// </summary>
+    /// <param name="self">The string containing an item name.</param>
+    /// <returns>The base item name without blueprint terms.</returns>
     public static string BaseItem(this string self)
     {
         if (self.Length == 0)
@@ -162,6 +204,11 @@ public static class FougeriteEx
         return string.Join(" ", baseterms.ToArray<string>());
     }
 
+    /// <summary>
+    /// Attempts to convert an item name to its blueprint equivalent if applicable.
+    /// </summary>
+    /// <param name="self">The item name.</param>
+    /// <returns>The blueprint name if found, otherwise the original string.</returns>
     public static string Blueprint(this string self)
     {
         if (self.Length == 0)
@@ -174,6 +221,12 @@ public static class FougeriteEx
         return self;
     }
 
+    /// <summary>
+    /// Attempts to match a given string to a known game item name using similarity scoring.
+    /// Handles common abbreviations and variations in item naming.
+    /// </summary>
+    /// <param name="self">The string to match.</param>
+    /// <returns> The best-matching item name, or the original string if no good match is found.</returns>
     public static string MatchItemName(this string self)
     {
         Logger.LogDebug($"[MatchItemName] self={self}");
@@ -227,6 +280,9 @@ public static class FougeriteEx
     private const string BP = "BP";
     private const string BLUEPRINT = "Blueprint";
 
+    /// <summary>
+    /// A collection of individual words commonly found in game item names.
+    /// </summary>
     public static readonly IEnumerable<string> ItemWords = new string[] { "556", "Ammo", "9mm", "Pistol", "Animal", "Fat", "Anti-Radiation", "Pills", "Armor", "Part", "1", "2", "3",
         "4", "5", "6", "7", "Arrow", "Bandage", "Bed", "Blood", "Draw", "Kit", "Bolt", "Action", "Rifle", "Camp", "Fire", "Can", "of", "Beans", "Tuna", "Charcoal", "Chocolate", "Bar",
         "Cloth", "Boots", "Helmet", "Pants", "Vest", "Cooked", "Chicken", "Breast", "Empty", "Casing", "Shotgun", "Shell", "Explosive", "Charge", "Explosives", "F1", "Grenade", "Flare",
@@ -236,6 +292,9 @@ public static class FougeriteEx
         "Bag", "Small",  "Rations",  "Stash",  "Water", "Bottle", "Stone", "Hatchet", "Stones", "Sulfur",  "Supply", "Signal", "Torch", "Uber", "Weapon", "Barricade", "Gate",  "Gateway",  "Planks",
         "Shelter", "Stairs",  "Storage", "Box", "Wooden", "Door", "Workbench", "Blueprint", "BP" };
 
+    /// <summary>
+    /// A comprehensive list of canonical game item names.
+    /// </summary>
     public static readonly IEnumerable<string> ItemNames = new string[] { "556 Ammo", "9mm Ammo", "9mm Pistol", "Animal Fat", "Anti-Radiation Pills", "Armor Part 1", "Armor Part 2", "Armor Part 3", 
         "Armor Part 4", "Armor Part 5", "Armor Part 6", "Armor Part 7", "Arrow", "Bandage", "Bed", "Blood Draw Kit", "Blood", "Bolt Action Rifle", "Camp Fire", "Can of Beans", 
         "Can of Tuna", "Charcoal", "Chocolate Bar", "Cloth Boots", "Cloth Helmet", "Cloth Pants", "Cloth Vest", "Cloth", "Cooked Chicken Breast", "Empty 556 Casing",
@@ -251,6 +310,9 @@ public static class FougeriteEx
         "Wood Ramp", "Wood Shelter", "Wood Stairs", "Wood Storage Box", "Wood Wall", "Wood Window", "Wood", "Wooden Door", "Workbench"
     };
 
+    /// <summary>
+    /// Maps item names to their blueprint suffix (e.g., "Blueprint" or "BP").
+    /// </summary>
     public static readonly IDictionary<string, string> BlueprintNames = new Dictionary<string, string>()
     {
         { "556 Ammo", "Blueprint" }, { "9mm Ammo", "Blueprint" }, { "9mm Pistol", "Blueprint" }, { "Armor Part 1", "BP" }, { "Armor Part 2", "BP" }, { "Armor Part 3", "BP" }, { "Armor Part 4", "BP" },

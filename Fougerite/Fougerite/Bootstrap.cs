@@ -73,6 +73,11 @@ namespace Fougerite
         /// when a console command doesn't explicitly specify a reply text?
         /// </summary>
         public static bool SilentConsoleCommands;
+        /// <summary>
+        /// Specifies the name of the message displayed by the server for system notifications.
+        /// This value is typically configurable and determines the title or identifier of server broadcast messages.
+        /// </summary>
+        public static string ServerMessageName;
         
         internal static readonly Thread CurrentThread = Thread.CurrentThread;
         private static readonly FileSystemWatcher IgnoredWatcher = new FileSystemWatcher(Path.Combine(Util.GetRootFolder(), "Save"), "IgnoredPlugins.txt");
@@ -151,6 +156,11 @@ namespace Fougerite
             if (Config.GetValue("Fougerite", "SilentConsoleCommands") != null)
             {
                 SilentConsoleCommands = Config.GetBoolValue("Fougerite", "SilentConsoleCommands");
+            }
+            if (Config.GetValue("Fougerite", "ServerMessageName") != null)
+            {
+                ServerMessageName = Config.GetValue("Fougerite", "ServerMessageName");
+                Server.GetServer().server_message_name = ServerMessageName;
             }
 
             if (!RustChat)
@@ -295,7 +305,8 @@ namespace Fougerite
                     RustChat = RustChat,
                     RPCChat = RPCChat,
                     RPCChatMethod = RPCChatMethod,
-                    EnableDefaultRustDecay = EnableDefaultRustDecay
+                    EnableDefaultRustDecay = EnableDefaultRustDecay,
+                    ServerMessageName = ServerMessageName
                 },
                 decay = new { decay.deploy_maxhealth_sec, decay.decaytickrate, decay.maxperframe, decay.maxtestperframe },
                 structure = new { structure.minpercentdmg, structure.framelimit, structure.maxframeattempt },

@@ -22,8 +22,16 @@ namespace Fougerite
         private readonly string _globalBanListIni = Path.Combine(Util.GetRootFolder(), Path.Combine("Save", "GlobalBanList.ini"));
         private readonly ConcurrentList<string> _ConsoleCommandCancelList = new ConcurrentList<string>();
         private readonly ConcurrentList<string> _CommandCancelList = new ConcurrentList<string>();
+        /// <summary>
+        /// Legacy data storage for plugins. 
+        /// Obsolete: Use <see cref="DataStore"/> instead.
+        /// </summary>
         [Obsolete("Use DataStore, this is used in old Javascript plugins from years ago.", false)]
         public Data data = new Data();
+
+        /// <summary>
+        /// The name used as the sender for system-wide server messages.
+        /// </summary>
         public string server_message_name = "Fougerite";
         /// <summary>
         /// This cache is supposed to be private, so make sure to switch your plugin to use
@@ -31,6 +39,9 @@ namespace Fougerite
         /// (We also can't change this to a ConcurrentDictionary because other old plugins may depend on this)
         /// </summary>
         public static IDictionary<ulong, Player> Cache = new Dictionary<ulong, Player>();
+        /// <summary>
+        /// A collection of commands that should always trigger hook execution even if handled by the engine.
+        /// </summary>
         public static IEnumerable<string> ForceCallForCommands = new List<string>();
 
 
@@ -131,13 +142,13 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Permanently bans a player by both IP and SteamID, logging both entries.
+        /// Bans a player by both IP and Steam ID.
         /// </summary>
         /// <param name="ip">The IP address to ban.</param>
-        /// <param name="id">The SteamID to ban.</param>
-        /// <param name="name">The name of the player.</param>
-        /// <param name="reason">The ban reason.</param>
-        /// <param name="adminname">The admin name.</param>
+        /// <param name="id">The Steam ID to ban.</param>
+        /// <param name="name">The name of the player (optional).</param>
+        /// <param name="reason">The reason for the ban.</param>
+        /// <param name="adminname">The name of the admin who issued the ban.</param>
         public void BanPlayerIPandID(string ip, string id, string name = "1", string reason = "You were banned.", string adminname = "Unknown")
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(ip, id, name, reason, adminname));
@@ -155,12 +166,12 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Bans a specific IP address and logs the entry.
+        /// Bans a player by their IP address.
         /// </summary>
         /// <param name="ip">The IP address to ban.</param>
-        /// <param name="name">The name of the player associated with the IP.</param>
-        /// <param name="reason">The ban reason.</param>
-        /// <param name="adminname">The admin name.</param>
+        /// <param name="name">The name of the player (optional).</param>
+        /// <param name="reason">The reason for the ban.</param>
+        /// <param name="adminname">The name of the admin who issued the ban.</param>
         public void BanPlayerIP(string ip, string name = "1", string reason = "You were banned.", string adminname = "Unknown")
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(ip, name, reason, adminname, false));
@@ -174,12 +185,12 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Bans a specific SteamID and logs the entry.
+        /// Bans a player by their Steam ID.
         /// </summary>
-        /// <param name="id">The SteamID to ban.</param>
-        /// <param name="name">The name of the player associated with the ID.</param>
-        /// <param name="reason">The ban reason.</param>
-        /// <param name="adminname">The admin name.</param>
+        /// <param name="id">The Steam ID to ban.</param>
+        /// <param name="name">The name of the player (optional).</param>
+        /// <param name="reason">The reason for the ban.</param>
+        /// <param name="adminname">The name of the admin who issued the ban.</param>
         public void BanPlayerID(string id, string name = "1", string reason = "You were banned.", string adminname = "Unknown")
         {
             bool cancel = Hooks.OnBanEventHandler(new BanEvent(id, name, reason, adminname, true));
@@ -193,20 +204,20 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Checks if a SteamID is currently in the ban list.
+        /// Checks if a Steam ID is currently banned.
         /// </summary>
-        /// <param name="id">The SteamID to check.</param>
-        /// <returns>True if banned; otherwise, false.</returns>
+        /// <param name="id">The Steam ID to check.</param>
+        /// <returns>True if banned, otherwise false.</returns>
         public bool IsBannedID(string id)
         {
             return DataStore.GetInstance().Get("Ids", id) != null;
         }
 
         /// <summary>
-        /// Checks if an IP address is currently in the ban list.
+        /// Checks if an IP address is currently banned.
         /// </summary>
         /// <param name="ip">The IP address to check.</param>
-        /// <returns>True if banned; otherwise, false.</returns>
+        /// <returns>True if banned, otherwise false.</returns>
         public bool IsBannedIP(string ip)
         {
             return DataStore.GetInstance().Get("Ips", ip) != null;
@@ -333,9 +344,9 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Sends a message to everyone on the server.
+        /// Broadcasts a chat message to all players on the server.
         /// </summary>
-        /// <param name="arg"></param>
+        /// <param name="arg">The message to broadcast.</param>
         public void Broadcast(string arg)
         {
             foreach (Player player in Players)
@@ -348,10 +359,10 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Sends a message to everyone on the server with a different name.
+        /// Broadcasts a chat message to all players, appearing as if sent by the specified name.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="arg"></param>
+        /// <param name="name">The name to display as the sender.</param>
+        /// <param name="arg">The message to broadcast.</param>
         public void BroadcastFrom(string name, string arg)
         {
             foreach (Player player in Players)
@@ -364,9 +375,9 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Sends a notification message which will appear in the middle of the screen for everyone.
+        /// Broadcasts a screen notice (popup) to all players.
         /// </summary>
-        /// <param name="s"></param>
+        /// <param name="s">The notice message.</param>
         public void BroadcastNotice(string s)
         {
             foreach (Player player in Players)
@@ -499,16 +510,16 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Returns the instance of the Server class.
+        /// Returns the singleton instance of the <see cref="Server"/> class.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The server instance.</returns>
         public static Server GetServer()
         {
             return Instance.Value;
         }
 
         /// <summary>
-        /// Saves the server.
+        /// Triggers a server-wide save operation.
         /// </summary>
         public void Save()
         {
@@ -829,7 +840,7 @@ namespace Fougerite
         /// Tries to Grab the current Rust++ API.
         /// </summary>
         /// <returns></returns>
-        [Obsolete("Obsolete. Read RustPPExtension's documentation to find out why.", false)]
+        [Obsolete("Obsolete. Read RustPPExtension's documentation to find out why, you can still use it though.", false)]
         public RustPPExtension GetRustPPAPI()
         {
             if (HasRustPP) 
@@ -839,6 +850,12 @@ namespace Fougerite
             return null;
         }
 
+        /// <summary>
+        /// Represents a parser for handling the global ban list file.
+        /// This property no longer works. Use the "Ids" and "Ips" tables
+        /// in the DataStore instead for managing ban-related data.
+        /// </summary>
+        [Obsolete("Obsolete. Use 'Ids' and 'Ips' table in DataStore.", false)]
         public IniParser GlobalBanList
         {
             get

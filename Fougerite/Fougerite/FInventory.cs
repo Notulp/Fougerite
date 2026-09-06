@@ -24,6 +24,10 @@
         /// Each <see cref="EntityItem"/> is initialized with a reference back to this <see cref="FInventory"/> 
         /// instance, enabling complex operations like mod-swapping and inter-slot item movement.
         /// </remarks>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FInventory"/> class wrapping the specified game inventory.
+        /// </summary>
+        /// <param name="inv">The underlying <see cref="Inventory"/> to wrap.</param>
         public FInventory(Inventory inv)
         {
             _inv = inv;
@@ -33,19 +37,19 @@
         }
 
         /// <summary>
-        /// Adds one item to the inventory.
+        /// Adds a single item of the specified type to the inventory.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">The name of the item to add.</param>
         public void AddItem(string name)
         {
             AddItem(name, 1);
         }
 
         /// <summary>
-        /// Adds an Item with the given amount to the inventory.
+        /// Adds a specified amount of an item type to the inventory.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="amount"></param>
+        /// <param name="name">The name of the item to add.</param>
+        /// <param name="amount">The quantity of the item to add.</param>
         public void AddItem(string name, int amount)
         {
             ItemDataBlock item = DatablockDictionary.GetByName(name);
@@ -53,21 +57,21 @@
         }
 
         /// <summary>
-        /// Adds an item to the specified slot.
+        /// Adds a single item to a specific slot in the inventory.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="slot"></param>
+        /// <param name="name">The name of the item to add.</param>
+        /// <param name="slot">The target inventory slot index.</param>
         public void AddItemTo(string name, int slot)
         {
             AddItemTo(name, slot, 1);
         }
 
         /// <summary>
-        /// Adds an item to the specified slot with the given amount.
+        /// Adds a specified amount of an item to a specific slot in the inventory.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="slot"></param>
-        /// <param name="amount"></param>
+        /// <param name="name">The name of the item to add.</param>
+        /// <param name="slot">The target inventory slot index.</param>
+        /// <param name="amount">The quantity of the item to add.</param>
         public void AddItemTo(string name, int slot, int amount)
         {
             ItemDataBlock byName = DatablockDictionary.GetByName(name);
@@ -100,11 +104,11 @@
         }
 
         /// <summary>
-        /// Checks if the inventory has the specified item.
+        /// Checks if the inventory contains at least the specified amount of an item.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="amount"></param>
-        /// <returns></returns>
+        /// <param name="name">The name of the item to check for.</param>
+        /// <param name="amount">The minimum quantity required. Defaults to 1.</param>
+        /// <returns>True if the item and amount are found, otherwise false.</returns>
         public bool HasItem(string name, int amount = 1)
         {
             int num = 0;
@@ -117,20 +121,20 @@
         }
 
         /// <summary>
-        /// Moves the item from s1 slot to s2 slot.
+        /// Moves an item from one slot to another within the inventory.
         /// </summary>
-        /// <param name="s1"></param>
-        /// <param name="s2"></param>
+        /// <param name="s1"> The source slot index.</param>
+        /// <param name="s2">The destination slot index.</param>
         public void MoveItem(int s1, int s2)
         {
             _inv.MoveItemAtSlotToEmptySlot(_inv, s1, s2);
         }
 
         /// <summary>
-        /// Removes the specific item with the given amount.
+        /// Removes a specified amount of an item from the inventory by its name.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="amount"></param>
+        /// <param name="name">The name of the item to remove.</param>
+        /// <param name="amount">The quantity to remove. Defaults to 1.</param>
         public void RemoveItem(string name, int amount = 1)
         {
             foreach (EntityItem item in Items)
@@ -156,10 +160,10 @@
         }
 
         /// <summary>
-        /// Removes an item from the specified slot with the given amount.
+        /// Removes a specified amount of an item from a specific inventory slot.
         /// </summary>
-        /// <param name="slot"></param>
-        /// <param name="amount"></param>
+        /// <param name="slot">The index of the slot to remove from.</param>
+        /// <param name="amount">The quantity to remove. Defaults to 1.</param>
         public void RemoveItem(int slot, int amount = 1)
         {
             EntityItem item = Items[slot];
@@ -175,7 +179,7 @@
         }
 
         /// <summary>
-        /// Counts the freeslots in the inventory.
+        /// Gets the current number of free (empty) slots in the inventory.
         /// </summary>
         public int FreeSlots
         {
@@ -186,7 +190,7 @@
         }
 
         /// <summary>
-        /// Gets the maximum slot amount rom the inventory.
+        /// Gets the total number of slots available in this inventory.
         /// </summary>
         public int SlotCount
         {

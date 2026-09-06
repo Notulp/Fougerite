@@ -12,14 +12,33 @@ namespace Fougerite
     public class ModuleManager
     {
         private static readonly Dictionary<string, Assembly> LoadedAssemblies = new Dictionary<string, Assembly>();
+        /// <summary>
+        /// The current version of the Fougerite API.
+        /// </summary>
         public static readonly Version ApiVersion = new Version(1, 0, 0, 0);
+
+        /// <summary>
+        /// The path to the directory where Fougerite modules are located.
+        /// </summary>
         public static string ModulesFolder = Config.GetModulesFolder();
+
+        /// <summary>
+        /// The path to the public directory for Fougerite data and modules.
+        /// </summary>
         public static string PublicFolder = Config.GetPublicFolder();
 
+        /// <summary>
+        /// A list of all currently loaded module containers.
+        /// Obsolete: Use PluginLoader.GetInstance().Plugins.Values instead.
+        /// </summary>
         [Obsolete(@"Modules is obsolete, and might be removed in the future.
              Use PluginLoader.GetInstance().Plugins.Values", false)]
         public static readonly List<ModuleContainer> Modules = new List<ModuleContainer>();
 
+        /// <summary>
+        /// A read-only collection of all loaded plugin modules.
+        /// Obsolete: Use PluginLoader.GetInstance().Plugins.Values instead.
+        /// </summary>
         [Obsolete(@"Plugins is obsolete, and might be removed in the future.
              Use PluginLoader.GetInstance().Plugins.Values", false)]
         public static ReadOnlyCollection<ModuleContainer> Plugins
