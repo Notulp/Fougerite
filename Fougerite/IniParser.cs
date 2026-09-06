@@ -93,13 +93,13 @@ public class IniParser
     }
 
     /// <summary>
-    /// Adds a Section, and a Key to the file.
+    /// Adds a Section and a Key to the file with an empty value.
     /// </summary>
     /// <param name="sectionName"></param>
     /// <param name="settingName"></param>
     public void AddSetting(string sectionName, string settingName)
     {
-        AddSetting(sectionName, settingName, string.Empty);
+        AddSetting(sectionName, settingName, string.Empty, null);
     }
 
     /// <summary>
@@ -109,6 +109,27 @@ public class IniParser
     /// <param name="settingName"></param>
     /// <param name="settingValue"></param>
     public void AddSetting(string sectionName, string settingName, string settingValue)
+    {
+        AddSetting(sectionName, settingName, settingValue, null);
+    }
+
+    /// <summary>
+    /// Adds a Section, Key, Value, and an optional documentation comment.
+    /// When <paramref name="document"/> is provided and the key does not already exist, one or more
+    /// <c>;</c>-prefixed comment lines are inserted directly above the key in the file so server
+    /// operators can understand the setting at a glance.
+    /// Multi-line documentation is supported: embed <c>\n</c> in <paramref name="document"/> and each
+    /// line will become a separate <c>;</c> comment line.
+    /// If the key already exists its value is updated and no new comment lines are added.
+    /// </summary>
+    /// <param name="sectionName">The INI section that owns the key.</param>
+    /// <param name="settingName">The key name.</param>
+    /// <param name="settingValue">The value to store.</param>
+    /// <param name="document">
+    /// Optional human-readable description.  Each logical line (split on <c>\n</c>) is written as a
+    /// separate <c>; text</c> line immediately above the key.
+    /// </param>
+    public void AddSetting(string sectionName, string settingName, string settingValue, string document)
     {
         try
         {
@@ -120,14 +141,31 @@ public class IniParser
             if (settingValue == null)
                 settingValue = string.Empty;
 
-            if (_keyPairs.ContainsKey(pair))
+            bool isNew = !_keyPairs.ContainsKey(pair);
+
+            if (!isNew)
             {
                 _keyPairs.Remove(pair);
+                _tmpList.Remove(pair);
             }
 
-            if (_tmpList.Contains(pair))
+            // Only insert document comment lines when the key is brand-new.
+            if (isNew && !string.IsNullOrEmpty(document))
             {
-                _tmpList.Remove(pair);
+                string[] docLines = document.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string docLine in docLines)
+                {
+                    string commentKey = $"; {docLine.Trim()}";
+                    SectionPair commentPair;
+                    commentPair.Section = sectionName;
+                    commentPair.Key = commentKey.Replace("=", "%eq%");
+
+                    if (!_keyPairs.ContainsKey(commentPair))
+                    {
+                        _keyPairs.Add(commentPair, "%comment%");
+                        _tmpList.Add(commentPair);
+                    }
+                }
             }
 
             _keyPairs.Add(pair, settingValue);
@@ -445,6 +483,70 @@ public class IniParser
         }
 
         return ret;
+    }
+
+    /// <summary>
+    /// Adds a setting with the given default value only if the key does not already exist in the section.
+    /// A document comment line (starting with <c>;</c>) is written immediately before the key to describe
+    /// what the setting does.  Both the comment and the key are skipped when the key is already present,
+    /// so existing user-configured values are never overwritten.
+    /// Call <see cref="Save"/> after all <c>AddDefault</c> calls to persist any newly added entries.
+    /// </summary>
+    /// <param name="sectionName">The section that contains the setting (e.g. "Fougerite").</param>
+    /// <param name="settingName">The key name of the setting.</param>
+    /// <param name="defaultValue">The default value to write when the key is missing.</param>
+    /// <param name="document">
+    /// A human-readable description of the setting.  Written as a <c>;</c>-comment line directly
+    /// above the key so server operators can understand its purpose without consulting external docs.
+    /// </param>
+    public void AddDefault(string sectionName, string settingName, string defaultValue, string document)
+    {
+        try
+        {
+            _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
+
+            SectionPair pair;
+            pair.Section = sectionName;
+            pair.Key = settingName;
+
+            // Only add when the key is genuinely absent,never overwrite user values.
+            if (_keyPairs.ContainsKey(pair))
+                return;
+
+            if (defaultValue == null)
+                defaultValue = string.Empty;
+
+            // Insert one comment line per logical line in document so the file stays readable.
+            // Multi-line documentation is supported: split on newlines and write each as a separate ; entry.
+            if (!string.IsNullOrEmpty(document))
+            {
+                string[] docLines = document.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string docLine in docLines)
+                {
+                    string commentKey = $"; {docLine.Trim()}";
+                    SectionPair commentPair;
+                    commentPair.Section = sectionName;
+                    commentPair.Key = commentKey.Replace("=", "%eq%");
+
+                    if (!_keyPairs.ContainsKey(commentPair))
+                    {
+                        _keyPairs.Add(commentPair, "%comment%");
+                        _tmpList.Add(commentPair);
+                    }
+                }
+            }
+
+            _keyPairs.Add(pair, defaultValue);
+            _tmpList.Add(pair);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"[IniParser] AddDefault Error: {ex}");
+        }
+        finally
+        {
+            _readerWriterLock.ReleaseWriterLock();
+        }
     }
 
     /// <summary>

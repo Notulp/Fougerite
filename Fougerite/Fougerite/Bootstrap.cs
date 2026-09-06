@@ -110,58 +110,115 @@ namespace Fougerite
         }
 
         /// <summary>
-        /// Applies options from the Fougerite.cfg
+        /// Applies options from the Fougerite.cfg.
+        /// Any key that is missing from the file is registered via <see cref="IniParser.AddDefault"/> so that
+        /// it will be written together with a descriptive comment the next time <see cref="IniParser.Save"/>
+        /// is called.
         /// </summary>
         /// <returns></returns>
         public bool ApplyOptions()
         {
+            Config.AddDefault("Fougerite", "enabled",
+                "true",
+                "uncomment to disable Fougerite, to disable version announce at login,\n" +
+                "or to enable structure and deployed item decay");
+
+            Config.AddDefault("Fougerite", "RemovePlayersFromCache",
+                "false",
+                "Remove players from cache after they disconnect.");
+
+            Config.AddDefault("Fougerite", "BanOnInvalidPacket",
+                "true",
+                "If a player sends an invalid packet (Possibly hacker) ban him.");
+
+            Config.AddDefault("Fougerite", "AutoBanCraft",
+                "true",
+                "Autoban people for Crafting Hack? (If this is disabled, the crafting will be only cancelled/logged.)");
+
+            Config.AddDefault("Fougerite", "SaveNotification",
+                "The server is currently saving! You have to wait before placing an object.",
+                "Text to display to the player when the server is saving, and the building parts cannot be placed due the subthread.");
+
+            Config.AddDefault("Fougerite", "RustChat",
+                "true",
+                "Enable the default ChatSystem output for the Player.Message methods?");
+
+            Config.AddDefault("Fougerite", "RPCChat",
+                "false",
+                "Send additional RPCPackets of the chat for the clients? (This is recommended for RustBuster Servers only.)");
+
+            Config.AddDefault("Fougerite", "ClientFunction",
+                "FougeriteChatSystem",
+                "Specify the client side's RPC method.");
+
+            Config.AddDefault("Fougerite", "EnableScriptPluginsIntensiveEvents",
+                "false",
+                "Enable intensive events for script plugins (Py, Lua, JS)\n" +
+                "This gives scripts access to events like OnPlayerMove, OnShoot, OnShotgunShoot, OnBowShoot, OnAnimalMovement,\n" +
+                "OnHeatZoneEnter, OnWorkZoneEnter.\n" +
+                "Use this carefully, as these events are called very often and may cause performance issues (server laggs).\n" +
+                "It is recommended to use C# plugins for these events instead.\n" +
+                "Script plugins are generally slower than C# plugins. Python is the fastest among script plugins.\n" +
+                "Use at your own risk.");
+
+            Config.AddDefault("Fougerite", "SilentConsoleCommands",
+                "false",
+                "Suppress the default \"Fougerite: Class.Function was executed!\" response\n" +
+                "when a console command doesn't explicitly specify a reply text?");
+
+            Config.AddDefault("Fougerite", "ServerMessageName",
+                "Fougerite",
+                "Specifies the name of the message displayed by the server for system notifications.\n" +
+                "This value is typically configurable and determines the title or identifier of server broadcast messages.");
+
+            Config.AddDefault("Fougerite", "FloodConnections",
+                "2",
+                "How many connections can be made from the same IP / 3 seconds?");
+
+            Config.AddDefault("Fougerite", "SaveTime",
+                "10",
+                "How many minutes shall pass until the server saves everything?");
+
+            Config.AddDefault("Fougerite", "SaveCopies",
+                "5",
+                "How many copies should the server make of the save files, before deleting them? Do not set this below 5.");
+
+            Config.AddDefault("Fougerite", "StopServerOnSaveFail",
+                "false",
+                "Stop Server on Saving failure?");
+
+            Config.AddDefault("Fougerite", "CrucialSavePoint",
+                "0",
+                "Ensure that manual save won't be executed, if the server is going to autosave? How many minutes should be the critical point\n" +
+                "where the manual save won't run if less than X minutes is left before autosave? This should be LESS than 'SaveTime'. 0 to disable.");
+
+            Config.AddDefault("Fougerite", "EnableDefaultRustDecay",
+                "true",
+                "Enable Default Rust Decay? (May cause problems or laggs after a huge map.)");
+
+            // Persist any newly added defaults so the file is up-to-date after the first save cycle.
+            Config.Save();
+
+            // ----------------------------------------------------------------
             // look for the string 'false' to disable.  **not a bool check**
+            // ----------------------------------------------------------------
             if (Config.GetValue("Fougerite", "enabled") == "false") 
             {
                 Debug.Log("Fougerite is disabled. No modules loaded. No hooks called.");
                 return false;
             }
-            if (Config.GetValue("Fougerite", "RemovePlayersFromCache") != null)
-            {
-                CR = Config.GetBoolValue("Fougerite", "RemovePlayersFromCache");
-            }
-            if (Config.GetValue("Fougerite", "BanOnInvalidPacket") != null)
-            {
-                BI = Config.GetBoolValue("Fougerite", "BanOnInvalidPacket");
-            }
-            if (Config.GetValue("Fougerite", "AutoBanCraft") != null)
-            {
-                AutoBanCraft = Config.GetBoolValue("Fougerite", "AutoBanCraft");
-            }
-            if (Config.GetValue("Fougerite", "SaveNotification") != null)
-            {
-                SaveNotification = Config.GetValue("Fougerite", "SaveNotification");
-            }
-            if (Config.GetValue("Fougerite", "RustChat") != null)
-            {
-                RustChat = Config.GetBoolValue("Fougerite", "RustChat");
-            }
-            if (Config.GetValue("Fougerite", "RPCChat") != null)
-            {
-                RPCChat = Config.GetBoolValue("Fougerite", "RPCChat");
-            }
-            if (Config.GetValue("Fougerite", "ClientFunction") != null)
-            {
-                RPCChatMethod = Config.GetValue("Fougerite", "ClientFunction");
-            }
-            if (Config.GetValue("Fougerite", "EnableScriptPluginsIntensiveEvents") != null)
-            {
-                EnableScriptPluginsIntensiveEvents = Config.GetBoolValue("Fougerite", "EnableScriptPluginsIntensiveEvents");
-            }
-            if (Config.GetValue("Fougerite", "SilentConsoleCommands") != null)
-            {
-                SilentConsoleCommands = Config.GetBoolValue("Fougerite", "SilentConsoleCommands");
-            }
-            if (Config.GetValue("Fougerite", "ServerMessageName") != null)
-            {
-                ServerMessageName = Config.GetValue("Fougerite", "ServerMessageName");
-                Server.GetServer().server_message_name = ServerMessageName;
-            }
+
+            CR = Config.GetBoolValue("Fougerite", "RemovePlayersFromCache");
+            BI = Config.GetBoolValue("Fougerite", "BanOnInvalidPacket");
+            AutoBanCraft = Config.GetBoolValue("Fougerite", "AutoBanCraft");
+            SaveNotification = Config.GetValue("Fougerite", "SaveNotification");
+            RustChat = Config.GetBoolValue("Fougerite", "RustChat");
+            RPCChat = Config.GetBoolValue("Fougerite", "RPCChat");
+            RPCChatMethod = Config.GetValue("Fougerite", "ClientFunction");
+            EnableScriptPluginsIntensiveEvents = Config.GetBoolValue("Fougerite", "EnableScriptPluginsIntensiveEvents");
+            SilentConsoleCommands = Config.GetBoolValue("Fougerite", "SilentConsoleCommands");
+            ServerMessageName = Config.GetValue("Fougerite", "ServerMessageName");
+            Server.GetServer().server_message_name = ServerMessageName;
 
             if (!RustChat)
             {
@@ -172,65 +229,26 @@ namespace Fougerite
             {
                 Logger.LogWarning("[SilentConsoleCommands] The default console command response is disabled for commands that don't explicitly specify a reply text.");
             }
-            
-            if (Config.GetValue("Fougerite", "FloodConnections") != null)
-            {
-                int v;
-                int.TryParse(Config.GetValue("Fougerite", "FloodConnections"), out v);
-                if (v <= 0)
-                {
-                    v = 2;
-                }
-                FloodConnections = v + 1;
-            }
-            if (Config.GetValue("Fougerite", "SaveTime") != null)
-            {
-                int v;
-                int.TryParse(Config.GetValue("Fougerite", "SaveTime"), out v);
-                if (v <= 0)
-                {
-                    v = 10;
-                }
-                ServerSaveHandler.ServerSaveTime = v;
-            }
-            else
-            {
-                ServerSaveHandler.ServerSaveTime = 10;
-            }
-            if (Config.GetValue("Fougerite", "SaveCopies") != null)
-            {
-                int v;
-                int.TryParse(Config.GetValue("Fougerite", "SaveCopies"), out v);
-                if (v <= 4)
-                {
-                    v = 5;
-                }
-                ServerSaveHandler.SaveCopies = v;
-            }
-            else
-            {
-                ServerSaveHandler.SaveCopies = 5;
-            }
-            if (Config.GetValue("Fougerite", "StopServerOnSaveFail") != null)
-            {
-                bool v = false;
-                bool.TryParse(Config.GetValue("Fougerite", "StopServerOnSaveFail"), out v);
-                ServerSaveHandler.StopServerOnSaveFail = v;
-            }
-            else
-            {
-                ServerSaveHandler.StopServerOnSaveFail = false;
-            }
-            if (Config.GetValue("Fougerite", "CrucialSavePoint") != null)
-            {
-                int v = 2;
-                int.TryParse(Config.GetValue("Fougerite", "CrucialSavePoint"), out v);
-                ServerSaveHandler.CrucialSavePoint = v;
-            }
-            else
-            {
-                ServerSaveHandler.CrucialSavePoint = 2;
-            }
+
+            int floodVal;
+            int.TryParse(Config.GetValue("Fougerite", "FloodConnections"), out floodVal);
+            FloodConnections = (floodVal > 0 ? floodVal : 2) + 1;
+
+            int saveTime;
+            int.TryParse(Config.GetValue("Fougerite", "SaveTime"), out saveTime);
+            ServerSaveHandler.ServerSaveTime = saveTime > 0 ? saveTime : 10;
+
+            int saveCopies;
+            int.TryParse(Config.GetValue("Fougerite", "SaveCopies"), out saveCopies);
+            ServerSaveHandler.SaveCopies = saveCopies >= 5 ? saveCopies : 5;
+
+            bool stopOnFail;
+            bool.TryParse(Config.GetValue("Fougerite", "StopServerOnSaveFail"), out stopOnFail);
+            ServerSaveHandler.StopServerOnSaveFail = stopOnFail;
+
+            int crucialPoint;
+            int.TryParse(Config.GetValue("Fougerite", "CrucialSavePoint"), out crucialPoint);
+            ServerSaveHandler.CrucialSavePoint = crucialPoint > 0 ? crucialPoint : 2;
 
             string ignoredPluginsPath = Util.GetRootFolder().Combine("\\Save\\IgnoredPlugins.txt");
             if (!File.Exists(ignoredPluginsPath))
@@ -266,16 +284,8 @@ namespace Fougerite
                 structure.framelimit = -1;
                 structure.minpercentdmg = float.MaxValue;
             }
-            if (Config.GetValue("Fougerite", "EnableDefaultRustDecay") != null)
-            {
-                EnableDefaultRustDecay = Config.GetBoolValue("Fougerite", "EnableDefaultRustDecay");
-            }
-            else
-            {
-                NetCull.Callbacks.beforeEveryUpdate += EnvDecay.Callbacks.RunDecayThink;
-                NetCull.Callbacks.beforeEveryUpdate += new NetCull.UpdateFunctor(StructureMaster.Callbacks.RunDecayThink);
-                Logger.LogWarning("[RustDecay] The default Rust Decay is enabled. (Config option not found)");
-            }
+            // EnableDefaultRustDecay is guaranteed to be present (registered via AddDefault above).
+            EnableDefaultRustDecay = Config.GetBoolValue("Fougerite", "EnableDefaultRustDecay");
             if (EnableDefaultRustDecay)
             {
                 NetCull.Callbacks.beforeEveryUpdate += EnvDecay.Callbacks.RunDecayThink;
