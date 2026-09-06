@@ -198,10 +198,8 @@ namespace Fougerite
 
             // Persist any newly added defaults so the file is up-to-date after the first save cycle.
             Config.Save();
-
-            // ----------------------------------------------------------------
+            
             // look for the string 'false' to disable.  **not a bool check**
-            // ----------------------------------------------------------------
             if (Config.GetValue("Fougerite", "enabled") == "false") 
             {
                 Debug.Log("Fougerite is disabled. No modules loaded. No hooks called.");
