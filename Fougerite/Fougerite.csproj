@@ -277,6 +277,9 @@
     <Content Include="..\AutoUpdate-Fougerite.ps1">
       <Link>AutoUpdate-Fougerite.ps1</Link>
     </Content>
+    <Content Include="..\Collect-Logs.ps1">
+      <Link>Collect-Logs.ps1</Link>
+    </Content>
     <Content Include="..\README.md">
       <Link>README.md</Link>
     </Content>
