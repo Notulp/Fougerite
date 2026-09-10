@@ -636,12 +636,12 @@ namespace Fougerite.PluginLoaders
         /// </summary>
         public void KillTimers()
         {
-            foreach (TimedEvent current in Timers.Values)
+            foreach (TimedEvent current in Timers.Values.ToList())
             {
                 current.Kill();
             }
 
-            foreach (TimedEvent timer in ParallelTimers)
+            foreach (TimedEvent timer in ParallelTimers.ToList())
             {
                 timer.Kill();
             }
