@@ -15,6 +15,7 @@ using Fougerite.Caches;
 using Fougerite.Concurrent;
 using Fougerite.Events;
 using Fougerite.Permissions;
+using Fougerite.PluginLoaders;
 using Fougerite.Tools;
 using IronPython.Runtime.Types;
 using UnityEngine;
@@ -1517,7 +1518,7 @@ namespace Fougerite
         /// <returns>The created TimedEvent instance.</returns>
         public TimedEvent CreateTimer(string name, int timeoutDelay, Action<TimedEvent> callback, bool autoReset = false, string pluginName = "", int maxElapsedCount = 0)
         {
-            ThreadTimerCheck();
+            ThreadTimerCheck($"{pluginName} timer {name}");
             TimedEvent timedEvent = GetTimer(name);
             if (timedEvent != null)
             {
@@ -1552,7 +1553,7 @@ namespace Fougerite
         /// <returns>The created TimedEvent instance.</returns>
         public TimedEvent CreateParallelTimer(string name, int timeoutDelay, Dictionary<string, object> args, Action<TimedEvent> callback, bool autoReset = false, string pluginName = "", int maxElapsedCount = 0)
         {
-            ThreadTimerCheck();
+            ThreadTimerCheck($"{pluginName} timer {name}");
             UnityEngine.GameObject go = new UnityEngine.GameObject($"{pluginName}_Parallel_{name}_{UnityEngine.Random.Range(1, 999999)}");
             UnityEngine.Object.DontDestroyOnLoad(go);
             TimedEvent timedEvent = go.AddComponent<TimedEvent>();
@@ -1821,12 +1822,16 @@ namespace Fougerite
         /// Checks if the current thread matches the main thread and logs warnings if the method is called from a non-main thread.
         /// Ensures that actions involving GameObject and UnityEngine objects are executed on the main thread to avoid crashes or misuse.
         /// </summary>
-        internal void ThreadTimerCheck()
+        internal void ThreadTimerCheck(string plugin = null)
         {
             if (MainThreadID == CurrentWorkingThreadID)
                 return;
             
-            Logger.LogWarning($"{nameof(CreateTimer)} or {nameof(CreateParallelTimer)} should be called from the main thread due to GameObject usage.");
+            string who = plugin != null
+                ? $"plugin ({plugin})"
+                : "An unidentified caller";
+            
+            Logger.LogWarning($"{nameof(CreateTimer)} or {nameof(CreateParallelTimer)} was called off the main thread (thread {CurrentWorkingThreadID}, main is {MainThreadID}) by {who}.");
             Logger.LogWarning("Consider using System.Timer when working with other threads to avoid potential issues.");
             Logger.LogWarning("Accessing UnityEngine objects from System.Timer can also cause crashes, so ensure that any UnityEngine interactions are done on the main thread.");
         }
