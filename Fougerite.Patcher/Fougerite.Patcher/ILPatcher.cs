@@ -10,6 +10,8 @@ namespace Fougerite.Patcher
     public class ILPatcher
     {
         private AssemblyDefinition rustAssembly = null;
+        private Dictionary<string, string> auditIlBefore;
+        private Dictionary<string, string> auditAccessBefore;
         private AssemblyDefinition fougeriteAssembly = null;
         private AssemblyDefinition unityAssembly = null;
         private AssemblyDefinition mscorlib = null;
@@ -3182,8 +3184,66 @@ namespace Fougerite.Patcher
         // uLink Class56.method_36 has been patched here: https://i.imgur.com/WIEQXhX.png
         // I modified using dynspy to avoid the struggle.
 
+        private void BeginAudit()
+        {
+            try
+            {
+                auditIlBefore = ILAudit.SnapshotIL(rustAssembly);
+                auditAccessBefore = ILAudit.SnapshotAccess(rustAssembly);
+            }
+            catch (Exception ex)
+            {
+                auditIlBefore = null;
+                auditAccessBefore = null;
+                Logger.Log($"[ILAudit] snapshot failed, auditing skipped for this pass: {ex}");
+            }
+        }
+
+        /// <summary>
+        /// Compares the module against the snapshot taken at the start of the pass and
+        /// reports anything structurally wrong, immediately before the assembly is written.
+        /// </summary>
+        private void RunAudit()
+        {
+            if (auditIlBefore == null) return;
+
+            try
+            {
+                Dictionary<string, string> after = ILAudit.SnapshotIL(rustAssembly);
+                HashSet<string> changed = ILAudit.ChangedKeys(auditIlBefore, after);
+
+                List<string> problems = ILAudit.Validate(changed, rustAssembly);
+                if (problems.Count > 0)
+                {
+                    Logger.Log($"[ILAudit] {problems.Count} problem(s) in the patched IL, see Fougerite_PatchAudit/validation.txt");
+                    foreach (string problem in problems.Take(20))
+                    {
+                        Logger.Log("  " + problem);
+                    }
+                }
+                else
+                {
+                    Logger.Log($"[ILAudit] {changed.Count} method(s) changed, no structural problems");
+                }
+
+                ILAudit.WriteILDiff(auditIlBefore, after);
+                ILAudit.WriteAccessDiff(auditAccessBefore, ILAudit.SnapshotAccess(rustAssembly));
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"[ILAudit] audit failed: {ex}");
+            }
+            finally
+            {
+                auditIlBefore = null;
+                auditAccessBefore = null;
+            }
+        }
+
         public bool FirstPass()
         {
+            BeginAudit();
+
             try
             {
                 bool flag = true;
@@ -3214,6 +3274,7 @@ namespace Fougerite.Patcher
                     definition3.HasConstant = true;
                     definition3.Constant = Program.Version;
                     serverInit.Fields.Add(definition3);
+                    RunAudit();
                     rustAssembly.Write("Assembly-CSharp.dll");
                 }
                 catch (Exception ex)
@@ -3234,6 +3295,8 @@ namespace Fougerite.Patcher
 
         public bool SecondPass()
         {
+            BeginAudit();
+
             Logger.Log("Prepraching LatePost method...");
             this.LatePostInTryCatch();
             WaitForPendingFinalizers();
@@ -3350,6 +3413,7 @@ namespace Fougerite.Patcher
                     definition3.HasConstant = true;
                     definition3.Constant = Program.Version;
                     serverInit.Fields.Add(definition3);
+                    RunAudit();
                     rustAssembly.Write("Assembly-CSharp.dll");
                 }
                 catch (Exception ex)
