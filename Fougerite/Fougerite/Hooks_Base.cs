@@ -405,6 +405,21 @@ namespace Fougerite
         /// Called every 3 second for each player, so carefully use It in script plugins.
         /// </summary>
         public static event MetabolismUpdateDelegate OnMetabolismUpdate;
+
+        /// <summary>
+        /// Represents the amount of damage applied to an entity when it comes into contact with water.
+        /// This variable is used in scenarios where water exposure results in detrimental effects.
+        /// </summary>
+        public static event WaterDamageDelegate OnWaterDamage;
+
+        /// <summary>
+        /// Called before the server broadcasts a movement sound for a player, so nearby
+        /// players can hear them. Swap the sound, change its range, or cancel it.
+        ///
+        /// Carries the water state, which is what makes a swimming sound possible: vanilla
+        /// only ever sent "HearFootstep" and had no notion of anyone being in water.
+        /// </summary>
+        public static event AudibleSoundDelegate OnAudibleSound;
         
         /// <summary>
         /// A central registry used to manage the lifecycle of generic item modification events.
@@ -639,6 +654,8 @@ namespace Fougerite
             OnWebSocketClosed = delegate { };
             OnWebSocketError = delegate { };
             OnPermissionChange = delegate { };
+            OnWaterDamage = delegate { };
+            OnAudibleSound = delegate { };
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -802,6 +819,10 @@ namespace Fougerite
         public delegate void WebSocketEventHandlerDelegate(WebSocketEvent e);
 
         public delegate void PermissionEventDelegate(PermissionEvent e);
+        
+        public delegate void WaterDamageDelegate(WaterDamageEvent e);
+
+        public delegate void AudibleSoundDelegate(AudibleSoundEvent e);
         
         /// <summary>
         /// Flags for Method.Invoke

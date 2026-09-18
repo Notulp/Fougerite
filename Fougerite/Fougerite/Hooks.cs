@@ -4726,6 +4726,147 @@ namespace Fougerite
         /// </summary>
         /// <param name="m">The metabolism object representing the player's metabolic state.</param>
         /// <returns>A <see cref="LifeStatus"/> value indicating the life state of the player after the metabolic update</returns>
+        /// <summary>
+        /// Managed replacement for HumanController.ServerFrame.
+        ///
+        /// Vanilla ended this method with an instant kill the moment a player touched the
+        /// waterline, which is why swimming was impossible. That check now goes through
+        /// WaterSystemServer, which runs an oxygen budget and raises a cancellable
+        /// WaterDamageEvent instead. The footstep broadcast is gated on the same state, so
+        /// swimmers are silent.
+        ///
+        /// Everything else is a faithful port of the original body.
+        /// </summary>
+        /// <param name="hc">The controller whose frame is being processed.</param>
+        public static void HumanControllerServerFrame(HumanController hc)
+        {
+            using (new Stopper(nameof(Hooks), nameof(HumanControllerServerFrame)))
+            {
+                try
+                {
+                    PlayerClient playerClient = hc.playerClient;
+                    if (playerClient)
+                    {
+                        playerClient.hasLastKnownPosition = true;
+                        playerClient.lastKnownPosition = hc.idMain.eyesOrigin;
+                    }
+
+                    float delta = Time.time - hc.lastServerFrameTime;
+
+                    InventoryHolder inventoryHolder = hc.inventoryHolder;
+                    if (inventoryHolder)
+                    {
+                        inventoryHolder.ServerFrame();
+                    }
+
+                    if (hc.clientVitalsSync)
+                    {
+                        hc.clientVitalsSync.ServerFrame();
+                    }
+                    
+                    PlayerInventory hcInventory = hc.inventory as PlayerInventory;
+                    if (hcInventory != null)
+                    {
+                        hcInventory.CraftThink();
+                    }
+
+                    Character character = hc.GetComponent<Character>();
+                    Metabolism metabolism = hc.GetComponent<Metabolism>();
+
+                    bool inWater = WaterSystemServer.IsInWater(character);
+                    bool swimming = (character.stateFlags.flags & WaterSystemServer.SwimFlag) != 0;
+                    bool silent = WaterSystemServer.ShouldSilenceFootsteps(hc);
+
+                    float scentRange;
+                    if (character.stateFlags.movement)
+                    {
+                        if (character.stateFlags.crouch)
+                        {
+                            metabolism.SetTargetActivityLevel(0.15f);
+                            scentRange = 5f;
+                        }
+                        else if (character.stateFlags.sprint)
+                        {
+                            metabolism.SetTargetActivityLevel(0.9f);
+                            EmitMovementSound(hc, character, 10f, silent, inWater, swimming, true);
+                            scentRange = 30f;
+                        }
+                        else
+                        {
+                            metabolism.SetTargetActivityLevel(0.4f);
+                            EmitMovementSound(hc, character, 5f, silent, inWater, swimming, false);
+                            scentRange = 20f;
+                        }
+                    }
+                    else
+                    {
+                        metabolism.SetTargetActivityLevel(0f);
+                        scentRange = 10f;
+                    }
+
+                    hc.AudibleMessage(scentRange, "Scent", hc.idMain.takeDamage);
+
+                    Radiation radiation = hc.GetLocal<Radiation>();
+                    if (radiation)
+                    {
+                        hc.radExposurePerMinute = radiation.CalculateExposure(true);
+                        metabolism.AddRads(hc.radExposurePerMinute * (delta / 60f));
+                    }
+
+                    // Replaces the vanilla instant kill. Must run before lastServerFrameTime
+                    // is advanced, because the oxygen drain is measured against it.
+                    WaterSystemServer.ServerFrameWaterCheck(hc);
+
+                    hc.lastServerFrameTime = Time.time;
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"HumanControllerServerFrame Error: {ex}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Broadcasts a player's movement sound, after letting plugins change or cancel it.
+        ///
+        /// The default is vanilla's "HearFootstep", but when the player is in water it is
+        /// suppressed instead, because a swimmer walking on gravel is worse than silence.
+        /// A plugin can put its own sound back by setting SoundName, which is the whole
+        /// point of the event: legacy had no swimming, so there is no stock sound to use.
+        /// </summary>
+        private static void EmitMovementSound(HumanController hc, Character character, float range,
+            bool silent, bool inWater, bool swimming, bool sprinting)
+        {
+            string sound = silent ? null : "HearFootstep";
+
+            Player player = null;
+            if (hc.playerClient != null)
+            {
+                player = Server.GetServer().FindPlayer(hc.playerClient.userID);
+            }
+
+            AudibleSoundEvent e = new AudibleSoundEvent(player, sound, range, inWater, swimming,
+                sprinting, character.stateFlags.crouch);
+
+            ExecuteSubscribers(OnAudibleSound, "OnAudibleSound", e);
+
+            if (e.Cancelled) return;
+            if (string.IsNullOrEmpty(e.SoundName)) return;
+            if (e.Range <= 0f) return;
+
+            hc.AudibleMessage(e.Range, e.SoundName, hc.transform.position);
+        }
+
+        /// <summary>
+        /// Fires before drowning damage is applied to a player. Plugins can cancel it or
+        /// change the amount.
+        /// </summary>
+        /// <param name="e">The water damage event.</param>
+        public static void WaterDamage(WaterDamageEvent e)
+        {
+            ExecuteSubscribers(OnWaterDamage, "OnWaterDamage", e);
+        }
+
         public static LifeStatus MetabolicUpdateHook(Metabolism m)
         {
             using (new Stopper(nameof(Hooks), nameof(MetabolicUpdateHook)))

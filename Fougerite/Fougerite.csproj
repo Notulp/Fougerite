@@ -62,6 +62,7 @@
     <Compile Include="Fougerite\CouroutineHost.cs" />
     <Compile Include="Fougerite\Events\AnimalMovementEvent.cs" />
     <Compile Include="Fougerite\Events\ArmorEquipEvent.cs" />
+    <Compile Include="Fougerite\Events\AudiableSoundEvent.cs" />
     <Compile Include="Fougerite\Events\BanEvent.cs" />
     <Compile Include="Fougerite\Events\BasicTorchIgniteEvent.cs" />
     <Compile Include="Fougerite\Events\BeltUseEvent.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Fougerite\Events\SystemTimerEvent.cs" />
     <Compile Include="Fougerite\Events\TimedExplosiveEvent.cs" />
     <Compile Include="Fougerite\Events\FlareIgniteEvent.cs" />
+    <Compile Include="Fougerite\Events\WaterDamageEvent.cs" />
     <Compile Include="Fougerite\Events\WebSocketEvent.cs" />
     <Compile Include="Fougerite\Events\WorkZoneEnterEvent.cs" />
     <Compile Include="Fougerite\Flood.cs" />
@@ -223,6 +225,7 @@
     <Compile Include="Fougerite\Tools\PluginMessaging.cs" />
     <Compile Include="Fougerite\Tools\SteamAPITools.cs" />
     <Compile Include="Fougerite\Tools\SteamUserRegistry.cs" />
+    <Compile Include="Fougerite\WaterSystemServer.cs" />
     <Compile Include="Fougerite\WinHttpClient.cs" />
     <Compile Include="Fougerite\Zone3D.cs" />
     <Compile Include="Fougerite\DataStore.cs" />

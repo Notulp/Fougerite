@@ -3029,6 +3029,155 @@ namespace Fougerite.Patcher
             MetabolicUpdateFrame.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(metabHook)));
             MetabolicUpdateFrame.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         }
+
+        private void MetabolismOxygenRpcPatch()
+        {
+            TypeDefinition Metabolism = rustAssembly.MainModule.GetType("Metabolism");
+            if (Metabolism == null)
+            {
+                Logger.Log("[WaterSupport] Metabolism not found, server side rbOxy not injected");
+                return;
+            }
+
+            if (Metabolism.GetMethod("rbOxy") != null)
+            {
+                Logger.Log("[WaterSupport] rbOxy already present, skipping");
+                return;
+            }
+
+            // The [RPC] attribute lives in uLink rather than Assembly-CSharp, so the
+            // constructor reference is lifted off a method that already carries it instead of
+            // resolving that assembly. RecieveNetwork is on this same type and is already an
+            // RPC.
+            MethodDefinition donor = Metabolism.GetMethod("RecieveNetwork");
+            CustomAttribute rpcAttribute = null;
+
+            if (donor != null)
+            {
+                foreach (CustomAttribute attribute in donor.CustomAttributes)
+                {
+                    if (attribute.AttributeType.Name.IndexOf("RPC", StringComparison.Ordinal) < 0) continue;
+                    rpcAttribute = attribute;
+                    break;
+                }
+            }
+
+            if (rpcAttribute == null)
+            {
+                Logger.Log("[WaterSupport] no existing [RPC] to copy, server side rbOxy not injected");
+                return;
+            }
+
+            // An empty [RPC] void rbOxy(float).
+            //
+            // The server never receives this, it only sends it, so the body does nothing. It
+            // exists because uLink resolves an RPC name against the NetworkView's own scripts
+            // before sending, and a name it cannot find is rejected. Without this the push
+            // would throw on the first attempt and WaterSystemServer would mark the player as
+            // unsupported, so oxygen sync would silently never work.
+            MethodDefinition rbOxy = new MethodDefinition(
+                "rbOxy",
+                MethodAttributes.Public | MethodAttributes.HideBySig,
+                rustAssembly.MainModule.TypeSystem.Void);
+
+            rbOxy.Parameters.Add(new ParameterDefinition(
+                "oxygen",
+                ParameterAttributes.None,
+                rustAssembly.MainModule.TypeSystem.Single));
+
+            rbOxy.CustomAttributes.Add(new CustomAttribute(
+                rustAssembly.MainModule.Import(rpcAttribute.Constructor)));
+
+            ILProcessor il = rbOxy.Body.GetILProcessor();
+            il.Append(Instruction.Create(OpCodes.Ret));
+
+            Metabolism.Methods.Add(rbOxy);
+
+            Logger.Log("[WaterSupport] injected server side Metabolism.rbOxy(float) stub");
+        }
+
+        private void HumanControllerServerFramePatch()
+        {
+            TypeDefinition HumanController = rustAssembly.MainModule.GetType("HumanController");
+            MethodDefinition ServerFrame = HumanController.GetMethod("ServerFrame");
+            MethodDefinition hook = hooksClass.GetMethod("HumanControllerServerFrame");
+
+            // Fields and methods the managed replacement reads. Guarded individually so a
+            // rename in a different build logs rather than throwing mid patch.
+            OpenField(HumanController, "lastServerFrameTime");
+            OpenField(HumanController, "radExposurePerMinute");
+            OpenField(HumanController, "clientVitalsSync");
+            OpenField(HumanController, "__inventory");
+            OpenMethod(HumanController, "AudibleMessage");
+
+            TypeDefinition InventoryHolder = rustAssembly.MainModule.GetType("InventoryHolder");
+            OpenMethod(InventoryHolder, "ServerFrame");
+
+            TypeDefinition ClientVitalsSync = rustAssembly.MainModule.GetType("ClientVitalsSync");
+            OpenMethod(ClientVitalsSync, "ServerFrame");
+
+            TypeDefinition Inventory = rustAssembly.MainModule.GetType("Inventory");
+            OpenMethod(Inventory, "CraftThink");
+
+            TypeDefinition Radiation = rustAssembly.MainModule.GetType("Radiation");
+            OpenMethod(Radiation, "CalculateExposure");
+
+            TypeDefinition Metabolism = rustAssembly.MainModule.GetType("Metabolism");
+            OpenMethod(Metabolism, "SetTargetActivityLevel");
+            OpenMethod(Metabolism, "AddRads");
+
+            TypeDefinition WaterLine = rustAssembly.MainModule.GetType("WaterLine");
+            if (WaterLine != null)
+            {
+                WaterLine.IsPublic = true;
+                OpenField(WaterLine, "Height");
+            }
+
+            // Whole body replaced, same approach as MetabolismPatch. The vanilla body ended
+            // with an instant kill on touching the waterline, which is what made swimming
+            // impossible; the managed version runs an oxygen budget instead and raises a
+            // cancellable WaterDamageEvent.
+            ServerFrame.Body.Instructions.Clear();
+            ServerFrame.Body.Variables.Clear();
+            ServerFrame.Body.ExceptionHandlers.Clear();
+            ServerFrame.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+            ServerFrame.Body.Instructions.Add(Instruction.Create(OpCodes.Call,
+                this.rustAssembly.MainModule.Import(hook)));
+            ServerFrame.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+        }
+
+        private void OpenField(TypeDefinition type, string name)
+        {
+            if (type == null)
+            {
+                Logger.Log($"[WaterSupport] type missing while opening field {name}");
+                return;
+            }
+
+            FieldDefinition f = type.GetField(name);
+            if (f == null)
+            {
+                Logger.Log($"[WaterSupport] {type.Name}.{name} field not found");
+                return;
+            }
+
+            f.SetPublic(true);
+        }
+
+        private void OpenMethod(TypeDefinition type, string name)
+        {
+            if (type == null)
+            {
+                Logger.Log($"[WaterSupport] type missing while opening method {name}");
+                return;
+            }
+
+            foreach (MethodDefinition m in type.Methods)
+            {
+                if (m.Name == name) m.SetPublic(true);
+            }
+        }
+
         
         // uLink Class56.method_36 has been patched here: https://i.imgur.com/WIEQXhX.png
         // I modified using dynspy to avoid the struggle.
@@ -3183,6 +3332,8 @@ namespace Fougerite.Patcher
                     this.PatchBasicTorchIgnite();
                     this.PatchZones();
                     this.MetabolismPatch();
+                    this.HumanControllerServerFramePatch();
+                    this.MetabolismOxygenRpcPatch();
                 }
                 catch (Exception ex)
                 {
