@@ -2010,6 +2010,11 @@ namespace Fougerite.Patcher
             MethodDefinition orig = type.GetMethod("Initialize");
             MethodDefinition method = hooksClass.GetMethod("ItemsLoaded");
             MethodDefinition definition4 = hooksClass.GetMethod("TablesLoaded");
+            
+            foreach (var x in type.Fields)
+            {
+                x.SetPublic(true);
+            }
 
             this.CloneMethod(orig);
             ILProcessor iLProcessor = orig.Body.GetILProcessor();

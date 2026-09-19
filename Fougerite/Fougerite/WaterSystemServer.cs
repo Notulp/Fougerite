@@ -303,10 +303,11 @@ namespace Fougerite
 
         /// <summary>
         /// Remaining air from 0 to 1 for a character, or 1 when it is not being tracked.
+        /// Returns -1 on wrong character input.
         /// </summary>
         public static float GetOxygen(Character character)
         {
-            if (!character) return 1f;
+            if (!character) return -1f;
 
             OxygenState state;
             return States.TryGetValue(character.GetInstanceID(), out state) ? state.Oxygen : 1f;
