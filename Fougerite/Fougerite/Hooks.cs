@@ -2014,9 +2014,9 @@ namespace Fougerite
             }
         }
 
-        public static void AnimalMovement(BaseAIMovement m, BasicWildLifeAI ai, ulong simMillis)
+        public static void AnimalMovementNavMesh(BaseAIMovement m, BasicWildLifeAI ai, ulong simMillis)
         {
-            using (new Stopper(nameof(Hooks), nameof(AnimalMovement)))
+            using (new Stopper(nameof(Hooks), nameof(AnimalMovementNavMesh)))
             {
                 // Get the NPC from the Character and find It's NPCCache entry
                 Character character = ai.GetComponent<Character>();
@@ -2046,7 +2046,7 @@ namespace Fougerite
                 }
                 else
                 {
-                    AnimalMovementEvent ev = new AnimalMovementEvent(npc, movement, simMillis);
+                    AnimalMovementEvent ev = new AnimalMovementEvent(npc, movement, simMillis, AnimalMovementType.NavMeshMovement, null);
                     try
                     {
                         ExecuteSubscribers(OnAnimalMovement, "AnimalMovementEvent", ev);
@@ -2055,6 +2055,31 @@ namespace Fougerite
                     {
                         Logger.LogError($"AnimalMovementEvent Error: {ex}");
                     }
+                }
+            }
+        }
+
+        public static void AnimalMovement(BasicWildLifeMovement m, BasicWildLifeAI ai, ulong simMillis)
+        {
+            using (new Stopper(nameof(Hooks), nameof(AnimalMovement)))
+            {
+                // Get the NPC from the Character and find It's NPCCache entry
+                Character character = ai.GetComponent<Character>();
+                NPC npc = null;
+                if (character != null)
+                {
+                    npc = NPCCache.GetInstance().GetEntityByInstanceId(character.GetInstanceID());
+                }
+                
+
+                AnimalMovementEvent ev = new AnimalMovementEvent(npc, null, simMillis, AnimalMovementType.AnimalMovement, m);
+                try
+                {
+                    ExecuteSubscribers(OnAnimalMovement, "AnimalMovementEvent", ev);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"AnimalMovementEvent Error: {ex}");
                 }
             }
         }

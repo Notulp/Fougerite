@@ -736,6 +736,7 @@ namespace Fougerite.Patcher
                 SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_S, SlotOperation.Parameters[3]));
                 SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(method)));
                 SlotOperation.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+                SlotOperation.Body.MaxStackSize = 5;
             }
             MethodDefinition ITSP = type.GetMethod("ITSP");
             MethodDefinition IACT = type.GetMethod("IACT");
@@ -828,6 +829,7 @@ namespace Fougerite.Patcher
             ITSP.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
             ITSP.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(ITSPHook)));
             ITSP.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            ITSP.Body.MaxStackSize = 3;
             
             IACT.Body.Instructions.Clear();
             IACT.Body.ExceptionHandlers.Clear();
@@ -838,6 +840,7 @@ namespace Fougerite.Patcher
             IACT.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_3));
             IACT.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(IACTHook)));
             IACT.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            IACT.Body.MaxStackSize = 4;
             
             IAST.Body.Instructions.Clear();
             IAST.Body.ExceptionHandlers.Clear();
@@ -1186,6 +1189,8 @@ namespace Fougerite.Patcher
             }
             RecieveNetwork.Body.Instructions.Add(Instruction.Create(OpCodes.Callvirt, this.rustAssembly.MainModule.Import(method)));
             RecieveNetwork.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            RecieveNetwork.Body.MaxStackSize = a.Length + 1;
 
             TypeDefinition logger = fougeriteAssembly.MainModule.GetType("Fougerite.Logger");
             MethodDefinition logex = logger.GetMethod("LogException");
@@ -1376,18 +1381,18 @@ namespace Fougerite.Patcher
             MethodDefinition method = hooksClass.GetMethod("ClientMove");
             MethodDefinition ProcessGetClientMove = hooksClass.GetMethod("ProcessGetClientMove");
             MethodDefinition GetClientMove = HumanController.GetMethod("GetClientMove");
-            
+
             HumanController.GetField("clockTest").SetPublic(true);
             HumanController.GetField("thatsRightPatWeDontNeedComments").SetPublic(true);
             HumanController.GetField("serverLastTimestamp").SetPublic(true);
             HumanController.GetField("clientMoveDropped").SetPublic(true);
-            HumanController.GetField("clockTest").SetPublic(true);
 
-            
             this.CloneMethod(GetClientMove);
 
             int num = 0;
-            ParameterDefinition parameter = method.Parameters[0];
+            // FIX 1: Retrieve parameter from GetClientMove directly instead of hooksClass method
+            ParameterDefinition parameter = GetClientMove.Parameters[0];
+
             MethodReference reference =
                 this.rustAssembly.MainModule.GetType("IDLocalCharacter").GetMethod("get_netUser");
             MethodReference reference2 = this.rustAssembly.MainModule.GetType("NetUser").GetMethod("Kick");
@@ -1399,36 +1404,54 @@ namespace Fougerite.Patcher
             MethodReference reference6 = this.rustAssembly.MainModule.Import(definition7.GetMethod("IsNaN"));
             MethodReference reference7 = this.rustAssembly.MainModule.Import(definition7.GetMethod("IsInfinity"));
             ILProcessor iLProcessor = GetClientMove.Body.GetILProcessor();
-            
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldarga_S, parameter));
+
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldarga_S, parameter));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldfld, field));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Call, reference6));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Call, reference6));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Nop));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldarga_S, parameter));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldarga_S, parameter));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldfld, field));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Call, reference7));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Call, reference7));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Nop));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldarga_S, parameter));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldfld, reference4));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Call, reference6));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldarga_S, parameter));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldfld, reference4));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Call, reference6));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Nop));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldarga_S, parameter));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldfld, reference4));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Call, reference7));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldarga_S, parameter));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldfld, reference4));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Call, reference7));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Nop));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldarga_S, parameter));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldfld, reference5));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Call, reference6));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldarga_S, parameter));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldfld, reference5));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Call, reference6));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Nop));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldarga_S, parameter));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldfld, reference5));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Call, reference7));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldarga_S, parameter));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Ldfld, reference5));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Call, reference7));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Nop));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldarg_0));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Call, reference));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Call, reference));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldc_I4, 0x8d));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ldc_I4_1));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Callvirt, reference2));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++],
+                Instruction.Create(OpCodes.Callvirt, reference2));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Pop));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[num++], Instruction.Create(OpCodes.Ret));
             iLProcessor.Replace(GetClientMove.Body.Instructions[3],
@@ -1444,7 +1467,6 @@ namespace Fougerite.Patcher
             iLProcessor.Replace(GetClientMove.Body.Instructions[0x17],
                 Instruction.Create(OpCodes.Brfalse_S, GetClientMove.Body.Instructions[0x1f]));
 
-            
             Array a = GetClientMove.Parameters.ToArray();
             Array.Reverse(a);
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[32],
@@ -1453,17 +1475,19 @@ namespace Fougerite.Patcher
             {
                 iLProcessor.InsertBefore(GetClientMove.Body.Instructions[32], Instruction.Create(OpCodes.Ldarg_S, p));
             }
+
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[32], Instruction.Create(OpCodes.Ldarg_0));
-            
+
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[0], Instruction.Create(OpCodes.Ret));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[0], Instruction.Create(OpCodes.Brtrue_S, GetClientMove.Body.Instructions[1]));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[0], Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(ProcessGetClientMove)));
-            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[0], Instruction.Create(OpCodes.Ldarg_S, GetClientMove.Parameters[GetClientMove.Parameters.Count - 1]));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[0],
+                Instruction.Create(OpCodes.Brtrue_S, GetClientMove.Body.Instructions[1]));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[0],
+                Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(ProcessGetClientMove)));
+            iLProcessor.InsertBefore(GetClientMove.Body.Instructions[0],
+                Instruction.Create(OpCodes.Ldarg_S, GetClientMove.Parameters[GetClientMove.Parameters.Count - 1]));
             iLProcessor.InsertBefore(GetClientMove.Body.Instructions[0], Instruction.Create(OpCodes.Ldarg_0));
 
-            //TypeDefinition logger = fougeriteAssembly.MainModule.GetType("Fougerite.Logger");
-            //MethodDefinition logex = logger.GetMethod("LogException");
-            //WrapMethod(GetClientMove, logex, rustAssembly, false);
+            GetClientMove.Body.MaxStackSize = Math.Max(8, GetClientMove.Parameters.Count + 2);
         }
 
         private void CraftingPatch()
@@ -1535,7 +1559,7 @@ namespace Fougerite.Patcher
         {
             TypeDefinition BasicWildLifeMovement = rustAssembly.MainModule.GetType("BaseAIMovement");
             MethodDefinition DoMove = BasicWildLifeMovement.GetMethod("DoMove");
-            MethodDefinition method = hooksClass.GetMethod("AnimalMovement");
+            MethodDefinition method = hooksClass.GetMethod("AnimalMovementNavMesh");
             this.CloneMethod(DoMove);
 
             ILProcessor iLProcessor = DoMove.Body.GetILProcessor();
@@ -1544,7 +1568,27 @@ namespace Fougerite.Patcher
             iLProcessor.InsertBefore(DoMove.Body.Instructions[0], Instruction.Create(OpCodes.Ldarg_2));
             iLProcessor.InsertBefore(DoMove.Body.Instructions[0], Instruction.Create(OpCodes.Ldarg_1));
             iLProcessor.InsertBefore(DoMove.Body.Instructions[0], Instruction.Create(OpCodes.Ldarg_0));
+            
+            DoMove.Body.MaxStackSize = Math.Max(DoMove.Body.MaxStackSize, 3);
+        }
+        
+        private void BasicWildLifeMovementPatch()
+        {
+            TypeDefinition basicWildLifeMovement = rustAssembly.MainModule.GetType("BasicWildLifeMovement");
+            MethodDefinition doMove = basicWildLifeMovement.GetMethod("DoMove");
+            MethodDefinition hookMethod = hooksClass.GetMethod("AnimalMovement");
 
+            this.CloneMethod(doMove);
+
+            ILProcessor ilProcessor = doMove.Body.GetILProcessor();
+            Instruction firstInstruction = doMove.Body.Instructions[0];
+
+            ilProcessor.InsertBefore(firstInstruction, Instruction.Create(OpCodes.Ldarg_0));
+            ilProcessor.InsertBefore(firstInstruction, Instruction.Create(OpCodes.Ldarg_1));
+            ilProcessor.InsertBefore(firstInstruction, Instruction.Create(OpCodes.Ldarg_2));
+            ilProcessor.InsertBefore(firstInstruction, Instruction.Create(OpCodes.Callvirt, this.rustAssembly.MainModule.Import(hookMethod)));
+
+            doMove.Body.MaxStackSize = Math.Max(doMove.Body.MaxStackSize, 4);
         }
 
         private void ResourceSpawned()
@@ -1619,6 +1663,8 @@ namespace Fougerite.Patcher
             iLProcessorREM.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_3));
             iLProcessorREM.Body.Instructions.Add(Instruction.Create(OpCodes.Callvirt, this.rustAssembly.MainModule.Import(REMHOOK)));
             iLProcessorREM.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            RemoveItem.Body.MaxStackSize = 4;
         }
 
         private void AirdropPatch()
@@ -1832,12 +1878,17 @@ namespace Fougerite.Patcher
             MethodDefinition method = hooksClass.GetMethod("PlayerGather");
 
             this.CloneMethod(orig);
-            ILProcessor iLProcessor = orig.Body.GetILProcessor(); // 30 - int amount = (int) Mathf.Abs(this.gatherProgress);
-            iLProcessor.InsertBefore(orig.Body.Instructions[30], Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(method)));
-            iLProcessor.InsertBefore(orig.Body.Instructions[30], Instruction.Create(OpCodes.Ldloca, orig.Body.Variables[1]));
-            iLProcessor.InsertBefore(orig.Body.Instructions[30], Instruction.Create(OpCodes.Ldloc_0));
-            iLProcessor.InsertBefore(orig.Body.Instructions[30], Instruction.Create(OpCodes.Ldarg_0));
-            iLProcessor.InsertBefore(orig.Body.Instructions[30], Instruction.Create(OpCodes.Ldarg_1));
+            ILProcessor iLProcessor = orig.Body.GetILProcessor();
+            
+            Instruction target = orig.Body.Instructions[29];
+
+            iLProcessor.InsertBefore(target, Instruction.Create(OpCodes.Ldarg_1));
+            iLProcessor.InsertBefore(target, Instruction.Create(OpCodes.Ldarg_0));
+            iLProcessor.InsertBefore(target, Instruction.Create(OpCodes.Ldloc_0));
+            iLProcessor.InsertBefore(target, Instruction.Create(OpCodes.Ldloca_S, orig.Body.Variables[1]));
+            iLProcessor.InsertBefore(target, Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(method)));
+
+            orig.Body.MaxStackSize = Math.Max(orig.Body.MaxStackSize, 5);
         }
 
         private void EntityDeployedPatch_DeployableItemDataBlock()
@@ -2295,6 +2346,7 @@ namespace Fougerite.Patcher
             CLD.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
             CLD.Body.Instructions.Add(Instruction.Create(OpCodes.Call, this.rustAssembly.MainModule.Import(CLDHook)));
             CLD.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            CLD.Body.MaxStackSize = 2;
             
             
             CLR.Body.Instructions.Clear();
@@ -2544,6 +2596,8 @@ namespace Fougerite.Patcher
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_2));
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(method)));
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            TOSS.Body.MaxStackSize = 3;
         }
 
         private void SupplySignalExplosion()
@@ -2688,6 +2742,7 @@ namespace Fougerite.Patcher
             iLProcessor6.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_3));
             iLProcessor6.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(TorchDoAction1)));
             iLProcessor6.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            TorchItemDataBlockDoAction1.Body.MaxStackSize = 4;
         }
 
         private void NGCPatch()
@@ -2962,6 +3017,8 @@ namespace Fougerite.Patcher
     
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(TorchDoAction2)));
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            DoAction2.Body.MaxStackSize = 4;
         }
         
         private void PatchBasicTorchIgnite()
@@ -2982,6 +3039,8 @@ namespace Fougerite.Patcher
     
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Call, rustAssembly.MainModule.Import(BasicTorchDoAction2Hook)));
             iLProcessor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+            
+            DoAction2.Body.MaxStackSize = 4;
         }
         
         private void PatchZones()
@@ -3357,6 +3416,7 @@ namespace Fougerite.Patcher
                     this.CraftingPatch();
                     this.CraftingCancelAndCompletePatch();
                     this.NavMeshPatch();
+                    this.BasicWildLifeMovementPatch();
                     this.ResourceSpawned();
                     this.InventoryModifications();
                     this.AirdropPatch();
