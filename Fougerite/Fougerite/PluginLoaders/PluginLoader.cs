@@ -132,7 +132,9 @@ namespace Fougerite.PluginLoaders
             PluginLoaderEvents.OnWebSocketConnected,
             PluginLoaderEvents.OnWebSocketClosed,
             PluginLoaderEvents.OnWebSocketError,
-            PluginLoaderEvents.OnPermissionChange
+            PluginLoaderEvents.OnPermissionChange,
+            PluginLoaderEvents.OnWaterDamage,
+            PluginLoaderEvents.OnAudibleSound
         };
 
         /// <summary>
@@ -596,6 +598,15 @@ namespace Fougerite.PluginLoaders
                         case PluginLoaderEvents.OnPermissionChange:
                             Hooks.OnPermissionChange += plugin.BaseOnPermissionChange;
                             break;
+                        case PluginLoaderEvents.OnWaterDamage:
+                            Hooks.OnWaterDamage += plugin.BaseOnWaterDamage;
+                            break;
+                        case PluginLoaderEvents.OnAudibleSound:
+                            if (IsIntensiveEventAllowed(plugin, method))
+                            {
+                                Hooks.OnAudibleSound += plugin.BaseOnAudibleSound;
+                            }
+                            break;
                     }
                 }
             }
@@ -890,6 +901,15 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnPermissionChange:
                             Hooks.OnPermissionChange -= plugin.BaseOnPermissionChange;
+                            break;
+                        case PluginLoaderEvents.OnWaterDamage:
+                            Hooks.OnWaterDamage -= plugin.BaseOnWaterDamage;
+                            break;
+                        case PluginLoaderEvents.OnAudibleSound:
+                            if (IsIntensiveEventAllowed(plugin, method))
+                            {
+                                Hooks.OnAudibleSound -= plugin.BaseOnAudibleSound;
+                            }
                             break;
                     }
                 }

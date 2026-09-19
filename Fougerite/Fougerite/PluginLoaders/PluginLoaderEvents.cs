@@ -91,5 +91,7 @@ namespace Fougerite.PluginLoaders
         public const string OnWebSocketConnected = "On_WebSocketConnected";
         public const string OnWebSocketError = "On_WebSocketError";
         public const string OnPermissionChange = "On_PermissionChange";
+        public const string OnWaterDamage = "On_WaterDamage";
+        public const string OnAudibleSound = "On_AudibleSound";
     }
 }

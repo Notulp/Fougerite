@@ -1288,5 +1288,15 @@ namespace Fougerite.PluginLoaders
         {
             Invoke(PluginLoaderEvents.OnPermissionChange, ev);
         }
+
+        public void BaseOnWaterDamage(WaterDamageEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnWaterDamage, ev);
+        }
+
+        public void BaseOnAudibleSound(AudibleSoundEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnAudibleSound, ev);
+        }
     }
 }
