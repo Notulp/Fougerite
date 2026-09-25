@@ -49,20 +49,20 @@ public void ItemAddedHandler(InventoryModEvent e)
 #### Python
 ```python
 def On_ItemAdded(self, InventoryModEvent):
-    Server.Log(InventoryModEvent.ItemName + " was added to an inventory.")
+    Util.Log(InventoryModEvent.ItemName + " was added to an inventory.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ItemAdded(InventoryModEvent)
 {
-    Server.Log(InventoryModEvent.ItemName + " was added to an inventory.");
+    Util.Log(InventoryModEvent.ItemName + " was added to an inventory.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ItemAdded(InventoryModEvent)
-    Server.Log(InventoryModEvent.ItemName .. " was added to an inventory.")
+    Util.Log(InventoryModEvent.ItemName .. " was added to an inventory.")
 end
 ```

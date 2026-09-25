@@ -37,20 +37,20 @@ public void TalkerHandler(uLink.NetworkPlayer netPlayer, Fougerite.Player player
 #### Python
 ```python
 def On_VoiceChat(self, NetworkPlayer, Player):
-    Server.Log(Player.Name + " is talking.")
+    Util.Log(Player.Name + " is talking.")
 ```
 
 #### JavaScript
 ```javascript
 function On_VoiceChat(NetworkPlayer, Player)
 {
-    Server.Log(Player.Name + " is talking.");
+    Util.Log(Player.Name + " is talking.");
 }
 ```
 
 #### Lua
 ```lua
 function On_VoiceChat(NetworkPlayer, Player)
-    Server.Log(Player.Name .. " is talking.")
+    Util.Log(Player.Name .. " is talking.")
 end
 ```

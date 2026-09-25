@@ -43,20 +43,20 @@ public void GrenadeThrowHandler(GrenadeThrowEvent e)
 #### Python
 ```python
 def On_GrenadeThrow(self, GrenadeThrowEvent):
-    Server.Log(GrenadeThrowEvent.Player.Name + " threw a grenade.")
+    Util.Log(GrenadeThrowEvent.Player.Name + " threw a grenade.")
 ```
 
 #### JavaScript
 ```javascript
 function On_GrenadeThrow(GrenadeThrowEvent)
 {
-    Server.Log(GrenadeThrowEvent.Player.Name + " threw a grenade.");
+    Util.Log(GrenadeThrowEvent.Player.Name + " threw a grenade.");
 }
 ```
 
 #### Lua
 ```lua
 function On_GrenadeThrow(GrenadeThrowEvent)
-    Server.Log(GrenadeThrowEvent.Player.Name .. " threw a grenade.")
+    Util.Log(GrenadeThrowEvent.Player.Name .. " threw a grenade.")
 end
 ```

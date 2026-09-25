@@ -48,20 +48,20 @@ public void LootHandler(LootStartEvent e)
 #### Python
 ```python
 def On_LootUse(self, LootStartEvent):
-    Server.Log(LootStartEvent.Player.Name + " is looting " + LootStartEvent.LootName)
+    Util.Log(LootStartEvent.Player.Name + " is looting " + LootStartEvent.LootName)
 ```
 
 #### JavaScript
 ```javascript
 function On_LootUse(LootStartEvent)
 {
-    Server.Log(LootStartEvent.Player.Name + " is looting " + LootStartEvent.LootName);
+    Util.Log(LootStartEvent.Player.Name + " is looting " + LootStartEvent.LootName);
 }
 ```
 
 #### Lua
 ```lua
 function On_LootUse(LootStartEvent)
-    Server.Log(LootStartEvent.Player.Name .. " is looting " .. LootStartEvent.LootName)
+    Util.Log(LootStartEvent.Player.Name .. " is looting " .. LootStartEvent.LootName)
 end
 ```

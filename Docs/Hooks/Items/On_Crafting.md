@@ -51,20 +51,20 @@ public void CraftingHandler(CraftingEvent e)
 #### Python
 ```python
 def On_Crafting(self, CraftingEvent):
-    Server.Log(CraftingEvent.Player.Name + " is crafting " + str(CraftingEvent.Amount) + "x " + CraftingEvent.ItemName)
+    Util.Log(CraftingEvent.Player.Name + " is crafting " + str(CraftingEvent.Amount) + "x " + CraftingEvent.ItemName)
 ```
 
 #### JavaScript
 ```javascript
 function On_Crafting(CraftingEvent)
 {
-    Server.Log(CraftingEvent.Player.Name + " is crafting " + CraftingEvent.Amount + "x " + CraftingEvent.ItemName);
+    Util.Log(CraftingEvent.Player.Name + " is crafting " + CraftingEvent.Amount + "x " + CraftingEvent.ItemName);
 }
 ```
 
 #### Lua
 ```lua
 function On_Crafting(CraftingEvent)
-    Server.Log(CraftingEvent.Player.Name .. " is crafting " .. tostring(CraftingEvent.Amount) .. "x " .. CraftingEvent.ItemName)
+    Util.Log(CraftingEvent.Player.Name .. " is crafting " .. tostring(CraftingEvent.Amount) .. "x " .. CraftingEvent.ItemName)
 end
 ```

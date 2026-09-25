@@ -50,32 +50,32 @@ public void ArmorUnEquipHandler(ArmorEquipEvent e)
 #### Python
 ```python
 def On_ArmorEquip(self, ArmorEquipEvent):
-    Server.Log(ArmorEquipEvent.Player.Name + " equipped armor.")
+    Util.Log(ArmorEquipEvent.Player.Name + " equipped armor.")
 
 def On_ArmorUnEquip(self, ArmorEquipEvent):
-    Server.Log(ArmorEquipEvent.Player.Name + " unequipped armor.")
+    Util.Log(ArmorEquipEvent.Player.Name + " unequipped armor.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ArmorEquip(ArmorEquipEvent)
 {
-    Server.Log(ArmorEquipEvent.Player.Name + " equipped armor.");
+    Util.Log(ArmorEquipEvent.Player.Name + " equipped armor.");
 }
 
 function On_ArmorUnEquip(ArmorEquipEvent)
 {
-    Server.Log(ArmorEquipEvent.Player.Name + " unequipped armor.");
+    Util.Log(ArmorEquipEvent.Player.Name + " unequipped armor.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ArmorEquip(ArmorEquipEvent)
-    Server.Log(ArmorEquipEvent.Player.Name .. " equipped armor.")
+    Util.Log(ArmorEquipEvent.Player.Name .. " equipped armor.")
 end
 
 function On_ArmorUnEquip(ArmorEquipEvent)
-    Server.Log(ArmorEquipEvent.Player.Name .. " unequipped armor.")
+    Util.Log(ArmorEquipEvent.Player.Name .. " unequipped armor.")
 end
 ```

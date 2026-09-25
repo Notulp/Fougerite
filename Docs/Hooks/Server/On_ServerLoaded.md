@@ -36,20 +36,20 @@ public void ServerLoadedHandler()
 #### Python
 ```python
 def On_ServerLoaded(self):
-    Server.Log("Server has finished loading.")
+    Util.Log("Server has finished loading.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ServerLoaded()
 {
-    Server.Log("Server has finished loading.");
+    Util.Log("Server has finished loading.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ServerLoaded()
-    Server.Log("Server has finished loading.")
+    Util.Log("Server has finished loading.")
 end
 ```

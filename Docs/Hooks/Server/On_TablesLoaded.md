@@ -36,20 +36,20 @@ public void TablesLoadedHandler(Dictionary<string, LootSpawnList> lists)
 #### Python
 ```python
 def On_TablesLoaded(self, Lists):
-    Server.Log("Loaded " + str(Lists.Count) + " loot tables.")
+    Util.Log("Loaded " + str(Lists.Count) + " loot tables.")
 ```
 
 #### JavaScript
 ```javascript
 function On_TablesLoaded(Lists)
 {
-    Server.Log("Loaded " + Lists.Count + " loot tables.");
+    Util.Log("Loaded " + Lists.Count + " loot tables.");
 }
 ```
 
 #### Lua
 ```lua
 function On_TablesLoaded(Lists)
-    Server.Log("Loaded " .. tostring(Lists.Count) .. " loot tables.")
+    Util.Log("Loaded " .. tostring(Lists.Count) .. " loot tables.")
 end
 ```

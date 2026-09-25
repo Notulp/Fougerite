@@ -37,7 +37,7 @@ public void SleeperSpawnedHandler(Sleeper sleeper)
 ### Example - Python
 ```python
 def On_SleeperSpawned(self, Sleeper):
-    Server.Log("Sleeper spawned for " + Sleeper.OwnerName + " at " + str(Sleeper.Location))
+    Util.Log("Sleeper spawned for " + Sleeper.OwnerName + " at " + str(Sleeper.Location))
 ```
 
 See also: [`Player.Sleeper`](Player.md) · [`Server.Sleepers`](Server.md)

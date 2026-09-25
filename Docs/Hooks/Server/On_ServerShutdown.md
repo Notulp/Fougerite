@@ -31,20 +31,20 @@ public void ShutdownHandler()
 #### Python
 ```python
 def On_ServerShutdown(self):
-    Server.Log("Server is shutting down. Saving data...")
+    Util.Log("Server is shutting down. Saving data...")
 ```
 
 #### JavaScript
 ```javascript
 function On_ServerShutdown()
 {
-    Server.Log("Server is shutting down. Saving data...");
+    Util.Log("Server is shutting down. Saving data...");
 }
 ```
 
 #### Lua
 ```lua
 function On_ServerShutdown()
-    Server.Log("Server is shutting down. Saving data...")
+    Util.Log("Server is shutting down. Saving data...")
 end
 ```

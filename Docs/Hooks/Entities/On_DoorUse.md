@@ -45,7 +45,7 @@ public void DoorHandler(Fougerite.Player player, DoorEvent de)
 ```python
 def On_DoorUse(self, Player, DoorEvent):
     Action = "opened" if DoorEvent.Open else "closed"
-    Server.Log(Player.Name + " " + Action + " a door.")
+    Util.Log(Player.Name + " " + Action + " a door.")
 ```
 
 #### JavaScript
@@ -53,7 +53,7 @@ def On_DoorUse(self, Player, DoorEvent):
 function On_DoorUse(Player, DoorEvent)
 {
     var Action = DoorEvent.Open ? "opened" : "closed";
-    Server.Log(Player.Name + " " + Action + " a door.");
+    Util.Log(Player.Name + " " + Action + " a door.");
 }
 ```
 
@@ -61,6 +61,6 @@ function On_DoorUse(Player, DoorEvent)
 ```lua
 function On_DoorUse(Player, DoorEvent)
     local Action = DoorEvent.Open and "opened" or "closed"
-    Server.Log(Player.Name .. " " .. Action .. " a door.")
+    Util.Log(Player.Name .. " " .. Action .. " a door.")
 end
 ```

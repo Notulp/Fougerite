@@ -43,20 +43,20 @@ public void BlueprintHandler(Fougerite.Player player, BPUseEvent ae)
 #### Python
 ```python
 def On_BlueprintUse(self, Player, BPUseEvent):
-    Server.Log(Player.Name + " learned blueprint: " + BPUseEvent.ItemName)
+    Util.Log(Player.Name + " learned blueprint: " + BPUseEvent.ItemName)
 ```
 
 #### JavaScript
 ```javascript
 function On_BlueprintUse(Player, BPUseEvent)
 {
-    Server.Log(Player.Name + " learned blueprint: " + BPUseEvent.ItemName);
+    Util.Log(Player.Name + " learned blueprint: " + BPUseEvent.ItemName);
 }
 ```
 
 #### Lua
 ```lua
 function On_BlueprintUse(Player, BPUseEvent)
-    Server.Log(Player.Name .. " learned blueprint: " .. BPUseEvent.ItemName)
+    Util.Log(Player.Name .. " learned blueprint: " .. BPUseEvent.ItemName)
 end
 ```

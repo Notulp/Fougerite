@@ -50,7 +50,7 @@ public void MessageHandler(PluginMessageEvent e)
 ```python
 def On_PluginMessage(self, PluginMessageEvent):
     if PluginMessageEvent.ReceiverName == "MyPlugin":
-        Server.Log("Received message from " + PluginMessageEvent.SenderName)
+        Util.Log("Received message from " + PluginMessageEvent.SenderName)
         PluginMessageEvent.Response = "ACK"
 ```
 
@@ -60,7 +60,7 @@ function On_PluginMessage(PluginMessageEvent)
 {
     if (PluginMessageEvent.ReceiverName === "MyPlugin")
     {
-        Server.Log("Received message from " + PluginMessageEvent.SenderName);
+        Util.Log("Received message from " + PluginMessageEvent.SenderName);
         PluginMessageEvent.Response = "ACK";
     }
 }
@@ -70,7 +70,7 @@ function On_PluginMessage(PluginMessageEvent)
 ```lua
 function On_PluginMessage(PluginMessageEvent)
     if PluginMessageEvent.ReceiverName == "MyPlugin" then
-        Server.Log("Received message from " .. PluginMessageEvent.SenderName)
+        Util.Log("Received message from " .. PluginMessageEvent.SenderName)
         PluginMessageEvent.Response = "ACK"
     end
 end

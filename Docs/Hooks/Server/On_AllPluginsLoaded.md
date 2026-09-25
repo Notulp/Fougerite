@@ -36,20 +36,20 @@ public void AllLoadedHandler()
 #### Python
 ```python
 def On_AllPluginsLoaded(self):
-    Server.Log("All plugins have loaded.")
+    Util.Log("All plugins have loaded.")
 ```
 
 #### JavaScript
 ```javascript
 function On_AllPluginsLoaded()
 {
-    Server.Log("All plugins have loaded.");
+    Util.Log("All plugins have loaded.");
 }
 ```
 
 #### Lua
 ```lua
 function On_AllPluginsLoaded()
-    Server.Log("All plugins have loaded.")
+    Util.Log("All plugins have loaded.")
 end
 ```

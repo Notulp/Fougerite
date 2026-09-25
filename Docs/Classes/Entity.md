@@ -58,7 +58,7 @@ public void EntityHurtHandler(HurtEvent he)
 def On_EntityHurt(self, HurtEvent):
     Entity = HurtEvent.Victim
     if Entity.IsStructure():
-        Server.Log(Entity.Name + " owned by " + Entity.OwnerName + " took damage, health: " + str(Entity.Health))
+        Util.Log(Entity.Name + " owned by " + Entity.OwnerName + " took damage, health: " + str(Entity.Health))
 ```
 
 See also: [`Player`](Player.md) (owns arrays of `Entity`) · [`Sleeper`](Sleeper.md)

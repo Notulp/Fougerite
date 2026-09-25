@@ -43,20 +43,20 @@ public void ExplosiveHandler(TimedExplosiveEvent e)
 #### Python
 ```python
 def On_TimedExplosiveSpawned(self, TimedExplosiveEvent):
-    Server.Log("A C4 was placed at " + str(TimedExplosiveEvent.Location))
+    Util.Log("A C4 was placed at " + str(TimedExplosiveEvent.Location))
 ```
 
 #### JavaScript
 ```javascript
 function On_TimedExplosiveSpawned(TimedExplosiveEvent)
 {
-    Server.Log("A C4 was placed at " + TimedExplosiveEvent.Location);
+    Util.Log("A C4 was placed at " + TimedExplosiveEvent.Location);
 }
 ```
 
 #### Lua
 ```lua
 function On_TimedExplosiveSpawned(TimedExplosiveEvent)
-    Server.Log("A C4 was placed at " .. tostring(TimedExplosiveEvent.Location))
+    Util.Log("A C4 was placed at " .. tostring(TimedExplosiveEvent.Location))
 end
 ```

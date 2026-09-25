@@ -43,20 +43,20 @@ public void RepairHandler(RepairEvent e)
 #### Python
 ```python
 def On_RepairBench(self, RepairEvent):
-    Server.Log(RepairEvent.Player.Name + " is repairing an item.")
+    Util.Log(RepairEvent.Player.Name + " is repairing an item.")
 ```
 
 #### JavaScript
 ```javascript
 function On_RepairBench(RepairEvent)
 {
-    Server.Log(RepairEvent.Player.Name + " is repairing an item.");
+    Util.Log(RepairEvent.Player.Name + " is repairing an item.");
 }
 ```
 
 #### Lua
 ```lua
 function On_RepairBench(RepairEvent)
-    Server.Log(RepairEvent.Player.Name .. " is repairing an item.")
+    Util.Log(RepairEvent.Player.Name .. " is repairing an item.")
 end
 ```

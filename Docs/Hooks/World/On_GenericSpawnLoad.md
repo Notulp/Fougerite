@@ -36,20 +36,20 @@ public void SpawnerLoadHandler(GenericSpawner gs)
 #### Python
 ```python
 def On_GenericSpawnLoad(self, GenericSpawner):
-    Server.Log("A generic spawner loaded.")
+    Util.Log("A generic spawner loaded.")
 ```
 
 #### JavaScript
 ```javascript
 function On_GenericSpawnLoad(GenericSpawner)
 {
-    Server.Log("A generic spawner loaded.");
+    Util.Log("A generic spawner loaded.");
 }
 ```
 
 #### Lua
 ```lua
 function On_GenericSpawnLoad(GenericSpawner)
-    Server.Log("A generic spawner loaded.")
+    Util.Log("A generic spawner loaded.")
 end
 ```

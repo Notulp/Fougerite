@@ -59,56 +59,56 @@ public void ErrorHandler(WebSocketEvent e)
 #### Python
 ```python
 def On_WebSocketMessage(self, WebSocketEvent):
-    Server.Log("WebSocket message: " + WebSocketEvent.Message)
+    Util.Log("WebSocket message: " + WebSocketEvent.Message)
 
 def On_WebSocketConnected(self, WebSocketEvent):
-    Server.Log("WebSocket connected: " + WebSocketEvent.SocketId)
+    Util.Log("WebSocket connected: " + WebSocketEvent.SocketId)
 
 def On_WebSocketClosed(self, WebSocketEvent):
-    Server.Log("WebSocket closed: " + WebSocketEvent.SocketId)
+    Util.Log("WebSocket closed: " + WebSocketEvent.SocketId)
 
 def On_WebSocketError(self, WebSocketEvent):
-    Server.Log("WebSocket error: " + WebSocketEvent.ErrorMessage)
+    Util.Log("WebSocket error: " + WebSocketEvent.ErrorMessage)
 ```
 
 #### JavaScript
 ```javascript
 function On_WebSocketMessage(WebSocketEvent)
 {
-    Server.Log("WebSocket message: " + WebSocketEvent.Message);
+    Util.Log("WebSocket message: " + WebSocketEvent.Message);
 }
 
 function On_WebSocketConnected(WebSocketEvent)
 {
-    Server.Log("WebSocket connected: " + WebSocketEvent.SocketId);
+    Util.Log("WebSocket connected: " + WebSocketEvent.SocketId);
 }
 
 function On_WebSocketClosed(WebSocketEvent)
 {
-    Server.Log("WebSocket closed: " + WebSocketEvent.SocketId);
+    Util.Log("WebSocket closed: " + WebSocketEvent.SocketId);
 }
 
 function On_WebSocketError(WebSocketEvent)
 {
-    Server.Log("WebSocket error: " + WebSocketEvent.ErrorMessage);
+    Util.Log("WebSocket error: " + WebSocketEvent.ErrorMessage);
 }
 ```
 
 #### Lua
 ```lua
 function On_WebSocketMessage(WebSocketEvent)
-    Server.Log("WebSocket message: " .. WebSocketEvent.Message)
+    Util.Log("WebSocket message: " .. WebSocketEvent.Message)
 end
 
 function On_WebSocketConnected(WebSocketEvent)
-    Server.Log("WebSocket connected: " .. WebSocketEvent.SocketId)
+    Util.Log("WebSocket connected: " .. WebSocketEvent.SocketId)
 end
 
 function On_WebSocketClosed(WebSocketEvent)
-    Server.Log("WebSocket closed: " .. WebSocketEvent.SocketId)
+    Util.Log("WebSocket closed: " .. WebSocketEvent.SocketId)
 end
 
 function On_WebSocketError(WebSocketEvent)
-    Server.Log("WebSocket error: " .. WebSocketEvent.ErrorMessage)
+    Util.Log("WebSocket error: " .. WebSocketEvent.ErrorMessage)
 end
 ```

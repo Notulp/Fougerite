@@ -43,20 +43,20 @@ public void ItemMoveHandler(ItemMoveEvent e)
 #### Python
 ```python
 def On_ItemMove(self, ItemMoveEvent):
-    Server.Log(ItemMoveEvent.Player.Name + " moved an item.")
+    Util.Log(ItemMoveEvent.Player.Name + " moved an item.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ItemMove(ItemMoveEvent)
 {
-    Server.Log(ItemMoveEvent.Player.Name + " moved an item.");
+    Util.Log(ItemMoveEvent.Player.Name + " moved an item.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ItemMove(ItemMoveEvent)
-    Server.Log(ItemMoveEvent.Player.Name .. " moved an item.")
+    Util.Log(ItemMoveEvent.Player.Name .. " moved an item.")
 end
 ```

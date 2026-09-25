@@ -43,20 +43,20 @@ public void ConsoleHandler(ref ConsoleSystem.Arg arg, bool external, ConsoleEven
 #### Python
 ```python
 def On_ConsoleWithCancel(self, Arg, External, ConsoleEvent):
-    Server.Log("Console command received.")
+    Util.Log("Console command received.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ConsoleWithCancel(Arg, External, ConsoleEvent)
 {
-    Server.Log("Console command received.");
+    Util.Log("Console command received.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ConsoleWithCancel(Arg, External, ConsoleEvent)
-    Server.Log("Console command received.")
+    Util.Log("Console command received.")
 end
 ```

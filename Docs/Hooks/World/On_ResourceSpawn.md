@@ -36,20 +36,20 @@ public void ResourceSpawnedHandler(ResourceTarget target)
 #### Python
 ```python
 def On_ResourceSpawn(self, ResourceTarget):
-    Server.Log("A resource node spawned.")
+    Util.Log("A resource node spawned.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ResourceSpawn(ResourceTarget)
 {
-    Server.Log("A resource node spawned.");
+    Util.Log("A resource node spawned.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ResourceSpawn(ResourceTarget)
-    Server.Log("A resource node spawned.")
+    Util.Log("A resource node spawned.")
 end
 ```

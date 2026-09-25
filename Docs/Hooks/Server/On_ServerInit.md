@@ -36,20 +36,20 @@ public void ServerInitHandler()
 #### Python
 ```python
 def On_ServerInit(self):
-    Server.Log("Server started loading.")
+    Util.Log("Server started loading.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ServerInit()
 {
-    Server.Log("Server started loading.");
+    Util.Log("Server started loading.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ServerInit()
-    Server.Log("Server started loading.")
+    Util.Log("Server started loading.")
 end
 ```

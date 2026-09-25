@@ -55,32 +55,32 @@ public void TorchIgniteHandler(BasicTorchIgniteEvent e)
 #### Python
 ```python
 def On_FlareIgnite(self, FlareIgniteEvent):
-    Server.Log(FlareIgniteEvent.Player.Name + " ignited a flare.")
+    Util.Log(FlareIgniteEvent.Player.Name + " ignited a flare.")
 
 def On_TorchIgnite(self, TorchIgniteEvent):
-    Server.Log(TorchIgniteEvent.Player.Name + " ignited a torch.")
+    Util.Log(TorchIgniteEvent.Player.Name + " ignited a torch.")
 ```
 
 #### JavaScript
 ```javascript
 function On_FlareIgnite(FlareIgniteEvent)
 {
-    Server.Log(FlareIgniteEvent.Player.Name + " ignited a flare.");
+    Util.Log(FlareIgniteEvent.Player.Name + " ignited a flare.");
 }
 
 function On_TorchIgnite(TorchIgniteEvent)
 {
-    Server.Log(TorchIgniteEvent.Player.Name + " ignited a torch.");
+    Util.Log(TorchIgniteEvent.Player.Name + " ignited a torch.");
 }
 ```
 
 #### Lua
 ```lua
 function On_FlareIgnite(FlareIgniteEvent)
-    Server.Log(FlareIgniteEvent.Player.Name .. " ignited a flare.")
+    Util.Log(FlareIgniteEvent.Player.Name .. " ignited a flare.")
 end
 
 function On_TorchIgnite(TorchIgniteEvent)
-    Server.Log(TorchIgniteEvent.Player.Name .. " ignited a torch.")
+    Util.Log(TorchIgniteEvent.Player.Name .. " ignited a torch.")
 end
 ```

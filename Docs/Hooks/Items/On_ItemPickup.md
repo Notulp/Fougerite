@@ -45,20 +45,20 @@ public void PickupHandler(ItemPickupEvent e)
 #### Python
 ```python
 def On_ItemPickup(self, ItemPickupEvent):
-    Server.Log(ItemPickupEvent.Player.Name + " picked up an item.")
+    Util.Log(ItemPickupEvent.Player.Name + " picked up an item.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ItemPickup(ItemPickupEvent)
 {
-    Server.Log(ItemPickupEvent.Player.Name + " picked up an item.");
+    Util.Log(ItemPickupEvent.Player.Name + " picked up an item.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ItemPickup(ItemPickupEvent)
-    Server.Log(ItemPickupEvent.Player.Name .. " picked up an item.")
+    Util.Log(ItemPickupEvent.Player.Name .. " picked up an item.")
 end
 ```

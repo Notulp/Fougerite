@@ -46,20 +46,20 @@ public void DestroyedHandler(DestroyEvent de)
 #### Python
 ```python
 def On_EntityDestroyed(self, DestroyEvent):
-    Server.Log(DestroyEvent.Entity.Name + " was destroyed. Decay: " + str(DestroyEvent.IsDecay))
+    Util.Log(DestroyEvent.Entity.Name + " was destroyed. Decay: " + str(DestroyEvent.IsDecay))
 ```
 
 #### JavaScript
 ```javascript
 function On_EntityDestroyed(DestroyEvent)
 {
-    Server.Log(DestroyEvent.Entity.Name + " was destroyed. Decay: " + DestroyEvent.IsDecay);
+    Util.Log(DestroyEvent.Entity.Name + " was destroyed. Decay: " + DestroyEvent.IsDecay);
 }
 ```
 
 #### Lua
 ```lua
 function On_EntityDestroyed(DestroyEvent)
-    Server.Log(DestroyEvent.Entity.Name .. " was destroyed. Decay: " .. tostring(DestroyEvent.IsDecay))
+    Util.Log(DestroyEvent.Entity.Name .. " was destroyed. Decay: " .. tostring(DestroyEvent.IsDecay))
 end
 ```

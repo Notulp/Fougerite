@@ -45,20 +45,20 @@ public void PermissionHandler(PermissionEvent e)
 #### Python
 ```python
 def On_PermissionChange(self, PermissionEvent):
-    Server.Log("Permission change: " + str(PermissionEvent.ActionType) + " on group " + PermissionEvent.GroupName)
+    Util.Log("Permission change: " + str(PermissionEvent.ActionType) + " on group " + PermissionEvent.GroupName)
 ```
 
 #### JavaScript
 ```javascript
 function On_PermissionChange(PermissionEvent)
 {
-    Server.Log("Permission change: " + PermissionEvent.ActionType + " on group " + PermissionEvent.GroupName);
+    Util.Log("Permission change: " + PermissionEvent.ActionType + " on group " + PermissionEvent.GroupName);
 }
 ```
 
 #### Lua
 ```lua
 function On_PermissionChange(PermissionEvent)
-    Server.Log("Permission change: " .. tostring(PermissionEvent.ActionType) .. " on group " .. PermissionEvent.GroupName)
+    Util.Log("Permission change: " .. tostring(PermissionEvent.ActionType) .. " on group " .. PermissionEvent.GroupName)
 end
 ```

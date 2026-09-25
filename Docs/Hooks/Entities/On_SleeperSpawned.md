@@ -36,20 +36,20 @@ public void SleeperHandler(Sleeper sleeper)
 #### Python
 ```python
 def On_SleeperSpawned(self, Sleeper):
-    Server.Log("A sleeper spawned: " + Sleeper.Name)
+    Util.Log("A sleeper spawned: " + Sleeper.Name)
 ```
 
 #### JavaScript
 ```javascript
 function On_SleeperSpawned(Sleeper)
 {
-    Server.Log("A sleeper spawned: " + Sleeper.Name);
+    Util.Log("A sleeper spawned: " + Sleeper.Name);
 }
 ```
 
 #### Lua
 ```lua
 function On_SleeperSpawned(Sleeper)
-    Server.Log("A sleeper spawned: " .. Sleeper.Name)
+    Util.Log("A sleeper spawned: " .. Sleeper.Name)
 end
 ```

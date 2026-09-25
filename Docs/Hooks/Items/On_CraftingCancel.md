@@ -42,20 +42,20 @@ public void CraftCancelHandler(CraftCancelEvent e)
 #### Python
 ```python
 def On_CraftingCancel(self, CraftCancelEvent):
-    Server.Log(CraftCancelEvent.Player.Name + " cancelled a crafting operation.")
+    Util.Log(CraftCancelEvent.Player.Name + " cancelled a crafting operation.")
 ```
 
 #### JavaScript
 ```javascript
 function On_CraftingCancel(CraftCancelEvent)
 {
-    Server.Log(CraftCancelEvent.Player.Name + " cancelled a crafting operation.");
+    Util.Log(CraftCancelEvent.Player.Name + " cancelled a crafting operation.");
 }
 ```
 
 #### Lua
 ```lua
 function On_CraftingCancel(CraftCancelEvent)
-    Server.Log(CraftCancelEvent.Player.Name .. " cancelled a crafting operation.")
+    Util.Log(CraftCancelEvent.Player.Name .. " cancelled a crafting operation.")
 end
 ```

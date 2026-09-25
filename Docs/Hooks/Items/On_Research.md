@@ -44,20 +44,20 @@ public void ResearchHandler(ResearchEvent e)
 #### Python
 ```python
 def On_Research(self, ResearchEvent):
-    Server.Log(ResearchEvent.Player.Name + " is researching " + ResearchEvent.ItemName)
+    Util.Log(ResearchEvent.Player.Name + " is researching " + ResearchEvent.ItemName)
 ```
 
 #### JavaScript
 ```javascript
 function On_Research(ResearchEvent)
 {
-    Server.Log(ResearchEvent.Player.Name + " is researching " + ResearchEvent.ItemName);
+    Util.Log(ResearchEvent.Player.Name + " is researching " + ResearchEvent.ItemName);
 }
 ```
 
 #### Lua
 ```lua
 function On_Research(ResearchEvent)
-    Server.Log(ResearchEvent.Player.Name .. " is researching " .. ResearchEvent.ItemName)
+    Util.Log(ResearchEvent.Player.Name .. " is researching " .. ResearchEvent.ItemName)
 end
 ```

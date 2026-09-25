@@ -38,20 +38,20 @@ public void TeleportHandler(Fougerite.Player player, Vector3 from, Vector3 dest)
 #### Python
 ```python
 def On_PlayerTeleport(self, Player, From, Dest):
-    Server.Log(Player.Name + " teleported from " + str(From) + " to " + str(Dest))
+    Util.Log(Player.Name + " teleported from " + str(From) + " to " + str(Dest))
 ```
 
 #### JavaScript
 ```javascript
 function On_PlayerTeleport(Player, From, Dest)
 {
-    Server.Log(Player.Name + " teleported from " + From + " to " + Dest);
+    Util.Log(Player.Name + " teleported from " + From + " to " + Dest);
 }
 ```
 
 #### Lua
 ```lua
 function On_PlayerTeleport(Player, From, Dest)
-    Server.Log(Player.Name .. " teleported from " .. tostring(From) .. " to " .. tostring(Dest))
+    Util.Log(Player.Name .. " teleported from " .. tostring(From) .. " to " .. tostring(Dest))
 end
 ```

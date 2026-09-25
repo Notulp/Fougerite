@@ -36,20 +36,20 @@ public void ItemsLoadedHandler(ItemsBlocks items)
 #### Python
 ```python
 def On_ItemsLoaded(self, Items):
-    Server.Log("Item datablocks have been loaded.")
+    Util.Log("Item datablocks have been loaded.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ItemsLoaded(Items)
 {
-    Server.Log("Item datablocks have been loaded.");
+    Util.Log("Item datablocks have been loaded.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ItemsLoaded(Items)
-    Server.Log("Item datablocks have been loaded.")
+    Util.Log("Item datablocks have been loaded.")
 end
 ```

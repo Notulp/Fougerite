@@ -45,20 +45,20 @@ public void FireBarrelHandler(FireBarrelToggleEvent e)
 #### Python
 ```python
 def On_FireBarrelToggle(self, FireBarrelToggleEvent):
-    Server.Log("Fire barrel toggled: " + str(FireBarrelToggleEvent.On))
+    Util.Log("Fire barrel toggled: " + str(FireBarrelToggleEvent.On))
 ```
 
 #### JavaScript
 ```javascript
 function On_FireBarrelToggle(FireBarrelToggleEvent)
 {
-    Server.Log("Fire barrel toggled: " + FireBarrelToggleEvent.On);
+    Util.Log("Fire barrel toggled: " + FireBarrelToggleEvent.On);
 }
 ```
 
 #### Lua
 ```lua
 function On_FireBarrelToggle(FireBarrelToggleEvent)
-    Server.Log("Fire barrel toggled: " .. tostring(FireBarrelToggleEvent.On))
+    Util.Log("Fire barrel toggled: " .. tostring(FireBarrelToggleEvent.On))
 end
 ```

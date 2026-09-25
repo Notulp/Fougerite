@@ -91,7 +91,7 @@ function webCallback(code, response)
 {
     if (response !== "Failed")
     {
-        Server.Log("[TestPlugin]: Response: " + response);
+        Util.Log("[TestPlugin]: Response: " + response);
     }
 }
 
@@ -112,7 +112,7 @@ function On_PluginInit()
 ```lua
 function webCallback(code, response)
     if response ~= "Failed" then
-        Server.Log("[TestPlugin]: Response: " .. response)
+        Util.Log("[TestPlugin]: Response: " .. response)
     end
 end
 

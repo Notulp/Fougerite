@@ -128,13 +128,13 @@ def On_PluginInit(self):
 
 def ConnectCallback(self, ATimedEvent):
     ATimedEvent.Kill()
-    Server.Log("Timer 'Connect' fired.")
-    Server.Log("MainThreadID: " + str(Util.MainThreadID) + " CurrentWorkingThreadID: "
+    Util.Log("Timer 'Connect' fired.")
+    Util.Log("MainThreadID: " + str(Util.MainThreadID) + " CurrentWorkingThreadID: "
                 + str(Util.CurrentWorkingThreadID))
 
     # Using Loom to call at the main thread:
     Loom.QueueOnMainThread(lambda:
-        Server.Log("Now running on the main thread!")
+        Util.Log("Now running on the main thread!")
     )
 ```
 
@@ -149,7 +149,7 @@ function On_PluginInit()
 function ConnectCallback(ATimedEvent)
 {
     ATimedEvent.Kill();
-    Server.Log("Timer 'Connect' fired.");
+    Util.Log("Timer 'Connect' fired.");
 }
 ```
 
@@ -162,7 +162,7 @@ end
 
 function ConnectCallback(ATimedEvent)
     ATimedEvent:Kill()
-    Server.Log("Timer 'Connect' fired.")
+    Util.Log("Timer 'Connect' fired.")
 end
 ```
 

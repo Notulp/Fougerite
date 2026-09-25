@@ -44,20 +44,20 @@ public void FlareThrowHandler(FlareThrowEvent e)
 #### Python
 ```python
 def On_FlareThrow(self, FlareThrowEvent):
-    Server.Log(FlareThrowEvent.Player.Name + " threw a flare.")
+    Util.Log(FlareThrowEvent.Player.Name + " threw a flare.")
 ```
 
 #### JavaScript
 ```javascript
 function On_FlareThrow(FlareThrowEvent)
 {
-    Server.Log(FlareThrowEvent.Player.Name + " threw a flare.");
+    Util.Log(FlareThrowEvent.Player.Name + " threw a flare.");
 }
 ```
 
 #### Lua
 ```lua
 function On_FlareThrow(FlareThrowEvent)
-    Server.Log(FlareThrowEvent.Player.Name .. " threw a flare.")
+    Util.Log(FlareThrowEvent.Player.Name .. " threw a flare.")
 end
 ```

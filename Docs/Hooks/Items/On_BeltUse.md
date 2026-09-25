@@ -45,20 +45,20 @@ public void BeltHandler(BeltUseEvent e)
 #### Python
 ```python
 def On_BeltUse(self, BeltUseEvent):
-    Server.Log(BeltUseEvent.Player.Name + " selected belt slot " + str(BeltUseEvent.SelectedBelt))
+    Util.Log(BeltUseEvent.Player.Name + " selected belt slot " + str(BeltUseEvent.SelectedBelt))
 ```
 
 #### JavaScript
 ```javascript
 function On_BeltUse(BeltUseEvent)
 {
-    Server.Log(BeltUseEvent.Player.Name + " selected belt slot " + BeltUseEvent.SelectedBelt);
+    Util.Log(BeltUseEvent.Player.Name + " selected belt slot " + BeltUseEvent.SelectedBelt);
 }
 ```
 
 #### Lua
 ```lua
 function On_BeltUse(BeltUseEvent)
-    Server.Log(BeltUseEvent.Player.Name .. " selected belt slot " .. tostring(BeltUseEvent.SelectedBelt))
+    Util.Log(BeltUseEvent.Player.Name .. " selected belt slot " .. tostring(BeltUseEvent.SelectedBelt))
 end
 ```

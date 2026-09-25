@@ -46,20 +46,20 @@ public void DeployedHandler(Fougerite.Player player, Entity e, Fougerite.Player 
 #### Python
 ```python
 def On_EntityDeployed(self, Player, Entity):
-    Server.Log(Player.Name + " placed a " + Entity.Name)
+    Util.Log(Player.Name + " placed a " + Entity.Name)
 ```
 
 #### JavaScript
 ```javascript
 function On_EntityDeployed(Player, Entity)
 {
-    Server.Log(Player.Name + " placed a " + Entity.Name);
+    Util.Log(Player.Name + " placed a " + Entity.Name);
 }
 ```
 
 #### Lua
 ```lua
 function On_EntityDeployed(Player, Entity)
-    Server.Log(Player.Name .. " placed a " .. Entity.Name)
+    Util.Log(Player.Name .. " placed a " .. Entity.Name)
 end
 ```

@@ -41,20 +41,20 @@ public void CraftCompleteHandler(CraftCompleteEvent e)
 #### Python
 ```python
 def On_CraftingComplete(self, CraftCompleteEvent):
-    Server.Log(CraftCompleteEvent.Player.Name + " finished crafting.")
+    Util.Log(CraftCompleteEvent.Player.Name + " finished crafting.")
 ```
 
 #### JavaScript
 ```javascript
 function On_CraftingComplete(CraftCompleteEvent)
 {
-    Server.Log(CraftCompleteEvent.Player.Name + " finished crafting.");
+    Util.Log(CraftCompleteEvent.Player.Name + " finished crafting.");
 }
 ```
 
 #### Lua
 ```lua
 function On_CraftingComplete(CraftCompleteEvent)
-    Server.Log(CraftCompleteEvent.Player.Name .. " finished crafting.")
+    Util.Log(CraftCompleteEvent.Player.Name .. " finished crafting.")
 end
 ```

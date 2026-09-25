@@ -47,20 +47,20 @@ public void RestrictionHandler(CommandRestrictionEvent e)
 #### Python
 ```python
 def On_CommandRestriction(self, RestrictionEvent):
-    Server.Log("Command '" + RestrictionEvent.Command + "' restricted: " + str(RestrictionEvent.IsBeingRestricted))
+    Util.Log("Command '" + RestrictionEvent.Command + "' restricted: " + str(RestrictionEvent.IsBeingRestricted))
 ```
 
 #### JavaScript
 ```javascript
 function On_CommandRestriction(RestrictionEvent)
 {
-    Server.Log("Command '" + RestrictionEvent.Command + "' restricted: " + RestrictionEvent.IsBeingRestricted);
+    Util.Log("Command '" + RestrictionEvent.Command + "' restricted: " + RestrictionEvent.IsBeingRestricted);
 }
 ```
 
 #### Lua
 ```lua
 function On_CommandRestriction(RestrictionEvent)
-    Server.Log("Command '" .. RestrictionEvent.Command .. "' restricted: " .. tostring(RestrictionEvent.IsBeingRestricted))
+    Util.Log("Command '" .. RestrictionEvent.Command .. "' restricted: " .. tostring(RestrictionEvent.IsBeingRestricted))
 end
 ```

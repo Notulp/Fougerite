@@ -36,20 +36,20 @@ public void ItemRemovedHandler(InventoryModEvent e)
 #### Python
 ```python
 def On_ItemRemoved(self, InventoryModEvent):
-    Server.Log(InventoryModEvent.ItemName + " was removed from an inventory.")
+    Util.Log(InventoryModEvent.ItemName + " was removed from an inventory.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ItemRemoved(InventoryModEvent)
 {
-    Server.Log(InventoryModEvent.ItemName + " was removed from an inventory.");
+    Util.Log(InventoryModEvent.ItemName + " was removed from an inventory.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ItemRemoved(InventoryModEvent)
-    Server.Log(InventoryModEvent.ItemName .. " was removed from an inventory.")
+    Util.Log(InventoryModEvent.ItemName .. " was removed from an inventory.")
 end
 ```

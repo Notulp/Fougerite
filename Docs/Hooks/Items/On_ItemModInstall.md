@@ -46,20 +46,20 @@ public void ModInstallHandler(ItemModInstallEvent<BulletWeaponDataBlock> e)
 #### Python
 ```python
 def On_ItemModInstall(self, ModInstallEvent):
-    Server.Log(ModInstallEvent.Player.Name + " installed a mod.")
+    Util.Log(ModInstallEvent.Player.Name + " installed a mod.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ItemModInstall(ModInstallEvent)
 {
-    Server.Log(ModInstallEvent.Player.Name + " installed a mod.");
+    Util.Log(ModInstallEvent.Player.Name + " installed a mod.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ItemModInstall(ModInstallEvent)
-    Server.Log(ModInstallEvent.Player.Name .. " installed a mod.")
+    Util.Log(ModInstallEvent.Player.Name .. " installed a mod.")
 end
 ```

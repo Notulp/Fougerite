@@ -87,7 +87,7 @@ def On_PluginInit(self):
 
 def ConnectCallback(self, ATimedEvent):
     ATimedEvent.Kill()
-    Server.Log("MainThreadID: " + str(Util.MainThreadID) + " CurrentWorkingThreadID: "
+    Util.Log("MainThreadID: " + str(Util.MainThreadID) + " CurrentWorkingThreadID: "
                 + str(Util.CurrentWorkingThreadID))
 ```
 

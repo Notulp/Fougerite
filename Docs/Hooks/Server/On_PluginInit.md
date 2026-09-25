@@ -27,20 +27,20 @@ public override void Initialize()
 #### Python
 ```python
 def On_PluginInit(self):
-    Server.Log("MyPlugin initialized.")
+    Util.Log("MyPlugin initialized.")
 ```
 
 #### JavaScript
 ```javascript
 function On_PluginInit()
 {
-    Server.Log("MyPlugin initialized.");
+    Util.Log("MyPlugin initialized.");
 }
 ```
 
 #### Lua
 ```lua
 function On_PluginInit()
-    Server.Log("MyPlugin initialized.")
+    Util.Log("MyPlugin initialized.")
 end
 ```

@@ -44,20 +44,20 @@ public void BloodDrawHandler(BloodDrawEvent e)
 #### Python
 ```python
 def On_BloodDraw(self, BloodDrawEvent):
-    Server.Log(BloodDrawEvent.Player.Name + " drew blood: " + str(BloodDrawEvent.BloodToTake))
+    Util.Log(BloodDrawEvent.Player.Name + " drew blood: " + str(BloodDrawEvent.BloodToTake))
 ```
 
 #### JavaScript
 ```javascript
 function On_BloodDraw(BloodDrawEvent)
 {
-    Server.Log(BloodDrawEvent.Player.Name + " drew blood: " + BloodDrawEvent.BloodToTake);
+    Util.Log(BloodDrawEvent.Player.Name + " drew blood: " + BloodDrawEvent.BloodToTake);
 }
 ```
 
 #### Lua
 ```lua
 function On_BloodDraw(BloodDrawEvent)
-    Server.Log(BloodDrawEvent.Player.Name .. " drew blood: " .. tostring(BloodDrawEvent.BloodToTake))
+    Util.Log(BloodDrawEvent.Player.Name .. " drew blood: " .. tostring(BloodDrawEvent.BloodToTake))
 end
 ```

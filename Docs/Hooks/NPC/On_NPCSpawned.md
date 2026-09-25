@@ -36,20 +36,20 @@ public void NPCSpawnedHandler(NPC npc)
 #### Python
 ```python
 def On_NPCSpawned(self, NPC):
-    Server.Log("NPC spawned: " + NPC.Name)
+    Util.Log("NPC spawned: " + NPC.Name)
 ```
 
 #### JavaScript
 ```javascript
 function On_NPCSpawned(NPC)
 {
-    Server.Log("NPC spawned: " + NPC.Name);
+    Util.Log("NPC spawned: " + NPC.Name);
 }
 ```
 
 #### Lua
 ```lua
 function On_NPCSpawned(NPC)
-    Server.Log("NPC spawned: " .. NPC.Name)
+    Util.Log("NPC spawned: " .. NPC.Name)
 end
 ```

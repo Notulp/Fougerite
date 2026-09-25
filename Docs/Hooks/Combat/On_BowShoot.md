@@ -43,20 +43,20 @@ public void BowShootHandler(BowShootEvent e)
 #### Python
 ```python
 def On_BowShoot(self, BowShootEvent):
-    Server.Log(BowShootEvent.Player.Name + " shot a bow.")
+    Util.Log(BowShootEvent.Player.Name + " shot a bow.")
 ```
 
 #### JavaScript
 ```javascript
 function On_BowShoot(BowShootEvent)
 {
-    Server.Log(BowShootEvent.Player.Name + " shot a bow.");
+    Util.Log(BowShootEvent.Player.Name + " shot a bow.");
 }
 ```
 
 #### Lua
 ```lua
 function On_BowShoot(BowShootEvent)
-    Server.Log(BowShootEvent.Player.Name .. " shot a bow.")
+    Util.Log(BowShootEvent.Player.Name .. " shot a bow.")
 end
 ```

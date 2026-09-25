@@ -44,20 +44,20 @@ public void SteamDenyHandler(SteamDenyEvent e)
 #### Python
 ```python
 def On_SteamDeny(self, SteamDenyEvent):
-    Server.Log("Steam denied a connection: " + SteamDenyEvent.Reason)
+    Util.Log("Steam denied a connection: " + SteamDenyEvent.Reason)
 ```
 
 #### JavaScript
 ```javascript
 function On_SteamDeny(SteamDenyEvent)
 {
-    Server.Log("Steam denied a connection: " + SteamDenyEvent.Reason);
+    Util.Log("Steam denied a connection: " + SteamDenyEvent.Reason);
 }
 ```
 
 #### Lua
 ```lua
 function On_SteamDeny(SteamDenyEvent)
-    Server.Log("Steam denied a connection: " .. SteamDenyEvent.Reason)
+    Util.Log("Steam denied a connection: " .. SteamDenyEvent.Reason)
 end
 ```

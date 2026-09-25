@@ -37,20 +37,20 @@ public void SavedHandler(int amount, double seconds)
 #### Python
 ```python
 def On_ServerSaved(self, Amount, Seconds):
-    Server.Log("Server saved " + str(Amount) + " objects in " + str(Seconds) + " seconds.")
+    Util.Log("Server saved " + str(Amount) + " objects in " + str(Seconds) + " seconds.")
 ```
 
 #### JavaScript
 ```javascript
 function On_ServerSaved(Amount, Seconds)
 {
-    Server.Log("Server saved " + Amount + " objects in " + Seconds + " seconds.");
+    Util.Log("Server saved " + Amount + " objects in " + Seconds + " seconds.");
 }
 ```
 
 #### Lua
 ```lua
 function On_ServerSaved(Amount, Seconds)
-    Server.Log("Server saved " .. tostring(Amount) .. " objects in " .. tostring(Seconds) .. " seconds.")
+    Util.Log("Server saved " .. tostring(Amount) .. " objects in " .. tostring(Seconds) .. " seconds.")
 end
 ```
