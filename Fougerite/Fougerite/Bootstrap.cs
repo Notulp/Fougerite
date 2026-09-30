@@ -78,6 +78,11 @@ namespace Fougerite
         /// This value is typically configurable and determines the title or identifier of server broadcast messages.
         /// </summary>
         public static string ServerMessageName;
+        /// <summary>
+        /// This value decides whether truth.punish, Facepunch's original speedhack and flyhack validations,
+        /// should be disabled. You may enable this setting on a RustBuster server.
+        /// </summary>
+        public static bool DisableFacePunchTruthPunish;
         
         internal static readonly Thread CurrentThread = Thread.CurrentThread;
         private static readonly FileSystemWatcher IgnoredWatcher = new FileSystemWatcher(Path.Combine(Util.GetRootFolder(), "Save"), "IgnoredPlugins.txt");
@@ -196,6 +201,11 @@ namespace Fougerite
                 "true",
                 "Enable Default Rust Decay? (May cause problems or laggs after a huge map.)");
 
+            Config.AddDefault("Fougerite", "DisableFacePunchTruthPunish",
+                "false",
+                "Setting this to true will disable truth.punish, FacePunch's original speedhack and flyhack validations\n" +
+                "You may disable this setting on a RustBuster server.");
+
             // Persist any newly added defaults so the file is up-to-date after the first save cycle.
             Config.Save();
             
@@ -282,8 +292,16 @@ namespace Fougerite
                 structure.framelimit = -1;
                 structure.minpercentdmg = float.MaxValue;
             }
-            // EnableDefaultRustDecay is guaranteed to be present (registered via AddDefault above).
+            
             EnableDefaultRustDecay = Config.GetBoolValue("Fougerite", "EnableDefaultRustDecay");
+            
+            DisableFacePunchTruthPunish = Config.GetBoolValue("Fougerite", "DisableFacePunchTruthPunish");
+            if (DisableFacePunchTruthPunish)
+            {
+                truth.punish = false;
+                Logger.LogWarning("[DisableFacePunchTruthPunish] Facepunch's original speedhack and flyhack validations (truth.punish) are disabled.");
+            }
+
             if (EnableDefaultRustDecay)
             {
                 NetCull.Callbacks.beforeEveryUpdate += EnvDecay.Callbacks.RunDecayThink;
