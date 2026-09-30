@@ -1083,6 +1083,11 @@ namespace Fougerite.PluginLoaders
             Invoke(PluginLoaderEvents.OnPlayerBan, be);
         }
 
+        public void BaseOnUnbanEvent(UnbanEvent ue)
+        {
+            Invoke(PluginLoaderEvents.OnPlayerUnban, ue);
+        }
+
         public void BaseOnRepairBench(Fougerite.Events.RepairEvent be)
         {
             Invoke(PluginLoaderEvents.OnRepairBench, be);

@@ -47,6 +47,7 @@ namespace Fougerite.PluginLoaders
         public const string OnVoiceChat = "On_VoiceChat";
         public const string OnLootUse = "On_LootUse";
         public const string OnPlayerBan = "On_PlayerBan";
+        public const string OnPlayerUnban = "On_PlayerUnban";
         public const string OnRepairBench = "On_RepairBench";
         public const string OnItemMove = "On_ItemMove";
         public const string OnGenericSpawnLoad = "On_GenericSpawnLoad";

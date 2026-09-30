@@ -94,6 +94,7 @@
     <Compile Include="Fougerite\Events\SystemTimerEvent.cs" />
     <Compile Include="Fougerite\Events\TimedExplosiveEvent.cs" />
     <Compile Include="Fougerite\Events\FlareIgniteEvent.cs" />
+    <Compile Include="Fougerite\Events\UnbanEvent.cs" />
     <Compile Include="Fougerite\Events\WaterDamageEvent.cs" />
     <Compile Include="Fougerite\Events\WebSocketEvent.cs" />
     <Compile Include="Fougerite\Events\WorkZoneEnterEvent.cs" />

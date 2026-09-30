@@ -3146,6 +3146,23 @@ namespace Fougerite
             }
         }
 
+        public static bool OnUnbanEventHandler(UnbanEvent ue)
+        {
+            using (new Stopper(nameof(Hooks), nameof(OnUnbanEventHandler)))
+            {
+                try
+                {
+                    ExecuteSubscribers(OnPlayerUnban, "UnbanEvent", ue);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"UnbanEvent Error: {ex}");
+                }
+
+                return ue.Cancelled;
+            }
+        }
+
         public static void GenericHook(GenericSpawner gs)
         {
             using (new Stopper(nameof(Hooks), nameof(GenericHook)))

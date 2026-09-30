@@ -299,6 +299,11 @@ namespace Fougerite
         public static event BanEventDelegate OnPlayerBan;
 
         /// <summary>
+        /// This delegate runs when a player got unbanned.
+        /// </summary>
+        public static event UnbanEventDelegate OnPlayerUnban;
+
+        /// <summary>
         /// This delegate runs when a player is using the repair bench.
         /// </summary>
         public static event RepairBenchEventDelegate OnRepairBench;
@@ -620,6 +625,7 @@ namespace Fougerite
             OnShotgunShoot = delegate { };
             OnGrenadeThrow = delegate { };
             OnPlayerBan = delegate { };
+            OnPlayerUnban = delegate { };
             OnRepairBench = delegate { };
             OnItemMove = delegate { };
             OnGenericSpawnerLoad = delegate { };
@@ -751,6 +757,8 @@ namespace Fougerite
         public delegate void GrenadeThrowEventDelegate(GrenadeThrowEvent grenadeThrowEvent);
 
         public delegate void BanEventDelegate(BanEvent banEvent);
+
+        public delegate void UnbanEventDelegate(UnbanEvent unbanEvent);
 
         public delegate void RepairBenchEventDelegate(Fougerite.Events.RepairEvent repairEvent);
 

@@ -90,6 +90,7 @@ namespace Fougerite.PluginLoaders
             PluginLoaderEvents.OnVoiceChat,
             PluginLoaderEvents.OnLootUse,
             PluginLoaderEvents.OnPlayerBan,
+            PluginLoaderEvents.OnPlayerUnban,
             PluginLoaderEvents.OnRepairBench,
             PluginLoaderEvents.OnItemMove,
             PluginLoaderEvents.OnGenericSpawnLoad,
@@ -451,6 +452,9 @@ namespace Fougerite.PluginLoaders
                         case PluginLoaderEvents.OnPlayerBan:
                             Hooks.OnPlayerBan += plugin.BaseOnBanEvent;
                             break;
+                        case PluginLoaderEvents.OnPlayerUnban:
+                            Hooks.OnPlayerUnban += plugin.BaseOnUnbanEvent;
+                            break;
                         case PluginLoaderEvents.OnRepairBench:
                             Hooks.OnRepairBench += plugin.BaseOnRepairBench;
                             break;
@@ -754,6 +758,9 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnPlayerBan:
                             Hooks.OnPlayerBan -= plugin.BaseOnBanEvent;
+                            break;
+                        case PluginLoaderEvents.OnPlayerUnban:
+                            Hooks.OnPlayerUnban -= plugin.BaseOnUnbanEvent;
                             break;
                         case PluginLoaderEvents.OnRepairBench:
                             Hooks.OnRepairBench -= plugin.BaseOnRepairBench;

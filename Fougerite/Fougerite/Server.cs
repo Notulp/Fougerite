@@ -245,16 +245,9 @@ namespace Fougerite
                 return false;
             }
 
-#pragma warning disable CS0618
-            var notifyList = Players.Where(pl =>
-                pl.Admin || pl.Moderator || PermissionSystem.GetPermissionSystem()
-                    .PlayerHasPermission(pl, "bansystem.notification"));
-            foreach (Player pl in notifyList)
-            {
-                pl.Message(
-                    $"{red}{name}{white} was unbanned by: {green}{UnBanner}{white} Different matches: {ids.Count}");
-            }
-#pragma warning restore CS0618
+            bool cancel = Hooks.OnUnbanEventHandler(new UnbanEvent(name, UnBanner, Sender));
+            if (cancel)
+                return false;
 
             if (ips.Count > 0)
             {
@@ -268,6 +261,20 @@ namespace Fougerite
                 DataStore.GetInstance().Remove("Ids", idtub);
             }
 
+            if (ids.Count > 0 || ips.Count > 0)
+            {
+#pragma warning disable CS0618
+                var notifyList = Players.Where(pl =>
+                    pl.Admin || pl.Moderator || PermissionSystem.GetPermissionSystem()
+                        .PlayerHasPermission(pl, "bansystem.notification"));
+                foreach (Player pl in notifyList)
+                {
+                    pl.Message(
+                        $"{red}{name}{white} was unbanned by: {green}{UnBanner}{white} Different matches: {ids.Count}");
+                }
+#pragma warning restore CS0618
+            }
+
             return true;
         }
 
@@ -277,9 +284,13 @@ namespace Fougerite
         /// <param name="ip">The IP address to unban.</param>
         /// <returns>True if the IP was found and removed; otherwise, false.</returns>
         public bool UnbanByIP(string ip)
-        {
+        { 
             if (DataStore.GetInstance().Get("Ips", ip) != null)
             {
+                bool cancel = Hooks.OnUnbanEventHandler(new UnbanEvent(ip, false));
+                if (cancel)
+                    return false;
+                
                 DataStore.GetInstance().Remove("Ips", ip);
                 return true;
             }
@@ -293,9 +304,13 @@ namespace Fougerite
         /// <param name="id">The SteamID to unban.</param>
         /// <returns>True if the ID was found and removed; otherwise, false.</returns>
         public bool UnbanByID(string id)
-        {
+        { 
             if (DataStore.GetInstance().Get("Ids", id) != null)
             {
+                bool cancel = Hooks.OnUnbanEventHandler(new UnbanEvent(id, true));
+                if (cancel)
+                    return false;
+                
                 DataStore.GetInstance().Remove("Ids", id);
                 return true;
             }
