@@ -47,6 +47,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="Fougerite\AssetBundleLoader.cs" />
     <Compile Include="Fougerite\Caches\CachedPlayer.cs" />
     <Compile Include="Fougerite\Caches\EntityCache.cs" />
     <Compile Include="Fougerite\Caches\NPCCache.cs" />

@@ -90,6 +90,8 @@ namespace Fougerite.PluginLoaders
                 script.Globals.Set("Web", UserData.Create(Web.GetInstance()));
                 script.Globals.Set("WinHttpClient", UserData.Create(WinHttpClient.GetInstance()));
                 script.Globals.Set("World", UserData.Create(World.GetWorld()));
+                script.Globals.Set("AssetBundleLoader", UserData.Create(AssetBundleLoader.GetAssetBundleLoader()));
+                script.Globals.Set("CustomMap", UserData.Create(CustomMap.GetInstance()));
                 #pragma warning disable 618
                 script.Globals.Set("PluginCollector", UserData.Create(GlobalPluginCollector.GetPluginCollector()));
                 #pragma warning restore 618

@@ -121,6 +121,8 @@ namespace Fougerite.PluginLoaders
                 Engine.SetValue("WinHttpClient", WinHttpClient.GetInstance());
                 Engine.SetValue("Util", Util.GetUtil());
                 Engine.SetValue("World", World.GetWorld());
+                Engine.SetValue("AssetBundleLoader", AssetBundleLoader.GetAssetBundleLoader());
+                Engine.SetValue("CustomMap", CustomMap.GetInstance());
 #pragma warning disable 618
                 Engine.SetValue("PluginCollector", GlobalPluginCollector.GetPluginCollector());
 #pragma warning restore 618

@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using Fougerite.Concurrent;
 using UnityEngine;
 
 namespace Fougerite
@@ -53,25 +54,25 @@ namespace Fougerite
         /// <summary>False if this handle no longer owns the map.</summary>
         public bool IsValid
         {
-            get { return CustomMap.IsCurrent(this); }
+            get { return CustomMap.GetInstance().IsCurrent(this); }
         }
 
         /// <summary>The state of the claim.</summary>
         public CustomMapState State
         {
-            get { return CustomMap.State; }
+            get { return CustomMap.GetInstance().State; }
         }
 
         /// <summary>The level given with -map.</summary>
         public string ServerLevelName
         {
-            get { return CustomMap.ServerLevelName; }
+            get { return CustomMap.GetInstance().ServerLevelName; }
         }
 
         /// <summary>Gives the owner more time, counted from now.</summary>
         public bool ExtendTimeout(float seconds)
         {
-            return CustomMap.ExtendTimeout(this, seconds);
+            return CustomMap.GetInstance().ExtendTimeout(this, seconds);
         }
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace Fougerite
         /// </summary>
         public bool Commit(AssetBundle bundle, string sceneName)
         {
-            return CustomMap.Commit(this, bundle, sceneName);
+            return CustomMap.GetInstance().Commit(this, bundle, sceneName);
         }
 
         /// <summary>
@@ -90,19 +91,19 @@ namespace Fougerite
         /// </summary>
         public bool CommitFile(string path, string sceneName)
         {
-            return CustomMap.CommitFile(this, path, sceneName);
+            return CustomMap.GetInstance().CommitFile(this, path, sceneName);
         }
 
         /// <summary>Gives up the claim. The -map level loads.</summary>
         public bool Abandon(string reason)
         {
-            return CustomMap.Abandon(this, reason);
+            return CustomMap.GetInstance().Abandon(this, reason);
         }
 
         /// <summary>The server must not start without this map. Shuts the server down.</summary>
         public bool Fail(string reason)
         {
-            return CustomMap.Fail(this, reason);
+            return CustomMap.GetInstance().Fail(this, reason);
         }
     }
 
@@ -143,7 +144,7 @@ namespace Fougerite
     /// -------
     ///     public override void Initialize()
     ///     {
-    ///         CustomMapHandle map = CustomMap.Claim(Name, 120f);
+    ///         CustomMapHandle map = CustomMap.GetInstance().Claim(Name, 120f);
     ///         if (map == null)
     ///         {
     ///             return; // Another plugin owns the map, or the level is already loaded.
@@ -175,8 +176,10 @@ namespace Fougerite
     ///   - If none of them is called within the timeout, the server shuts down.
     ///   - Do not Unload the bundle you committed.
     /// </summary>
-    public static class CustomMap
+    public sealed class CustomMap
     {
+        private static readonly Lazy<CustomMap> Instance = new Lazy<CustomMap>(() => new CustomMap());
+
         /// <summary>Claim timeout used when none is given.</summary>
         public const float DefaultTimeoutSeconds = 120f;
 
@@ -186,22 +189,35 @@ namespace Fougerite
         /// <summary>How long the load waits for the plugins before it gives up on them.</summary>
         public const float PluginWaitSeconds = 60f;
 
-        private static readonly object Sync = new object();
-        private static readonly Stopwatch ClaimTimer = new Stopwatch();
-        private static readonly Stopwatch PluginTimer = new Stopwatch();
+        private readonly object Sync = new object();
+        private readonly Stopwatch ClaimTimer = new Stopwatch();
+        private readonly Stopwatch PluginTimer = new Stopwatch();
 
-        private static bool _windowOpen = true;
-        private static CustomMapState _state;
-        private static CustomMapHandle _handle;
-        private static string _serverLevel;
-        private static string _sceneName;
-        private static AssetBundle _bundle;
-        private static float _timeoutSeconds = DefaultTimeoutSeconds;
-        private static bool _waitingLogged;
-        private static bool _quitQueued;
+        private bool _windowOpen = true;
+        private CustomMapState _state;
+        private CustomMapHandle _handle;
+        private string _serverLevel;
+        private string _sceneName;
+        private AssetBundle _bundle;
+        private float _timeoutSeconds = DefaultTimeoutSeconds;
+        private bool _waitingLogged;
+        private bool _quitQueued;
+
+        private CustomMap()
+        {
+        }
+
+        /// <summary>
+        /// Returns the CustomMap's instance.
+        /// </summary>
+        /// <returns></returns>
+        public static CustomMap GetInstance()
+        {
+            return Instance.Value;
+        }
 
         /// <summary>Where the server's map is in its lifecycle.</summary>
-        public static CustomMapState State
+        public CustomMapState State
         {
             get
             {
@@ -210,7 +226,7 @@ namespace Fougerite
         }
 
         /// <summary>True if a plugin owns the map.</summary>
-        public static bool IsClaimed
+        public bool IsClaimed
         {
             get
             {
@@ -219,7 +235,7 @@ namespace Fougerite
         }
 
         /// <summary>True while Claim would succeed.</summary>
-        public static bool CanClaim
+        public bool CanClaim
         {
             get
             {
@@ -228,7 +244,7 @@ namespace Fougerite
         }
 
         /// <summary>The owner of the map, or null.</summary>
-        public static string Owner
+        public string Owner
         {
             get
             {
@@ -237,7 +253,7 @@ namespace Fougerite
         }
 
         /// <summary>The level given with -map.</summary>
-        public static string ServerLevelName
+        public string ServerLevelName
         {
             get
             {
@@ -246,7 +262,7 @@ namespace Fougerite
         }
 
         /// <summary>The committed scene, or null.</summary>
-        public static string SceneName
+        public string SceneName
         {
             get
             {
@@ -258,7 +274,7 @@ namespace Fougerite
         /// Claims the server's map. Returns null if another plugin already owns it, or if the
         /// level has already been chosen. Call it while your plugin loads.
         /// </summary>
-        public static CustomMapHandle Claim(string owner)
+        public CustomMapHandle Claim(string owner)
         {
             return Claim(owner, DefaultTimeoutSeconds);
         }
@@ -269,7 +285,7 @@ namespace Fougerite
         /// </summary>
         /// <param name="owner">Your plugin name, for the logs.</param>
         /// <param name="timeoutSeconds">How long the load may wait for you.</param>
-        public static CustomMapHandle Claim(string owner, float timeoutSeconds)
+        public CustomMapHandle Claim(string owner, float timeoutSeconds)
         {
             if (string.IsNullOrEmpty(owner))
             {
@@ -303,12 +319,12 @@ namespace Fougerite
             return handle;
         }
 
-        internal static bool IsCurrent(CustomMapHandle handle)
+        internal bool IsCurrent(CustomMapHandle handle)
         {
             lock (Sync) return handle != null && ReferenceEquals(handle, _handle);
         }
 
-        internal static bool ExtendTimeout(CustomMapHandle handle, float seconds)
+        internal bool ExtendTimeout(CustomMapHandle handle, float seconds)
         {
             lock (Sync)
             {
@@ -318,7 +334,7 @@ namespace Fougerite
             }
         }
 
-        internal static bool Commit(CustomMapHandle handle, AssetBundle bundle, string sceneName)
+        internal bool Commit(CustomMapHandle handle, AssetBundle bundle, string sceneName)
         {
             if (string.IsNullOrEmpty(sceneName))
             {
@@ -355,7 +371,7 @@ namespace Fougerite
             return true;
         }
 
-        internal static bool CommitFile(CustomMapHandle handle, string path, string sceneName)
+        internal bool CommitFile(CustomMapHandle handle, string path, string sceneName)
         {
             if (!IsCurrent(handle))
             {
@@ -391,7 +407,7 @@ namespace Fougerite
             return false;
         }
 
-        internal static bool Abandon(CustomMapHandle handle, string reason)
+        internal bool Abandon(CustomMapHandle handle, string reason)
         {
             lock (Sync)
             {
@@ -404,7 +420,7 @@ namespace Fougerite
             return true;
         }
 
-        internal static bool Fail(CustomMapHandle handle, string reason)
+        internal bool Fail(CustomMapHandle handle, string reason)
         {
             lock (Sync)
             {
@@ -417,7 +433,7 @@ namespace Fougerite
         }
 
         /// <summary>Polled by Hooks.ServerLoadedHook every frame before RustLevel.Load.</summary>
-        internal static bool CanBeginLevelLoad(string serverLevel)
+        internal bool CanBeginLevelLoad(string serverLevel)
         {
             if (!Hooks.AllPluginsLoadedOnce)
             {
@@ -464,7 +480,7 @@ namespace Fougerite
         }
 
         /// <summary>Called by Hooks.ServerLoadedHook right before RustLevel.Load.</summary>
-        internal static string ResolveLevelName(string serverLevel)
+        internal string ResolveLevelName(string serverLevel)
         {
             string result;
             string owner;
@@ -501,7 +517,7 @@ namespace Fougerite
         }
 
         /// <summary>Called by Hooks.ServerLoadedHook right after RustLevel.Load.</summary>
-        internal static Events.CustomMapLoadedEvent LevelLoaded(string loadedLevel)
+        internal Events.CustomMapLoadedEvent LevelLoaded(string loadedLevel)
         {
             lock (Sync)
             {
@@ -517,13 +533,13 @@ namespace Fougerite
             }
         }
 
-        private static float ClampTimeout(float seconds)
+        private float ClampTimeout(float seconds)
         {
             if (float.IsNaN(seconds) || seconds <= 0f) return DefaultTimeoutSeconds;
             return seconds > MaxTimeoutSeconds ? MaxTimeoutSeconds : seconds;
         }
 
-        private static void FailInternal(string reason)
+        private void FailInternal(string reason)
         {
             lock (Sync)
             {

@@ -3183,17 +3183,17 @@ namespace Fougerite
         public static IEnumerator ServerLoadedHook(ServerInit init, string levelName)
         {
             // Wait for the plugins, then for a CustomMap claim, then load whatever was chosen.
-            while (!CustomMap.CanBeginLevelLoad(levelName))
+            while (!CustomMap.GetInstance().CanBeginLevelLoad(levelName))
             {
                 yield return null;
             }
 
-            levelName = CustomMap.ResolveLevelName(levelName);
+            levelName = CustomMap.GetInstance().ResolveLevelName(levelName);
             yield return RustLevel.Load(levelName);
 
             try
             {
-                ExecuteSubscribers(OnCustomMapLoaded, "CustomMapLoaded", CustomMap.LevelLoaded(levelName));
+                ExecuteSubscribers(OnCustomMapLoaded, "CustomMapLoaded", CustomMap.GetInstance().LevelLoaded(levelName));
             }
             catch (Exception ex)
             {

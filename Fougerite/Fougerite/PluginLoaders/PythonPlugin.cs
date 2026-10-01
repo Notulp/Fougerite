@@ -110,6 +110,8 @@ namespace Fougerite.PluginLoaders
             Scope.SetVariable("WinHttpClient", WinHttpClient.GetInstance());
             Scope.SetVariable("Util", Util.GetUtil());
             Scope.SetVariable("World", World.GetWorld());
+            Scope.SetVariable("AssetBundleLoader", AssetBundleLoader.GetAssetBundleLoader());
+            Scope.SetVariable("CustomMap", CustomMap.GetInstance());
             #pragma warning disable 618
             Scope.SetVariable("PluginCollector", GlobalPluginCollector.GetPluginCollector());
             #pragma warning restore 618
