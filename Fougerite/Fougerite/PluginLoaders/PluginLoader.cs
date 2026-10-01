@@ -95,6 +95,7 @@ namespace Fougerite.PluginLoaders
             PluginLoaderEvents.OnItemMove,
             PluginLoaderEvents.OnGenericSpawnLoad,
             PluginLoaderEvents.OnServerLoaded,
+            PluginLoaderEvents.OnCustomMapLoaded,
             PluginLoaderEvents.OnSupplySignalExploded,
             PluginLoaderEvents.OnPlayerMove,
             PluginLoaderEvents.OnBeltUse,
@@ -467,6 +468,9 @@ namespace Fougerite.PluginLoaders
                         case PluginLoaderEvents.OnServerLoaded:
                             Hooks.OnServerLoaded += plugin.BaseOnServerLoaded;
                             break;
+                        case PluginLoaderEvents.OnCustomMapLoaded:
+                            Hooks.OnCustomMapLoaded += plugin.BaseOnCustomMapLoaded;
+                            break;
                         case PluginLoaderEvents.OnSupplySignalExploded:
                             Hooks.OnSupplySignalExpode += plugin.BaseOnSupplySignalExploded;
                             break;
@@ -773,6 +777,9 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnServerLoaded:
                             Hooks.OnServerLoaded -= plugin.BaseOnServerLoaded;
+                            break;
+                        case PluginLoaderEvents.OnCustomMapLoaded:
+                            Hooks.OnCustomMapLoaded -= plugin.BaseOnCustomMapLoaded;
                             break;
                         case PluginLoaderEvents.OnSupplySignalExploded:
                             Hooks.OnSupplySignalExpode -= plugin.BaseOnSupplySignalExploded;

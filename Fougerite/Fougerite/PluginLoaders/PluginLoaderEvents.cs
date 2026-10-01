@@ -52,6 +52,7 @@ namespace Fougerite.PluginLoaders
         public const string OnItemMove = "On_ItemMove";
         public const string OnGenericSpawnLoad = "On_GenericSpawnLoad";
         public const string OnServerLoaded = "On_ServerLoaded";
+        public const string OnCustomMapLoaded = "On_CustomMapLoaded";
         public const string OnSupplySignalExploded = "On_SupplySignalExploded";
         public const string OnPlayerMove = "On_PlayerMove";
         public const string OnBeltUse = "On_BeltUse";

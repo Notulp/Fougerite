@@ -1108,6 +1108,11 @@ namespace Fougerite.PluginLoaders
             Invoke(PluginLoaderEvents.OnServerLoaded);
         }
 
+        public void BaseOnCustomMapLoaded(CustomMapLoadedEvent ev)
+        {
+            Invoke(PluginLoaderEvents.OnCustomMapLoaded, ev);
+        }
+
         public void BaseOnSupplySignalExploded(SupplySignalExplosionEvent evt)
         {
             Invoke(PluginLoaderEvents.OnSupplySignalExploded, evt);

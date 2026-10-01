@@ -25,6 +25,8 @@ namespace Fougerite
         /// </summary>
         public static void AllPluginsLoaded()
         {
+            AllPluginsLoadedOnce = true;
+
             using (new Stopper(nameof(Hooks), nameof(AllPluginsLoaded)))
             {
                 try
@@ -3180,7 +3182,23 @@ namespace Fougerite
 
         public static IEnumerator ServerLoadedHook(ServerInit init, string levelName)
         {
+            // Wait for the plugins, then for a CustomMap claim, then load whatever was chosen.
+            while (!CustomMap.CanBeginLevelLoad(levelName))
+            {
+                yield return null;
+            }
+
+            levelName = CustomMap.ResolveLevelName(levelName);
             yield return RustLevel.Load(levelName);
+
+            try
+            {
+                ExecuteSubscribers(OnCustomMapLoaded, "CustomMapLoaded", CustomMap.LevelLoaded(levelName));
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"CustomMapLoaded Error: {ex}");
+            }
             
             // Do our own stuff
             GameObject go = new GameObject();

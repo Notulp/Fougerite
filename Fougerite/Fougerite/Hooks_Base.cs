@@ -34,6 +34,11 @@ namespace Fougerite
         public static bool ServerInitialized = false;
 
         /// <summary>
+        /// Set the first time every plugin has loaded. CustomMap waits for it before the level loads.
+        /// </summary>
+        internal static bool AllPluginsLoadedOnce = false;
+
+        /// <summary>
         /// A cache of Steam IDs for recently disconnected players, used to handle uLink disconnection cleanup.
         /// </summary>
         public static readonly List<ulong> uLinkDCCache = new List<ulong>();
@@ -322,6 +327,11 @@ namespace Fougerite
         /// This delegate runs when the server finished loading.
         /// </summary>
         public static event ServerLoadedDelegate OnServerLoaded;
+
+        /// <summary>
+        /// This delegate runs when the server's level and save have loaded, right before OnServerLoaded.
+        /// </summary>
+        public static event CustomMapLoadedDelegate OnCustomMapLoaded;
 
         /// <summary>
         /// This delegate runs when a supply signal explodes at a position.
@@ -630,6 +640,7 @@ namespace Fougerite
             OnItemMove = delegate { };
             OnGenericSpawnerLoad = delegate { };
             OnServerLoaded = delegate { };
+            OnCustomMapLoaded = delegate { };
             OnSupplySignalExpode = delegate { };
             OnBeltUse = delegate { };
             OnLogger = delegate { };
@@ -767,6 +778,8 @@ namespace Fougerite
         public delegate void GenericSpawnerLoadDelegate(GenericSpawner genericSpawner);
 
         public delegate void ServerLoadedDelegate();
+
+        public delegate void CustomMapLoadedDelegate(CustomMapLoadedEvent customMapLoadedEvent);
 
         public delegate void SupplySignalDelegate(SupplySignalExplosionEvent supplySignalExplosionEvent);
 
