@@ -83,6 +83,25 @@ namespace Fougerite
         /// should be disabled. You may enable this setting on a RustBuster server.
         /// </summary>
         public static bool DisableFacePunchTruthPunish;
+        /// <summary>
+        /// Determines who may join when native Steam authentication rejects a connection.
+        /// See <see cref="SteamAuthMode"/> for the available modes.
+        /// </summary>
+        public static SteamAuthMode SteamAuthenticationMode = SteamAuthMode.Legacy;
+        /// <summary>
+        /// Holds the Steam Web API key used to verify Spacewar tickets.
+        /// The field is internal so that script plugins cannot read the key by accident.
+        /// </summary>
+        internal static string SteamWebAPIKey = string.Empty;
+        /// <summary>
+        /// Holds the timeout of a single Steam Web API request in seconds.
+        /// </summary>
+        public static float SteamWebAPITimeout = 4f;
+        /// <summary>
+        /// Determines whether Spacewar players are admitted when the Steam Web API cannot be reached
+        /// because of an outage, a rate limit or a timeout.
+        /// </summary>
+        public static bool SteamWebAPIFailOpen;
         
         internal static readonly Thread CurrentThread = Thread.CurrentThread;
         private static readonly FileSystemWatcher IgnoredWatcher = new FileSystemWatcher(Path.Combine(Util.GetRootFolder(), "Save"), "IgnoredPlugins.txt");
@@ -206,6 +225,35 @@ namespace Fougerite
                 "Setting this to true will disable truth.punish, FacePunch's original speedhack and flyhack validations\n" +
                 "You may disable this setting on a RustBuster server.");
 
+            Config.AddDefault("Fougerite", "SteamAuthMode",
+                "Legacy",
+                "Decides who may join when Steam rejects the connection ticket (RustBuster on Spacewar 480, cracked clients).\n" +
+                "Legacy                   Old behaviour. Nothing is verified, plugins like AuthAllow decide via SteamDenyEvent.ForceAllow.\n" +
+                "RustOnly                 Only players whose ticket passes native Steam auth for Rust (252490).\n" +
+                "RustOwners               Rust players, plus Spacewar (480) tickets verified by the Steam Web API whose account owns Rust.\n" +
+                "                         The player's Steam game details must be public. Requires SteamWebAPIKey.\n" +
+                "SteamAccounts            Rust players, plus any genuine Steam account on a Spacewar (480) ticket verified by the Steam Web API.\n" +
+                "                         Forged and emulated tickets are rejected. Requires SteamWebAPIKey.\n" +
+                "SteamAccountsUnverified  Rust players, plus Spacewar (480) tickets that pass offline checks. No API key, no requests, fastest.\n" +
+                "                         Rejects broken emulators and sloppy forgeries, but a well forged ticket gets in with any SteamID.\n" +
+                "AllowAll                 Everyone joins, including players without Steam at all (cracked).\n" +
+                "Outside Legacy, plugins can still deny a player but can't let in one that the mode rejects.");
+
+            Config.AddDefault("Fougerite", "SteamWebAPIKey",
+                "",
+                "Steam Web API key from https://steamcommunity.com/dev/apikey\n" +
+                "Required by RustOwners and SteamAccounts, ignored by every other mode. Keep it private.");
+
+            Config.AddDefault("Fougerite", "SteamWebAPITimeout",
+                "10",
+                "Seconds to wait for one Steam Web API request (1-45). The player waits this long while connecting.");
+
+            Config.AddDefault("Fougerite", "SteamWebAPIFailOpen",
+                "false",
+                "RustOwners and SteamAccounts only. If the Steam Web API can't be reached (outage, rate limit, timeout)\n" +
+                "let Spacewar players in anyway (true) or reject them (false)?\n" +
+                "true means forged tickets get in during an outage. A rejected API key always denies.");
+
             // Persist any newly added defaults so the file is up-to-date after the first save cycle.
             Config.Save();
             
@@ -302,6 +350,8 @@ namespace Fougerite
                 Logger.LogWarning("[DisableFacePunchTruthPunish] Facepunch's original speedhack and flyhack validations (truth.punish) are disabled.");
             }
 
+            ApplySteamAuthOptions();
+
             if (EnableDefaultRustDecay)
             {
                 NetCull.Callbacks.beforeEveryUpdate += EnvDecay.Callbacks.RunDecayThink;
@@ -332,7 +382,11 @@ namespace Fougerite
                     RPCChat = RPCChat,
                     RPCChatMethod = RPCChatMethod,
                     EnableDefaultRustDecay = EnableDefaultRustDecay,
-                    ServerMessageName = ServerMessageName
+                    ServerMessageName = ServerMessageName,
+                    SteamAuthMode = SteamAuthenticationMode.ToString(),
+                    SteamWebAPIKeyConfigured = !string.IsNullOrEmpty(SteamWebAPIKey),
+                    SteamWebAPITimeout = SteamWebAPITimeout,
+                    SteamWebAPIFailOpen = SteamWebAPIFailOpen
                 },
                 decay = new { decay.deploy_maxhealth_sec, decay.decaytickrate, decay.maxperframe, decay.maxtestperframe },
                 structure = new { structure.minpercentdmg, structure.framelimit, structure.maxframeattempt },
@@ -385,6 +439,98 @@ namespace Fougerite
             };
 
             Logger.Log($"[EngineMetricsDump] {JsonConvert.SerializeObject(combinedDump, Formatting.Indented)}");
+            return true;
+        }
+
+        /// <summary>
+        /// Reads the SteamAuthMode related options from Fougerite.cfg, validates them and reports the outcome.
+        /// </summary>
+        private void ApplySteamAuthOptions()
+        {
+            string rawMode = (Config.GetValue("Fougerite", "SteamAuthMode") ?? string.Empty).Trim();
+            SteamAuthenticationMode = SteamAuthMode.Legacy;
+            if (rawMode.Length > 0)
+            {
+                try
+                {
+                    SteamAuthMode parsed = (SteamAuthMode)Enum.Parse(typeof(SteamAuthMode), rawMode, true);
+                    if (Enum.IsDefined(typeof(SteamAuthMode), parsed))
+                    {
+                        SteamAuthenticationMode = parsed;
+                    }
+                    else
+                    {
+                        Logger.LogError($"[SteamAuth] Unknown SteamAuthMode '{rawMode}', using Legacy.");
+                    }
+                }
+                catch (Exception)
+                {
+                    Logger.LogError($"[SteamAuth] Unknown SteamAuthMode '{rawMode}', using Legacy.");
+                }
+            }
+
+            SteamWebAPIKey = (Config.GetValue("Fougerite", "SteamWebAPIKey") ?? string.Empty).Trim();
+
+            int timeout;
+            if (!int.TryParse(Config.GetValue("Fougerite", "SteamWebAPITimeout"), out timeout))
+            {
+                timeout = 4;
+            }
+            SteamWebAPITimeout = Math.Max(1, Math.Min(45, timeout));
+
+            SteamWebAPIFailOpen = Config.GetBoolValue("Fougerite", "SteamWebAPIFailOpen");
+
+            bool keySet = !string.IsNullOrEmpty(SteamWebAPIKey);
+            if (keySet && (SteamWebAPIKey.Length != 32 || !IsHex(SteamWebAPIKey)))
+            {
+                Logger.LogWarning("[SteamAuth] SteamWebAPIKey doesn't look like a Steam Web API key (32 hex characters).");
+            }
+
+            switch (SteamAuthenticationMode)
+            {
+                case SteamAuthMode.Legacy:
+                    Logger.LogWarning("[SteamAuth] SteamAuthMode=Legacy. Steam-rejected players are let in or kept out by plugins " +
+                                      "(AuthAllow etc.) and forged tickets are NOT detected. Consider SteamAccounts or RustOwners.");
+                    break;
+                case SteamAuthMode.RustOnly:
+                    Logger.LogWarning("[SteamAuth] SteamAuthMode=RustOnly. Only players passing native Rust Steam auth can join.");
+                    break;
+                case SteamAuthMode.RustOwners:
+                case SteamAuthMode.SteamAccounts:
+                    if (!keySet)
+                    {
+                        Logger.LogError($"[SteamAuth] SteamAuthMode={SteamAuthenticationMode} needs SteamWebAPIKey. " +
+                                        "Spacewar players will be DENIED until a key is set (behaves like RustOnly).");
+                    }
+                    else
+                    {
+                        Logger.LogWarning($"[SteamAuth] SteamAuthMode={SteamAuthenticationMode}, Spacewar tickets are verified " +
+                                          $"through the Steam Web API (timeout {SteamWebAPITimeout}s).");
+                    }
+                    break;
+                case SteamAuthMode.SteamAccountsUnverified:
+                    Logger.LogWarning("[SteamAuth] SteamAuthMode=SteamAccountsUnverified. Spacewar tickets are checked offline only. " +
+                                      "Sloppy forgeries are rejected, but a well forged ticket can still join and claim any SteamID.");
+                    break;
+                case SteamAuthMode.AllowAll:
+                    Logger.LogWarning("[SteamAuth] SteamAuthMode=AllowAll. Anyone can join, including players without Steam.");
+                    break;
+            }
+
+            if (SteamWebAPIFailOpen && (SteamAuthenticationMode == SteamAuthMode.RustOwners
+                                        || SteamAuthenticationMode == SteamAuthMode.SteamAccounts))
+            {
+                Logger.LogWarning("[SteamAuth] SteamWebAPIFailOpen=true. Unverified Spacewar players get in while the Steam Web API is unreachable.");
+            }
+        }
+
+        private static bool IsHex(string value)
+        {
+            foreach (char c in value)
+            {
+                bool hex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+                if (!hex) return false;
+            }
             return true;
         }
 

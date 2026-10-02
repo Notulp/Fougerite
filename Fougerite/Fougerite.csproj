@@ -228,6 +228,7 @@
     <Compile Include="Fougerite\Tools\FougeriteTickManager.cs" />
     <Compile Include="Fougerite\Tools\PluginMessaging.cs" />
     <Compile Include="Fougerite\Tools\SteamAPITools.cs" />
+    <Compile Include="Fougerite\Tools\SteamTicketValidator.cs" />
     <Compile Include="Fougerite\Tools\SteamUserRegistry.cs" />
     <Compile Include="Fougerite\WaterSystemServer.cs" />
     <Compile Include="Fougerite\WinHttpClient.cs" />

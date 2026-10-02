@@ -2304,17 +2304,26 @@ namespace Fougerite
         {
             using (new Stopper(nameof(Hooks), nameof(SteamDeny)))
             {
-                // We want to check if the user is a valid Steam user, just maybe from a different appid
-                bool isRust = false;
-                bool isSpacewar = false;
-                if (cc != null && cc.SteamTicket != null && cc.SteamTicket.Length > 0)
+                SteamAuthMode mode = Bootstrap.SteamAuthenticationMode;
+                if (mode == SteamAuthMode.Legacy)
                 {
-                    byte[] ticket = cc.SteamTicket;
-                    isRust = SteamAPITools.FindSequence(ticket, SteamAPITools.RustAppIdBytes);
-                    isSpacewar = SteamAPITools.FindSequence(ticket, SteamAPITools.SpacewarAppIdBytes);
+                    LegacySteamDeny(cc, approval, strReason, errornum);
+                    return;
                 }
-                
-                SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum, isRust || isSpacewar);
+
+                SteamTicketInfo ticketInfo = null;
+                if (cc != null)
+                {
+                    SteamAPITools.TryParseTicket(cc.SteamTicket, out ticketInfo);
+                }
+
+                SteamWebValidation web = SteamTicketValidator.Get(cc);
+                string policyReason;
+                bool policyAllowed = SteamTicketValidator.Evaluate(mode, cc, ticketInfo, web, out policyReason);
+                bool genuine = web != null && web.IsGenuineSteamAccount;
+
+                SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum, genuine, mode,
+                    ticketInfo, web, policyAllowed, policyReason);
                 try
                 {
                     ExecuteSubscribers(OnSteamDeny, "SteamDenyEvent", sde);
@@ -2324,17 +2333,30 @@ namespace Fougerite
                     Logger.LogError($"SteamDenyEvent Error: {ex}");
                 }
 
-                if (sde.ForceAllow)
+                if (sde.ForceAllow && !policyAllowed)
                 {
-                    if ((isRust || isSpacewar) && !SteamUserRegistry.Contains(cc.UserID))
+                    Logger.LogWarning($"[SteamAuth] A plugin set ForceAllow for {cc.UserName} ({cc.UserID}) but " +
+                                      $"SteamAuthMode={mode} rejects it ({policyReason}). Ignored. " +
+                                      "Remove AuthAllow-style plugins, the mode handles this now.");
+                }
+
+                if (policyAllowed && sde.ForceAllow)
+                {
+                    bool spacewarClient = genuine || (mode == SteamAuthMode.SteamAccountsUnverified
+                                                      && ticketInfo != null
+                                                      && ticketInfo.AppId == SteamAPITools.SpacewarAppId);
+                    if (spacewarClient && !SteamUserRegistry.Contains(cc.UserID))
                     {
-                        SteamUserRegistry.Add(cc.UserID, isRust ? SteamUserRegistry.SteamAppId.Rust : SteamUserRegistry.SteamAppId.SpaceWars);
+                        SteamUserRegistry.Add(cc.UserID, SteamUserRegistry.SteamAppId.SpaceWars);
                     }
+
+                    Logger.Log($"[SteamAuth] Allowed {cc.UserName} ({cc.UserID}) despite '{strReason}': {policyReason}");
                     return;
                 }
 
-                string deny = $"Auth failed: {strReason} - {cc.UserName} ({cc.UserID})";
-                Logger.Log(deny);
+                SteamTicketValidator.Forget(cc);
+                Logger.Log($"Auth failed: {strReason} - {cc.UserName} ({cc.UserID}) [SteamAuthMode={mode}: " +
+                           $"{(policyAllowed ? "denied by plugin" : policyReason)}]");
                 approval.Deny((uLink.NetworkConnectionError)errornum);
                 ConnectionAcceptor.CloseConnection(cc);
                 Rust.Steam.Server.OnUserLeave(cc.UserID);
@@ -2342,6 +2364,54 @@ namespace Fougerite
                 {
                     SteamUserRegistry.Remove(cc.UserID);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Handles a Steam rejection exactly like Fougerite did before SteamAuthMode existed.
+        /// It is used for <see cref="SteamAuthMode.Legacy"/>, where plugins such as AuthAllow decide everything
+        /// through <see cref="SteamDenyEvent.ForceAllow"/>.
+        /// </summary>
+        private static void LegacySteamDeny(ClientConnection cc, NetworkPlayerApproval approval, string strReason,
+            NetError errornum)
+        {
+            // We want to check if the user is a valid Steam user, just maybe from a different appid
+            bool isRust = false;
+            bool isSpacewar = false;
+            if (cc != null && cc.SteamTicket != null && cc.SteamTicket.Length > 0)
+            {
+                byte[] ticket = cc.SteamTicket;
+                isRust = SteamAPITools.FindSequence(ticket, SteamAPITools.RustAppIdBytes);
+                isSpacewar = SteamAPITools.FindSequence(ticket, SteamAPITools.SpacewarAppIdBytes);
+            }
+            
+            SteamDenyEvent sde = new SteamDenyEvent(cc, approval, strReason, errornum, isRust || isSpacewar);
+            try
+            {
+                ExecuteSubscribers(OnSteamDeny, "SteamDenyEvent", sde);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"SteamDenyEvent Error: {ex}");
+            }
+
+            if (sde.ForceAllow)
+            {
+                if ((isRust || isSpacewar) && !SteamUserRegistry.Contains(cc.UserID))
+                {
+                    SteamUserRegistry.Add(cc.UserID, isRust ? SteamUserRegistry.SteamAppId.Rust : SteamUserRegistry.SteamAppId.SpaceWars);
+                }
+                return;
+            }
+
+            string deny = $"Auth failed: {strReason} - {cc.UserName} ({cc.UserID})";
+            Logger.Log(deny);
+            approval.Deny((uLink.NetworkConnectionError)errornum);
+            ConnectionAcceptor.CloseConnection(cc);
+            Rust.Steam.Server.OnUserLeave(cc.UserID);
+            if (SteamUserRegistry.Contains(cc.UserID))
+            {
+                SteamUserRegistry.Remove(cc.UserID);
             }
         }
 
@@ -2537,24 +2607,95 @@ namespace Fougerite
         private static void Accept(ConnectionAcceptor ca, NetworkPlayerApproval approval,
             ClientConnection clientConnection)
         {
+            SteamAuthMode mode = Bootstrap.SteamAuthenticationMode;
+            SteamTicketInfo ticketInfo = null;
+            bool needsWebValidation = false;
+
             if (clientConnection != null && clientConnection.SteamTicket != null && clientConnection.SteamTicket.Length > 0)
             {
-                byte[] ticket = clientConnection.SteamTicket;
-                bool isRust = SteamAPITools.FindSequence(ticket, SteamAPITools.RustAppIdBytes);
-                bool isSpacewar = SteamAPITools.FindSequence(ticket, SteamAPITools.SpacewarAppIdBytes);
-                
-                if (isRust || isSpacewar)
+                if (mode == SteamAuthMode.Legacy)
                 {
-                    if (!SteamUserRegistry.Contains(clientConnection.UserID))
+                    byte[] ticket = clientConnection.SteamTicket;
+                    bool isRust = SteamAPITools.FindSequence(ticket, SteamAPITools.RustAppIdBytes);
+                    bool isSpacewar = SteamAPITools.FindSequence(ticket, SteamAPITools.SpacewarAppIdBytes);
+                    
+                    if (isRust || isSpacewar)
                     {
-                        SteamUserRegistry.Add(clientConnection.UserID, isRust ? SteamUserRegistry.SteamAppId.Rust : SteamUserRegistry.SteamAppId.SpaceWars);
+                        if (!SteamUserRegistry.Contains(clientConnection.UserID))
+                        {
+                            SteamUserRegistry.Add(clientConnection.UserID, isRust ? SteamUserRegistry.SteamAppId.Rust : SteamUserRegistry.SteamAppId.SpaceWars);
+                        }
+                    }
+                }
+                else if (SteamAPITools.TryParseTicket(clientConnection.SteamTicket, out ticketInfo)
+                         && ticketInfo.SteamId == clientConnection.UserID)
+                {
+                    if (ticketInfo.AppId == SteamAPITools.RustAppId)
+                    {
+                        // Native Steam auth verifies this one, SteamDeny removes it again if that fails.
+                        if (!SteamUserRegistry.Contains(clientConnection.UserID))
+                        {
+                            SteamUserRegistry.Add(clientConnection.UserID, SteamUserRegistry.SteamAppId.Rust);
+                        }
+                    }
+                    else if (ticketInfo.AppId == SteamAPITools.SpacewarAppId)
+                    {
+                        // Registered as SpaceWars only after the Web API confirmed it (see SteamDeny).
+                        needsWebValidation = SteamTicketValidator.ShouldValidate(mode);
                     }
                 }
             }
             
             ca.m_Connections.Add(clientConnection);
-            ca.StartCoroutine(clientConnection.AuthorisationRoutine(approval));
+            if (needsWebValidation)
+            {
+                // Native auth will reject a 480 ticket with "game mismatch" in the same frame and call SteamDeny
+                // synchronously, so the Web API answer has to be ready BEFORE the routine starts.
+                SteamWebValidation validation = SteamTicketValidator.Begin(clientConnection, ticketInfo.AppId, mode);
+                ca.StartCoroutine(AwaitWebValidationThenAuthorise(ca, approval, clientConnection, validation));
+            }
+            else
+            {
+                ca.StartCoroutine(clientConnection.AuthorisationRoutine(approval));
+            }
             approval.Wait();
+        }
+
+        /// <summary>
+        /// Waits for the Steam Web API result without blocking the main thread and then starts the regular
+        /// authorisation routine. Native authentication rejects Spacewar tickets synchronously, so the result has
+        /// to be available before the routine runs for SteamDeny to read it.
+        /// </summary>
+        private static IEnumerator AwaitWebValidationThenAuthorise(ConnectionAcceptor ca,
+            NetworkPlayerApproval approval, ClientConnection cc, SteamWebValidation validation)
+        {
+            float deadline = Time.realtimeSinceStartup + validation.MaxWaitSeconds;
+            while (!validation.IsCompleted && Time.realtimeSinceStartup < deadline)
+            {
+                yield return null;
+            }
+
+            if (!validation.IsCompleted)
+            {
+                validation.TryComplete(SteamWebValidationStatus.TimedOut,
+                    $"No answer within {validation.MaxWaitSeconds:0.#}s");
+            }
+
+            if (validation.Status == SteamWebValidationStatus.ApiKeyRejected)
+            {
+                Logger.LogError("[SteamAuth] Steam rejected the configured SteamWebAPIKey (HTTP 401/403). " +
+                                "Spacewar players can't be verified until it's fixed.");
+            }
+
+            // The client may have dropped or been denied while we were waiting.
+            if (approval.isDenied || !ca.m_Connections.Contains(cc))
+            {
+                SteamTicketValidator.Forget(cc);
+                yield break;
+            }
+
+            Logger.LogDebug($"[SteamAuth] {cc.UserName} ({cc.UserID}): {validation}");
+            ca.StartCoroutine(cc.AuthorisationRoutine(approval));
         }
 
         public static bool ProcessGetClientMove(HumanController hc, uLink.NetworkMessageInfo info)
