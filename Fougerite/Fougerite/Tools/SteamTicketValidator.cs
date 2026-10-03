@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Newtonsoft.Json.Linq;
 
 namespace Fougerite.Tools
@@ -57,28 +58,20 @@ namespace Fougerite.Tools
     {
         /// <summary>The request is still running.</summary>
         Pending,
-
         /// <summary>The ticket is genuine and the account owns Rust whenever ownership was required.</summary>
         Verified,
-
         /// <summary>Steam rejected the ticket because it is forged, expired, cancelled or issued for another app.</summary>
         InvalidTicket,
-
         /// <summary>The ticket is genuine but belongs to a different SteamID than the one the client claimed.</summary>
         SteamIdMismatch,
-
         /// <summary>The ticket is genuine but the account does not own Rust.</summary>
         NotRustOwner,
-
         /// <summary>The ticket is genuine but ownership cannot be read because the profile hides its game details.</summary>
         OwnershipPrivate,
-
         /// <summary>Steam could not be asked because of a transport error, a rate limit, an outage or an unreadable response.</summary>
         ApiError,
-
         /// <summary>Steam refused the configured key with HTTP 401 or 403. This is never covered by SteamWebAPIFailOpen.</summary>
         ApiKeyRejected,
-
         /// <summary>Steam did not answer within the configured timeout.</summary>
         TimedOut
     }
@@ -92,6 +85,9 @@ namespace Fougerite.Tools
         private readonly object _lock = new object();
         private SteamWebValidationStatus _status = SteamWebValidationStatus.Pending;
         private string _detail = string.Empty;
+        private int _attempts;
+        private bool _sawInvalidTicket;
+        private System.Threading.Timer _retryTimer;
 
         internal SteamWebValidation(ulong claimedSteamId, uint appId, bool requireRustOwnership, float maxWaitSeconds)
         {
@@ -123,6 +119,23 @@ namespace Fougerite.Tools
         public DateTime CreatedUtc { get; private set; }
 
         internal float MaxWaitSeconds { get; private set; }
+
+        internal string RequestTicketHex { get; private set; }
+
+        internal string RequestIdentity { get; private set; }
+
+        /// <summary>
+        /// Gets the number of padding bytes that were removed from the client ticket before it was sent to Steam.
+        /// </summary>
+        public int TrimmedBytes { get; private set; }
+
+        /// <summary>
+        /// Gets the number of AuthenticateUserTicket requests that were sent for this connection.
+        /// </summary>
+        public int Attempts
+        {
+            get { lock (_lock) return _attempts; }
+        }
 
         /// <summary>
         /// Gets the SteamID Steam returned for the ticket, or zero when Steam did not accept it.
@@ -159,10 +172,7 @@ namespace Fougerite.Tools
         /// </summary>
         public SteamWebValidationStatus Status
         {
-            get
-            {
-                lock (_lock) return _status;
-            }
+            get { lock (_lock) return _status; }
         }
 
         /// <summary>
@@ -170,10 +180,7 @@ namespace Fougerite.Tools
         /// </summary>
         public string Detail
         {
-            get
-            {
-                lock (_lock) return _detail;
-            }
+            get { lock (_lock) return _detail; }
         }
 
         /// <summary>
@@ -222,6 +229,83 @@ namespace Fougerite.Tools
             }
         }
 
+        internal void SetRequest(string ticketHex, string identity, int trimmedBytes)
+        {
+            RequestTicketHex = ticketHex;
+            RequestIdentity = identity;
+            TrimmedBytes = trimmedBytes;
+        }
+
+        internal int BeginAttempt()
+        {
+            lock (_lock)
+            {
+                return ++_attempts;
+            }
+        }
+
+        internal void MarkInvalidTicketSeen()
+        {
+            lock (_lock)
+            {
+                _sawInvalidTicket = true;
+            }
+        }
+
+        internal void SetRetryTimer(System.Threading.Timer timer)
+        {
+            lock (_lock)
+            {
+                if (_status != SteamWebValidationStatus.Pending)
+                {
+                    timer.Dispose();
+                    return;
+                }
+
+                if (_retryTimer != null)
+                {
+                    _retryTimer.Dispose();
+                }
+                _retryTimer = timer;
+            }
+        }
+
+        internal void ReleaseRetryTimer()
+        {
+            lock (_lock)
+            {
+                if (_retryTimer != null)
+                {
+                    _retryTimer.Dispose();
+                    _retryTimer = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finalizes a validation whose deadline passed. When Steam already called the ticket invalid the result
+        /// stays a rejection, so that a forged ticket can never slip through SteamWebAPIFailOpen just because its
+        /// retries ran out of time.
+        /// </summary>
+        internal void CompleteOnDeadline()
+        {
+            bool sawInvalid;
+            lock (_lock)
+            {
+                sawInvalid = _sawInvalidTicket;
+            }
+
+            if (sawInvalid)
+            {
+                TryComplete(SteamWebValidationStatus.InvalidTicket,
+                    $"101 Invalid ticket, deadline reached after {Attempts} attempt(s)");
+            }
+            else
+            {
+                TryComplete(SteamWebValidationStatus.TimedOut, $"No answer within {MaxWaitSeconds:0.#}s");
+            }
+        }
+
         internal void SetHttpStatus(int code)
         {
             lock (_lock)
@@ -242,19 +326,23 @@ namespace Fougerite.Tools
 
                 _status = status;
                 _detail = detail ?? string.Empty;
+                if (_retryTimer != null)
+                {
+                    _retryTimer.Dispose();
+                    _retryTimer = null;
+                }
                 if (ownsRust.HasValue)
                 {
                     OwnsRust = ownsRust;
                 }
-
                 return true;
             }
         }
 
         public override string ToString()
         {
-            return
-                $"{Status} ({Detail}) AppId={AppId} Claimed={ClaimedSteamId} Verified={VerifiedSteamId} OwnsRust={OwnsRust}";
+            return $"{Status} ({Detail}) AppId={AppId} Claimed={ClaimedSteamId} Verified={VerifiedSteamId} " +
+                   $"OwnsRust={OwnsRust} Attempts={Attempts} Trimmed={TrimmedBytes}";
         }
     }
 
@@ -264,11 +352,38 @@ namespace Fougerite.Tools
     /// </summary>
     public static class SteamTicketValidator
     {
+        /// <summary>
+        /// The identity string the client passes to ISteamUser.GetAuthTicketForWebApi and the server passes to
+        /// AuthenticateUserTicket. Steam rejects the ticket when the two values differ, so a ticket requested for
+        /// another service cannot be used here.
+        /// </summary>
+        public const string WebApiTicketIdentity = "Fougerite";
+
+        /// <summary>
+        /// The marker a client writes after its session ticket to announce a Steam Web API ticket.
+        /// The value spells FGWT in little endian ASCII.
+        /// </summary>
+        public const int WebApiTicketMagic = 0x54574746;
+
+        /// <summary>
+        /// The version of the Web API ticket extension in the connection data.
+        /// </summary>
+        public const byte WebApiTicketVersion = 1;
+
+        /// <summary>
+        /// The largest Web API ticket that is accepted. Steam tickets are at most 2560 bytes long.
+        /// </summary>
+        public const int MaxWebApiTicketLength = 2560;
+
         private static readonly Dictionary<ClientConnection, SteamWebValidation> Validations =
             new Dictionary<ClientConnection, SteamWebValidation>();
-
         private static readonly object ValidationsLock = new object();
         private static readonly TimeSpan MaxAge = TimeSpan.FromMinutes(5);
+
+        // Steam only accepts a session ticket after the client received GetAuthSessionTicketResponse_t,
+        // which can be later than the moment the client connects. Error 101 is retried with these delays.
+        private static readonly int[] InvalidTicketRetryDelaysMs = { 750, 1500, 2500 };
+        private const int SteamErrorInvalidTicket = 101;
 
         /// <summary>
         /// Gets a value indicating whether a Steam Web API key is configured.
@@ -289,6 +404,52 @@ namespace Fougerite.Tools
                    && (mode == SteamAuthMode.RustOwners
                        || mode == SteamAuthMode.SteamAccounts
                        || mode == SteamAuthMode.AllowAll);
+        }
+
+        /// <summary>
+        /// Reads an optional ticket from ISteamUser.GetAuthTicketForWebApi that a client may append to its connection
+        /// data. Clients are not required to send one, the session ticket is validated when it is absent.
+        /// The stream is only touched for Spacewar clients in a mode that uses the Web API, which keeps vanilla
+        /// clients from ever reading past the end of their connection data.
+        /// Must be called directly after ClientConnection.ReadConnectionData.
+        /// </summary>
+        /// <param name="cc">The connection whose data was just read.</param>
+        /// <param name="loginData">The connection data stream, positioned right after the session ticket.</param>
+        /// <param name="mode">The active SteamAuthMode.</param>
+        /// <returns>The Web API ticket, or null when it is absent, malformed or not needed.</returns>
+        public static byte[] ReadWebApiTicket(ClientConnection cc, uLink.BitStream loginData, SteamAuthMode mode)
+        {
+            if (cc == null || loginData == null || !ShouldValidate(mode))
+            {
+                return null;
+            }
+
+            SteamTicketInfo info;
+            if (!SteamAPITools.TryParseTicket(cc.SteamTicket, out info) || info.AppId != SteamAPITools.SpacewarAppId)
+            {
+                return null;
+            }
+
+            try
+            {
+                if (loginData.ReadInt32() != WebApiTicketMagic || loginData.ReadByte() != WebApiTicketVersion)
+                {
+                    return null;
+                }
+
+                byte[] ticket = loginData.ReadBytes();
+                if (ticket == null || ticket.Length == 0 || ticket.Length > MaxWebApiTicketLength)
+                {
+                    return null;
+                }
+
+                return ticket;
+            }
+            catch (Exception)
+            {
+                // Clients without the extension simply end their data after the session ticket.
+                return null;
+            }
         }
 
         /// <summary>
@@ -314,17 +475,35 @@ namespace Fougerite.Tools
         }
 
         /// <summary>
-        /// Starts validating the ticket of a connection. The call returns immediately and the requests run on the
-        /// ThreadPool, poll <see cref="SteamWebValidation.IsCompleted"/> from the main thread to learn the outcome.
+        /// Starts validating the ticket of a connection. The call returns immediately and the requests run on
+        /// the ThreadPool, poll <see cref="SteamWebValidation.IsCompleted"/> from the main thread to learn the outcome.
         /// </summary>
-        internal static SteamWebValidation Begin(ClientConnection cc, uint appId, SteamAuthMode mode)
+        /// <param name="cc">The connection being validated.</param>
+        /// <param name="ticketInfo">The parsed session ticket of the connection.</param>
+        /// <param name="webApiTicket">An optional ticket from ISteamUser.GetAuthTicketForWebApi, null to validate the session ticket.</param>
+        /// <param name="mode">The active SteamAuthMode.</param>
+        /// <returns>The validation, which completes asynchronously.</returns>
+        internal static SteamWebValidation Begin(ClientConnection cc, SteamTicketInfo ticketInfo, byte[] webApiTicket,
+            SteamAuthMode mode)
         {
             bool requireOwnership = mode == SteamAuthMode.RustOwners;
             float timeout = Bootstrap.SteamWebAPITimeout;
-            // One request for the ticket, a second one for ownership, plus a little slack.
-            float maxWait = timeout * (requireOwnership ? 2 : 1) + 1f;
+            float retryWindow = InvalidTicketRetryDelaysMs.Sum() / 1000f;
+            // Ticket request, its retries, the ownership request and a little slack.
+            float maxWait = timeout * (requireOwnership ? 2 : 1) + retryWindow + 1f;
 
-            SteamWebValidation validation = new SteamWebValidation(cc.UserID, appId, requireOwnership, maxWait);
+            SteamWebValidation validation = new SteamWebValidation(cc.UserID, ticketInfo.AppId, requireOwnership,
+                maxWait);
+
+            if (webApiTicket != null)
+            {
+                validation.SetRequest(SteamAPITools.ToHex(webApiTicket), WebApiTicketIdentity, 0);
+            }
+            else
+            {
+                byte[] issued = SteamAPITools.GetIssuedTicket(cc.SteamTicket, ticketInfo);
+                validation.SetRequest(SteamAPITools.ToHex(issued), null, cc.SteamTicket.Length - issued.Length);
+            }
 
             lock (ValidationsLock)
             {
@@ -332,23 +511,49 @@ namespace Fougerite.Tools
                 Validations[cc] = validation;
             }
 
+            SendTicketRequest(validation);
+            return validation;
+        }
+
+        private static void SendTicketRequest(SteamWebValidation v)
+        {
+            if (v.IsCompleted)
+            {
+                return;
+            }
+
+            v.BeginAttempt();
+
             // Never log this URL, it contains the key.
             string url = $"{SteamAPITools.SteamWebApiBaseUrl}ISteamUserAuth/AuthenticateUserTicket/v1/" +
                          $"?key={Uri.EscapeDataString(Bootstrap.SteamWebAPIKey)}" +
-                         $"&appid={appId}" +
-                         $"&ticket={SteamAPITools.ToHex(cc.SteamTicket)}";
+                         $"&appid={v.AppId}" +
+                         $"&ticket={v.RequestTicketHex}";
+            if (v.RequestIdentity != null)
+            {
+                url += $"&identity={Uri.EscapeDataString(v.RequestIdentity)}";
+            }
 
             try
             {
                 WinHttpClient.GetInstance().MakeRequest(url,
-                    (code, body) => OnTicketResponse(validation, code, body), "GET", null, null, null, timeout);
+                    (code, body) => OnTicketResponse(v, code, body), "GET", null, null, null,
+                    Bootstrap.SteamWebAPITimeout);
             }
             catch (Exception ex)
             {
-                validation.TryComplete(SteamWebValidationStatus.ApiError, $"Request failed to start: {ex.Message}");
+                v.TryComplete(SteamWebValidationStatus.ApiError, $"Request failed to start: {ex.Message}");
             }
+        }
 
-            return validation;
+        private static void ScheduleTicketRetry(SteamWebValidation v, int delayMs)
+        {
+            System.Threading.Timer timer = new System.Threading.Timer(_ =>
+            {
+                v.ReleaseRetryTimer();
+                SendTicketRequest(v);
+            }, null, delayMs, Timeout.Infinite);
+            v.SetRetryTimer(timer);
         }
 
         /// <summary>
@@ -453,11 +658,9 @@ namespace Fougerite.Tools
                 case SteamWebValidationStatus.Pending:
                     if (Bootstrap.SteamWebAPIFailOpen)
                     {
-                        reason =
-                            $"Steam Web API unavailable ({web.Status}: {web.Detail}), allowed by SteamWebAPIFailOpen";
+                        reason = $"Steam Web API unavailable ({web.Status}: {web.Detail}), allowed by SteamWebAPIFailOpen";
                         return true;
                     }
-
                     reason = $"Steam Web API unavailable ({web.Status}: {web.Detail})";
                     return false;
 
@@ -485,9 +688,24 @@ namespace Fougerite.Tools
                 JToken error = response["error"];
                 if (error != null)
                 {
-                    // Errors here are about the ticket the client gave us (101 invalid, 102 other app, etc.).
+                    int errorCode = (int?)error["errorcode"] ?? 0;
+                    string errorDesc = (string)error["errordesc"];
+
+                    // A genuine ticket reads as invalid until Steam registered it, so 101 is retried a few times.
+                    if (errorCode == SteamErrorInvalidTicket)
+                    {
+                        v.MarkInvalidTicketSeen();
+                        int attempt = v.Attempts;
+                        if (attempt <= InvalidTicketRetryDelaysMs.Length)
+                        {
+                            ScheduleTicketRetry(v, InvalidTicketRetryDelaysMs[attempt - 1]);
+                            return;
+                        }
+                    }
+
+                    // Every other error is about the ticket itself (102 other app, 103 expired and so on).
                     v.TryComplete(SteamWebValidationStatus.InvalidTicket,
-                        $"{(string)error["errorcode"]} {(string)error["errordesc"]}");
+                        $"{errorCode} {errorDesc} after {v.Attempts} attempt(s)");
                     return;
                 }
 

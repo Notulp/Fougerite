@@ -74,10 +74,8 @@ namespace Fougerite.Tools
                         break;
                     }
                 }
-
                 if (match) return true;
             }
-
             return false;
         }
 
@@ -116,6 +114,7 @@ namespace Fougerite.Tools
             ulong gcToken = 0;
             ulong outerSteamId = 0;
             uint sessionGenerated = 0;
+            int declaredEnd = 0;
 
             if (ReadUInt32(ticket, 0) == GcTokenSectionLength)
             {
@@ -138,7 +137,7 @@ namespace Fougerite.Tools
                     return false;
                 }
 
-                layoutExact = remaining == (uint)(ticket.Length - GcSectionTotalLength);
+                declaredEnd = GcSectionTotalLength + (int)remaining;
                 offset = GcSectionTotalLength;
                 hasGcSection = true;
             }
@@ -179,13 +178,25 @@ namespace Fougerite.Tools
                 layoutExact = false;
             }
 
-            int signatureBytes = ticket.Length - ownershipEnd;
-            bool hasSignature = signatureBytes >= SignatureLength;
-            layoutExact &= signatureBytes == SignatureLength;
+            bool hasSignature = ticket.Length - ownershipEnd >= SignatureLength;
+            int ticketLength = hasSignature ? ownershipEnd + SignatureLength : ticket.Length;
+
+            // The GC section states how long the rest of the ticket is. Anything the client sent beyond that
+            // is buffer padding and is cut off, it is not part of the ticket Steam issued.
+            if (hasGcSection)
+            {
+                layoutExact &= hasSignature && declaredEnd == ticketLength;
+            }
+            else
+            {
+                layoutExact &= hasSignature;
+            }
+
             bool signatureBlank = hasSignature && IsUniform(ticket, ownershipEnd, SignatureLength);
 
             info = new SteamTicketInfo(steamId, appId, version, hasGcSection, hasSignature, gcToken,
-                FromUnix(sessionGenerated), FromUnix(issued), FromUnix(expires), layoutExact, signatureBlank);
+                FromUnix(sessionGenerated), FromUnix(issued), FromUnix(expires), layoutExact, signatureBlank,
+                ticketLength, ticket.Length - ticketLength);
             return true;
         }
 
@@ -294,6 +305,25 @@ namespace Fougerite.Tools
         }
 
         /// <summary>
+        /// Returns the ticket exactly as Steam issued it, without any padding the client sent after it.
+        /// Steam rejects tickets that carry extra bytes, so this is what has to be sent to the Web API.
+        /// </summary>
+        /// <param name="ticket">The raw ticket bytes sent by the client.</param>
+        /// <param name="info">The parsed ticket.</param>
+        /// <returns>The trimmed ticket, or the original array when nothing has to be removed.</returns>
+        public static byte[] GetIssuedTicket(byte[] ticket, SteamTicketInfo info)
+        {
+            if (ticket == null || info == null || info.TrailingBytes <= 0 || info.TicketLength > ticket.Length)
+            {
+                return ticket;
+            }
+
+            byte[] trimmed = new byte[info.TicketLength];
+            Buffer.BlockCopy(ticket, 0, trimmed, 0, info.TicketLength);
+            return trimmed;
+        }
+
+        /// <summary>
         /// Encodes bytes as an uppercase hexadecimal string, which is the format the Steam Web API expects for tickets.
         /// </summary>
         /// <param name="data">The bytes to encode.</param>
@@ -312,7 +342,6 @@ namespace Fougerite.Tools
                 sb.Append(alphabet[b >> 4]);
                 sb.Append(alphabet[b & 0x0F]);
             }
-
             return sb.ToString();
         }
 
@@ -371,7 +400,6 @@ namespace Fougerite.Tools
                     return false;
                 }
             }
-
             return true;
         }
 
@@ -406,7 +434,7 @@ namespace Fougerite.Tools
     {
         internal SteamTicketInfo(ulong steamId, uint appId, uint version, bool hasSessionHeader, bool hasSignature,
             ulong gcToken, DateTime sessionGeneratedUtc, DateTime ownershipIssuedUtc, DateTime ownershipExpiresUtc,
-            bool isLayoutExact, bool isSignatureBlank)
+            bool isLayoutExact, bool isSignatureBlank, int ticketLength, int trailingBytes)
         {
             SteamId = steamId;
             AppId = appId;
@@ -419,6 +447,8 @@ namespace Fougerite.Tools
             OwnershipExpiresUtc = ownershipExpiresUtc;
             IsLayoutExact = isLayoutExact;
             IsSignatureBlank = isSignatureBlank;
+            TicketLength = ticketLength;
+            TrailingBytes = trailingBytes;
         }
 
         /// <summary>
@@ -467,8 +497,8 @@ namespace Fougerite.Tools
         public DateTime OwnershipExpiresUtc { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether every length field matches the received data exactly,
-        /// which is always the case for tickets produced by Steam.
+        /// Gets a value indicating whether every length field inside the ticket is consistent,
+        /// which is always the case for tickets produced by Steam. Trailing padding does not affect this value.
         /// </summary>
         public bool IsLayoutExact { get; private set; }
 
@@ -478,11 +508,22 @@ namespace Fougerite.Tools
         /// </summary>
         public bool IsSignatureBlank { get; private set; }
 
+        /// <summary>
+        /// Gets the length of the ticket as Steam issued it.
+        /// </summary>
+        public int TicketLength { get; private set; }
+
+        /// <summary>
+        /// Gets the number of bytes the client sent after the end of the ticket, typically unused buffer space.
+        /// </summary>
+        public int TrailingBytes { get; private set; }
+
         /// <inheritdoc />
         public override string ToString()
         {
             return $"SteamId={SteamId} AppId={AppId} Version={Version} Header={HasSessionHeader} " +
-                   $"Signature={HasSignature} Exact={IsLayoutExact} Expires={OwnershipExpiresUtc:u}";
+                   $"Signature={HasSignature} Exact={IsLayoutExact} Length={TicketLength} " +
+                   $"Trailing={TrailingBytes} Expires={OwnershipExpiresUtc:u}";
         }
     }
 }

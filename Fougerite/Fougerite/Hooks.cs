@@ -2485,6 +2485,10 @@ namespace Fougerite
                         return;
                     }
 
+                    // Has to happen right away while the stream is still positioned after the session ticket.
+                    byte[] webApiTicket = SteamTicketValidator.ReadWebApiTicket(clientConnection, approval.loginData,
+                        Bootstrap.SteamAuthenticationMode);
+
                     Server srv = Server.GetServer();
                     ulong uid = clientConnection.UserID;
                     string ip = approval.ipAddress;
@@ -2568,7 +2572,7 @@ namespace Fougerite
                                 temp.Disconnect();
                             }
 
-                            Accept(ca, approval, clientConnection);
+                            Accept(ca, approval, clientConnection, webApiTicket);
                             return;
                         }
 
@@ -2598,14 +2602,14 @@ namespace Fougerite
                             return;
                         }
 
-                        Accept(ca, approval, clientConnection);
+                        Accept(ca, approval, clientConnection, webApiTicket);
                     }
                 }
             }
         }
 
         private static void Accept(ConnectionAcceptor ca, NetworkPlayerApproval approval,
-            ClientConnection clientConnection)
+            ClientConnection clientConnection, byte[] webApiTicket)
         {
             SteamAuthMode mode = Bootstrap.SteamAuthenticationMode;
             SteamTicketInfo ticketInfo = null;
@@ -2651,7 +2655,8 @@ namespace Fougerite
             {
                 // Native auth will reject a 480 ticket with "game mismatch" in the same frame and call SteamDeny
                 // synchronously, so the Web API answer has to be ready BEFORE the routine starts.
-                SteamWebValidation validation = SteamTicketValidator.Begin(clientConnection, ticketInfo.AppId, mode);
+                SteamWebValidation validation = SteamTicketValidator.Begin(clientConnection, ticketInfo,
+                    webApiTicket, mode);
                 ca.StartCoroutine(AwaitWebValidationThenAuthorise(ca, approval, clientConnection, validation));
             }
             else
@@ -2677,8 +2682,7 @@ namespace Fougerite
 
             if (!validation.IsCompleted)
             {
-                validation.TryComplete(SteamWebValidationStatus.TimedOut,
-                    $"No answer within {validation.MaxWaitSeconds:0.#}s");
+                validation.CompleteOnDeadline();
             }
 
             if (validation.Status == SteamWebValidationStatus.ApiKeyRejected)
