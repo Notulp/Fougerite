@@ -36,6 +36,29 @@ Fougerite plugins react to game events by either:
   - [`Timers`](Classes/Timers.md) - **Normal Timer vs System Timer**: which thread each runs on, and when
     to use which (`Plugin.CreateTimer`/`CreateParallelTimer` vs `Util.CreateSystemTimer`/
     `CreateParallelSystemTimer`).
+  - [`Caches`](Classes/Caches.md) - Thread-safe `EntityCache`/`NPCCache`/`SleeperCache` snapshots, and the
+    persistent `PlayerCache` (name/alias/IP history) for offline SteamID lookups.
+  - [`PluginLoaders`](Classes/PluginLoaders.md) - How plugins are loaded/hot-reloaded/unloaded, and
+    managing other plugins from your own.
+  - [`SteamAuth`](Classes/SteamAuth.md) - The extended Steam authentication pipeline used to admit/reject
+    non-Rust Steam tickets (e.g. RustBuster/Spacewar).
+  - [`PluginMessaging`](Classes/PluginMessaging.md) - Inter-Plugin Communication between plugins.
+  - [`Inventory`](Classes/Inventory.md) - Chest/stash contents, player backpacks/belt/armor, and the weapon
+    mod API (`FInventory`/`EntityInv`/`EntityItem`/`PlayerInv`/`PlayerItem`).
+  - [`World`](Classes/World.md) - Spawning, airdrops, terrain, zones (`World`/`Zone3D`), wildlife (`NPC`),
+    and the advanced `CustomMap` API.
+  - [`Data`](Classes/Data.md) - The persistent `DataStore` key/value store and the `Data` string/number
+    helper singleton.
+  - [`Modules`](Classes/Modules.md) - Fougerite's original, now-obsolete C# plugin system
+    (`Module`/`ModuleContainer`/`ModuleManager`).
+  - [`Config`](Classes/Config.md) - Reading/writing `Fougerite.cfg`, and `Bootstrap`'s runtime settings.
+  - [`Networking`](Classes/Networking.md) - `WinHttpClient`, `ScriptWebSocket`, and the
+    `MySQLConnector`/`SQLiteConnector` database helpers.
+  - [`Utilities`](Classes/Utilities.md) - `ChatString`, `Flood`, `JsonAPI`, `ReflectionExtensions`,
+    `SuperFastHashUInt16Hack`, `Stopper`, `CoroutineHost`, `Icalls`, `ItemsBlocks`, `AssetBundleLoader`, and
+    the legacy `RustPPExtension`/`GlobalPluginCollector`.
+  - [`ServerSystems`](Classes/ServerSystems.md) - `ServerSaveHandler` (map save scheduling) and
+    `WaterSystemServer` (oxygen-based swimming/drowning, dry-region exclusions).
 
 ### How hooks map to script methods
 

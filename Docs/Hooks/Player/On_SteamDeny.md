@@ -16,10 +16,23 @@ public delegate void SteamDenyDelegate(SteamDenyEvent sde);
 
 ### Properties/Methods
 - `SteamDenyEvent.NetUser` - The `NetUser` instance related to the connection.
+- `SteamDenyEvent.ClientConnection` - The `ClientConnection` created for this connection.
 - `SteamDenyEvent.Reason` - The deny reason string.
 - `SteamDenyEvent.ErrorNumber` - The `NetError` associated with the deny.
-- `SteamDenyEvent.ForceAllow` - Set to `true` to override the deny and let the player in anyway.
-- `SteamDenyEvent.IsValidSteamUser` - Whether Steam considers the connecting user valid.
+- `SteamDenyEvent.ForceAllow` - Get/set whether the player is admitted despite the Steam rejection. In
+  `SteamAuthMode.Legacy` it starts `false` (set `true` to let the player in, like the old AuthAllow plugin).
+  In every other mode it starts as `PolicyAllowed` - a plugin may set it to `false` to tighten the verdict, but
+  setting it to `true` never admits a player the configured mode already rejected.
+- `SteamDenyEvent.IsValidSteamUser` - Whether Steam Web API confirmed the ticket belongs to this account
+  (always `false` in `SteamAuthMode.SteamAccountsUnverified`/`Legacy`, where It only means the ticket contains
+  a recognised AppID, which proves nothing on its own).
+- `SteamDenyEvent.Mode` - The `SteamAuthMode` (see [`SteamAuth`](../../Classes/SteamAuth.md)) in effect for this
+  connection.
+- `SteamDenyEvent.Ticket` - The parsed `SteamTicketInfo`, or `null` in `Legacy` mode/for malformed tickets.
+- `SteamDenyEvent.TicketAppId` - The AppID the ticket claims (0 when unknown).
+- `SteamDenyEvent.WebValidation` - The `SteamWebValidation` result, or `null` when no Web API call was made.
+- `SteamDenyEvent.PolicyAllowed` - The verdict of the configured `SteamAuthMode` (always `false` in `Legacy`).
+- `SteamDenyEvent.PolicyReason` - A human-readable description of why the mode admitted/rejected the player.
 
 ### Examples
 
