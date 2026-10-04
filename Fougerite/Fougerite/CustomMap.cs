@@ -506,6 +506,8 @@ namespace Fougerite
 
             if (state == CustomMapState.Committed)
             {
+                server.map = result;
+                Util.GetUtil().SetStaticField("ServerSaveManager", "autoSavePath", $"{server.datadir}{server.map}.sav");
                 Logger.Log($"[CustomMap] Loading {result} from {owner} instead of {serverLevel}.");
             }
             else if (!Application.CanStreamedLevelBeLoaded(serverLevel))
