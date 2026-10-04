@@ -237,7 +237,7 @@ namespace Fougerite
                 "Value                    Who can join besides real Rust players   API key   Steam profile requirement\n" +
                 "RustOnly                 nobody                                   no        none\n" +
                 "RustOwners               Spacewar players that own Rust           yes       'Game details' must be Public\n" +
-                "SteamPaidAccounts        Spacewar players on a paid account       yes       a Community profile must exist, private is fine\n" +
+                "SteamPaidAccounts        Spacewar players on a paid account       yes       a Community profile must exist, private is fine, spent minimum 5$\n" +
                 "SteamAccounts            any real Steam account on Spacewar       yes       none\n" +
                 "SteamAccountsUnverified  Spacewar tickets that look valid         no        none\n" +
                 "AllowAll                 everyone, even without Steam             no        none\n" +
