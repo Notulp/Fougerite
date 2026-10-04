@@ -89,10 +89,45 @@ Fougerite needs to search the game's item dictionary by name.
 ### AssetBundleLoader
 `AssetBundleLoader.GetAssetBundleLoader()` returns the singleton. Solves a RustBuster-specific problem: if
 several plugins each call `WWW.LoadFromCacheOrDownload` independently right as the loading screen ends, they
-all spike the managed heap at once. Instead:
-- `LoadBundle(string path, int version, Action<AssetBundle> done)` - queues a bundle load; Fougerite processes
-  the queue one bundle at a time (on the [`CoroutineHost`](#coroutinehost)/`Loom` coroutine runner) and invokes
-  `done` on the main thread with the loaded `AssetBundle` (or `null` on failure) once it's this request's turn.
+all spike the managed heap at once. Bundles are instead queued and downloaded one at a time (on the
+[`CoroutineHost`](#coroutinehost)/`Loom` coroutine runner), and every asset lookup below transparently searches
+every bundle loaded through this class (in load order) and then the game's own bundles through
+`Facepunch.Bundling`, so a plugin bundle can add new assets or replace a game asset.
+
+- `LoadBundle(string path, int version, Action<AssetBundle> done)` - queues a bundle load. `path` is the
+  bundle's URL (local files use the `file://` scheme), `version` is the cache version (`0` bypasses the cache,
+  the right choice for local files). `done` runs on the main thread exactly once, with the loaded `AssetBundle`
+  or `null` on failure; a successfully loaded bundle is registered for `Load<T>`/`LoadAsync<T>` **before** the
+  callback runs.
+- `LoadBundle(string path, int version)` - same as above but without a callback, for when the plugin only
+  needs the bundle's assets (via `Load<T>`/`LoadAsync<T>`) and not the `AssetBundle` object itself. Failures are
+  logged; any `LoadAsync<T>` call made afterwards waits for this bundle.
+- `PendingCount` - number of bundles still waiting in the queue (not counting the one currently loading).
+- `Load<T>(string path)` / `Load(string path, Type type)` - looks up an asset **immediately**, synchronously.
+  Returns `null` right away (does not wait) if the bundle holding it hasn't finished loading yet, or if the
+  game hasn't finished loading its own bundles - use `LoadAsync<T>` whenever the asset might not be ready yet.
+- `LoadAsync<T>(string path, Action<T> done)` - looks up an asset **without stalling the frame** and calls
+  `done` on the main thread exactly once, with the asset or `null` if nothing provides it. First waits for
+  every bundle that was queued before this call (so queue the plugin bundle, then immediately call
+  `LoadAsync<T>` for its assets), then - if still not found - waits for the game to finish loading its own
+  bundles and searches those too, using Unity's asynchronous bundle loading throughout.
+- `LoadAndInjectBundle(string path, int version, Type assetType, Action<AssetBundle, bool> done)` - for
+  plugins that keep calling `Facepunch.Bundling.Load`/`LoadAsync` directly instead of this class: queues the
+  bundle (like `LoadBundle`) and then injects it into `Facepunch.Bundling` as soon as the game's own bundles
+  are ready, so the game's own loader can see it too. `done` runs once on the main thread with the bundle
+  (`null` on load failure) and whether the injection succeeded.
+- `InjectWhenBundlingLoaded(AssetBundle bundle, Type assetType, Action<bool> done)` - injects an
+  **already-loaded** bundle into `Facepunch.Bundling` as soon as `Facepunch.Bundling.Loaded` becomes true
+  (immediately, if it already is). `done` is optional and receives whether the injection succeeded.
+- `InjectIntoFacepunchBundling(AssetBundle bundle, Type assetType)` - the low-level, synchronous version of the
+  two members above; must be called on the main thread **after** `Facepunch.Bundling.Loaded` is already `true`
+  (otherwise it logs and returns `false`). `assetType` is the asset type to register the bundle under
+  (typically `typeof(GameObject)` for prefabs) - a list for that exact type must already exist in the game.
+  Bundles are searched in registration order and the **game's own paths always win** over an injected bundle
+  (an injected bundle can only add new paths, not replace one the game already ships). Injecting the same
+  bundle under the same type twice is detected and treated as success. Rewritten against the game's actual
+  `Facepunch.Bundling` layout (no longer relies on `Util` reflection), so it ignores duplicate injections and
+  logs exactly what is missing if a game build's layout differs.
 
 ### RustPPExtension *(obsolete)*
 A compatibility bridge into the bundled `RustPP` plugin's admin/permission/social systems (friends, mutes,
@@ -127,6 +162,66 @@ public override void Initialize()
         }
 
         Logger.Log("Asset bundle loaded.");
+    });
+}
+```
+
+### Example - C# (queuing a bundle, then loading its assets asynchronously)
+```csharp
+private GameObject heliPrefab;
+
+public override void Initialize()
+{
+    AssetBundleLoader loader = AssetBundleLoader.GetAssetBundleLoader();
+
+    // Queue the plugin bundle. Bundles are downloaded one after another, never in parallel.
+    loader.LoadBundle("file://" + ModuleFolder + "/heli.unity3d", 0);
+
+    // LoadAsync<T> waits for the bundle queued above (and the game's own bundles) without stalling a frame.
+    loader.LoadAsync<GameObject>("assets/prefabs/helicopter/Mi24", prefab =>
+    {
+        if (prefab == null)
+        {
+            Logger.LogError("Mi24 prefab not found.");
+            return;
+        }
+
+        heliPrefab = prefab;
+    });
+}
+
+// Once the bundles have loaded, plain synchronous lookups work too (returns null if not ready yet).
+public void SpawnExplosionEffect()
+{
+    GameObject explosion = AssetBundleLoader.GetAssetBundleLoader().Load<GameObject>("assets/prefabs/helicopter/longexplosion");
+    if (explosion != null)
+    {
+        UnityEngine.Object.Instantiate(explosion);
+    }
+}
+```
+
+### Example - C# (making a plugin bundle visible to `Facepunch.Bundling.Load` directly)
+```csharp
+public override void Initialize()
+{
+    AssetBundleLoader.GetAssetBundleLoader().LoadAndInjectBundle(
+        "file://" + ModuleFolder + "/heli.unity3d", 0, typeof(GameObject), (bundle, injected) =>
+    {
+        if (bundle == null)
+        {
+            Logger.LogError("Heli bundle failed to load.");
+            return;
+        }
+
+        if (!injected)
+        {
+            Logger.LogError("Heli bundle loaded but could not be injected into Facepunch.Bundling.");
+            return;
+        }
+
+        // Existing code that already calls Facepunch.Bundling.Load directly now finds our assets too.
+        GameObject heliPrefab = Facepunch.Bundling.Load<GameObject>("assets/prefabs/helicopter/Mi24");
     });
 }
 ```

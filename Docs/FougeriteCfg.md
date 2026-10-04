@@ -39,23 +39,39 @@ Core behavior toggles and gameplay-affecting settings.
 | `ServerMessageName` | `Fougerite` | Display name/title used for server-originated broadcast/system messages. |
 | `DisableFacePunchTruthPunish` | `false` | Disables `truth.punish`, Facepunch's original speedhack/flyhack validations. You may enable (`true`) this on a RustBuster server, since RustBuster clients can trip these false-positively. |
 | `SteamAuthMode` | `Legacy` | Decides who may join when native Steam auth rejects the connection ticket (RustBuster clients on Spacewar 480, cracked clients). See the dedicated table below and [`SteamAuth`](Classes/SteamAuth.md) for full details. |
-| `SteamWebAPIKey` | *(empty)* | Steam Web API key from <https://steamcommunity.com/dev/apikey>. Required by `RustOwners`/`SteamAccounts`, ignored by every other mode. Keep it private, never share your logs/config with it filled in. |
-| `SteamWebAPITimeout` | `10` | Seconds to wait for one Steam Web API request (`1`-`45`). The connecting player waits this long while the request is in flight. |
-| `SteamWebAPIFailOpen` | `false` | `RustOwners`/`SteamAccounts` only. If the Steam Web API can't be reached (outage, rate limit, timeout), let Spacewar players in anyway (`true`) or reject them (`false`). `true` means a forged ticket gets in during an outage; a rejected API key (HTTP 401/403) is never covered by this and always denies. |
+| `SteamWebAPIKey` | *(empty)* | Steam Web API key from <https://steamcommunity.com/dev/apikey>. Required by `RustOwners`/`SteamPaidAccounts`/`SteamAccounts`, ignored by every other mode. Keep it private, never share your logs/config with it filled in. |
+| `SteamWebAPITimeout` | `10` | Seconds to wait for one Steam Web API request (`1`-`45`). The connecting player waits this long while the request is in flight; `RustOwners`/`SteamPaidAccounts` can take up to roughly twice this value plus ~6 seconds, since they make a second call for the ownership/limited-account check. |
+| `SteamWebAPIFailOpen` | `false` | `RustOwners`/`SteamPaidAccounts`/`SteamAccounts` only. If the Steam Web API can't be reached (outage, rate limit, timeout), let Spacewar players in anyway (`true`) or reject them (`false`). `true` means a forged ticket gets in during an outage; a rejected API key (HTTP 401/403) is never covered by this and always denies. |
 
 #### `SteamAuthMode` values (safest to least safe)
 
 | Value | Safety rating | Behavior |
 |---|---|---|
-| `RustOnly` | **Most Safe** | Enforces strict native Steam authentication for Rust (252490). Completely blocks all Spacewar, emulated or cracked clients. |
-| `RustOwners` | **High Safety** | Allows Spacewar tickets, but uses the Steam Web API to verify the account actually owns paid Rust. |
-| `SteamAccounts` | **Medium Safety** | Verifies via the Web API that the Spacewar ticket belongs to a legitimate Steam account, but does not require Rust ownership. **This is the most recommended setting to use with RustBuster.** |
+| `RustOnly` | **Most Safe** | Only native Rust (252490) players. Enforces strict native Steam authentication and blocks all Spacewar, emulated or cracked clients. |
+| `RustOwners` | **High Safety** | Allows Spacewar tickets, but uses the Steam Web API to verify the account actually owns paid Rust. Requires the player's game details to be public. |
+| `SteamPaidAccounts` | **High Safety** | Allows Spacewar players whose ticket is verified through the Steam Web API and whose Steam account is not limited (i.e. has spent at least 5 USD on Steam). Rust ownership is **not** required - this keeps out freshly-made alt accounts without requiring the player to own Rust. Private profiles are fine, but the player must have set up a Steam Community profile at least once. |
+| `SteamAccounts` | **Medium Safety** | Verifies via the Web API that the Spacewar ticket belongs to a legitimate Steam account, but does not require Rust ownership or a non-limited account. **This is the most recommended setting to use with RustBuster.** |
 | `SteamAccountsUnverified` | **Low Safety** | Performs basic offline checks to filter out sloppy emulators; bypassable by well-forged tickets spoofing any SteamID. |
 | `Legacy` | **Very Low Safety** | Performs no ticket verification on its own, delegating access decisions entirely to plugins (e.g. the old AuthAllow plugin via `SteamDenyEvent.ForceAllow`). |
 | `AllowAll` | **Zero Safety** | Disables all checks and allows anyone to connect, including clients without Steam. |
 
-Outside of `Legacy`, a plugin can still deny a player through `On_SteamDeny`, but it can never let in a
-connection the configured mode already rejected.
+`RustOwners` and `SteamPaidAccounts` have their own profile requirement (public game details, and a
+Steam Community profile having existed at least once) - the startup log prints a warning about this for
+whichever of the two is active, so server owners aren't surprised by rejected players. Outside of `Legacy`,
+a plugin can still deny a player through `On_SteamDeny`, but it can never let in a connection the configured
+mode already rejected.
+
+#### Genuine tickets rejected with "101 Invalid ticket"
+When Steam just issued the ticket, its Web API can briefly answer `101 Invalid ticket` for a perfectly valid
+Spacewar ticket before the ticket is fully registered on Steam's side. Fougerite now retries the Web API call
+for about 5 seconds to cover this window, and also strips the buffer padding some clients append after the
+ticket before sending it, which could previously trigger the same false rejection. No client-side changes are
+needed; this applies automatically to `RustOwners`, `SteamPaidAccounts` and `SteamAccounts`.
+
+#### Upgrading from an older `Fougerite.cfg`
+If your existing `Fougerite.cfg` still shows the old Steam comments (without `SteamPaidAccounts`), delete the
+four Steam lines (`SteamAuthMode`, `SteamWebAPIKey`, `SteamWebAPITimeout`, `SteamWebAPIFailOpen`) once - they,
+and the up-to-date comment block above them, are written back automatically on the next startup.
 
 ### `[Modules]` section
 

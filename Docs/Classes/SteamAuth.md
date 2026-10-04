@@ -30,8 +30,9 @@ Static helpers for parsing/validating ticket bytes - no network calls, pure data
   `SteamAuthMode.SteamAccountsUnverified`. Rejects broken emulators/lazy forgeries, but cannot stop a carefully
   crafted forgery since the signature itself is never checked.
 - `IsIndividualSteamId(ulong steamId)` - true for a public, individual, desktop-instance SteamID64.
-- `GetIssuedTicket(byte[] ticket, SteamTicketInfo info)` - trims trailing client buffer padding, returning the
-  ticket exactly as Steam issued it (required before sending it to the Web API).
+- `GetIssuedTicket(byte[] ticket, SteamTicketInfo info)` - trims the trailing buffer padding some clients
+  append after the ticket, returning the ticket exactly as Steam issued it. This is required before sending it
+  to the Web API, otherwise genuine tickets could be rejected (see `SteamTicketValidator.Begin` below).
 - `ToHex(byte[] data)` - uppercase hex encoding (the format the Steam Web API expects for tickets).
 
 `SteamTicketInfo` (returned by `TryParseTicket`) exposes: `SteamId`, `AppId`, `Version`, `HasSessionHeader`,
@@ -46,16 +47,24 @@ admits:
   blocks all Spacewar, emulated or cracked clients; every rejected connection stays rejected.
 - `RustOwners` (2) - **High Safety.** Allows Spacewar tickets, but uses the Steam Web API to verify the account
   actually owns paid Rust (needs a Web API key + the player's game details to be public).
-- `SteamAccounts` (3) - **Medium Safety.** Verifies via the Web API that the Spacewar ticket belongs to a
-  legitimate Steam account, but does not require Rust ownership (needs a Web API key). **This is the most
-  recommended setting to use with RustBuster.**
-- `SteamAccountsUnverified` (4) - **Low Safety.** Performs basic offline checks
+- `SteamPaidAccounts` (3) - **High Safety.** Allows Spacewar players whose ticket is verified through the
+  Steam Web API and whose Steam account is not limited, meaning it has spent at least 5 USD on Steam (needs a
+  Web API key). This keeps out freshly-made alt accounts **without** requiring Rust ownership. Private
+  profiles are fine, but the player must have set up a Steam Community profile at least once.
+- `SteamAccounts` (4) - **Medium Safety.** Verifies via the Web API that the Spacewar ticket belongs to a
+  legitimate Steam account, but does not require Rust ownership or a non-limited account (needs a Web API
+  key). **This is the most recommended setting to use with RustBuster.**
+- `SteamAccountsUnverified` (5) - **Low Safety.** Performs basic offline checks
   (`SteamAPITools.IsPlausibleTicket`) to filter out sloppy emulators. No network call, fastest Steam-only mode,
   but bypassable by well-forged tickets spoofing any SteamID.
 - `Legacy` (0) - **Very Low Safety.** Performs no ticket verification on its own, delegating access decisions
   entirely to plugins (via `SteamDenyEvent.ForceAllow`). This is the original pre-`SteamAuthMode` behaviour.
-- `AllowAll` (5) - **Zero Safety.** Disables all checks and allows anyone to connect, including clients without
+- `AllowAll` (6) - **Zero Safety.** Disables all checks and allows anyone to connect, including clients without
   Steam at all.
+
+`RustOwners` and `SteamPaidAccounts` each need a Steam profile requirement the player might not have set up
+(public game details / an existing Community profile); the startup log warns about whichever is configured so
+the requirement isn't a surprise when players get rejected.
 
 ### SteamTicketValidator
 Static class that drives the Steam Web API calls and the final admit/deny decision:
@@ -65,9 +74,10 @@ Static class that drives the Steam Web API calls and the final admit/deny decisi
   `ISteamUser.GetAuthTicketForWebApi` ticket a client appended after its session ticket. Must be called right
   after `ClientConnection.ReadConnectionData`.
 - `Begin(ClientConnection cc, SteamTicketInfo ticketInfo, byte[] webApiTicket, SteamAuthMode mode)` - starts an
-  asynchronous `AuthenticateUserTicket` (+ `GetOwnedGames` when ownership is required) call on the `ThreadPool`
-  and returns a `SteamWebValidation` immediately; invalid-ticket (error 101) responses are retried a few times
-  since Steam needs a moment to register a freshly-created ticket.
+  asynchronous `AuthenticateUserTicket` (+ `GetOwnedGames`/community-profile check when required) call on the
+  `ThreadPool` and returns a `SteamWebValidation` immediately. A genuine, freshly-issued ticket can briefly make
+  Steam answer `101 Invalid ticket`, so an invalid-ticket response is retried for about 5 seconds while Steam
+  finishes registering the ticket, instead of failing the connection outright.
 - `Get(ClientConnection cc)` - returns the in-flight/completed validation for a connection, or `null`.
 - `Evaluate(SteamAuthMode mode, ClientConnection cc, SteamTicketInfo ticket, SteamWebValidation web, out string reason)`
   - applies the mode and returns whether the player may join, plus a human-readable `reason` (useful for
@@ -76,11 +86,13 @@ Static class that drives the Steam Web API calls and the final admit/deny decisi
   constants for the optional Web API ticket extension in the connection data.
 
 `SteamWebValidation` (returned by `Begin`) exposes the live/completed state of one validation: `ClaimedSteamId`,
-`AppId`, `RequireRustOwnership`, `Attempts`, `VerifiedSteamId`, `OwnerSteamId`, `VacBanned`, `PublisherBanned`,
-`OwnsRust` (nullable), `LastHttpStatus`, `Status` (`SteamWebValidationStatus`), `Detail`, `IsCompleted`,
-`IsGenuineSteamAccount`, `IsApiFailure`. `SteamWebValidationStatus` values: `Pending`, `Verified`,
-`InvalidTicket`, `SteamIdMismatch`, `NotRustOwner`, `OwnershipPrivate`, `ApiError`, `ApiKeyRejected`,
-`TimedOut`.
+`AppId`, `RequireRustOwnership`, `RequirePaidAccount` (set for `SteamPaidAccounts`), `IsLimitedAccount`
+(nullable, true when the account never spent 5 USD on Steam), `Attempts`, `TrimmedBytes` (padding bytes
+removed from the client's ticket before sending it to Steam), `VerifiedSteamId`, `OwnerSteamId`, `VacBanned`,
+`PublisherBanned`, `OwnsRust` (nullable), `LastHttpStatus`, `Status` (`SteamWebValidationStatus`), `Detail`,
+`IsCompleted`, `IsGenuineSteamAccount`, `IsApiFailure`. `SteamWebValidationStatus` values: `Pending`,
+`Verified`, `InvalidTicket`, `SteamIdMismatch`, `NotRustOwner`, `OwnershipPrivate`, `LimitedAccount`,
+`AccountStatusUnknown`, `ApiError`, `ApiKeyRejected`, `TimedOut`.
 
 ### SteamUserRegistry
 A simple static, thread-safe registry of SteamIDs that have been verified this session (by native auth for
