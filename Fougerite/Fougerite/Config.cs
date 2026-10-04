@@ -95,7 +95,7 @@ namespace Fougerite
 
         /// <summary>
         /// Adds a setting with its default value to <c>Fougerite.cfg</c> only when the key is not already
-        /// present.  A <c>;</c>-prefixed comment line (<paramref name="document"/>) is inserted directly
+        /// present.  A <c>;</c>-prefixed comment line (<paramref name="Document"/>) is inserted directly
         /// above the key so server operators can understand the setting without consulting external docs.
         /// This method is a no-op when the key exists, so user-edited values are never overwritten.
         /// Call <see cref="Save"/> after all <c>AddDefault</c> calls to flush new entries to disk.
