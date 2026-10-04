@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Xml;
 using Newtonsoft.Json.Linq;
 
 namespace Fougerite.Tools
@@ -27,15 +29,27 @@ namespace Fougerite.Tools
 
         /// <summary>
         /// Admits Rust players as well as Spacewar players whose ticket is confirmed by the Steam Web API and whose
-        /// account owns Rust. Requires a Web API key and public game details on the player's profile.
+        /// account owns Rust. Requires a Web API key. Spacewar players must have public game details on their
+        /// profile, players with private or friends only game details are rejected even when they own Rust.
         /// </summary>
         RustOwners = 2,
 
         /// <summary>
+        /// Admits Rust players as well as Spacewar players whose ticket is confirmed by the Steam Web API and whose
+        /// account is not a limited Steam account, meaning at least five US dollars were spent on Steam.
+        /// This keeps out freshly created alternate accounts while still admitting players that do not own Rust.
+        /// The flag is read from the Steam Community profile XML, which also works for private profiles.
+        /// Spacewar players must have set up a community profile once, accounts that never did are rejected.
+        /// Requires a Web API key.
+        /// </summary>
+        SteamPaidAccounts = 3,
+
+        /// <summary>
         /// Admits Rust players as well as any genuine Steam account using a Spacewar ticket confirmed by the
         /// Steam Web API. Forged and emulated tickets are rejected. Requires a Web API key.
+        /// Profile privacy settings do not matter.
         /// </summary>
-        SteamAccounts = 3,
+        SteamAccounts = 4,
 
         /// <summary>
         /// Admits Rust players as well as Spacewar players whose ticket passes every offline check in
@@ -43,12 +57,12 @@ namespace Fougerite.Tools
         /// which makes this the fastest Steam only mode. Broken emulators and careless forgeries are rejected,
         /// but a carefully forged ticket is accepted and may claim any SteamID.
         /// </summary>
-        SteamAccountsUnverified = 4,
+        SteamAccountsUnverified = 5,
 
         /// <summary>
         /// Admits everybody, including players that do not run Steam at all.
         /// </summary>
-        AllowAll = 5
+        AllowAll = 6
     }
 
     /// <summary>
@@ -68,6 +82,10 @@ namespace Fougerite.Tools
         NotRustOwner,
         /// <summary>The ticket is genuine but ownership cannot be read because the profile hides its game details.</summary>
         OwnershipPrivate,
+        /// <summary>The ticket is genuine but the account is a limited Steam account that never spent five US dollars.</summary>
+        LimitedAccount,
+        /// <summary>The ticket is genuine but Steam did not report whether the account is limited, usually because no community profile exists.</summary>
+        AccountStatusUnknown,
         /// <summary>Steam could not be asked because of a transport error, a rate limit, an outage or an unreadable response.</summary>
         ApiError,
         /// <summary>Steam refused the configured key with HTTP 401 or 403. This is never covered by SteamWebAPIFailOpen.</summary>
@@ -89,11 +107,13 @@ namespace Fougerite.Tools
         private bool _sawInvalidTicket;
         private System.Threading.Timer _retryTimer;
 
-        internal SteamWebValidation(ulong claimedSteamId, uint appId, bool requireRustOwnership, float maxWaitSeconds)
+        internal SteamWebValidation(ulong claimedSteamId, uint appId, bool requireRustOwnership,
+            bool requirePaidAccount, float maxWaitSeconds)
         {
             ClaimedSteamId = claimedSteamId;
             AppId = appId;
             RequireRustOwnership = requireRustOwnership;
+            RequirePaidAccount = requirePaidAccount;
             MaxWaitSeconds = maxWaitSeconds;
             CreatedUtc = DateTime.UtcNow;
         }
@@ -112,6 +132,16 @@ namespace Fougerite.Tools
         /// Gets a value indicating whether Rust ownership is checked in addition to the ticket, as done by <see cref="SteamAuthMode.RustOwners"/>.
         /// </summary>
         public bool RequireRustOwnership { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the account must not be limited, as done by <see cref="SteamAuthMode.SteamPaidAccounts"/>.
+        /// </summary>
+        public bool RequirePaidAccount { get; private set; }
+
+        /// <summary>
+        /// Gets whether the account is a limited Steam account, or null when this was not checked or could not be determined.
+        /// </summary>
+        public bool? IsLimitedAccount { get; private set; }
 
         /// <summary>
         /// Gets the time the validation started.
@@ -201,7 +231,9 @@ namespace Fougerite.Tools
                 SteamWebValidationStatus s = Status;
                 return s == SteamWebValidationStatus.Verified
                        || s == SteamWebValidationStatus.NotRustOwner
-                       || s == SteamWebValidationStatus.OwnershipPrivate;
+                       || s == SteamWebValidationStatus.OwnershipPrivate
+                       || s == SteamWebValidationStatus.LimitedAccount
+                       || s == SteamWebValidationStatus.AccountStatusUnknown;
             }
         }
 
@@ -306,6 +338,14 @@ namespace Fougerite.Tools
             }
         }
 
+        internal void SetLimitedAccount(bool limited)
+        {
+            lock (_lock)
+            {
+                IsLimitedAccount = limited;
+            }
+        }
+
         internal void SetHttpStatus(int code)
         {
             lock (_lock)
@@ -342,7 +382,7 @@ namespace Fougerite.Tools
         public override string ToString()
         {
             return $"{Status} ({Detail}) AppId={AppId} Claimed={ClaimedSteamId} Verified={VerifiedSteamId} " +
-                   $"OwnsRust={OwnsRust} Attempts={Attempts} Trimmed={TrimmedBytes}";
+                   $"OwnsRust={OwnsRust} Limited={IsLimitedAccount} Attempts={Attempts} Trimmed={TrimmedBytes}";
         }
     }
 
@@ -402,6 +442,7 @@ namespace Fougerite.Tools
         {
             return IsWebApiConfigured
                    && (mode == SteamAuthMode.RustOwners
+                       || mode == SteamAuthMode.SteamPaidAccounts
                        || mode == SteamAuthMode.SteamAccounts
                        || mode == SteamAuthMode.AllowAll);
         }
@@ -487,13 +528,14 @@ namespace Fougerite.Tools
             SteamAuthMode mode)
         {
             bool requireOwnership = mode == SteamAuthMode.RustOwners;
+            bool requirePaidAccount = mode == SteamAuthMode.SteamPaidAccounts;
             float timeout = Bootstrap.SteamWebAPITimeout;
             float retryWindow = InvalidTicketRetryDelaysMs.Sum() / 1000f;
-            // Ticket request, its retries, the ownership request and a little slack.
-            float maxWait = timeout * (requireOwnership ? 2 : 1) + retryWindow + 1f;
+            // Ticket request, its retries, the account request and a little slack.
+            float maxWait = timeout * (requireOwnership || requirePaidAccount ? 2 : 1) + retryWindow + 1f;
 
             SteamWebValidation validation = new SteamWebValidation(cc.UserID, ticketInfo.AppId, requireOwnership,
-                maxWait);
+                requirePaidAccount, maxWait);
 
             if (webApiTicket != null)
             {
@@ -585,6 +627,7 @@ namespace Fougerite.Tools
                     return false;
 
                 case SteamAuthMode.RustOwners:
+                case SteamAuthMode.SteamPaidAccounts:
                 case SteamAuthMode.SteamAccounts:
                 case SteamAuthMode.SteamAccountsUnverified:
                     break;
@@ -648,9 +691,18 @@ namespace Fougerite.Tools
             switch (web.Status)
             {
                 case SteamWebValidationStatus.Verified:
-                    reason = mode == SteamAuthMode.RustOwners
-                        ? "Steam Web API: genuine Spacewar ticket, account owns Rust"
-                        : "Steam Web API: genuine Spacewar ticket";
+                    if (mode == SteamAuthMode.RustOwners)
+                    {
+                        reason = "Steam Web API: genuine Spacewar ticket, account owns Rust";
+                    }
+                    else if (mode == SteamAuthMode.SteamPaidAccounts)
+                    {
+                        reason = "Steam Web API: genuine Spacewar ticket, account is not limited";
+                    }
+                    else
+                    {
+                        reason = "Steam Web API: genuine Spacewar ticket";
+                    }
                     return true;
 
                 case SteamWebValidationStatus.ApiError:
@@ -733,6 +785,15 @@ namespace Fougerite.Tools
                     return;
                 }
 
+                if (v.RequirePaidAccount)
+                {
+                    string profileUrl = $"{SteamAPITools.SteamCommunityBaseUrl}profiles/{steamId}/?xml=1";
+                    WinHttpClient.GetInstance().MakeRequest(profileUrl,
+                        (code2, body2) => OnProfileResponse(v, code2, body2), "GET", null, null, null,
+                        Bootstrap.SteamWebAPITimeout);
+                    return;
+                }
+
                 if (!v.RequireRustOwnership)
                 {
                     v.TryComplete(SteamWebValidationStatus.Verified, "Ticket OK");
@@ -753,6 +814,81 @@ namespace Fougerite.Tools
             catch (Exception ex)
             {
                 v.TryComplete(SteamWebValidationStatus.ApiError, $"Bad ticket response: {ex.Message}");
+            }
+        }
+
+        private static void OnProfileResponse(SteamWebValidation v, int code, string body)
+        {
+            try
+            {
+                v.SetHttpStatus(code);
+                if (v.IsCompleted) return;
+                if (!CheckHttp(v, code, body, false)) return;
+
+                XmlDocument document = new XmlDocument();
+                // Default reader settings refuse DTDs, so the response cannot pull in external entities.
+                using (XmlReader reader = XmlReader.Create(new StringReader(body), new XmlReaderSettings()))
+                {
+                    document.Load(reader);
+                }
+
+                XmlElement root = document.DocumentElement;
+                if (root != null && root.Name == "response")
+                {
+                    // Steam answers accounts without a community profile with a response element holding an error.
+                    XmlNode error = root.SelectSingleNode("error");
+                    v.TryComplete(SteamWebValidationStatus.AccountStatusUnknown,
+                        error != null ? $"Community profile error {error.InnerText.Trim()}" : "No community profile");
+                    return;
+                }
+
+                if (root == null || root.Name != "profile")
+                {
+                    v.TryComplete(SteamWebValidationStatus.ApiError,
+                        $"Unexpected community response {(root != null ? root.Name : "without a root element")}");
+                    return;
+                }
+
+                // Make sure the answer is about the account the ticket belongs to.
+                XmlNode idNode = root.SelectSingleNode("steamID64");
+                ulong profileId;
+                if (idNode == null || !ulong.TryParse(idNode.InnerText.Trim(), out profileId)
+                                   || profileId != v.VerifiedSteamId)
+                {
+                    v.TryComplete(SteamWebValidationStatus.ApiError, "Community profile is for a different account");
+                    return;
+                }
+
+                XmlNode limitedNode = root.SelectSingleNode("isLimitedAccount");
+                if (limitedNode == null)
+                {
+                    v.TryComplete(SteamWebValidationStatus.AccountStatusUnknown,
+                        "Community profile does not report the limited account flag");
+                    return;
+                }
+
+                string limitedValue = limitedNode.InnerText.Trim();
+                if (limitedValue != "0" && limitedValue != "1")
+                {
+                    v.TryComplete(SteamWebValidationStatus.ApiError, $"Unexpected isLimitedAccount value {limitedValue}");
+                    return;
+                }
+
+                bool limited = limitedValue == "1";
+                v.SetLimitedAccount(limited);
+                if (limited)
+                {
+                    v.TryComplete(SteamWebValidationStatus.LimitedAccount, "Limited account, never spent five US dollars");
+                }
+                else
+                {
+                    v.TryComplete(SteamWebValidationStatus.Verified, "Ticket OK, account is not limited");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Rate limit pages and maintenance pages come back as HTML instead of XML.
+                v.TryComplete(SteamWebValidationStatus.ApiError, $"Bad community profile response: {ex.Message}");
             }
         }
 
@@ -803,6 +939,15 @@ namespace Fougerite.Tools
         /// </summary>
         private static bool CheckHttp(SteamWebValidation v, int code, string body)
         {
+            return CheckHttp(v, code, body, true);
+        }
+
+        /// <summary>
+        /// Translates transport and HTTP errors into a final status and reports whether the body should be parsed.
+        /// A 401 or 403 only means a rejected key when the request actually carried the key.
+        /// </summary>
+        private static bool CheckHttp(SteamWebValidation v, int code, string body, bool usesApiKey)
+        {
             if (code == 0)
             {
                 // WinHttpClient reports transport failures with code 0 and a short tag as the body.
@@ -810,7 +955,7 @@ namespace Fougerite.Tools
                 return false;
             }
 
-            if (code == 401 || code == 403)
+            if (usesApiKey && (code == 401 || code == 403))
             {
                 v.TryComplete(SteamWebValidationStatus.ApiKeyRejected, $"HTTP {code}, check SteamWebAPIKey");
                 return false;

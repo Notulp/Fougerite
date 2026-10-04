@@ -24,6 +24,11 @@ namespace Fougerite.Tools
         public const string SteamWebApiBaseUrl = "https://api.steampowered.com/";
 
         /// <summary>
+        /// The base address of the Steam Community site, which serves the profile XML that exposes the limited account flag.
+        /// </summary>
+        public const string SteamCommunityBaseUrl = "https://steamcommunity.com/";
+
+        /// <summary>
         /// The little endian byte representation of AppID 252490.
         /// </summary>
         public static readonly byte[] RustAppIdBytes = new byte[] { 0x4A, 0xDA, 0x03, 0x00 };

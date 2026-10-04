@@ -17,7 +17,7 @@ namespace Fougerite
         /// <summary>
         /// Returns the Current Fougerite Version
         /// </summary>
-        public const string Version = "1.9.94";
+        public const string Version = "1.9.95";
         /// <summary>
         /// This value decides whether we should remove the player classes from the cache upon disconnect.
         /// </summary>
@@ -86,6 +86,9 @@ namespace Fougerite
         /// <summary>
         /// Determines who may join when native Steam authentication rejects a connection.
         /// See <see cref="SteamAuthMode"/> for the available modes.
+        /// Profile settings only matter for Spacewar players. <see cref="SteamAuthMode.RustOwners"/> requires public
+        /// game details, <see cref="SteamAuthMode.SteamPaidAccounts"/> requires that a community profile exists but
+        /// accepts private ones, and every other mode works regardless of profile settings.
         /// </summary>
         public static SteamAuthMode SteamAuthenticationMode = SteamAuthMode.Legacy;
         /// <summary>
@@ -94,9 +97,9 @@ namespace Fougerite
         /// </summary>
         internal static string SteamWebAPIKey = string.Empty;
         /// <summary>
-        /// Holds the timeout of a single Steam Web API request in seconds.
+        /// Holds the timeout of a single Steam Web API request in seconds, between 1 and 45.
         /// </summary>
-        public static float SteamWebAPITimeout = 4f;
+        public static float SteamWebAPITimeout = 10f;
         /// <summary>
         /// Determines whether Spacewar players are admitted when the Steam Web API cannot be reached
         /// because of an outage, a rate limit or a timeout.
@@ -228,29 +231,46 @@ namespace Fougerite
             Config.AddDefault("Fougerite", "SteamAuthMode",
                 "Legacy",
                 "Decides who may join when Steam rejects the connection ticket (RustBuster on Spacewar 480, cracked clients).\n" +
+                "Players on the real Rust AppID (252490) are always checked natively by Steam and are never affected by\n" +
+                "profile privacy. The profile requirements below only apply to Spacewar (480) players.\n" +
+                "\n" +
                 "Legacy                   Old behaviour. Nothing is verified, plugins like AuthAllow decide via SteamDenyEvent.ForceAllow.\n" +
-                "RustOnly                 Only players whose ticket passes native Steam auth for Rust (252490).\n" +
+                "                         Profile requirement: none.\n" +
+                "RustOnly                 Only players whose ticket passes native Steam auth for Rust (252490). Spacewar players are rejected.\n" +
+                "                         Profile requirement: none.\n" +
                 "RustOwners               Rust players, plus Spacewar (480) tickets verified by the Steam Web API whose account owns Rust.\n" +
-                "                         The player's Steam game details must be public. Requires SteamWebAPIKey.\n" +
+                "                         Requires SteamWebAPIKey.\n" +
+                "                         Profile requirement: PUBLIC GAME DETAILS. Steam privacy settings, 'Game details' must be Public.\n" +
+                "                         Players with private or friends only game details are REJECTED even if they own Rust.\n" +
+                "SteamPaidAccounts        Rust players, plus Spacewar (480) tickets verified by the Steam Web API from accounts that are\n" +
+                "                         not limited (spent at least 5 USD on Steam). Requires SteamWebAPIKey.\n" +
+                "                         Profile requirement: the account must have set up a Steam Community profile once.\n" +
+                "                         Private and friends only profiles are fine. Accounts that never set one up are REJECTED.\n" +
                 "SteamAccounts            Rust players, plus any genuine Steam account on a Spacewar (480) ticket verified by the Steam Web API.\n" +
                 "                         Forged and emulated tickets are rejected. Requires SteamWebAPIKey.\n" +
+                "                         Profile requirement: none. Private profiles and accounts without a profile are fine.\n" +
                 "SteamAccountsUnverified  Rust players, plus Spacewar (480) tickets that pass offline checks. No API key, no requests, fastest.\n" +
                 "                         Rejects broken emulators and sloppy forgeries, but a well forged ticket gets in with any SteamID.\n" +
+                "                         Profile requirement: none.\n" +
                 "AllowAll                 Everyone joins, including players without Steam at all (cracked).\n" +
+                "                         Profile requirement: none.\n" +
+                "\n" +
                 "Outside Legacy, plugins can still deny a player but can't let in one that the mode rejects.");
 
             Config.AddDefault("Fougerite", "SteamWebAPIKey",
                 "",
                 "Steam Web API key from https://steamcommunity.com/dev/apikey\n" +
-                "Required by RustOwners and SteamAccounts, ignored by every other mode. Keep it private.");
+                "Required by RustOwners, SteamPaidAccounts and SteamAccounts, ignored by every other mode. Keep it private.");
 
             Config.AddDefault("Fougerite", "SteamWebAPITimeout",
                 "10",
-                "Seconds to wait for one Steam Web API request (1-45). The player waits this long while connecting.");
+                "Seconds to wait for one Steam Web API request (1-45). The player waits this long while connecting.\n" +
+                "Worst case a join takes longer, because an invalid ticket answer is retried for about 5 seconds and\n" +
+                "RustOwners and SteamPaidAccounts make a second request after the ticket check.");
 
             Config.AddDefault("Fougerite", "SteamWebAPIFailOpen",
                 "false",
-                "RustOwners and SteamAccounts only. If the Steam Web API can't be reached (outage, rate limit, timeout)\n" +
+                "RustOwners, SteamPaidAccounts and SteamAccounts only. If the Steam Web API can't be reached (outage, rate limit, timeout)\n" +
                 "let Spacewar players in anyway (true) or reject them (false)?\n" +
                 "true means forged tickets get in during an outage. A rejected API key always denies.");
 
@@ -474,7 +494,7 @@ namespace Fougerite
             int timeout;
             if (!int.TryParse(Config.GetValue("Fougerite", "SteamWebAPITimeout"), out timeout))
             {
-                timeout = 4;
+                timeout = 10;
             }
             SteamWebAPITimeout = Math.Max(1, Math.Min(45, timeout));
 
@@ -496,6 +516,7 @@ namespace Fougerite
                     Logger.LogWarning("[SteamAuth] SteamAuthMode=RustOnly. Only players passing native Rust Steam auth can join.");
                     break;
                 case SteamAuthMode.RustOwners:
+                case SteamAuthMode.SteamPaidAccounts:
                 case SteamAuthMode.SteamAccounts:
                     if (!keySet)
                     {
@@ -506,6 +527,17 @@ namespace Fougerite
                     {
                         Logger.LogWarning($"[SteamAuth] SteamAuthMode={SteamAuthenticationMode}, Spacewar tickets are verified " +
                                           $"through the Steam Web API (timeout {SteamWebAPITimeout}s).");
+                    }
+
+                    if (SteamAuthenticationMode == SteamAuthMode.RustOwners)
+                    {
+                        Logger.LogWarning("[SteamAuth] RustOwners needs PUBLIC game details on the Steam profile of Spacewar players. " +
+                                          "Players with private game details are rejected even if they own Rust.");
+                    }
+                    else if (SteamAuthenticationMode == SteamAuthMode.SteamPaidAccounts)
+                    {
+                        Logger.LogWarning("[SteamAuth] SteamPaidAccounts needs Spacewar players to have set up a Steam Community " +
+                                          "profile once. Private profiles are fine.");
                     }
                     break;
                 case SteamAuthMode.SteamAccountsUnverified:
@@ -518,6 +550,7 @@ namespace Fougerite
             }
 
             if (SteamWebAPIFailOpen && (SteamAuthenticationMode == SteamAuthMode.RustOwners
+                                        || SteamAuthenticationMode == SteamAuthMode.SteamPaidAccounts
                                         || SteamAuthenticationMode == SteamAuthMode.SteamAccounts))
             {
                 Logger.LogWarning("[SteamAuth] SteamWebAPIFailOpen=true. Unverified Spacewar players get in while the Steam Web API is unreachable.");

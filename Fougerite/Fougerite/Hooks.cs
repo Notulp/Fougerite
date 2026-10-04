@@ -125,7 +125,7 @@ namespace Fougerite
                     {
                         player.Message($"[color #00FFFF]This Server is running Fougerite V[color yellow]{Bootstrap.Version}");
                         player.Message("[color green]Fougerite Team: www.fougerite.com");
-                        player.Message("[color #0C86AE]Pluton Team: www.pluton-team.org");
+                        player.Message("[color #0C86AE]Discord: https://discord.gg/fNsBMeHW");
                     }
                     
                     // Check global command restrictions first
