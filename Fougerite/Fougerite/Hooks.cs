@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Fougerite.Caches;
@@ -779,6 +780,90 @@ namespace Fougerite
                     {
                         Logger.showRPC = !Logger.showRPC;
                         a.ReplyWith($"Toggled rpctracer to:{Logger.showRPC}");
+                    }
+                }
+                else if (Class.Equals("fougerite", ic) && Function.Equals("ban", ic))
+                {
+                    if (adminRights)
+                    {
+                        if (a.HasArgs(1))
+                        {
+                            string[] bargs = a.Args;
+                            string target = bargs[0];
+                            string reason = bargs.Length > 1 ? string.Join(" ", bargs.Skip(1).ToArray()) : "You were banned.";
+                            string adminName = external ? "Console" : a.argUser.displayName;
+                            Player sender = external ? null : Server.GetServer().FindPlayer(UID);
+
+                            Player targetPlayer = Server.GetServer().FindPlayer(target);
+                            if (targetPlayer != null)
+                            {
+                                Server.GetServer().BanPlayer(targetPlayer, adminName, reason, sender);
+                                a.ReplyWith($"Fougerite: {targetPlayer.Name} was banned!");
+                            }
+                            else
+                            {
+                                if (IPAddress.TryParse(target, out _))
+                                {
+                                    Server.GetServer().BanPlayerIP(target, "1", reason, adminName);
+                                    a.ReplyWith($"Fougerite: IP {target} was banned!");
+                                }
+                                else if (Util.GetUtil().IsSteamId64(target))
+                                {
+                                    Server.GetServer().BanPlayerID(target, "1", reason, adminName);
+                                    a.ReplyWith($"Fougerite: SteamID {target} was banned!");
+                                }
+                                else
+                                {
+                                    a.ReplyWith($"Fougerite: Could not find player {target}!");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            a.ReplyWith("Fougerite: Please specify a target to ban (steamid, ip or player name).");
+                        }
+                    }
+                    else
+                    {
+                        a.ReplyWith("Fougerite: You don't have permission to use this command!");
+                    }
+                }
+                else if (Class.Equals("fougerite", ic) && Function.Equals("unban", ic))
+                {
+                    if (adminRights)
+                    {
+                        if (a.HasArgs(1))
+                        {
+                            string target = a.Args[0];
+                            string adminName = external ? "Console" : a.argUser.displayName;
+                            Player sender = external ? null : Server.GetServer().FindPlayer(UID);
+
+                            bool unbanned;
+                            if (IPAddress.TryParse(target, out _))
+                            {
+                                unbanned = Server.GetServer().UnbanByIP(target);
+                            }
+                            else if (Util.GetUtil().IsSteamId64(target))
+                            {
+                                unbanned = Server.GetServer().UnbanByID(target);
+                            }
+                            else
+                            {
+                                unbanned = Server.GetServer().UnbanByName(target, adminName, sender);
+                            }
+
+                            a.ReplyWith(unbanned
+                                ? $"Fougerite: {target} was unbanned!"
+                                : $"Fougerite: Could not find a ban matching {target}!");
+                        }
+                        else
+                        {
+                            a.ReplyWith("Fougerite: Please specify a target to unban (steamid, ip or player name).");
+                        }
+                    }
+                    else
+                    {
+                        a.ReplyWith("Fougerite: You don't have permission to use this command!");
                     }
                 }
 

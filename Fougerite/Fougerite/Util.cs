@@ -1766,6 +1766,26 @@ namespace Fougerite
         }
 
         /// <summary>
+        /// Determines if the given string represents a valid Steam ID 64.
+        /// </summary>
+        /// <param name="input">The input string to validate as a Steam ID 64.</param>
+        /// <returns>True if the input is a valid Steam ID 64, otherwise, false.</returns>
+        public bool IsSteamId64(string input)
+        {
+            if (!ulong.TryParse(input, out ulong id))
+                return false;
+
+            const ulong Base = 76561197960265728UL; // 0x0110000100000000
+
+            ulong universe = id >> 56; // 1 = Public
+            ulong type = (id >> 52) & 0xF; // 1 = Individual
+            ulong instance = (id >> 32) & 0xFFFFF; // 1 = Desktop
+            ulong accountId = id & 0xFFFFFFFF;
+
+            return id >= Base && universe == 1 && type == 1 && instance == 1 && accountId != 0;
+        }
+
+        /// <summary>
         /// Returns the current server time in milliseconds.
         /// </summary>
         public ulong TimeInMillis
