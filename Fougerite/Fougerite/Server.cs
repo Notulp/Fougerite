@@ -163,6 +163,14 @@ namespace Fougerite
 
             DataStore.GetInstance().Add("Ips", ip, name);
             DataStore.GetInstance().Add("Ids", id, name);
+
+            var onlineMatches = Players.Where(pl => (pl.IP == ip || pl.SteamID == id) && pl.IsOnline && !pl.IsDisconnecting).ToList();
+            foreach (Player pl in onlineMatches)
+            {
+                pl.Message($"[color #FF0000] {reason}");
+                pl.Message($"[color #FF0000] Banned by: {adminname}");
+                pl.Disconnect();
+            }
         }
 
         /// <summary>
@@ -182,6 +190,14 @@ namespace Fougerite
             File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"), $"{timestamp} {name}|{ip}|{adminname}|{reason}\r\n");
 
             DataStore.GetInstance().Add("Ips", ip, name);
+
+            var onlineMatches = Players.Where(pl => pl.IP == ip && pl.IsOnline && !pl.IsDisconnecting).ToList();
+            foreach (Player pl in onlineMatches)
+            {
+                pl.Message($"[color #FF0000] {reason}");
+                pl.Message($"[color #FF0000] Banned by: {adminname}");
+                pl.Disconnect();
+            }
         }
 
         /// <summary>
@@ -201,6 +217,14 @@ namespace Fougerite
             File.AppendAllText(Path.Combine(Util.GetRootFolder(), "Save\\BanLog.log"), $"{timestamp} {name}|{id}|{adminname}|{reason}\r\n");
 
             DataStore.GetInstance().Add("Ids", id, name);
+
+            var onlineMatches = Players.Where(pl => pl.SteamID == id && pl.IsOnline && !pl.IsDisconnecting).ToList();
+            foreach (Player pl in onlineMatches)
+            {
+                pl.Message($"[color #FF0000] {reason}");
+                pl.Message($"[color #FF0000] Banned by: {adminname}");
+                pl.Disconnect();
+            }
         }
 
         /// <summary>
