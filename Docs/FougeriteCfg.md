@@ -37,6 +37,25 @@ Core behavior toggles and gameplay-affecting settings.
 | `EnableScriptPluginsIntensiveEvents` | `false` | Exposes high-frequency events (`OnPlayerMove`, `OnShoot`, `OnShotgunShoot`, `OnBowShoot`, `OnAnimalMovement`, `OnHeatZoneEnter`, `OnWorkZoneEnter`) to **script** plugins (Python/JS/Lua). These fire very often and can cause server lag - prefer writing performance-sensitive hooks in **C#** instead. Use at your own risk. |
 | `SilentConsoleCommands` | `false` | Suppress the default `"Fougerite: Class.Function was executed!"` reply for console commands that don't set an explicit reply text. |
 | `ServerMessageName` | `Fougerite` | Display name/title used for server-originated broadcast/system messages. |
+| `DisableFacePunchTruthPunish` | `false` | Disables `truth.punish`, Facepunch's original speedhack/flyhack validations. You may enable (`true`) this on a RustBuster server, since RustBuster clients can trip these false-positively. |
+| `SteamAuthMode` | `Legacy` | Decides who may join when native Steam auth rejects the connection ticket (RustBuster clients on Spacewar 480, cracked clients). See the dedicated table below and [`SteamAuth`](Classes/SteamAuth.md) for full details. |
+| `SteamWebAPIKey` | *(empty)* | Steam Web API key from <https://steamcommunity.com/dev/apikey>. Required by `RustOwners`/`SteamAccounts`, ignored by every other mode. Keep it private, never share your logs/config with it filled in. |
+| `SteamWebAPITimeout` | `10` | Seconds to wait for one Steam Web API request (`1`-`45`). The connecting player waits this long while the request is in flight. |
+| `SteamWebAPIFailOpen` | `false` | `RustOwners`/`SteamAccounts` only. If the Steam Web API can't be reached (outage, rate limit, timeout), let Spacewar players in anyway (`true`) or reject them (`false`). `true` means a forged ticket gets in during an outage; a rejected API key (HTTP 401/403) is never covered by this and always denies. |
+
+#### `SteamAuthMode` values (safest to least safe)
+
+| Value | Safety rating | Behavior |
+|---|---|---|
+| `RustOnly` | **Most Safe** | Enforces strict native Steam authentication for Rust (252490). Completely blocks all Spacewar, emulated or cracked clients. |
+| `RustOwners` | **High Safety** | Allows Spacewar tickets, but uses the Steam Web API to verify the account actually owns paid Rust. |
+| `SteamAccounts` | **Medium Safety** | Verifies via the Web API that the Spacewar ticket belongs to a legitimate Steam account, but does not require Rust ownership. **This is the most recommended setting to use with RustBuster.** |
+| `SteamAccountsUnverified` | **Low Safety** | Performs basic offline checks to filter out sloppy emulators; bypassable by well-forged tickets spoofing any SteamID. |
+| `Legacy` | **Very Low Safety** | Performs no ticket verification on its own, delegating access decisions entirely to plugins (e.g. the old AuthAllow plugin via `SteamDenyEvent.ForceAllow`). |
+| `AllowAll` | **Zero Safety** | Disables all checks and allows anyone to connect, including clients without Steam. |
+
+Outside of `Legacy`, a plugin can still deny a player through `On_SteamDeny`, but it can never let in a
+connection the configured mode already rejected.
 
 ### `[Modules]` section
 
@@ -116,6 +135,11 @@ enabled=true
 EnableScriptPluginsIntensiveEvents=false
 SilentConsoleCommands=false
 ServerMessageName=Fougerite
+DisableFacePunchTruthPunish=false
+SteamAuthMode=SteamAccounts
+SteamWebAPIKey=
+SteamWebAPITimeout=10
+SteamWebAPIFailOpen=false
 
 [Modules]
 ;module = folder
@@ -150,3 +174,5 @@ rpctracer=false
 - [`Installation.md`](Installation.md) - where to physically place each type of plugin.
 - [`Scripts.md`](Scripts.md) - the `AutoUpdate-Fougerite.ps1` script also touches `.cfg`/`.ini` files under
   `Save\` and will prompt you about overwriting them.
+- [`SteamAuth`](Classes/SteamAuth.md) - the full `SteamAuthMode` pipeline (ticket parsing, Steam Web API
+  validation, `On_SteamDeny`).

@@ -111,5 +111,77 @@ def On_PluginMessage(self, PluginMessageEvent):
         PluginMessageEvent.Cancel()
 ```
 
+### Example - C# (a real contract with a DTO instead of raw strings)
+A plain DTO class is usually a better message contract than magic strings, since both plugins can share the
+type (either by one referencing the other's dll, or by simply agreeing on identical field names and casting
+with reflection/`dynamic` when they don't share an assembly).
+
+```csharp
+// Shared by convention between "EconomyPlugin" and whoever calls it.
+public class BalanceRequest
+{
+    public ulong SteamID;
+}
+
+public class BalanceResponse
+{
+    public bool HasAccount;
+    public double Balance;
+}
+
+// --- EconomyPlugin (receiver) ---
+public override void Initialize()
+{
+    Hooks.OnPluginMessage += OnPluginMessage;
+}
+
+public override void DeInitialize()
+{
+    Hooks.OnPluginMessage -= OnPluginMessage;
+}
+
+public void OnPluginMessage(PluginMessageEvent e)
+{
+    if (e.ReceiverName != Name || !(e.Message is BalanceRequest))
+    {
+        return;
+    }
+
+    BalanceRequest request = (BalanceRequest)e.Message;
+    double balance;
+    if (TryGetBalance(request.SteamID, out balance))
+    {
+        e.Response = new BalanceResponse { HasAccount = true, Balance = balance };
+    }
+    else
+    {
+        e.Response = new BalanceResponse { HasAccount = false, Balance = 0 };
+    }
+}
+
+// --- Any other plugin (sender) ---
+public void CheckBalance(Player player)
+{
+    PluginMessaging.SendAsync(Name, "EconomyPlugin", new BalanceRequest { SteamID = player.UID }, result =>
+    {
+        if (result.Status != PluginMessageResponse.Success)
+        {
+            Logger.Log("EconomyPlugin is unavailable: " + result.Status);
+            return;
+        }
+
+        BalanceResponse response = (BalanceResponse)result.Event.Response;
+        if (response.HasAccount)
+        {
+            player.Message($"Your balance is {response.Balance:0.00}.");
+        }
+        else
+        {
+            player.Message("You don't have an account yet.");
+        }
+    });
+}
+```
+
 See also: [`On_PluginMessage`](../Hooks/Server/On_PluginMessage.md) · [`PluginLoaders`](PluginLoaders.md) ·
 [`BasePlugin`](BasePlugin.md)

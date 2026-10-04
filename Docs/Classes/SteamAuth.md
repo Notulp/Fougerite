@@ -39,15 +39,23 @@ Static helpers for parsing/validating ticket bytes - no network calls, pure data
 `IsSignatureBlank`, `TicketLength`, `TrailingBytes`.
 
 ### SteamAuthMode (enum, `Fougerite.cfg` -> `SteamAuthMode`)
-Controls what happens to a connection that native Steam auth rejects:
-- `Legacy` (0) - original behaviour; nothing enforced, a plugin decides via `SteamDenyEvent.ForceAllow`.
-- `RustOnly` (1) - every rejected connection stays rejected.
-- `RustOwners` (2) - admits Spacewar tickets confirmed by the Web API **and** whose account owns Rust (needs a
-  Web API key + public game details).
-- `SteamAccounts` (3) - admits any genuine Spacewar ticket confirmed by the Web API (needs a Web API key).
-- `SteamAccountsUnverified` (4) - admits Spacewar tickets that pass `SteamAPITools.IsPlausibleTicket`. No
-  network call, fastest Steam-only mode, but a carefully forged ticket can still slip through.
-- `AllowAll` (5) - admits everyone, including non-Steam clients.
+Controls what happens to a connection that native Steam auth rejects. Each mode's safety rating below reflects
+how hard it is for a forged/cracked/emulated client to slip through - **not** how many legitimate players it
+admits:
+- `RustOnly` (1) - **Most Safe.** Enforces strict native Steam authentication for Rust (252490). Completely
+  blocks all Spacewar, emulated or cracked clients; every rejected connection stays rejected.
+- `RustOwners` (2) - **High Safety.** Allows Spacewar tickets, but uses the Steam Web API to verify the account
+  actually owns paid Rust (needs a Web API key + the player's game details to be public).
+- `SteamAccounts` (3) - **Medium Safety.** Verifies via the Web API that the Spacewar ticket belongs to a
+  legitimate Steam account, but does not require Rust ownership (needs a Web API key). **This is the most
+  recommended setting to use with RustBuster.**
+- `SteamAccountsUnverified` (4) - **Low Safety.** Performs basic offline checks
+  (`SteamAPITools.IsPlausibleTicket`) to filter out sloppy emulators. No network call, fastest Steam-only mode,
+  but bypassable by well-forged tickets spoofing any SteamID.
+- `Legacy` (0) - **Very Low Safety.** Performs no ticket verification on its own, delegating access decisions
+  entirely to plugins (via `SteamDenyEvent.ForceAllow`). This is the original pre-`SteamAuthMode` behaviour.
+- `AllowAll` (5) - **Zero Safety.** Disables all checks and allows anyone to connect, including clients without
+  Steam at all.
 
 ### SteamTicketValidator
 Static class that drives the Steam Web API calls and the final admit/deny decision:

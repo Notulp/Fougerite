@@ -27,7 +27,9 @@ public delegate void SteamDenyDelegate(SteamDenyEvent sde);
   (always `false` in `SteamAuthMode.SteamAccountsUnverified`/`Legacy`, where It only means the ticket contains
   a recognised AppID, which proves nothing on its own).
 - `SteamDenyEvent.Mode` - The `SteamAuthMode` (see [`SteamAuth`](../../Classes/SteamAuth.md)) in effect for this
-  connection.
+  connection. From safest to least safe: `RustOnly` (Most Safe) -> `RustOwners` (High Safety) ->
+  `SteamAccounts` (Medium Safety, recommended for RustBuster) -> `SteamAccountsUnverified` (Low Safety) ->
+  `Legacy` (Very Low Safety) -> `AllowAll` (Zero Safety).
 - `SteamDenyEvent.Ticket` - The parsed `SteamTicketInfo`, or `null` in `Legacy` mode/for malformed tickets.
 - `SteamDenyEvent.TicketAppId` - The AppID the ticket claims (0 when unknown).
 - `SteamDenyEvent.WebValidation` - The `SteamWebValidation` result, or `null` when no Web API call was made.
