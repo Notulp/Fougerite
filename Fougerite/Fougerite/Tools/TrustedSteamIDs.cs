@@ -46,7 +46,7 @@ namespace Fougerite.Tools
                 {
                     if (!File.Exists(_path))
                     {
-                        List<ulong> example = new List<ulong>() {76561190000000000};
+                        List<ulong> example = new List<ulong>() {76561190000000000, 76561190000000001};
                         File.WriteAllText(_path, JsonConvert.SerializeObject(example, Formatting.Indented), Encoding.UTF8);
                     }
 
