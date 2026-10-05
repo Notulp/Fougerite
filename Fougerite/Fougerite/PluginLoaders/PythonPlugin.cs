@@ -120,6 +120,7 @@ namespace Fougerite.PluginLoaders
             Scope.SetVariable("MySQL", MySQLConnector.GetInstance);
             Scope.SetVariable("SQLite", SQLiteConnector.GetInstance);
             Scope.SetVariable("PermissionSystem", PermissionSystem.GetPermissionSystem());
+            Scope.SetVariable("TrustedSteamIDs", Tools.TrustedSteamIDs.GetInstance());
             Scope.SetVariable("PlayerCache", PlayerCache.GetPlayerCache());
             Scope.SetVariable("EntityCache", EntityCache.GetInstance());
             Scope.SetVariable("NPCCache", NPCCache.GetInstance());

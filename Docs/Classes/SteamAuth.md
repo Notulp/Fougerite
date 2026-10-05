@@ -1,6 +1,6 @@
 ### Class
 `Fougerite.Tools.SteamAPITools` / `Fougerite.Tools.SteamTicketInfo` / `Fougerite.Tools.SteamTicketValidator` /
-`Fougerite.Tools.SteamWebValidation` / `Fougerite.Tools.SteamUserRegistry`
+`Fougerite.Tools.SteamWebValidation` / `Fougerite.Tools.TrustedSteamIDs` / `Fougerite.Tools.SteamUserRegistry`
 
 ### Description
 These classes implement Fougerite's extended Steam authentication pipeline, used by `Hooks`/`ConnectionAcceptor`
@@ -46,11 +46,13 @@ admits:
 - `RustOnly` (1) - **Most Safe.** Enforces strict native Steam authentication for Rust (252490). Completely
   blocks all Spacewar, emulated or cracked clients; every rejected connection stays rejected.
 - `RustOwners` (2) - **High Safety.** Allows Spacewar tickets, but uses the Steam Web API to verify the account
-  actually owns paid Rust (needs a Web API key + the player's game details to be public).
+  actually owns paid Rust (needs a Web API key + the player's game details to be public). A SteamID listed in
+  `TrustedSteamIDs` is admitted even when it doesn't own Rust.
 - `SteamPaidAccounts` (3) - **High Safety.** Allows Spacewar players whose ticket is verified through the
   Steam Web API and whose Steam account is not limited, meaning it has spent at least 5 USD on Steam (needs a
   Web API key). This keeps out freshly-made alt accounts **without** requiring Rust ownership. Private
-  profiles are fine, but the player must have set up a Steam Community profile at least once.
+  profiles are fine, but the player must have set up a Steam Community profile at least once. A SteamID
+  listed in `TrustedSteamIDs` is admitted even when its account is limited.
 - `SteamAccounts` (4) - **Medium Safety.** Verifies via the Web API that the Spacewar ticket belongs to a
   legitimate Steam account, but does not require Rust ownership or a non-limited account (needs a Web API
   key). **This is the most recommended setting to use with RustBuster.**
@@ -93,6 +95,22 @@ removed from the client's ticket before sending it to Steam), `VerifiedSteamId`,
 `IsCompleted`, `IsGenuineSteamAccount`, `IsApiFailure`. `SteamWebValidationStatus` values: `Pending`,
 `Verified`, `InvalidTicket`, `SteamIdMismatch`, `NotRustOwner`, `OwnershipPrivate`, `LimitedAccount`,
 `AccountStatusUnknown`, `ApiError`, `ApiKeyRejected`, `TimedOut`.
+
+### TrustedSteamIDs
+Lazy singleton (`GetInstance()`, same pattern as `PermissionSystem`/`Web`/etc.) backed by
+`Save\TrustedSteamIDs.json`, holding SteamIDs that are admitted by `SteamTicketValidator.Evaluate` under
+`SteamAuthMode.RustOwners`/`SteamAuthMode.SteamPaidAccounts` without needing to pass that mode's Steam Web API
+check (Rust ownership / non-limited account). Not used by any other mode - `RustOnly` doesn't call the Web
+API at all, and the other modes don't need this kind of override.
+The JSON file is just a flat array of SteamID64 numbers and can be edited by hand while the server is stopped:
+- `GetInstance()` - returns the singleton instance.
+- `Contains(ulong steamId)` - whether the SteamID is trusted.
+- `Add(ulong steamId)` / `Remove(ulong steamId)` - add/remove a SteamID, persisting the change to disk.
+- `GetAll()` - a snapshot `List<ulong>` of every trusted SteamID.
+- `Reload()` - reloads the list from disk, discarding unsaved in-memory changes (there shouldn't be any, since
+  `Add`/`Remove` save immediately).
+This is also documented in `Fougerite.cfg` right under the `SteamAuthMode` table.
+Exposed to Python, JS and Lua plugins as the global `TrustedSteamIDs` variable, same as `PermissionSystem`.
 
 ### SteamUserRegistry
 A simple static, thread-safe registry of SteamIDs that have been verified this session (by native auth for

@@ -246,7 +246,9 @@ namespace Fougerite
                 "A paid account is one that spent at least 5 USD on Steam, so Steam does not treat it as a limited account.\n" +
                 "RustOwners rejects players with private game details even when they own Rust.\n" +
                 "SteamAccountsUnverified checks tickets offline only. It stops broken emulators, but a well made fake ticket can join as any SteamID.\n" +
-                "Plugins can always kick a player the mode allows. Outside Legacy, plugins cannot let in a player the mode rejects.");
+                "Plugins can always kick a player the mode allows. Outside Legacy, plugins cannot let in a player the mode rejects.\n" +
+                "RustOwners and SteamPaidAccounts also allow any SteamID listed in Save\\TrustedSteamIDs.json,\n" +
+                "even if that SteamID fails the Rust ownership / paid account check. Edit that file by hand while the server is stopped.");
 
             Config.AddDefault("Fougerite", "SteamWebAPIKey",
                 "",
@@ -611,6 +613,9 @@ namespace Fougerite
             
             // Load DataStore
             DataStore.GetInstance().Load();
+            
+            // Load TrustedSteamIDs
+            TrustedSteamIDs.GetInstance().Reload();
             
             // Update Banlist
             UpdateBanList();

@@ -131,6 +131,7 @@ namespace Fougerite.PluginLoaders
                 Engine.SetValue("MySQL", MySQLConnector.GetInstance);
                 Engine.SetValue("SQLite", SQLiteConnector.GetInstance);
                 Engine.SetValue("PermissionSystem", PermissionSystem.GetPermissionSystem());
+                Engine.SetValue("TrustedSteamIDs", Tools.TrustedSteamIDs.GetInstance());
                 Engine.SetValue("PlayerCache", PlayerCache.GetPlayerCache());
                 Engine.SetValue("EntityCache", EntityCache.GetInstance());
                 Engine.SetValue("SleeperCache", SleeperCache.GetInstance());

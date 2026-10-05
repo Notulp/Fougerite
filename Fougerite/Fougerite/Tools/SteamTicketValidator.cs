@@ -667,6 +667,13 @@ namespace Fougerite.Tools
                 return false;
             }
 
+            if ((mode == SteamAuthMode.RustOwners || mode == SteamAuthMode.SteamPaidAccounts)
+                && TrustedSteamIDs.GetInstance().Contains(ticket.SteamId))
+            {
+                reason = $"{mode}: SteamID is on the trusted list";
+                return true;
+            }
+
             if (mode == SteamAuthMode.SteamAccountsUnverified)
             {
                 string offlineReason;
