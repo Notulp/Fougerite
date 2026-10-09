@@ -87,6 +87,9 @@ namespace Fougerite.PluginLoaders
 
         public override void Load(string code = "")
         {
+            bool nativeDomainLoaded = false;
+            ModuleContainer loadedContainer = null;
+
             try
             {
                 byte[] bin = File.ReadAllBytes(code);
@@ -112,6 +115,12 @@ namespace Fougerite.PluginLoaders
                 {
                     throw new Exception("Native mono plugin domain loading returned null.");
                 }
+
+                // From this point on, the native side has an AppDomain/assembly registered under
+                // our name. If anything below fails, we must explicitly unload it, otherwise the
+                // native hash table keeps a stale entry that a future load with the same
+                // name would silently overwrite, leaking the AppDomain.
+                nativeDomainLoaded = true;
 
                 foreach (Type type in assembly.GetExportedTypes())
                 {
@@ -157,6 +166,7 @@ namespace Fougerite.PluginLoaders
                         #pragma warning disable 618
                         ModuleManager.Modules.Add(Container);
                         #pragma warning restore 618
+                        loadedContainer = Container;
                         Engine = PluginInstance;
                         Logger.LogDebug($"[Modules] Module added: {FileInfo.Name}");
                         Globals = new ConcurrentList<string>(type.GetMethods().Select(method => method.Name).ToList());
@@ -164,12 +174,38 @@ namespace Fougerite.PluginLoaders
                     }
                 }
 
+                if (Engine == null)
+                {
+                    throw new Exception($"No valid public, non-abstract {nameof(Module)} subclass was found in the plugin assembly.");
+                }
+
                 State = PluginState.Loaded;
             }
             catch (Exception ex)
             {
-                Logger.LogException(ex);
+                Logger.LogError($"[Modules] Failed to load plugin \"{Name}\". The plugin will not be considered loaded and all its resources will be released. {ex}");
                 State = PluginState.FailedToLoad;
+
+                if (loadedContainer != null)
+                {
+                    #pragma warning disable 618
+                    ModuleManager.Modules.Remove(loadedContainer);
+                    #pragma warning restore 618
+                }
+                Engine = null;
+
+                if (nativeDomainLoaded)
+                {
+                    try
+                    {
+                        var icalls = new Icalls();
+                        icalls.mono_fg_unload_plugin(Name);
+                    }
+                    catch (Exception unloadEx)
+                    {
+                        Logger.LogError($"[Modules] Failed to unload native plugin domain for \"{Name}\" after a failed load. {unloadEx}");
+                    }
+                }
             }
 
             PluginLoader.GetInstance().OnPluginLoaded(this);

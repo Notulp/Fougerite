@@ -13,23 +13,26 @@ namespace Fougerite
     public sealed class Icalls
     {
         /// <summary>
-        /// Loads a plugin into the application domain from the supplied memory buffer.
+        /// Loads a plugin into its own isolated <c>AppDomain</c> from the supplied assembly bytes.
         /// </summary>
-        /// <param name="pluginName">The name of the plugin mapping to its isolated domain.</param>
+        /// <param name="pluginName">The name of the plugin, used as the key for its domain/context.</param>
         /// <param name="data">A pointer to the memory buffer containing the plugin binary data.</param>
         /// <param name="dataLen">The length of the binary data in the memory buffer.</param>
         /// <returns>
         /// An instance of the <see cref="System.Reflection.Assembly"/> representing the loaded plugin.
         /// Returns null if the plugin could not be successfully loaded.
         /// </returns>
+        /// <remarks>
+        /// Always unload a plugin before loading it again under the same name, otherwise the previous domain leaks.
+        /// </remarks>
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern Assembly mono_fg_load_plugin(string pluginName, IntPtr data, uint dataLen);
 
         /// <summary>
-        /// Unloads a plugin specified by its name.
+        /// Unloads the <c>AppDomain</c> belonging to the named plugin and frees its resources.
         /// </summary>
         /// <param name="pluginName">The name of the plugin to be unloaded.</param>
-        /// <returns>True if the plugin was successfully unloaded, otherwise, false.</returns>
+        /// <returns>True if the plugin was found and unloaded, otherwise, false.</returns>
         [MethodImpl(MethodImplOptions.InternalCall)]
         public extern bool mono_fg_unload_plugin(string pluginName);
     }
@@ -46,22 +49,21 @@ namespace Fougerite
     internal static class NativeMono
     {
         /// <summary>
-        /// Creates an unmanaged Fougerite Mono domain.
+        /// Initializes the native plugin registry used to track each loaded plugin's domain.
+        /// Despite the name, it does not create an actual Mono domain itself.
         /// </summary>
         /// <returns>
-        /// Returns an integer representing the success or failure of creating the domain.
+        /// Returns an integer representing the success or failure of the initialization.
         /// Typically, 0x1 indicates success and any other value indicates failure.
         /// </returns>
         [DllImport("mono.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int mono_fg_create_domain();
 
         /// <summary>
-        /// Unloads the Mono domain used for running specific plugins or assemblies.
-        /// Typically used to release resources associated with the domain and prepare
-        /// for a fresh environment.
+        /// Unloads all currently tracked plugin domains and releases the native plugin registry.
         /// </summary>
         /// <returns>
-        /// An integer indicating whether the domain was successfully unloaded.
+        /// An integer indicating whether the operation completed.
         /// A return value of 0x1 indicates success, while any other value denotes failure.
         /// </returns>
         [DllImport("mono.dll", CallingConvention = CallingConvention.Cdecl)]
