@@ -186,7 +186,7 @@ namespace Fougerite.PluginLoaders
 
         public void ReloadPlugins()
         {
-            foreach (BasePlugin plugin in PluginLoader.GetInstance().Plugins.Values)
+            foreach (BasePlugin plugin in PluginLoader.GetInstance().Plugins.Values.ToArray())
             {
                 if (!plugin.DontReload)
                 {

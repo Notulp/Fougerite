@@ -927,10 +927,10 @@ namespace Fougerite.PluginLoaders
                             break;
                     }
                 }
-
-                if (plugin.Globals.Contains(PluginLoaderEvents.OnPluginShutdown))
-                    plugin.BaseOnPluginShutdown();
             }
+
+            if (plugin.Globals.Contains(PluginLoaderEvents.OnPluginShutdown))
+                plugin.BaseOnPluginShutdown();
         }
 
         /// Checks if an intensive event is allowed to be hooked by a plugin.

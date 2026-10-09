@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Fougerite.PluginLoaders
 {
@@ -124,7 +125,7 @@ namespace Fougerite.PluginLoaders
 
         public void ReloadPlugins()
         {
-            foreach (BasePlugin plugin in PluginLoader.GetInstance().Plugins.Values)
+            foreach (BasePlugin plugin in PluginLoader.GetInstance().Plugins.Values.ToArray())
             {
                 if (!plugin.DontReload)
                 {
@@ -170,7 +171,7 @@ namespace Fougerite.PluginLoaders
 
         public void UnloadPlugins()
         {
-            foreach (string name in PluginLoader.GetInstance().Plugins.Keys)
+            foreach (string name in PluginLoader.GetInstance().Plugins.Keys.ToArray())
                 UnloadPlugin(name);
         }
 
