@@ -61,6 +61,38 @@ Starting from version **1.9.7**, Fougerite ships [Fougerite_LibRust_x64](https:/
 
 ---
 
+## Reverse Engineering & Future Unity Engine Upgrade
+
+Rust Legacy was originally built on **Unity 4.5.5f**, a 2013-era engine release. The x64 upgrade above is only
+possible because of years of reverse engineering the server (`librust.dll`/`Assembly-CSharp.dll`) and client
+down to the packet and function level (see "12 years of Fougerite" above) - none of that groundwork is
+publicly documented by Facepunch, since Rust Legacy itself is abandoned/unsupported.
+
+That same reverse engineering work is now being pointed at a bigger goal: **porting Rust Legacy itself onto a
+modern Unity engine version**, instead of staying on Unity 4.5.5f forever. A newer Unity gives access to:
+- A vastly larger, actively maintained engine API (rendering, physics, networking, asset pipeline) that
+  Unity 4.5.5f never had and never will receive.
+- Modern Unity/Mono/IL2CPP runtime performance improvements over the 2013-era Mono (Mini) JIT the server
+  currently ships with.
+- A realistic long-term path once x86/x64-era tooling for a 12-year-old engine becomes harder to source.
+
+As the engine port progresses, Fougerite's own mods/hooks will be **ported over to the upgraded engine** one
+at a time, rather than rewritten from scratch - the plugin-facing API (`BasePlugin`, `Hooks`, `World`,
+`Player`, etc. documented under [`Docs/`](Docs/README.md)) is intended to keep working for existing C#/
+Python/JS/Lua plugins across that transition wherever feasible.
+
+### C# Plugin Reloading
+
+Fougerite's C# plugin engines (both DLL "Modules" and the source-based `CSScript` engine) support **hot
+reloading at runtime** without restarting the server: editing/dropping a plugin file reloads it in place
+through a single custom unmanaged Mono plugin-domain registry shared by both engines, instead of spinning up
+a full new AppDomain per reload (which the stock Mono build used wasn't designed for). See
+[`Docs/Classes/BasePlugin.md`](Docs/Classes/BasePlugin.md#c-modules-single-appdomain-and-reloading) and
+[`Docs/Classes/PluginLoaders.md`](Docs/Classes/PluginLoaders.md#nativedomainmanager) for the full
+implementation details (`NativeDomainManager`, `mono_fg_create_domain`/`mono_fg_unload_domain`).
+
+---
+
 ## Compilation
 1. First you need to decide wheather you are going to modify the patcher or not. If you are only here to modify or compile
    the Fougerite project, or one of the engines skip to step 7.
