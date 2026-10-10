@@ -61,6 +61,41 @@ whichever of the two is active, so server owners aren't surprised by rejected pl
 a plugin can still deny a player through `On_SteamDeny`, but it can never let in a connection the configured
 mode already rejected.
 
+#### `TrustedSteamIDs`: whitelisting specific players for `RustOwners`/`SteamPaidAccounts`
+`RustOwners` and `SteamPaidAccounts` can reject a perfectly legitimate player simply because their Steam
+profile doesn't meet that mode's requirement (doesn't own Rust, or the account is flagged as limited/private
+game details) - `TrustedSteamIDs` lets you override that for individual SteamID64s without lowering
+`SteamAuthMode` for everyone else.
+
+It's backed by `Save\TrustedSteamIDs.json` (next to `Fougerite.cfg`, not a `Fougerite.cfg` key itself), a
+plain JSON array of SteamID64 numbers, created automatically on first startup with two example entries:
+```json
+[
+  76561190000000000,
+  76561190000000001
+]
+```
+Replace the examples with the real SteamID64s you want to trust, then save the file - it's safe to hand-edit
+while the server is stopped. A SteamID listed here is let in by `SteamTicketValidator.Evaluate` even if:
+- `RustOwners` - the Steam Web API says the account doesn't own Rust.
+- `SteamPaidAccounts` - the Steam Web API says the account is limited (never spent 5 USD on Steam).
+
+It has **no effect** on any other `SteamAuthMode` value - `RustOnly` never calls the Web API at all, and
+`SteamAccounts`/`SteamAccountsUnverified`/`Legacy`/`AllowAll` don't need this kind of override. Also exposed
+to Python/JS/Lua plugins as the global `TrustedSteamIDs` variable (same pattern as `PermissionSystem`), and
+in C# via `Fougerite.Tools.TrustedSteamIDs.GetInstance()` - see [`SteamAuth.md`](Classes/SteamAuth.md#trustedsteamids)
+for the full API (`Contains`/`Add`/`Remove`/`GetAll`/`Reload`).
+
+Example - C# (trusting a SteamID at runtime, e.g. from an admin command):
+```csharp
+using Fougerite.Tools;
+
+if (TrustedSteamIDs.GetInstance().Add(76561198000000123))
+{
+    Logger.Log("Added 76561198000000123 to TrustedSteamIDs.");
+}
+```
+
 #### Genuine tickets rejected with "101 Invalid ticket"
 When Steam just issued the ticket, its Web API can briefly answer `101 Invalid ticket` for a perfectly valid
 Spacewar ticket before the ticket is fully registered on Steam's side. Fougerite now retries the Web API call

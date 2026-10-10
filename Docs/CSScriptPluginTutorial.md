@@ -173,7 +173,59 @@ compile-time reference), the loader still notices the literal and treats it as a
 to load that plugin first if possible, without adding a compiler reference. Use `#require` when you want to
 use the other plugin's types directly; rely on the soft dependency when you only need "best effort" ordering.
 
-### 6. Reacting to other plugins loading/unloading
+### 6. `OnModulesLoaded`: waiting for every C# plugin, then scanning them
+
+[`Hooks.OnModulesLoaded`](Hooks/Server/On_ModulesLoaded.md) fires exactly once, after every enabled C#
+based engine finished its **startup** load - that means both the DLL `Module`s (`EnableCSharp`) and the
+CSScript plugins (`EnableCSScript`), in whichever combination is actually enabled:
+- Both engines enabled - DLL modules load first, then CSScript plugins, then `OnModulesLoaded` fires once.
+- Only `EnableCSharp` enabled - fires once DLL modules finished loading (no CSScript plugins exist).
+- Only `EnableCSScript` enabled - fires once CSScript plugins finished loading (no DLL modules exist).
+- Neither engine enabled - it never fires at all, there's nothing to wait for.
+
+This makes it the ideal place for a CSScript plugin to look at **every other already-loaded C# plugin**
+(DLL module or CSScript, it doesn't matter which) and grab their API, instead of guessing load order with
+`#require`/`Order`:
+```csharp
+using Fougerite;
+using Fougerite.PluginLoaders;
+
+public override void Initialize()
+{
+    Hooks.OnModulesLoaded += HandleModulesLoaded;
+}
+
+public override void DeInitialize()
+{
+    Hooks.OnModulesLoaded -= HandleModulesLoaded;
+}
+
+private void HandleModulesLoaded()
+{
+    // Every plugin of every type is in here by now, not just C# ones (Python/JS/Lua plugins
+    // finish loading separately, but any that were already up by this point are included too).
+    foreach (BasePlugin plugin in PluginLoader.GetInstance().Plugins.Values)
+    {
+        if (plugin.Type != PluginType.CSharp && plugin.Type != PluginType.CSScript)
+            continue; // only DLL modules/CSScript plugins expose an Engine field.
+
+        Module engine = ((dynamic) plugin).Engine; // CSPlugin.Engine / CSScriptPlugin.Engine
+        Logger.Log("Found C# plugin: " + plugin.Name + " v" + engine.Version + " by " + engine.Author);
+
+        if (plugin.Name == "EconomyCore")
+        {
+            // Safe to cast to the concrete type and call its API here, it's guaranteed loaded.
+        }
+    }
+}
+```
+`PluginLoader.GetInstance().Plugins` is a flat dictionary of every loaded plugin by name, regardless of
+type, so this works the same whether you're looking for a DLL module or another CSScript plugin. Prefer
+`#require` (section 5) when you know the exact dependency up front and want a compile-time typed reference;
+use `OnModulesLoaded` + a scan like above when you want to discover/react to whatever happens to be loaded
+without hard-coding a single dependency.
+
+### 7. Reacting to other plugins loading/unloading
 
 Two hooks fire for **every** plugin, of **any** type (DLL module, CSScript, Python, JS, Lua) - handy
 precisely for CSScript plugins that use `#require`/soft dependencies and want to know when a dependency came
@@ -212,7 +264,7 @@ private void HandlePluginUnloaded(BasePlugin plugin)
 }
 ```
 
-### 7. Full example: `HelloScriptTest`
+### 8. Full example: `HelloScriptTest`
 
 A complete, working multi-file CSScript plugin. It demonstrates: the `Module` skeleton, a helper type living
 in its own file (proving every `.cs` file in the folder gets compiled), and both new hooks.
@@ -338,7 +390,7 @@ Drop the file(s) in `Modules\HelloScriptTest\HelloScriptTest.cs`, make sure `Ena
 [HelloScriptTest] all C# modules are loaded.
 ```
 
-### 8. Where to go next
+### 9. Where to go next
 - [`CSharpPluginTutorial.md`](CSharpPluginTutorial.md) - the DLL-module tutorial; CSScript plugins share the
   exact same `Module`/`BasePlugin` API, this tutorial only covers what's different about CSScript.
 - [`Hooks/README.md`](Hooks/README.md) - every hook/event, including
