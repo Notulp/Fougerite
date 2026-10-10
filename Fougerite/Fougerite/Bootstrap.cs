@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading;
 using Fougerite.Caches;
@@ -268,6 +268,16 @@ namespace Fougerite
                 "false rejects them, which is the safe choice.\n" +
                 "true lets them in unchecked, which also lets fake tickets in for as long as Steam is unreachable.\n" +
                 "Only used by RustOwners, SteamPaidAccounts and SteamAccounts. A wrong API key always rejects, whatever this says.");
+
+            Config.AddDefault("Engines", "EnableCSScript",
+                "true",
+                "Compiles C# script plugins from source at startup, Modules\\Name\\Name.cs plus every other .cs file in that folder.\n" +
+                "Use // #require OtherPlugin in a source file to reference another C# script plugin or DLL module at compile time.");
+
+            Config.AddDefault("Engines", "CSScriptCompiler",
+                "",
+                "Optional full path to csc.exe or mcs.exe used for C# script plugins.\n" +
+                "Leave empty to detect it, MSBuild Roslyn first, then the .NET Framework compilers, then Mono mcs.");
 
             // Persist any newly added defaults so the file is up-to-date after the first save cycle.
             Config.Save();
@@ -643,6 +653,7 @@ namespace Fougerite
             {
                 //ModuleManager.LoadModules();
                 CSharpPluginLoader.GetInstance();
+                CSScriptPluginLoader.GetInstance();
                 PythonPluginLoader.GetInstance();
                 JavaScriptPluginLoader.GetInstance();
                 LuaPluginLoader.GetInstance();

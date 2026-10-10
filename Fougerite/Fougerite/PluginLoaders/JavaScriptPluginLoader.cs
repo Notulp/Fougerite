@@ -188,6 +188,7 @@ namespace Fougerite.PluginLoaders
                     PluginLoader.GetInstance().Plugins.Remove(name);
                 }
 
+                PluginLoader.GetInstance().OnPluginUnloaded(plugin);
                 Logger.LogDebug($"[JSPluginLoader] {name} plugin was unloaded successfuly.");
             }
             else

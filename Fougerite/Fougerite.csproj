@@ -116,6 +116,8 @@
     <Compile Include="Fougerite\PluginLoaders\CountedInstance.cs" />
     <Compile Include="Fougerite\PluginLoaders\CSharpPluginLoader.cs" />
     <Compile Include="Fougerite\PluginLoaders\CSPlugin.cs" />
+    <Compile Include="Fougerite\PluginLoaders\CSScriptPlugin.cs" />
+    <Compile Include="Fougerite\PluginLoaders\CSScriptPluginLoader.cs" />
     <Compile Include="Fougerite\PluginLoaders\IPlugin.cs" />
     <Compile Include="Fougerite\PluginLoaders\IPluginLoader.cs" />
     <Compile Include="Fougerite\PluginLoaders\ISingleton.cs" />

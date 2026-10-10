@@ -850,6 +850,16 @@ namespace Fougerite.PluginLoaders
             Invoke(PluginLoaderEvents.OnAllPluginsLoaded);
         }
 
+        public void BaseOnPluginLoaded(BasePlugin plugin)
+        {
+            Invoke(PluginLoaderEvents.OnPluginLoaded, plugin);
+        }
+
+        public void BaseOnPluginUnloaded(BasePlugin plugin)
+        {
+            Invoke(PluginLoaderEvents.OnPluginUnloaded, plugin);
+        }
+
         public void BaseOnBlueprintUse(Player player, BPUseEvent evt)
         {
             Invoke(PluginLoaderEvents.OnBlueprintUse, player, evt);

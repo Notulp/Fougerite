@@ -167,6 +167,8 @@ namespace Fougerite.PluginLoaders
                     //    "[CSharpPlugin] Module {0} v{1} (by {2}) initiated.", CurrentModule.Name, CurrentModule.Version, CurrentModule.Author));
                 }
 
+                // C# script plugins load after the DLL modules, before OnModulesLoaded.
+                CSScriptPluginLoader.NotifyCSharpModulesLoaded();
                 Hooks.ModulesLoaded();
             }
             else
@@ -242,6 +244,7 @@ namespace Fougerite.PluginLoaders
                 var icalls = new Icalls();
                 icalls.mono_fg_unload_plugin(name);
 
+                PluginLoader.GetInstance().OnPluginUnloaded(plugin);
                 Logger.LogDebug($"[CSharpPluginLoader] {name} plugin was unloaded successfuly.");
             }
             else

@@ -200,6 +200,16 @@ namespace Fougerite
         /// </summary>
         public static event ModulesLoadedDelegate OnModulesLoaded;
 
+        /// <summary>
+        /// This delegate runs when a plugin of any type is loaded.
+        /// </summary>
+        public static event PluginLoadedDelegate OnPluginLoaded;
+
+        /// <summary>
+        /// This delegate runs when a plugin of any type is unloaded.
+        /// </summary>
+        public static event PluginUnloadedDelegate OnPluginUnloaded;
+
         [Obsolete("This method is no longer called since the rust api doesn't call It.", false)]
         public static event RecieveNetworkDelegate OnRecieveNetwork;
 
@@ -615,6 +625,8 @@ namespace Fougerite
             OnServerInit = delegate { };
             OnServerShutdown = delegate { };
             OnModulesLoaded = delegate { };
+            OnPluginLoaded = delegate { };
+            OnPluginUnloaded = delegate { };
             OnRecieveNetwork = delegate { };
             OnShowTalker = delegate { };
             OnCrafting = delegate { };
@@ -728,6 +740,10 @@ namespace Fougerite
         public delegate void ServerShutdownDelegate();
 
         public delegate void ModulesLoadedDelegate();
+
+        public delegate void PluginLoadedDelegate(PluginLoaders.BasePlugin plugin);
+
+        public delegate void PluginUnloadedDelegate(PluginLoaders.BasePlugin plugin);
 
         public delegate void RecieveNetworkDelegate(Player player, Metabolism m, float cal, float water,
             float rad, float anti, float temp, float poison);
@@ -845,6 +861,24 @@ namespace Fougerite
 
         public delegate void AudibleSoundDelegate(AudibleSoundEvent e);
         
+        /// <summary>
+        /// Called by the PluginLoader when a plugin is loaded.
+        /// </summary>
+        /// <param name="plugin">The loaded plugin.</param>
+        public static void PluginLoaded(PluginLoaders.BasePlugin plugin)
+        {
+            ExecuteSubscribers(OnPluginLoaded, nameof(OnPluginLoaded), plugin);
+        }
+
+        /// <summary>
+        /// Called by the PluginLoader when a plugin is unloaded.
+        /// </summary>
+        /// <param name="plugin">The unloaded plugin.</param>
+        public static void PluginUnloaded(PluginLoaders.BasePlugin plugin)
+        {
+            ExecuteSubscribers(OnPluginUnloaded, nameof(OnPluginUnloaded), plugin);
+        }
+
         /// <summary>
         /// Flags for Method.Invoke
         /// </summary>

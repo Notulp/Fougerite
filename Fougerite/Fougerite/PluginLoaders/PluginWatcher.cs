@@ -61,6 +61,11 @@ namespace Fougerite.PluginLoaders
     public class PluginTypeWatcher : CountedInstance
     {
         /// <summary>
+        /// Quiet period after the last change to a C# script plugin file before the plugin is rebuilt, so saving several files or an atomic editor save causes a single reload.
+        /// </summary>
+        private const int ScriptReloadDelayMs = 750;
+
+        /// <summary>
         /// The plugin type assigned to this watcher.
         /// </summary>
         public PluginType Type;
@@ -69,6 +74,10 @@ namespace Fougerite.PluginLoaders
         /// The underlying unmanaged system file watcher component.
         /// </summary>
         public readonly FileSystemWatcher Watcher;
+
+        private readonly object _pendingScriptReloadsLock = new object();
+        private readonly Dictionary<string, System.Threading.Timer> _pendingScriptReloads =
+            new Dictionary<string, System.Threading.Timer>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginTypeWatcher"/> class.
@@ -84,6 +93,12 @@ namespace Fougerite.PluginLoaders
             Watcher.IncludeSubdirectories = true;
             Watcher.Changed += OnPluginChanged;
             Watcher.Created += OnPluginCreated;
+
+            if (Type == PluginType.CSScript)
+            {
+                Watcher.Renamed += OnScriptRenamed;
+                Watcher.Deleted += OnScriptDeleted;
+            }
         }
 
         /// <summary>
@@ -137,6 +152,12 @@ namespace Fougerite.PluginLoaders
         /// <param name="e">The file event arguments wrapper data.</param>
         private void OnPluginCreated(object sender, FileSystemEventArgs e)
         {
+            if (Type == PluginType.CSScript)
+            {
+                QueueScriptReload(e.FullPath);
+                return;
+            }
+
             Loom.QueueOnMainThread(() =>
             {
                 try
@@ -171,6 +192,12 @@ namespace Fougerite.PluginLoaders
         /// <param name="e">The file event arguments wrapper data.</param>
         private void OnPluginChanged(object sender, FileSystemEventArgs e)
         {
+            if (Type == PluginType.CSScript)
+            {
+                QueueScriptReload(e.FullPath);
+                return;
+            }
+
             Loom.QueueOnMainThread(() =>
             {
                 try
@@ -212,6 +239,99 @@ namespace Fougerite.PluginLoaders
                 catch (Exception ex)
                 {
                     Logger.LogError($"[PluginWatcher] OnPluginChanged error: {ex}");
+                }
+            });
+        }
+
+        /// <summary>
+        /// Triggered when a file in a C# script plugin folder is renamed.
+        /// </summary>
+        /// <param name="sender">The source sender component.</param>
+        /// <param name="e">The rename event arguments wrapper data.</param>
+        private void OnScriptRenamed(object sender, RenamedEventArgs e)
+        {
+            QueueScriptReload(e.OldFullPath);
+            QueueScriptReload(e.FullPath);
+        }
+
+        /// <summary>
+        /// Triggered when a file in a C# script plugin folder is deleted.
+        /// </summary>
+        /// <param name="sender">The source sender component.</param>
+        /// <param name="e">The file event arguments wrapper data.</param>
+        private void OnScriptDeleted(object sender, FileSystemEventArgs e)
+        {
+            QueueScriptReload(e.FullPath);
+        }
+
+        /// <summary>
+        /// Schedules a rebuild of the C# script plugin owning the file, restarting the quiet period if one is already pending.
+        /// </summary>
+        /// <param name="fullPath">Absolute path of the changed file.</param>
+        private void QueueScriptReload(string fullPath)
+        {
+            try
+            {
+                string pluginName;
+                if (!CSScriptPluginLoader.GetInstance().TryGetPluginNameFromPath(fullPath, out pluginName))
+                    return;
+
+                lock (_pendingScriptReloadsLock)
+                {
+                    System.Threading.Timer timer;
+                    if (_pendingScriptReloads.TryGetValue(pluginName, out timer))
+                    {
+                        timer.Change(ScriptReloadDelayMs, System.Threading.Timeout.Infinite);
+                        return;
+                    }
+
+                    _pendingScriptReloads.Add(pluginName,
+                        new System.Threading.Timer(OnScriptReloadDue, pluginName, ScriptReloadDelayMs, System.Threading.Timeout.Infinite));
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"[PluginWatcher] QueueScriptReload error: {ex}");
+            }
+        }
+
+        /// <summary>
+        /// Rebuilds a C# script plugin on the main thread once its quiet period elapsed.
+        /// </summary>
+        /// <param name="state">The plugin name.</param>
+        private void OnScriptReloadDue(object state)
+        {
+            string pluginName = (string) state;
+            lock (_pendingScriptReloadsLock)
+            {
+                System.Threading.Timer timer;
+                if (_pendingScriptReloads.TryGetValue(pluginName, out timer))
+                {
+                    _pendingScriptReloads.Remove(pluginName);
+                    timer.Dispose();
+                }
+            }
+
+            Loom.QueueOnMainThread(() =>
+            {
+                try
+                {
+                    bool loaded = PluginLoader.GetInstance().Plugins.ContainsKey(pluginName);
+                    if (!loaded && !File.Exists(CSScriptPluginLoader.GetInstance().GetMainFilePath(pluginName)))
+                        return;
+
+                    if (!TryLoadPlugin(pluginName, Type))
+                    {
+                        Logger.Log($"[PluginWatcher] Couldn't reload C# script plugin {pluginName}");
+                    }
+                    else
+                    {
+                        Logger.Log($"[PluginWatcher] Reloaded C# script plugin {pluginName}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"[PluginWatcher] OnScriptReloadDue error: {ex}");
                 }
             });
         }

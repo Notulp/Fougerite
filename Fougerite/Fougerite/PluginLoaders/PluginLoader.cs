@@ -53,6 +53,8 @@ namespace Fougerite.PluginLoaders
         {
             PluginLoaderEvents.OnTablesLoaded,
             PluginLoaderEvents.OnAllPluginsLoaded,
+            PluginLoaderEvents.OnPluginLoaded,
+            PluginLoaderEvents.OnPluginUnloaded,
             PluginLoaderEvents.OnBlueprintUse,
             PluginLoaderEvents.OnChat,
             PluginLoaderEvents.OnCommand,
@@ -181,6 +183,7 @@ namespace Fougerite.PluginLoaders
 
             InstallHooks(plugin);
             Plugins[plugin.Name] = plugin;
+            Hooks.PluginLoaded(plugin);
 
             if (CurrentlyLoadingPlugins.Count == 0 && !_allPluginsLoaded)
             {
@@ -189,6 +192,14 @@ namespace Fougerite.PluginLoaders
             }
 
             Logger.Log(string.Format("[PluginLoader] Module {0}<{3}> v{1} (by {2}) initiated.", plugin.Name, plugin.Version, plugin.Author, plugin.Type));
+        }
+
+        /// Handles the event when a plugin is unloaded.
+        /// Called by the plugin loaders after the plugin was removed from <see cref="Plugins"/>.
+        /// <param name="plugin">The instance of the plugin that has been unloaded.</param>
+        public void OnPluginUnloaded(BasePlugin plugin)
+        {
+            Hooks.PluginUnloaded(plugin);
         }
 
         /// Loads a plugin of a specified type into the runtime environment.
@@ -215,10 +226,15 @@ namespace Fougerite.PluginLoaders
                 {
                     if (string.Equals(plugin, name, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (pluginLoader.Key == PluginType.CSharp || pluginLoader.Key == PluginType.CSScript)
+                        if (pluginLoader.Key == PluginType.CSharp)
                         {
                             CSharpPluginLoader csharpLoader = (CSharpPluginLoader) pluginLoader.Value;
                             csharpLoader.LoadPlugin(plugin, callInit);
+                        }
+                        else if (pluginLoader.Key == PluginType.CSScript)
+                        {
+                            CSScriptPluginLoader csScriptLoader = (CSScriptPluginLoader) pluginLoader.Value;
+                            csScriptLoader.LoadPlugin(plugin, callInit);
                         }
                         else
                         {
@@ -403,6 +419,12 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnAllPluginsLoaded:
                             Hooks.OnAllPluginsLoaded += plugin.BaseOnAllPluginsLoaded;
+                            break;
+                        case PluginLoaderEvents.OnPluginLoaded:
+                            Hooks.OnPluginLoaded += plugin.BaseOnPluginLoaded;
+                            break;
+                        case PluginLoaderEvents.OnPluginUnloaded:
+                            Hooks.OnPluginUnloaded += plugin.BaseOnPluginUnloaded;
                             break;
                         case PluginLoaderEvents.OnPlayerTeleport:
                             Hooks.OnPlayerTeleport += plugin.BaseOnPlayerTeleport;
@@ -713,6 +735,12 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnAllPluginsLoaded:
                             Hooks.OnAllPluginsLoaded -= plugin.BaseOnAllPluginsLoaded;
+                            break;
+                        case PluginLoaderEvents.OnPluginLoaded:
+                            Hooks.OnPluginLoaded -= plugin.BaseOnPluginLoaded;
+                            break;
+                        case PluginLoaderEvents.OnPluginUnloaded:
+                            Hooks.OnPluginUnloaded -= plugin.BaseOnPluginUnloaded;
                             break;
                         case PluginLoaderEvents.OnPlayerTeleport:
                             Hooks.OnPlayerTeleport -= plugin.BaseOnPlayerTeleport;

@@ -160,6 +160,7 @@ namespace Fougerite.PluginLoaders
                     PluginLoader.GetInstance().Plugins.Remove(name);
                 }
 
+                PluginLoader.GetInstance().OnPluginUnloaded(plugin);
                 Logger.LogDebug($"[PYPluginLoader] {name} plugin was unloaded successfuly.");
             }
             else
