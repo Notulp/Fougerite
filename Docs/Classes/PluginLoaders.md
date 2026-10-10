@@ -132,6 +132,40 @@ A static class of ~90 `public const string` fields (`OnChat = "On_Chat"`, `OnSer
 ...) - the canonical script method names the loader looks for on a plugin's globals, one per `Fougerite.Hooks`
 event. Useful if you need the exact string for a hook when reflecting over a plugin's declared methods.
 
+### Engine Speed / Performance
+All five plugin languages ultimately run on the same main thread as the rest of the server (Rust Legacy/Mono
+doesn't support true multithreading, only sub-threads via `Loom`/`Timers`), so a slow handler in *any*
+language can lag the whole server. C# (and CSScript, which just compiles to the same IL at load time) is
+JIT-compiled and runs at native .NET speed; Python (IronPython), JavaScript (Jint) and Lua (MoonSharp) are all
+interpreted on top of .NET, so they pay a per-operation interpretation overhead that C# doesn't.
+
+A simple micro-benchmark (750,000 iterations of a tight loop calling `Math.Sqrt`/`math.sqrt` each iteration)
+gives a rough, consistent ordering of interpreter overhead, from fastest to slowest:
+
+**C# (native) > Python (IronPython) > Lua (MoonSharp) > JavaScript (Jint)**
+
+- C# finishes effectively immediately (sub-millisecond for this workload).
+- Python was roughly 0.15s for the loop, and faster still (~0.1s) when the looked-up function
+  (`math.sqrt`) is cached into a local/default argument instead of re-resolved every iteration - the same
+  "attribute lookup caching" trick documented for Python's CPython interpreter applies here too.
+- Lua was noticeably slower than Python (~1.3s), but still clearly faster than both the old Jint v1 and
+  Jint v2 engines.
+- JavaScript (Jint) was the slowest, taking several seconds for the same loop in both the Jint v1 (used by
+  the now-removed Magma loader) and Jint v2 engines - avoid doing heavy numeric/CPU-bound work in JS plugins.
+
+**Practical takeaways**:
+- Prefer C#/CSScript for anything CPU-heavy (pathfinding, big data processing, tight loops over many
+  entities/items).
+- In Python, cache frequently-called functions/methods into local variables (or default arguments) instead of
+  re-resolving them (e.g. `module.attribute`) on every loop iteration.
+- In any interpreted language, avoid doing expensive work inside high-frequency hooks (`On_PlayerMove`,
+  `On_Shoot`, `On_AnimalMovement`, `On_ServerTick`, ...) - see the "Intensive events" note above; offload heavy
+  work to a background thread via [`Loom`](Loom.md) or a parallel [`Timer`](Timers.md) instead of the main
+  thread handler.
+- These numbers are relative, not absolute - modern CPUs are much faster than when this benchmark was first
+  run, but the relative ordering between native (C#) and interpreted (Python/Lua/JS) code still holds in
+  practice.
+
 ### Example - C# (reloading another plugin by name, e.g. from a chat command)
 ```csharp
 public void ReloadModule(string pluginName)

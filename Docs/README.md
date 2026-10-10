@@ -51,6 +51,8 @@ Fougerite plugins react to game events by either:
     mod API (`FInventory`/`EntityInv`/`EntityItem`/`PlayerInv`/`PlayerItem`).
   - [`World`](Classes/World.md) - Spawning, airdrops, terrain, zones (`World`/`Zone3D`), wildlife (`NPC`),
     and the advanced `CustomMap` API.
+  - [`Prefabs`](Classes/Prefabs.md) - Reference list of known prefab names usable with `World.SpawnEntity`
+    (structures, deployables, resources, animals, loot crates).
   - [`Data`](Classes/Data.md) - The persistent `DataStore` key/value store and the `Data` string/number
     helper singleton.
   - [`Modules`](Classes/Modules.md) - Fougerite's original, now-obsolete C# plugin system

@@ -76,6 +76,17 @@ A player's full inventory ([`Player.Inventory`](Player.md)), split into three lo
 - `InternalInventory` / `PlayerInventory` - the raw Rust `Inventory` and, when applicable, the more specific
   `PlayerInventory` component.
 
+> The raw Rust `Inventory` indexes all three groups as one contiguous slot range, which `AddItemTo`/`MoveItem`
+> expect when you pass a raw `slot` number:
+> - **Inventory slots: 0-29** - `Items` (the main backpack grid).
+> - **Bar slots: 30-35** - `BarItems` (the hotbar/belt).
+> - **Armor slots: 36-39** - `ArmorItems` (head/chest/legs/hands).
+>
+> See the inventory slot layout image below for a visual reference - useful when building custom UIs or when
+> mapping a raw slot index back to a position in `PlayerInv`/`PlayerInventory`.
+>
+> ![Player inventory slot layout](../Images/PlayerInventorySlots.png)
+
 ### PlayerItem
 Same shape as `EntityItem` (`IsEmpty`/`Name`/`Quantity`/`UsesLeft`/`Slot`/`Drop`/mod API, etc.), plus:
 - `Consume(int qty)` - reduces `UsesLeft` by `qty` without fully removing the item (used internally by

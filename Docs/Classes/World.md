@@ -25,6 +25,8 @@ its own Unity asset bundle at startup (used together with RustBuster's client-si
     taking `float x, y, z`) - spawns `rep` copies of `prefab` and returns the (first) resulting `Entity`.
   - `Spawn(...)` - the older, untyped overloads returning `object` instead of `Entity`.
   - `SpawnAtPlayer(string prefab, Player p, int rep = 1)` - spawns at a player's location.
+  - See [`Prefabs`](Prefabs.md) for a reference list of known `prefab` names (structures, deployables,
+    resources, animals, loot crates).
 - Airdrops:
   - `Airdrop()` / `Airdrop(int rep)` - calls a supply drop at a random location.
   - `AirdropAtOriginal(float x, float y, float z, int rep = 1)` / `AirdropAtOriginal(Player p, int rep = 1)` /
@@ -136,4 +138,5 @@ public void AnimalScanCallback(ATimedEvent e)
 }
 ```
 
-See also: [`Entity`](Entity.md) · [`Sleeper`](Sleeper.md) · [`Caches`](Caches.md) · [`Util`](Util.md)
+See also: [`Entity`](Entity.md) · [`Sleeper`](Sleeper.md) · [`Caches`](Caches.md) · [`Util`](Util.md) ·
+[`Prefabs`](Prefabs.md)

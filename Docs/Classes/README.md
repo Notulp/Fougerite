@@ -31,6 +31,8 @@ This section documents important helper classes available to Fougerite plugins, 
   contents, player backpacks/belt/armor, and the weapon mod API.
 - [`World`](World.md) - The `World` singleton (spawning, airdrops, terrain, zones), `Zone3D`, `NPC` (wildlife),
   and the advanced `CustomMap` API for replacing the server's map at startup.
+- [`Prefabs`](Prefabs.md) - A reference list of known prefab names usable with `World.SpawnEntity`/`Spawn`/
+  `SpawnAtPlayer` (structures, deployables, resources, animals, loot crates).
 - [`Data`](Data.md) - The `DataStore` persistent key/value store (the recommended way to save plugin data
   across restarts) and the older `Data` string/number helper singleton.
 - [`Modules`](Modules.md) - `Module`/`ModuleContainer`/`ModuleManager`, Fougerite's original (now obsolete)
