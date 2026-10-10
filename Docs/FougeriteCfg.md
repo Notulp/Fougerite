@@ -114,6 +114,51 @@ it.
 | `EnablePython` | `true` | Enable the IronPython engine (`Save\PyPlugins\`). |
 | `EnableJavaScript` | `true` | Enable the Jint JavaScript engine (`Save\JsPlugins\`). |
 | `EnableLua` | `true` | Enable the MoonSharp Lua engine (`Save\LuaPlugins\`). |
+| `EnableCSScript` | `true` | Enable the C# Script (CSScript) engine. Compiles C# source files from scratch at startup, `Modules\Name\Name.cs` plus every other `.cs` file in that same folder, into one in-memory plugin assembly - no external IDE/build step needed on your side. See [`CSScriptPluginTutorial.md`](CSScriptPluginTutorial.md) for the full guide. |
+| `CSScriptCompiler` | *(empty)* | Optional full path to a `csc.exe`/`mcs.exe` executable to force a specific C# compiler for CSScript plugins. Leave empty to auto-detect (see below). |
+
+#### How `CSScriptCompiler` / compiler auto-detection works
+
+When `CSScriptCompiler` is empty, `CSScriptPluginLoader` looks for a compiler in this exact order, and logs
+which one it picked on startup:
+
+1. **MSBuild's Roslyn `csc.exe`** - found through `vswhere.exe` (ships with any Visual Studio 2017+
+   installation, including the free **Build Tools for Visual Studio**), requires the *MSBuild* workload to
+   be installed.
+2. **The .NET Framework's own `csc.exe`** - looked up directly under
+   `%WINDIR%\Microsoft.NET\Framework(64)\v4.0.30319\csc.exe` first, then `...\v3.5\csc.exe`. This ships with
+   Windows itself on any machine that has .NET Framework 4.x installed (practically every Windows install),
+   no extra download needed.
+3. **Mono's `mcs.exe`** - checked, in order, next to `rust_server.exe`, in `rust_server_Data\Managed\`, in
+   `<Program Files>\Mono\lib\mono\4.5\mcs.exe` (Windows Mono install), and finally
+   `/usr/lib/mono/4.5/mcs.exe` / `/usr/local/lib/mono/4.5/mcs.exe` (Linux).
+
+If none of the above is found, CSScript plugins fail to compile with a clear error telling you to install
+one of them or set `CSScriptCompiler` explicitly. You only need **one** working compiler, not all three.
+
+**Getting a compiler, step by step:**
+- **MSBuild (recommended on Windows)** - download **Build Tools for Visual Studio** (free, no full IDE
+  required) from <https://visualstudio.microsoft.com/downloads/> (scroll to "Tools for Visual Studio").
+  Run the installer and, in the **Individual components** tab, tick:
+  - **MSBuild**
+  - **.NET Framework 3.5 development tools** (or just **.NET Framework 3.5 targeting pack**) - this gives
+    you the `v3.5` reference assemblies/compiler so the compiled plugin matches the server's own .NET 3.5
+    Mono runtime.
+  If you already have full Visual Studio installed with the ".NET desktop development" workload, MSBuild is
+  already included - nothing else to do.
+- **Mono `mcs` (Windows or Linux, lighter alternative)**:
+  - *Windows*: download the Mono installer from <https://www.mono-project.com/download/stable/> and install
+    it with defaults; `mcs.exe` ends up at `C:\Program Files\Mono\lib\mono\4.5\mcs.exe`, which is one of the
+    auto-detected paths above.
+  - *Linux*: install your distro's Mono package, e.g. `sudo apt install mono-mcs` (Debian/Ubuntu) or
+    `sudo dnf install mono-core` (Fedora). This also places `mcs` where auto-detection expects it.
+  - If auto-detection doesn't find it (non-standard install path), set it explicitly:
+    ```ini
+    CSScriptCompiler=C:\Program Files\Mono\lib\mono\4.5\mcs.exe
+    ```
+- **.NET Framework `csc.exe`** - usually already present if .NET Framework 4.x is installed (default on
+  modern Windows). If you specifically want the `v3.5` compiler and it's missing, enable **.NET Framework
+  3.5 (includes .NET 2.0 and 3.0)** under *Control Panel -> Programs -> Turn Windows features on or off*.
 
 ### `[Logging]` section
 
@@ -174,6 +219,12 @@ EnableCSharp=true
 EnablePython=true
 EnableJavaScript=true
 EnableLua=true
+; Compiles C# script plugins from source at startup, Modules\Name\Name.cs plus every other .cs file in that folder.
+; Use // #require OtherPlugin in a source file to reference another C# script plugin or DLL module at compile time.
+EnableCSScript=true
+; Optional full path to csc.exe or mcs.exe used for C# script plugins.
+; Leave empty to detect it, MSBuild Roslyn first, then the .NET Framework compilers, then Mono mcs.
+CSScriptCompiler=
 
 [Logging]
 ; Fougerite logs are in PublicFolder\Logs
@@ -188,6 +239,8 @@ rpctracer=false
 
 ### See also
 - [`Installation.md`](Installation.md) - where to physically place each type of plugin.
+- [`CSScriptPluginTutorial.md`](CSScriptPluginTutorial.md) - writing/compiling C# Script (CSScript) plugins,
+  the `#require` directive, and the `EnableCSScript`/`CSScriptCompiler` keys in practice.
 - [`Scripts.md`](Scripts.md) - the `AutoUpdate-Fougerite.ps1` script also touches `.cfg`/`.ini` files under
   `Save\` and will prompt you about overwriting them.
 - [`SteamAuth`](Classes/SteamAuth.md) - the full `SteamAuthMode` pipeline (ticket parsing, Steam Web API

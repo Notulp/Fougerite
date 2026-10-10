@@ -92,8 +92,10 @@ domain** via native interop calls defined in `Fougerite.Icalls`:
 - `Icalls.mono_fg_load_plugin(pluginName, data, dataLen)` - Loads a plugin `Assembly` from a raw memory
   buffer into the current domain.
 - `Icalls.mono_fg_unload_plugin(pluginName)` - Unloads a previously-loaded plugin.
-- `NativeMono.mono_fg_create_domain()` / `mono_fg_unload_domain()` - Low-level domain creation/teardown,
-  implemented in the custom `mono.dll` shipped with the project.
+- `NativeMono.mono_fg_create_domain()` / `mono_fg_unload_domain()` - Low-level registry creation/teardown,
+  implemented in the custom `mono.dll` shipped with the project. `mono_fg_create_domain()` only initializes
+  the native registry that `mono_fg_load_plugin` tracks entries in; `mono_fg_unload_domain()` unloads
+  **every** domain still tracked in that registry and releases the registry itself.
 
 Because everything lives in one domain, C# module plugins can be **hot-reloaded** at runtime (e.g. via the
 `fougerite.reload` console command) without restarting the server - the old assembly is unloaded and the new
@@ -105,6 +107,14 @@ one is loaded back in, in-place. This is more fragile than true `AppDomain` isol
   subscribers/timers still referencing the unloaded assembly's types.
 - Set `DontReload = true` on your plugin if it should be excluded from `fougerite.reload`.
 
-Script plugins (Python/JS/Lua) don't go through `Icalls` at all - they are recompiled/re-executed by their
-respective script engines (IronPython/Jint/MoonSharp) each time they're (re)loaded, so they don't share this
-particular caveat, but they still share the same `BasePlugin.GlobalData` static storage as C# modules.
+Both `CSharpPluginLoader` (DLL modules) and `CSScriptPluginLoader` (C# Script plugins, see
+[`CSScriptPluginTutorial.md`](../CSScriptPluginTutorial.md)) are "C# based" loaders that need this native
+registry available. Since either one can be independently enabled/disabled via `EnableCSharp`/`EnableCSScript`
+in `Fougerite.cfg`, creating/tearing down the registry is centralized in
+[`NativeDomainManager`](PluginLoaders.md#nativedomainmanager): it is created lazily (`lock`-protected, once)
+by whichever of the two loaders needs it first, and only actually torn down once **both** have finished
+unloading their own plugins - so one loader's unload never tears the registry out from under the other
+loader's still-loaded plugins. Script plugins (Python/JS/Lua) don't go through `Icalls`/`NativeDomainManager`
+at all - they are recompiled/re-executed by their respective script engines (IronPython/Jint/MoonSharp) each
+time they're (re)loaded, so they don't share this particular caveat, but they still share the same
+`BasePlugin.GlobalData` static storage as C# modules.

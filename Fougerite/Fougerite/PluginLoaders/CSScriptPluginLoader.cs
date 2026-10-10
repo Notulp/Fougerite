@@ -21,39 +21,143 @@ namespace Fougerite.PluginLoaders
     {
         public PluginType Type = PluginType.CSScript;
         public const string Extension = ".cs";
+
+        /// <summary>
+        /// Represents the directory where C# script plugins are stored.
+        /// By default, it is located at the "Modules\" folder under the root directory
+        /// of the application.
+        /// </summary>
         public readonly DirectoryInfo PluginDirectory = new DirectoryInfo(Path.Combine(Util.GetRootFolder(), "Modules\\"));
 
+        /// <summary>
+        /// Represents the directory used to cache compiled plugin assemblies for the CSScript plugin loader.
+        /// </summary>
         public readonly DirectoryInfo CacheDirectory = new DirectoryInfo(Path.Combine(Util.GetRootFolder(), "Save\\.CSScriptCache"));
 
+        /// <summary>
+        /// Represents the path to the managed folder, typically used to locate the
+        /// "Managed" directory within the root folder of the Rust server. This directory
+        /// commonly contains assemblies and other managed resources required for the server's execution.
+        /// 
         public readonly string ManagedFolder = Path.Combine(Util.GetRootFolder(), Path.Combine("rust_server_Data", "Managed"));
 
+        /// <summary>
+        /// Name of the folder used to store reference assemblies for plugin scripts.
+        /// </summary>
         private const string ReferencesFolderName = "References";
+
+        /// <summary>
+        /// Represents the name of the directory used for temporary storage during the plugin compilation process.
+        /// This folder is utilized to stage intermediate files created during the build and compilation of plugins.
+        /// </summary>
         private const string StagingFolderName = ".staging";
 
+        /// <summary>
+        /// Represents the format version of the build utilized in hashing and versioning processes.
+        /// Used internally to ensure compatibility and consistency between compiled plugins and the loader.
+        /// </summary>
         private const string BuildFormatVersion = "1";
 
+        /// <summary>
+        /// The timeout in milliseconds for the compilation process of C# script plugins.
+        /// If the compilation process exceeds this duration, it will be terminated.
+        /// </summary>
         private const int CompilerTimeoutMs = 120000;
+
+        /// <summary>
+        /// Specifies the timeout in milliseconds for external tool executions, such as processes executed
+        /// during plugin loading or compilation tasks.
+        /// </summary
         private const int ToolTimeoutMs = 15000;
+
+        /// <summary>
+        /// Specifies the maximum time, in milliseconds, to wait for the output or error stream threads
+        /// to complete when processing an external process.
+        /// This timeout ensures that the application does not hang indefinitely
+        /// if the stream operations do not finish promptly.
+        /// </summary
         private const int StreamJoinTimeoutMs = 10000;
 
+        /// <summary>
+        /// Represents an array of folder names to be ignored during plugin loading or processing.
+        /// These folder names are excluded to prevent unnecessary compilation or interaction,
+        /// typically because they contain irrelevant or intermediate build files.
+        /// </summary>
         private static readonly string[] IgnoredFolderNames = { "bin", "obj", ReferencesFolderName };
+
+        /// <summary>
+        /// Represents a compiled regular expression used to identify "Order" property overrides in
+        /// C# plugin code. This is typically utilized for parsing and extracting order values from
+        /// method properties within the loaded scripts.
+        /// </summary>
         private static readonly Regex OrderProperty = new Regex(@"\boverride\s+(?:(?:System\s*\.\s*)?UInt32|uint)\s+Order\b", RegexOptions.Compiled);
+
+        /// <summary>
+        /// A compiled regular expression used to identify and extract numeric order casting expressions
+        /// with types such as UInt32, uint, or ulong enclosed within parentheses in source code.
+        /// </summary>
         private static readonly Regex OrderCast = new Regex(@"\(\s*(?:(?:System\s*\.\s*)?U?Int32|u?int|u?long)\s*\)", RegexOptions.Compiled);
 
         // Same as Module.Order when a plugin does not override it.
+        /// <summary>
+        /// The default execution order assigned to a plugin when it does not explicitly declare a custom order.
+        /// </summary>
         private const uint DefaultOrder = uint.MaxValue;
 
+        /// <summary>
+        /// Represents a regular expression used to match and extract directives in the format of
+        /// "// #require PluginName" from C# script files. These directives allow script files to
+        /// declare dependencies on other plugins or DLL modules.
+        /// </summary>
         private static readonly Regex RequireDirective = new Regex(@"^\s*//\s*#require\s+""?(?<name>[^\s""]+)""?\s*$", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Indicates whether the startup process for loading plugins has been completed.
+        /// When set to true, ensures that startup plugins have been loaded and
+        /// disables subsequent calls to startup-loading logic.
+        /// </summary>
         private static volatile bool _startupCompleted;
 
+        /// <summary>
+        /// Serves as a synchronization lock to ensure thread safety when accessing or modifying
+        /// assemblies within the CSScriptPluginLoader. This is primarily used to protect operations
+        /// involving the registration, unregistration, and resolution of script assemblies.
+        /// </summary>
         private readonly object _assemblyLock = new object();
+
+        /// <summary>
+        /// A dictionary that maps the names of script assemblies to their corresponding <see cref="System.Reflection.Assembly"/> instances.
+        /// Used to manage and track the loaded C# script assemblies for the plugin system.
+        /// The keys in this dictionary are case-insensitive.
+        /// </summary>
         private readonly Dictionary<string, Assembly> _scriptAssemblies = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// A dictionary that stores references to loaded assemblies, indexed by their simple names.
+        /// It is used to resolve assembly dependencies and facilitate the loading of script assemblies or other
+        /// assemblies required by plugins during runtime.
+        /// </summary
         private readonly Dictionary<string, Assembly> _referenceAssemblies = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Stores a list of framework assembly references used during compilation or execution of plugins.
+        /// This collection is populated by analyzing the assemblies present in the managed folder and helps ensure
+        /// all necessary dependencies for script plugins are available.
+        /// </
         private List<string> _frameworkReferences;
+
+        /// <summary>
+        /// Indicates whether the managed core library ("mscorlib.dll") is present in the Managed folder.
+        /// </summary>
         private bool _hasManagedCorlib;
+
+        /// <summary>
+        /// Stores information about the current compiler being used for C# script plugin compilation.
+        /// This field is initialized by detecting the compiler through a specified logic
+        /// in the plugin loader and is used for managing script compilation processes.
+        /// </summary>
         private CompilerInfo _compiler;
+        public const string DomainOwner = "CSScript";
 
         public CSScriptPluginLoader()
         {
@@ -127,6 +231,12 @@ namespace Fougerite.PluginLoaders
                 throw new InvalidOperationException($"[CSScriptPluginLoader] {name} plugin is already loaded.");
             }
 
+            if (!NativeDomainManager.EnsureCreated(DomainOwner))
+            {
+                Logger.LogError($"[CSScriptPluginLoader] {name} plugin could not be loaded, the unmanaged Fougerite Mono domain is not available.");
+                return;
+            }
+
             LoadSet(new List<string> { name }, init);
         }
 
@@ -135,6 +245,12 @@ namespace Fougerite.PluginLoaders
             if (!IsEngineEnabled)
             {
                 Logger.LogDebug("[CSScriptPluginLoader] C# script plugins are disabled in Fougerite.cfg.");
+                return;
+            }
+
+            if (!NativeDomainManager.EnsureCreated(DomainOwner))
+            {
+                Logger.LogError("[CSScriptPluginLoader] Can't load C# script plugins, the unmanaged Fougerite Mono domain is not available.");
                 return;
             }
 
@@ -214,6 +330,8 @@ namespace Fougerite.PluginLoaders
                     UnloadPlugin(plugin.Name);
                 }
             }
+
+            NativeDomainManager.ReleaseOwner(DomainOwner);
         }
 
         public void Initialize()

@@ -14,9 +14,13 @@ Fougerite plugins react to game events by either:
   A beginner-friendly, step-by-step walkthrough: setting up a Visual Studio (or JetBrains Rider) project,
   targeting .NET 3.5, writing your first `Module`, subscribing to hooks, and building/installing the
   compiled plugin on the server.
-- [`Installation.md`](Installation.md) - Where to physically place each type of plugin (C#/Python/JS/Lua)
-  on the server, how the `[Modules]` section of `Fougerite.cfg` maps folders to modules, and how to
-  relocate the `Modules`/`Save` folders with `FougeriteDirectory.cfg`.
+- [`CSScriptPluginTutorial.md`](CSScriptPluginTutorial.md) - Writing a **C# Script (CSScript)** plugin: C#
+  source compiled by the server itself, no external build step. Covers compiler setup
+  (MSBuild/.NET Framework/Mono), the multi-file `Modules\Name\*.cs` layout, the `#require` directive for
+  referencing other plugins/modules at compile time, and a full working example.
+- [`Installation.md`](Installation.md) - Where to physically place each type of plugin
+  (C#/CSScript/Python/JS/Lua) on the server, how the `[Modules]` section of `Fougerite.cfg` maps folders to
+  modules, and how to relocate the `Modules`/`Save` folders with `FougeriteDirectory.cfg`.
 - [`FougeriteCfg.md`](FougeriteCfg.md) - Full reference for every section/key of `Fougerite.cfg`
   (`[Fougerite]`, `[Modules]`, `[Engines]`, `[Logging]`).
 - [`Scripts.md`](Scripts.md) - The `AutoUpdate-Fougerite.ps1` and `Collect-Logs.ps1` maintenance scripts:

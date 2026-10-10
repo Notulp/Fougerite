@@ -11,6 +11,7 @@ namespace Fougerite.PluginLoaders
         public PluginType Type = PluginType.CSharp;
         public const string Extension = ".dll";
         public readonly DirectoryInfo PluginDirectory = new DirectoryInfo(Path.Combine(Util.GetRootFolder(), "Modules\\"));
+        public const string DomainOwner = "CSharp";
 
         public CSharpPluginLoader()
         {
@@ -78,6 +79,12 @@ namespace Fougerite.PluginLoaders
                 return;
             }
 
+            if (!NativeDomainManager.EnsureCreated(DomainOwner))
+            {
+                Logger.LogError($"[CSharpPluginLoader] {name} plugin could not be loaded, the unmanaged Fougerite Mono domain is not available.");
+                return;
+            }
+
             try
             {
                 string code = GetSource(name);
@@ -118,18 +125,9 @@ namespace Fougerite.PluginLoaders
         {
             if (Config.GetBoolValue("Engines", "EnableCSharp"))
             {
-                try
+                if (!NativeDomainManager.EnsureCreated(DomainOwner))
                 {
-                    int domaincreation = NativeMono.mono_fg_create_domain();
-                    if (domaincreation == 0)
-                    {
-                        Logger.LogError("[CSharpPluginLoader] Failed to create unmanaged Fougerite Mono domain.");
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogError($"[CSharpPluginLoader] Exception while creating Fougerite domain: {ex}");
+                    Logger.LogError("[CSharpPluginLoader] Can't load C# plugins, the unmanaged Fougerite Mono domain is not available.");
                     return;
                 }
 
@@ -267,14 +265,7 @@ namespace Fougerite.PluginLoaders
                 }
             }
 
-            try
-            {
-                NativeMono.mono_fg_unload_domain();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError($"[CSharpPluginLoader] Exception while unloading Fougerite domain: {ex}");
-            }
+            NativeDomainManager.ReleaseOwner(DomainOwner);
         }
 
         public void Initialize()

@@ -2,10 +2,11 @@
 Installing plugins on a Fougerite server
 
 ### Description
-Fougerite supports 4 plugin engines: **C#** (compiled "Modules"), **Python** (IronPython), **JavaScript**
-(Jint) and **Lua** (MoonSharp). Each engine looks for its plugins in a different folder, and each has its
-own on/off switch in [`Fougerite.cfg`](FougeriteCfg.md). This guide shows exactly where to drop each type
-of plugin so the server picks it up.
+Fougerite supports 5 plugin types: **C#** (compiled "Modules"), **C# Script**/CSScript (C# source compiled
+on the server itself), **Python** (IronPython), **JavaScript** (Jint) and **Lua** (MoonSharp). Each one
+looks for its plugins in a different folder (C# and CSScript share `Modules\`), and each has its own on/off
+switch in [`Fougerite.cfg`](FougeriteCfg.md). This guide shows exactly where to drop each type of plugin so
+the server picks it up.
 
 All paths below are relative to your Rust Legacy dedicated server's root folder (the folder that contains
 `rust_server.exe`).
@@ -18,8 +19,10 @@ All paths below are relative to your Rust Legacy dedicated server's root folder 
 ├── rust_server_Data\
 │   └── Managed\                     (Fougerite.dll, UnityEngine.dll, Assembly-CSharp.dll, ...)
 ├── Modules\                         <-- C# plugins (Modules) go here
-│   └── MyPlugin\
-│       └── MyPlugin.dll
+│   ├── MyPlugin\
+│   │   └── MyPlugin.dll
+│   └── MyScriptPlugin\              <-- C# Script (CSScript) plugins also go here, as source
+│       └── MyScriptPlugin.cs
 └── Save\                            <-- the "PublicFolder": everything script plugins/config live in
     ├── Fougerite.cfg                <-- main Fougerite configuration file, see FougeriteCfg.md
     ├── IgnoredPlugins.txt           <-- one plugin (folder) name per line to skip loading it
@@ -63,6 +66,23 @@ All paths below are relative to your Rust Legacy dedicated server's root folder 
 4. Restart the server (C# modules are also reloadable at runtime, see
    [`Classes/BasePlugin.md`](Classes/BasePlugin.md) for how reloading works on the custom single-AppDomain
    Mono build).
+
+### 2b. Installing a C# Script (CSScript) plugin
+
+C# Script plugins skip step 1 above entirely - there's no separate build step, Fougerite compiles the
+source on the server itself. Full guide: [`CSScriptPluginTutorial.md`](CSScriptPluginTutorial.md).
+
+1. Create a folder under `Modules\` and put your `.cs` source file(s) inside it, with the **main file named
+   exactly like the folder**:
+   ```
+   Modules\MyScriptPlugin\MyScriptPlugin.cs
+   ```
+   Any additional `.cs` file dropped in the same folder is compiled in automatically.
+2. Make sure `EnableCSScript=true` under `[Engines]` in `Save\Fougerite.cfg` (it's `true` by default). No
+   `[Modules]` entry is needed, unlike DLL modules.
+3. Restart the server, or just save the `.cs` file again once the server is already running - CSScript
+   plugins are watched and hot-reload automatically like script plugins.
+4. If it fails to compile, check `Save\.CSScriptCache\<Name>\<Name>.log` for the full compiler output.
 
 ### 3. Installing a Python / JavaScript / Lua plugin (script plugin)
 
@@ -133,4 +153,6 @@ to the two defaults above - this is the case on most servers.
 - [`FougeriteCfg.md`](FougeriteCfg.md) - full reference for every `Fougerite.cfg` section/key.
 - [`Scripts.md`](Scripts.md) - the `AutoUpdate-Fougerite.ps1` and `Collect-Logs.ps1` helper scripts.
 - [`CSharpPluginTutorial.md`](CSharpPluginTutorial.md) - writing your first C# module.
+- [`CSScriptPluginTutorial.md`](CSScriptPluginTutorial.md) - writing a C# Script (CSScript) plugin, compiler
+  setup and the `#require` directive.
 - [`Hooks/README.md`](Hooks/README.md) / [`Classes/README.md`](Classes/README.md) - plugin API reference.

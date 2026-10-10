@@ -102,6 +102,8 @@ properties/methods on those arguments, and usage examples in C#, Python, JavaScr
 | [OnDayCycleChanged](World/On_DayCycleChanged.md) | `On_DayCycleChanged` | Day/night cycle changes. |
 | [OnAllPluginsLoaded](Server/On_AllPluginsLoaded.md) | `On_AllPluginsLoaded` | All plugins finished loading (first time). |
 | [OnPluginInit](Server/On_PluginInit.md) | `On_PluginInit` | This plugin has finished initializing. |
+| [OnPluginLoaded](Server/On_PluginLoaded.md) | `On_PluginLoaded` | Any plugin (C#/CSScript/Python/JS/Lua) finished loading. |
+| [OnPluginUnloaded](Server/On_PluginUnloaded.md) | `On_PluginUnloaded` | Any plugin (C#/CSScript/Python/JS/Lua) was unloaded. |
 | [OnModulesLoaded](Server/On_ModulesLoaded.md) | *(C# modules only)* | All C# modules finished loading. |
 | [OnServerInit](Server/On_ServerInit.md) | `On_ServerInit` | The server started loading. |
 | [OnServerLoaded](Server/On_ServerLoaded.md) | `On_ServerLoaded` | The server finished loading. |

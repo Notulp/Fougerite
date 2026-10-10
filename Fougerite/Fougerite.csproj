@@ -125,6 +125,7 @@
     <Compile Include="Fougerite\PluginLoaders\JavaScriptPluginLoader.cs" />
     <Compile Include="Fougerite\PluginLoaders\LuaPlugin.cs" />
     <Compile Include="Fougerite\PluginLoaders\LuaPluginLoader.cs" />
+    <Compile Include="Fougerite\PluginLoaders\NativeDomainManager.cs" />
     <Compile Include="Fougerite\PluginLoaders\PluginLoader.cs" />
     <Compile Include="Fougerite\PluginLoaders\PluginLoaderEvents.cs" />
     <Compile Include="Fougerite\PluginLoaders\PluginWatcher.cs" />
