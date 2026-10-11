@@ -13,8 +13,20 @@ plugin, in every language, either directly (`this`/`self` in C#) or through the 
 script plugins.
 
 ### Fields / Properties
-- `Author`, `About`, `Version` - Metadata about the plugin, usually filled from `__author__`, `__about__`,
-  `__version__` (Python) or similar per-language conventions.
+- `Author`, `About`, `Version` - Metadata about the plugin, read once right after it loads and shown in the
+  `[PluginLoader] Module Name<Type> vVersion (by Author) initiated.` startup log line. The **source** of these
+  three fields is different for every plugin type/engine:
+
+  | Engine | How `Author`/`About`/`Version` are declared | Default if missing |
+  |---|---|---|
+  | **C#** (`Module`) | `override` the `Author`/`Description`/`Version` properties (note: `Description`, not `About` - see [`CSharpPluginTutorial.md`](../CSharpPluginTutorial.md#3-the-module-skeleton)). `Version` is a real `System.Version` (`new Version(1, 0)`), not a string. | Compile error (all three are `abstract`, must be overridden). |
+  | **Python** | Three **module-level** variables, outside any class: `__author__ = '...'`, `__about__ = '...'`, `__version__ = '...'` (see [`PythonPluginTutorial.md`](../PythonPluginTutorial.md#3-the-plugin-skeleton)). | Empty string for each. |
+  | **JavaScript (Jint)** | Three **global** `var`s at the top of the file: `var Author = "...";`, `var About = "...";`, `var Version = "...";` (see [`JavaScriptPluginTutorial.md`](../JavaScriptPluginTutorial.md#3-the-plugin-skeleton)). | `Author` -> `"Unknown"`, `About` -> `""`, `Version` -> `"1.0"`. |
+  | **Lua (MoonSharp)** | Three **global** assignments at the top of the file (no `local`): `Author = "..."`, `Version = "..."`, `About = "..."` (see [`LuaPluginTutorial.md`](../LuaPluginTutorial.md#3-the-plugin-skeleton)). | `Author` -> `"Unknown"`, `Version` -> `"1.0"`, `About` -> `""` (empty Lua string). |
+
+  For every script engine (Python/JS/Lua), these are read **once**, right after your script finishes
+  executing for the first time (or after a reload) - changing them requires a reload to take effect, same as
+  any other top-level code in the file.
 - `Name` - The plugin's name (matches its class name / file name).
 - `RootDir` - The `DirectoryInfo` of the folder the plugin lives in.
 - `Type` - `PluginType` enum: `Python`, `JS`, `Lua`, `CS`, `Undefined`, etc.

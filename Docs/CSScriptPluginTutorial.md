@@ -469,3 +469,7 @@ Drop the file(s) in `Modules\HelloScriptTest\HelloScriptTest.cs`, make sure `Ena
 - [`FougeriteCfg.md`](FougeriteCfg.md#engines-section) - the full `[Engines]` reference, including
   `EnableCSScript`/`CSScriptCompiler`.
 - [`Installation.md`](Installation.md) - where plugin folders live, and how to relocate `Modules`/`Save`.
+- [`PythonPluginTutorial.md`](PythonPluginTutorial.md) / [`LuaPluginTutorial.md`](LuaPluginTutorial.md) /
+  [`JavaScriptPluginTutorial.md`](JavaScriptPluginTutorial.md) - the equivalent walkthroughs for the Python
+  (IronPython), Lua (MoonSharp), and JavaScript (Jint) script engines, if full C# isn't a requirement for your
+  plugin.

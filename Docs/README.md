@@ -18,6 +18,15 @@ Fougerite plugins react to game events by either:
   source compiled by the server itself, no external build step. Covers compiler setup
   (MSBuild/.NET Framework/Mono), the multi-file `Modules\Name\*.cs` layout, the `#require` directive for
   referencing other plugins/modules at compile time, and a full working example.
+- [`PythonPluginTutorial.md`](PythonPluginTutorial.md) - Writing a **Python (IronPython)** plugin: the
+  `Save\PyPlugins\Name\Name.py` layout, the `__author__`/`__about__`/`__version__` metadata convention, the
+  `On_PluginInit`/`On_PluginDeinit` lifecycle (no `+=`/`-=` subscriptions needed), and a full working example.
+- [`LuaPluginTutorial.md`](LuaPluginTutorial.md) - Writing a **Lua (MoonSharp)** plugin: the
+  `Save\LuaPlugins\Name\Name.lua` layout, the `Author`/`About`/`Version` global metadata convention, the
+  `:` (colon) method-call syntax MoonSharp's interop expects, and a full working example.
+- [`JavaScriptPluginTutorial.md`](JavaScriptPluginTutorial.md) - Writing a **JavaScript (Jint)** plugin: the
+  `Save\JsPlugins\Name\Name.js` layout, the `Author`/`About`/`Version` global metadata convention, ES5-only
+  syntax caveats, and a full working example.
 - [`Installation.md`](Installation.md) - Where to physically place each type of plugin
   (C#/CSScript/Python/JS/Lua) on the server, how the `[Modules]` section of `Fougerite.cfg` maps folders to
   modules, and how to relocate the `Modules`/`Save` folders with `FougeriteDirectory.cfg`.

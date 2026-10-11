@@ -223,3 +223,8 @@ public void ChatHandler(Fougerite.Player player, ref ChatString chatString)
   between the main-thread Normal Timer and the background-thread System Timer.
 - [`Classes/Web.md`](Classes/Web.md) / [`Classes/Loom.md`](Classes/Loom.md) - HTTP requests and safely
   jumping between threads.
+- [`CSScriptPluginTutorial.md`](CSScriptPluginTutorial.md) - the same `Module`/`BasePlugin` API, but compiled
+  by the server itself from `.cs` source, no IDE/build step required.
+- [`PythonPluginTutorial.md`](PythonPluginTutorial.md) / [`LuaPluginTutorial.md`](LuaPluginTutorial.md) /
+  [`JavaScriptPluginTutorial.md`](JavaScriptPluginTutorial.md) - the equivalent walkthroughs for the Python
+  (IronPython), Lua (MoonSharp), and JavaScript (Jint) script engines.
