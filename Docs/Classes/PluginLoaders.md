@@ -74,7 +74,10 @@ server at load time instead of being shipped as a prebuilt `.dll`. Full walkthro
 - Compiler auto-detection (`CSScriptCompiler` in `Fougerite.cfg`, or MSBuild Roslyn -> .NET Framework ->
   Mono `mcs`, tried in that order) and the `// #require OtherPlugin` directive (compile-time reference +
   load-order dependency against another CSScript plugin or DLL module by name) are documented in detail in
-  the tutorial above.
+  the tutorial above. A plugin can `#require` any number of other plugins/modules - just add one
+  `// #require Name` line per dependency (one name per line, anywhere in any of its `.cs` files); see
+  ["Requiring multiple plugins"](../CSScriptPluginTutorial.md#5-require-referencing-other-plugins-and-modules)
+  in the tutorial for an example.
 
 `CSScriptPlugin` (a `BasePlugin`) is the loaded plugin instance, mirroring `CSPlugin`'s role for DLL
 modules:

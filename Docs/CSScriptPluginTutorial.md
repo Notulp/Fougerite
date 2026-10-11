@@ -166,6 +166,36 @@ namespace ShopPlugin
 among both CSScript plugins and `Modules\*.dll` names, so you don't need to know in advance which kind the
 dependency is.
 
+**Requiring multiple plugins:** yes, this is supported - just add one `#require` directive per line, each
+with a single plugin/module name. They can be anywhere in any `.cs` file of your plugin (not necessarily
+next to each other), and can mix CSScript plugins and DLL modules freely:
+```csharp
+// #require EconomyCore
+// #require PermissionsCore
+using Fougerite;
+using EconomyCore;
+using PermissionsCore;
+
+namespace ShopPlugin
+{
+    public class ShopPlugin : Module
+    {
+        public override void Initialize()
+        {
+            // Both EconomyCore and PermissionsCore are guaranteed to be compiled and loaded
+            // before ShopPlugin, regardless of the order the two directives were written in.
+        }
+    }
+}
+```
+The loader collects **every** matching `// #require Name` line across **all** source files of the plugin into
+its full dependency set - there is no limit on how many directives (and therefore dependencies) a single
+plugin can declare. There is no multi-name shorthand though (e.g. `// #require A, B` or
+`// #require A B` on one line) - the directive only recognizes exactly one name per line, so list each
+dependency on its own `// #require` line. A circular dependency between two or more plugins' `#require`
+chains is detected and rejected (none of the plugins in the cycle are loaded) rather than deadlocking or
+silently picking an order.
+
 **Soft dependencies (no `#require` needed):** if your code merely *mentions* another plugin's name as a
 string literal somewhere (e.g. `PluginLoader.GetInstance().Plugins["EconomyCore"]` without a cast, used
 purely through reflection/duck-typing, which is also perfectly valid and common when you don't want a hard
