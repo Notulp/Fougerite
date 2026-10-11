@@ -115,7 +115,11 @@ else built, or another CSScript plugin. Add a special comment directive, on its 
 2. **Load-order dependency** - the loader makes sure `OtherPlugin` is compiled and loaded **before** your
    plugin, automatically, regardless of what order the folders/`Order` values would otherwise suggest.
 
-Example - a plugin that type-safely calls into another already-loaded CSScript plugin:
+Example - a plugin that type-safely calls into another already-loaded CSScript plugin. Note that both
+examples below use **safe casting** (`as` + a null check) rather than a direct `(Type) obj` cast - a direct
+cast throws an `InvalidCastException` (and takes your whole plugin down) if `EconomyCore` isn't loaded yet,
+failed to load, or was reloaded with a different engine, whereas `as` just yields `null` that you can check
+and log cleanly. Always prefer safe casting like this when crossing a plugin boundary:
 ```csharp
 // #require EconomyCore
 using Fougerite;
@@ -127,13 +131,29 @@ namespace ShopPlugin
     {
         public override void Initialize()
         {
+            Fougerite.PluginLoaders.BasePlugin basePlugin;
+            if (!Fougerite.PluginLoaders.PluginLoader.GetInstance().Plugins.TryGetValue("EconomyCore", out basePlugin))
+            {
+                Logger.LogError("EconomyCore is not loaded.");
+                return;
+            }
+
+            var wrapper = basePlugin as Fougerite.PluginLoaders.CSScriptPlugin;
+            if (wrapper == null)
+            {
+                Logger.LogError("EconomyCore did not load as a CSScript plugin.");
+                return;
+            }
+
             // EconomyPlugin is EconomyCore's Module subclass - fully typed, not a dictionary lookup.
-            EconomyPlugin economy = (EconomyPlugin) Fougerite.PluginLoaders.PluginLoader
-                .GetInstance().Plugins["EconomyCore"]
-                .GetType()
+            EconomyPlugin economy = wrapper.GetType()
                 .GetProperty("Engine")
-                .GetValue(((Fougerite.PluginLoaders.CSScriptPlugin) Fougerite.PluginLoaders.PluginLoader
-                    .GetInstance().Plugins["EconomyCore"]), null);
+                .GetValue(wrapper, null) as EconomyPlugin;
+            if (economy == null)
+            {
+                Logger.LogError("EconomyCore's Engine is not an EconomyPlugin.");
+                return;
+            }
         }
     }
 }
@@ -155,8 +175,27 @@ namespace ShopPlugin
 
         public override void Initialize()
         {
-            CSScriptPlugin wrapper = (CSScriptPlugin) PluginLoader.GetInstance().Plugins["EconomyCore"];
-            _economy = (EconomyPlugin) wrapper.Engine;
+            BasePlugin basePlugin;
+            if (!PluginLoader.GetInstance().Plugins.TryGetValue("EconomyCore", out basePlugin))
+            {
+                Logger.LogError("EconomyCore is not loaded.");
+                return;
+            }
+
+            var wrapper = basePlugin as CSScriptPlugin;
+            if (wrapper == null)
+            {
+                Logger.LogError("EconomyCore did not load as a CSScript plugin.");
+                return;
+            }
+
+            _economy = wrapper.Engine as EconomyPlugin;
+            if (_economy == null)
+            {
+                Logger.LogError("EconomyCore's Engine is not an EconomyPlugin.");
+                return;
+            }
+
             _economy.AddBalance("76561198000000000", 100);
         }
     }
