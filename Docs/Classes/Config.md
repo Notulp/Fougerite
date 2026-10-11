@@ -108,35 +108,69 @@ file save, in addition to the `AddDefault`/`GetSetting`/`Save` used above.
 This is exactly the pattern real plugins use, e.g. an `AirDrops` plugin loading its own `Settings.ini` next to
 itself. `ModuleFolder` here isn't a hand-built path like `moduleFolder` above - it's a built-in
 `Fougerite.Module` property, already pointing at the plugin's own folder under `Modules\` by the time
-`Initialize()` runs, so a DLL module plugin can use it directly without resolving the folder itself:
+`Initialize()` runs, so a DLL module plugin can use it directly without resolving the folder itself.
+
+**Don't trust the file's contents.** `Settings.ini` is a plain text file a server operator can (and will) hand-edit -
+a typo'd number, a missing key after a bad merge, or a half-written file from a crash mid-save are all normal
+things that happen in production. `int.Parse` throws `FormatException`/`OverflowException` on bad input and
+`ArgumentNullException` if the setting is missing entirely (`GetSetting` can return `null`), and any one of those
+exceptions escaping `ReloadConfig()` takes down the whole plugin (or worse, if called from a hook, the hook
+dispatch). Use `int.TryParse` with a sane fallback default for every numeric setting, and wrap the whole read in
+a `try/catch` as a last line of defense:
 ```csharp
 private IniParser Settings;
 
 private void ReloadConfig()
 {
-    string path = Path.Combine(ModuleFolder, "Settings.ini");
-    if (!File.Exists(path))
+    try
     {
-        File.Create(path).Dispose();
-        Settings = new IniParser(path);
-        Settings.AddSetting("Settings", "TimedAirdrop", "True");
-        Settings.AddSetting("Settings", "AirdropTime", "1800000");
-        Settings.AddSetting("Settings", "MinPlayers", "20");
-        Settings.Save();
-    }
-    else
-    {
-        Settings = new IniParser(path);
-    }
+        string path = Path.Combine(ModuleFolder, "Settings.ini");
+        if (!File.Exists(path))
+        {
+            File.Create(path).Dispose();
+            Settings = new IniParser(path);
+            Settings.AddSetting("Settings", "TimedAirdrop", "True");
+            Settings.AddSetting("Settings", "AirdropTime", "1800000");
+            Settings.AddSetting("Settings", "MinPlayers", "20");
+            Settings.Save();
+        }
+        else
+        {
+            Settings = new IniParser(path);
+        }
 
-    TimedAirdrop = Settings.GetBoolSetting("Settings", "TimedAirdrop");
-    AirdropTime = int.Parse(Settings.GetSetting("Settings", "AirdropTime"));
-    MinPlayers = int.Parse(Settings.GetSetting("Settings", "MinPlayers"));
+        TimedAirdrop = Settings.GetBoolSetting("Settings", "TimedAirdrop");
+
+        // int.TryParse never throws - it returns false and leaves "AirdropTime" at its previous/default
+        // value if the setting is missing, empty, or isn't a valid number (e.g. the operator typed "18oo000").
+        if (!int.TryParse(Settings.GetSetting("Settings", "AirdropTime"), out AirdropTime))
+        {
+            Logger.LogWarning("[AirDrops] 'AirdropTime' is missing or invalid, falling back to 1800000.");
+            AirdropTime = 1800000;
+        }
+
+        if (!int.TryParse(Settings.GetSetting("Settings", "MinPlayers"), out MinPlayers))
+        {
+            Logger.LogWarning("[AirDrops] 'MinPlayers' is missing or invalid, falling back to 20.");
+            MinPlayers = 20;
+        }
+    }
+    catch (Exception ex)
+    {
+        // Catches anything TryParse doesn't cover - e.g. a corrupted/unreadable Settings.ini, a locked
+        // file, or a permissions error on the module folder. Never let config loading crash the plugin.
+        Logger.LogError("[AirDrops] Error while reading the config: " + ex);
+    }
 }
 ```
 Note `AddSetting` (not `AddDefault`) is used here since this branch only runs once, when the file is brand new -
 either works for this first-run case, but prefer `AddDefault` if you ever add new settings to an *existing*
 `Settings.ini` in a later plugin version, so you don't overwrite values the server operator already changed.
+The same `TryParse`-then-fallback approach applies to every other type you read out of an `IniParser`
+(`double.TryParse`, `bool.TryParse` instead of trusting `GetBoolSetting` blindly, etc.) and to script plugins
+too - Python's `int(x)` raises `ValueError` on bad input just like `int.Parse` does in C#, so wrap script-side
+parsing in a `try/except` (or validate with `.isdigit()`/a regex first) rather than letting a bad `.ini` value
+crash `On_PluginInit`.
 
 ### Example - Python/JS/Lua (a plugin's own dedicated config file, via `GetIni`/`CreateIni`/`IniExists`)
 Script plugins don't have direct filesystem access the way a C# plugin does, so `BasePlugin` exposes the same
@@ -162,6 +196,94 @@ def ClansConfig(self):
 ```
 `ClansConfig.ini` ends up inside this plugin's own folder (e.g. `Save\PyPlugins\Clans\ClansConfig.ini`), fully
 separate from `Fougerite.cfg` and from any other plugin's settings - never shared, never collided with.
+
+### Example - Python/JS/Lua (safely parsing config values on read)
+`IniParser.GetSetting`/`GetBoolSetting` return raw/boolean values straight from the `.ini` file - there's no
+schema, so a hand-edited typo, a missing key, or a half-written file after a crash all turn into bad data at
+runtime. Converting a setting to a number in a script engine has the exact same failure mode as `int.Parse` in
+C#: Python's `int(x)` raises `ValueError`, JavaScript's `Number(x)`/`parseInt(x)` silently returns `NaN` instead
+of throwing (arguably worse, since it won't even trip a `try/except`), and Lua's `tonumber(x)` returns `nil`.
+None of these should be allowed to crash `On_PluginInit`/a hook or quietly produce garbage - always validate the
+result and fall back to a sane default, and wrap the whole load in error handling:
+
+**Python** - `int()`/`float()` throw `ValueError` on bad input, so wrap the conversion in `try/except`:
+```python
+def ClansConfig(self):
+    if not self.IniExists("ClansConfig"):
+        ini = self.CreateIni("ClansConfig")
+        ini.AddSetting("Settings", "Cost", "0")
+        ini.AddSetting("Settings", "AllowSelfDamage", "True")
+        ini.AddSetting("Settings", "ClanMemberLimit", "0")
+        ini.Save()
+    return self.GetIni("ClansConfig")
+
+def On_PluginInit(self):
+    try:
+        ini = self.ClansConfig()
+
+        try:
+            self.Cost = int(ini.GetSetting("Settings", "Cost"))
+        except (TypeError, ValueError):
+            Logger.LogWarning("[Clans] 'Cost' is missing or invalid, falling back to 0.")
+            self.Cost = 0
+
+        # GetBoolSetting is already safe (never throws), so it's fine to use directly.
+        self.AllowSelfDamage = ini.GetBoolSetting("Settings", "AllowSelfDamage")
+    except Exception as ex:
+        Logger.LogError("[Clans] Error while reading the config: " + str(ex))
+```
+
+**JavaScript** - `Number`/`parseInt` don't throw, they return `NaN`, so you must check with `isNaN(...)` (a
+`try/catch` alone won't catch a bad value here):
+```javascript
+function On_PluginInit() {
+    try {
+        var ini = Plugin.IniExists("ClansConfig") ? Plugin.GetIni("ClansConfig") : Plugin.CreateIni("ClansConfig");
+
+        var cost = parseInt(ini.GetSetting("Settings", "Cost"), 10);
+        if (isNaN(cost)) {
+            Plugin.Log("Clans", "'Cost' is missing or invalid, falling back to 0.");
+            cost = 0;
+        }
+        this.Cost = cost;
+
+        // GetBoolSetting is already safe (never throws), so it's fine to use directly.
+        this.AllowSelfDamage = ini.GetBoolSetting("Settings", "AllowSelfDamage");
+    } catch (ex) {
+        Plugin.LogError("Clans", "Error while reading the config: " + ex);
+    }
+}
+```
+
+**Lua** - `tonumber(x)` returns `nil` instead of throwing, so check for `nil` the same way; `pcall` is the
+Lua equivalent of `try/catch` for anything else that could fail:
+```lua
+function On_PluginInit()
+    local ok, err = pcall(function()
+        local ini
+        if Plugin:IniExists("ClansConfig") then
+            ini = Plugin:GetIni("ClansConfig")
+        else
+            ini = Plugin:CreateIni("ClansConfig")
+        end
+
+        local cost = tonumber(ini:GetSetting("Settings", "Cost"))
+        if cost == nil then
+            Plugin:Log("Clans", "'Cost' is missing or invalid, falling back to 0.")
+            cost = 0
+        end
+        Cost = cost
+
+        -- GetBoolSetting is already safe (never throws), so it's fine to use directly.
+        AllowSelfDamage = ini:GetBoolSetting("Settings", "AllowSelfDamage")
+    end)
+    if not ok then
+        Plugin:Log("Clans", "Error while reading the config: " .. tostring(err))
+    end
+end
+```
+Same rule in every engine: never trust a converted config value without checking it succeeded, and never let a
+config-loading error escape and take the whole plugin/hook down with it.
 
 ### Example - C# (checking the running Fougerite version)
 ```csharp
