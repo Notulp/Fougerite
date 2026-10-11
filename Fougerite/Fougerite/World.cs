@@ -792,6 +792,18 @@ namespace Fougerite
         /// SupplyCrate, ResourceTarget, DeployableObject, StructureComponent,
         /// StructureMaster.
         /// The other spawn methods are returning the gameobject instead.
+        ///
+        /// OWNERSHIP NOTE: This method does NOT assign a real owner.
+        /// - For deployables (DeployableObject), ownerID/creatorID are left at 0 (no owner). This still
+        ///   works (the entity spawns/functions fine, unowned), but It's always recommended to set
+        ///   obj4.ownerID/obj4.creatorID (and call CacheCreator()/CreatorSet() again) to a real Player's
+        ///   UID/SteamID right after spawning, so things like owner-based permissions/auth (doors, boxes,
+        ///   turrets, etc.) and raid/ownership logs work as expected.
+        /// - For structures (StructureComponent), this method does NOT attach the spawned component to a
+        ///   StructureMaster at all. It still works without one (no NullReferenceException on normal use),
+        ///   but decay/weight-linking and saving rely on a master being set - see CreateSM(...)/
+        ///   StructureMaster.AddStructureComponent(...). If you spawn structures in bulk, It's recommended to
+        ///   create (or find a nearby) StructureMaster and attach each component to It.
         /// </summary>
         /// <param name="prefab"></param>
         /// <param name="location"></param>
@@ -809,6 +821,10 @@ namespace Fougerite
                     GameObject obj3 = NetCull.InstantiateStatic(prefab, location, rotation);
                     if (obj3.GetComponent(out StructureComponent structureComponent))
                     {
+                        // NOTE: structureComponent isn't attached to any StructureMaster here. It will work
+                        // unowned/masterless, but for proper decay/weight-linking/saving behaviour, consider
+                        // creating/finding a StructureMaster (see CreateSM) and calling
+                        // master.AddStructureComponent(structureComponent) yourself.
                         obj2 = EntityCache.GetInstance().GrabOrAllocate(structureComponent.GetInstanceID(), structureComponent);
                     } 
                     else if (obj3.GetComponent(out LootableObject lootableObject))
@@ -828,6 +844,9 @@ namespace Fougerite
                         DeployableObject obj4 = obj3.GetComponent<DeployableObject>();
                         if (obj4 != null)
                         {
+                            // No owner is assigned by default (works fine unowned), but It's recommended to
+                            // set obj4.ownerID/obj4.creatorID to a real Player's UID right after this call,
+                            // then re-run CacheCreator()/CreatorSet(), so ownership-based features behave.
                             obj4.ownerID = 0L;
                             obj4.creatorID = 0L;
                             obj4.CacheCreator();
@@ -842,6 +861,79 @@ namespace Fougerite
                 Logger.LogError($"SpawnEntity error: {e}");
             }
             return obj2;
+        }
+
+        /// <summary>
+        /// Spawns an animal/NPC prefab (e.g. ";stag_prefab", ";wolf_prefab", ";bear_prefab") at the given
+        /// vector, rotation, N times.
+        /// IMPORTANT: Unlike SpawnEntity, this returns the Fougerite NPC class, not Entity, since animals are
+        /// Character/BasicWildLifeAI based and aren't one of the component types Entity wraps
+        /// (StructureComponent, LootableObject, SupplyCrate, ResourceTarget, DeployableObject).
+        /// Use World.SpawnEntity for structures/deployables/loot, and this method for animals/NPCs instead.
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="location"></param>
+        /// <param name="rotation"></param>
+        /// <param name="rep"></param>
+        /// <returns></returns>
+        public NPC SpawnAnimal(string prefab, Vector3 location, Quaternion rotation, int rep = 1)
+        {
+            NPC npc = null;
+            try
+            {
+                for (int i = 0; i < rep; i++)
+                {
+                    GameObject obj3 = NetCull.InstantiateStatic(prefab, location, rotation);
+                    Character ch = obj3.GetComponent<Character>();
+                    if (ch == null)
+                    {
+                        Logger.LogWarning($"SpawnAnimal: Prefab '{prefab}' doesn't contain a Character component. Use World.SpawnEntity instead.");
+                        continue;
+                    }
+
+                    int instanceId = ch.GetInstanceID();
+                    // The AddWildlifeInstance hook usually already registered this Character into the
+                    // NPCCache (through BasicWildLifeAI.Awake), but It may not have run yet on this same
+                    // frame, so we create and register It ourselves if that's the case.
+                    npc = NPCCache.GetInstance().GetEntityByInstanceId(instanceId);
+                    if (npc == null)
+                    {
+                        npc = new NPC(ch);
+                        NPCCache.GetInstance().Add(npc);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"SpawnAnimal error: {e}");
+            }
+            return npc;
+        }
+
+        /// <summary>
+        /// Spawns an animal/NPC prefab at the given vector, N times. See the other SpawnAnimal overload for
+        /// more info.
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="location"></param>
+        /// <param name="rep"></param>
+        /// <returns></returns>
+        public NPC SpawnAnimal(string prefab, Vector3 location, int rep = 1)
+        {
+            return SpawnAnimal(prefab, location, Quaternion.identity, rep);
+        }
+
+        /// <summary>
+        /// Spawns an animal/NPC prefab at the given player's location/rotation, N times. See the
+        /// SpawnAnimal(string, Vector3, Quaternion, int) overload for more info.
+        /// </summary>
+        /// <param name="prefab"></param>
+        /// <param name="p"></param>
+        /// <param name="rep"></param>
+        /// <returns></returns>
+        public NPC SpawnAnimalAtPlayer(string prefab, Player p, int rep = 1)
+        {
+            return SpawnAnimal(prefab, p.Location, p.PlayerClient.transform.rotation, rep);
         }
 
         private object Spawn(string prefab, Vector3 location, Quaternion rotation, int rep)

@@ -23,6 +23,30 @@ its own Unity asset bundle at startup (used together with RustBuster's client-si
 - Spawning:
   - `SpawnEntity(string prefab, Vector3 location, Quaternion rotation = default, int rep = 1)` (+ overloads
     taking `float x, y, z`) - spawns `rep` copies of `prefab` and returns the (first) resulting `Entity`.
+    **Only use this for prefabs that resolve to one of `Entity`'s supported components**
+    (`StructureComponent`/`LootableObject`/`SupplyCrate`/`ResourceTarget`/`DeployableObject`) - structures,
+    deployables, resource nodes, loot crates. Animal prefabs (`Character`-based) aren't one of those, so
+    `SpawnEntity(";stag_prefab", ...)` won't give you a usable NPC wrapper.
+    **Ownership note:** `SpawnEntity` does **not** assign a real owner by itself.
+    - Deployables (`;deploy_...` prefabs) are spawned with `ownerID`/`creatorID` left at `0` (unowned). This
+      still works - the entity spawns and functions fine - but it's always recommended to assign a real
+      owner right after spawning (see the example below), since a lot of gameplay/plugin logic (door/box
+      auth, raid/ownership logs, "who placed this" checks) is owner-based.
+    - Structures (`;struct_...` prefabs) are spawned as a bare `StructureComponent`, **not** attached to any
+      `StructureMaster`. This also still works on its own (no crash/error for normal use), but decay,
+      weight-linking between pieces, and proper save/load behavior all rely on the component belonging to a
+      `StructureMaster` - see `CreateSM(...)` below and `StructureMaster.AddStructureComponent(...)`. If
+      you're spawning structures (walls, foundations, etc.), it's recommended to create/find a
+      `StructureMaster` and attach every spawned component to it.
+  - `SpawnAnimal(string prefab, Vector3 location, Quaternion rotation = default, int rep = 1)` (+ overload
+    taking just `Vector3 location, int rep = 1`) - spawns `rep` copies of an animal/NPC prefab (e.g.
+    `;stag_prefab`, `;wolf_prefab`, `;bear_prefab`, `;chicken_prefab`, see [`Prefabs`](Prefabs.md#animals)) and
+    returns the (first) resulting [`NPC`](#npc) instead of `Entity`. Internally this does exactly what the
+    game itself does when wildlife naturally spawns (registers the `Character` into [`NPCCache`](Caches.md),
+    same as the `AddWildlifeInstance` hook), so the returned `NPC` immediately shows up in `World.Animals`/
+    `GetNPCsInZone` too.
+  - `SpawnAnimalAtPlayer(string prefab, Player p, int rep = 1)` - shortcut for `SpawnAnimal` at a player's
+    location/rotation.
   - `Spawn(...)` - the older, untyped overloads returning `object` instead of `Entity`.
   - `SpawnAtPlayer(string prefab, Player p, int rep = 1)` - spawns at a player's location.
   - See [`Prefabs`](Prefabs.md) for a reference list of known `prefab` names (structures, deployables,
@@ -135,6 +159,85 @@ public void AnimalScanCallback(ATimedEvent e)
 {
     List<NPC> animals = World.GetWorld().GetNPCsInZone("SafeZone");
     Logger.Log($"{animals.Count} animals are roaming inside SafeZone.");
+}
+```
+
+### Example - C# (spawning a stag at the player with a command)
+A minimal `/spawnstag` command demonstrating `SpawnAnimal`/`SpawnAnimalAtPlayer`. Note it returns an `NPC`,
+not an `Entity` - don't use `SpawnEntity` for animal prefabs, since `Character`-based animals aren't one of
+the component types `Entity` wraps:
+```csharp
+public override void Initialize()
+{
+    Hooks.OnCommand += HandleCommand;
+}
+
+public override void DeInitialize()
+{
+    Hooks.OnCommand -= HandleCommand;
+}
+
+public void HandleCommand(Fougerite.Player player, string cmd, string[] args)
+{
+    if (cmd != "spawnstag")
+    {
+        return;
+    }
+
+    NPC npc = World.GetWorld().SpawnAnimalAtPlayer(";stag_prefab", player);
+    if (npc != null)
+    {
+        player.Message($"Spawned a stag ({npc.Name}, InstanceID {npc.InstanceID}) at your location!");
+    }
+    else
+    {
+        player.Message("Failed to spawn the stag.");
+    }
+}
+```
+Same idea in Python (see [`PythonPluginTutorial.md`](../PythonPluginTutorial.md)):
+```python
+def On_Command(self, Player, cmd, args):
+    if cmd == "spawnstag":
+        npc = World.SpawnAnimalAtPlayer(";stag_prefab", Player)
+        if npc is not None:
+            Player.Message("Spawned a stag (" + npc.Name + ")!")
+        else:
+            Player.Message("Failed to spawn the stag.")
+```
+
+### Example - C# (spawning deployables/structures with a proper owner)
+As noted above, `SpawnEntity` does not assign a real owner by itself. Deployables spawn unowned
+(`ownerID`/`creatorID == 0`), and structures spawn without a `StructureMaster`. Both will still work
+unowned/masterless, but it's always recommended to assign a real owner - most gameplay/plugin logic (door/box
+auth, raid logs, "who placed this") is owner-based, and structures need a `StructureMaster` for decay/saving
+to behave correctly:
+```csharp
+public void SpawnOwnedBoxCommand(Fougerite.Player player)
+{
+    // Deployables: SpawnEntity leaves ownerID/creatorID at 0. Entity.ChangeOwner(Player) fixes that up
+    // for you (it internally calls DeployableObject.SetupCreator + CacheCreator/CreatorSet).
+    Entity box = World.GetWorld().SpawnEntity(";deploy_wood_box", player.Location, player.PlayerClient.transform.rotation);
+    if (box != null)
+    {
+        box.ChangeOwner(player);
+        player.Message("Spawned a wood box, owned by you.");
+    }
+}
+
+public void SpawnOwnedWallCommand(Fougerite.Player player)
+{
+    // Structures: SpawnEntity returns a bare StructureComponent with no StructureMaster. Create (or find a
+    // nearby) one first and attach the component to it, THEN assign the owner - Entity.ChangeOwner only
+    // works on structures that already have a master (it walks GetLinkedStructs()/IsStructure()).
+    StructureMaster master = World.GetWorld().CreateSM(player);
+    Entity wall = World.GetWorld().SpawnEntity(";struct_wood_wall", player.Location, player.PlayerClient.transform.rotation);
+    if (wall != null && wall.GetObject(out StructureComponent comp))
+    {
+        master.AddStructureComponent(comp);
+        wall.ChangeOwner(player);
+        player.Message("Spawned a wood wall, attached to a new StructureMaster and owned by you.");
+    }
 }
 ```
 
