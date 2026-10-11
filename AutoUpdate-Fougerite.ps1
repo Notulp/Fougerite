@@ -252,6 +252,7 @@ Write-Host "    - Save\JsPlugins\PlayerLog\" -ForegroundColor White
 Write-Host "    - Save\JsPlugins\Drop++\" -ForegroundColor White
 Write-Host "    - Save\PyPlugins\Advertise\" -ForegroundColor White
 Write-Host "    - Save\LuaPlugins\Test\" -ForegroundColor White
+Write-Host "    - Modules\HelloScriptTest\" -ForegroundColor White
 Write-Host ""
 Write-Host "  These are useful for learning the basics but are NOT needed" -ForegroundColor White
 Write-Host "  on a normal production server. It is recommended to SKIP them" -ForegroundColor White
@@ -308,7 +309,8 @@ try {
         $isExamplePlugin = ($normalised -match "(?i)(^|/)Save/JsPlugins/PlayerLog/") -or `
                            ($normalised -match "(?i)(^|/)Save/JsPlugins/Drop\+\+/") -or `
                            ($normalised -match "(?i)(^|/)Save/PyPlugins/Advertise/") -or `
-                           ($normalised -match "(?i)(^|/)Save/LuaPlugins/Test/")
+                           ($normalised -match "(?i)(^|/)Save/LuaPlugins/Test/") -or `
+                           ($normalised -match "(?i)(^|/)Modules/HelloScriptTest/")
 
         # -- Directory entries --
         if ($entry.FullName.EndsWith("/") -or $entry.FullName.EndsWith("\")) {
