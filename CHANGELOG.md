@@ -70,6 +70,15 @@ large documentation catch-up. No new hooks or config settings, so updating is dr
   falls back to a third, older mechanism - membership in the `"Moderators"` `DataStore` table - that isn't part
   of either permission system. Also noted that script plugins (JS/Lua/Python) get `PermissionSystem` injected
   directly into their global scope, so they can call `PlayerHasPermission` without any C#-side glue.
+- Added [`Docs/Examples/`](Docs/Examples/README.md): ten worked examples, each reimplementing the core
+  mechanic of a real community plugin (originally written against Fougerite/Magma, see
+  [dretax/Python-Plugins](https://github.com/dretax/Python-Plugins)) in C#, JavaScript, Python and Lua -
+  `BambeeProtector` (new-player kill protection), `Warps` (named teleports), `LevelSystem` (gathering XP/level
+  progression), `Kits` (config-driven loadouts), `iConomy` (a player-balance economy), `Clans` (role-based
+  clans with opt-in friendly fire), `DestroySystem` (hit-to-destroy your own structures with a raid-cooldown
+  lock), `Recorder` (recording/respawning a structure as a blueprint), `TDM` (a round-based arena mode, plus a
+  write-up of how to finish its never-completed team split with a locked `Zone3D` arena and a RustBuster GUI
+  lobby), and `HungerGames` (a battle-royale shrinking safe zone). Linked from `Docs/README.md`.
 
 ## v1.9.97
 

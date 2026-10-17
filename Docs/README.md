@@ -48,6 +48,8 @@ Fougerite plugins react to game events by either:
   and what each one functionally gates.
 - [`GlitchFix.md`](GlitchFix.md) - The bundled anti-glitch module: every `GlitchFix.cfg` setting and what each
   building/griefing check actually does.
+- [`Examples/`](Examples/README.md) - Worked examples (C#/JS/Python/Lua) reimplementing the core mechanic of
+  ten real-world community plugins (kill protection, an economy, kits, clans, a battle royale mode, and more).
 - [`Hooks/`](Hooks/README.md) - Full reference of every hook/event exposed by Fougerite, one file per hook,
   grouped by category (Player, NPC, Entities, Items, Combat, World, Server).
 - [`Classes/`](Classes/README.md) - Reference and usage examples for important helper classes:
