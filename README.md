@@ -93,6 +93,35 @@ implementation details (`NativeDomainManager`, `mono_fg_create_domain`/`mono_fg_
 
 ---
 
+## FreezeMonitor (Watchdog)
+
+`FreezeMonitor_On`/`FreezeMonitor_Off` are no longer stubs. When armed, a background watchdog thread (`FreezeWatchdogWorker`) monitors a heartbeat timestamp that the managed side is expected to refresh every frame. If the heartbeat stops advancing for longer than `freeze.timeout` seconds, the server is considered frozen and the watchdog:
+
+1. Creates a `FreezeDumps` folder next to the server executable and starts a timestamped report (`freeze_<timestamp>.txt`).
+2. Periodically suspends and samples the main thread's call stack (native frames resolved via `dbghelp`/`SymFromAddr`, managed frames resolved via the Mono JIT API when available) and appends them to the report, so you can see exactly where the server is stuck and whether it's stuck at the same spot.
+3. Writes a minidump (`freeze_<timestamp>.dmp`) once the freeze has lasted `freeze.dumpafter` seconds, up to `freeze.maxdumps` dumps per run (set `freeze.fulldump` to capture full process memory instead of a lighter dump).
+4. Optionally force-kills the process once the freeze has lasted `freeze.killafter` seconds (`0` disables auto-kill), so an orchestrator/watchdog script can restart the server instead of letting it hang forever.
+5. Reports recovery once the heartbeat resumes, including the total freeze duration.
+
+All diagnostics work (stack walking, symbol loading, minidump writing) happens on a separate `FreezeDiagWorker` thread so it never adds load to, or further blocks, the frozen main thread.
+
+Two additional exports support this:
+
+- `FreezeMonitor_SetCallback(fnc)` lets managed code subscribe to freeze lifecycle events (`Detected`, `Dumped`, `Recovered`) with the elapsed seconds and a text description, e.g. to post a Discord/RCON alert. On the managed side this surfaces as [`Hooks.OnServerFreeze`](Docs/Hooks/README.md), wired up by [`Fougerite.Tools.FreezeContext`](Fougerite/Fougerite/Tools/FreezeContext.cs).
+- `FreezeMonitor_SetContext(context, record)` lets managed hooks announce "I'm about to run `<context>`" right before invoking a plugin hook. If the main thread then freezes, the report includes this context and a short history of recently-entered contexts, making it much easier to pin a freeze on a specific plugin hook.
+
+### Configuration
+
+| Key | Default | Meaning |
+|---|---|---|
+| `freeze.timeout` | `10` | Seconds without a heartbeat before the server is considered frozen |
+| `freeze.dumpafter` | `30` | Seconds frozen before a minidump is written (`0` disables dumping) |
+| `freeze.killafter` | `0` | Seconds frozen before the process is force-killed (`0` disables auto-kill) |
+| `freeze.maxdumps` | `3` | Maximum number of minidumps written per freeze episode |
+| `freeze.fulldump` | `0` | `1` to capture full process memory in the minidump instead of a lighter dump |
+
+---
+
 ## Compilation
 1. First you need to decide wheather you are going to modify the patcher or not. If you are only here to modify or compile
    the Fougerite project, or one of the engines skip to step 7.

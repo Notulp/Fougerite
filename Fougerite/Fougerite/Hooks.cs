@@ -146,6 +146,7 @@ namespace Fougerite
                     // Execute Raw Event after restriction check
                     if (OnChatRaw != null)
                     {
+                        IntPtr freezeChatRaw = FreezeContext.Enter(FreezeContext.ChatRawEvent);
                         try
                         {
                             OnChatRaw(ref arg);
@@ -153,6 +154,10 @@ namespace Fougerite
                         catch (Exception ex)
                         {
                             Logger.LogError($"ChatRawEvent Error: {ex}");
+                        }
+                        finally
+                        {
+                            FreezeContext.Leave(freezeChatRaw);
                         }
                     }
 
@@ -175,6 +180,7 @@ namespace Fougerite
                     // Execute raw event first
                     if (OnChatRaw != null)
                     {
+                        IntPtr freezeChatRaw = FreezeContext.Enter(FreezeContext.ChatRawEvent);
                         try
                         {
                             OnChatRaw(ref arg);
@@ -183,10 +189,15 @@ namespace Fougerite
                         {
                             Logger.LogError($"ChatRawEvent Error: {ex}");
                         }
+                        finally
+                        {
+                            FreezeContext.Leave(freezeChatRaw);
+                        }
                     }
                     
                     Logger.ChatLog(quotedName, quotedMessage);
                     ChatString chatstr = new ChatString(quotedMessage);
+                    IntPtr freezeChat = FreezeContext.Enter(FreezeContext.ChatEvent);
                     try
                     {
                         if (OnChat != null)
@@ -197,6 +208,10 @@ namespace Fougerite
                     catch (Exception ex)
                     {
                         Logger.LogError($"ChatEvent Error: {ex}");
+                    }
+                    finally
+                    {
+                        FreezeContext.Leave(freezeChat);
                     }
 
                     // Check for empty text
@@ -376,6 +391,7 @@ namespace Fougerite
 
                         ConsoleSystem.Arg[] argArray1 = new ConsoleSystem.Arg[] { arg };
                         object[] parameters = argArray1;
+                        IntPtr freezeCommand = FreezeContext.Enter(FreezeContext.Intern("Console " + type.FullName + "." + method.Name));
                         try
                         {
                             method.Invoke(null, parameters);
@@ -388,6 +404,10 @@ namespace Fougerite
                             arg.ReplyWith(string.Concat(textArray3));
                             //flag = false;
                             break;
+                        }
+                        finally
+                        {
+                            FreezeContext.Leave(freezeCommand);
                         }
 
                         arg = parameters[0] as ConsoleSystem.Arg;
@@ -618,6 +638,7 @@ namespace Fougerite
                 if (OnConsoleReceivedWithCancel != null)
                 {
                     ConsoleEvent ce = new ConsoleEvent();
+                    IntPtr freezeWithCancel = FreezeContext.Enter(FreezeContext.ConsoleReceivedWithCancelEvent);
                     try
                     {
                         OnConsoleReceivedWithCancel(ref a, external, ce);
@@ -625,6 +646,10 @@ namespace Fougerite
                     catch (Exception ex)
                     {
                         Logger.LogError($"OnConsoleReceivedWithCancel Error: {ex}");
+                    }
+                    finally
+                    {
+                        FreezeContext.Leave(freezeWithCancel);
                     }
 
                     if (ce.Cancelled)
@@ -635,6 +660,7 @@ namespace Fougerite
 
                 if (OnConsoleReceived != null)
                 {
+                    IntPtr freezeReceived = FreezeContext.Enter(FreezeContext.ConsoleReceivedEvent);
                     try
                     {
                         OnConsoleReceived(ref a, external);
@@ -642,6 +668,10 @@ namespace Fougerite
                     catch (Exception ex)
                     {
                         Logger.LogError($"ConsoleReceived Error: {ex}");
+                    }
+                    finally
+                    {
+                        FreezeContext.Leave(freezeReceived);
                     }
                 }
 
@@ -2226,6 +2256,7 @@ namespace Fougerite
 
         public static void GlobalQuit()
         {
+            global::Rust.Utility.FreezeMonitor.Off();
             Logger.Log("Detecting quit. Saving...");
             ConsoleSystem.Run("server.close", false);
             //ConsoleSystem.Run("save.all", false);

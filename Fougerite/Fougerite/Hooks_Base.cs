@@ -3,14 +3,37 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Fougerite.Concurrent;
 using Fougerite.Events;
+using Fougerite.Tools;
 using UnityEngine;
 
 namespace Fougerite
 {
     public partial class Hooks
     {
+        /// <summary>
+        /// Describes the state reported by the native server freeze monitor.
+        /// </summary>
+        public enum ServerFreezeType
+        {
+            /// <summary>
+            /// The server main thread was detected as frozen.
+            /// </summary>
+            Detected = 0,
+
+            /// <summary>
+            /// Diagnostic information about the freeze was dumped.
+            /// </summary>
+            Dumped = 1,
+
+            /// <summary>
+            /// The server recovered from the freeze.
+            /// </summary>
+            Recovered = 2
+        }
+        
         /// <summary>
         /// A thread-safe dictionary mapping entity IDs to their respective <see cref="Entity"/> wrappers.
         /// Primarily used to track and manage entity decay.
@@ -585,6 +608,12 @@ namespace Fougerite
         public static event PermissionEventDelegate OnPermissionChange;
 
         /// <summary>
+        /// This delegate runs when the native server freeze monitor reports a state change.
+        /// Runs on a separate thread. Do not perform UnityEngine operations.
+        /// </summary>
+        public static event ServerFreezeDelegate OnServerFreeze;
+
+        /// <summary>
         /// This value returns if the server is shutting down.
         /// </summary>
         public static bool IsShuttingDown { get; set; }
@@ -685,6 +714,8 @@ namespace Fougerite
             OnPermissionChange = delegate { };
             OnWaterDamage = delegate { };
             OnAudibleSound = delegate { };
+            OnServerFreeze = delegate { };
+            FreezeContext.ClearSubscribers();
         }
         
         public delegate void BlueprintUseHandlerDelegate(Player player, BPUseEvent ae);
@@ -860,6 +891,14 @@ namespace Fougerite
         public delegate void WaterDamageDelegate(WaterDamageEvent e);
 
         public delegate void AudibleSoundDelegate(AudibleSoundEvent e);
+
+        /// <summary>
+        /// Handles a server freeze state change reported by the native server freeze monitor.
+        /// </summary>
+        /// <param name="type">The reported freeze state.</param>
+        /// <param name="frozenSeconds">The amount of seconds the server has been frozen for.</param>
+        /// <param name="info">Additional diagnostic information about the freeze.</param>
+        public delegate void ServerFreezeDelegate(ServerFreezeType type, int frozenSeconds, string info);
         
         /// <summary>
         /// Called by the PluginLoader when a plugin is loaded.
@@ -877,6 +916,7 @@ namespace Fougerite
         public static void PluginUnloaded(PluginLoaders.BasePlugin plugin)
         {
             ExecuteSubscribers(OnPluginUnloaded, nameof(OnPluginUnloaded), plugin);
+            FreezeContext.ForgetPlugin(plugin);
         }
 
         /// <summary>
@@ -908,6 +948,8 @@ namespace Fougerite
             bool success = true;
             foreach (Delegate x in delegateOfEvent.GetInvocationList())
             {
+                IntPtr freezeContext = FreezeContext.ForSubscriber(x, eventName);
+                IntPtr freezePrevious = freezeContext != IntPtr.Zero ? FreezeContext.Enter(freezeContext) : IntPtr.Zero;
                 try
                 {
                     x.Method.Invoke(x.Target, Flags, binder, parameters, cultureInfo);
@@ -917,9 +959,42 @@ namespace Fougerite
                     Logger.LogError($"{eventName} Error: {ex}");
                     success = false;
                 }
+                finally
+                {
+                    if (freezeContext != IntPtr.Zero)
+                    {
+                        FreezeContext.Leave(freezePrevious);
+                    }
+                }
             }
             
             return success;
+        }
+
+        /// <summary>
+        /// Called by the native server freeze monitor when a freeze state change is detected.
+        /// </summary>
+        /// <param name="type">The reported freeze state, as a <see cref="ServerFreezeType"/>.</param>
+        /// <param name="frozenSeconds">The amount of seconds the server has been frozen for.</param>
+        /// <param name="info">A pointer to a native ANSI string containing additional diagnostic information.</param>
+        internal static void OnNativeFreeze(int type, int frozenSeconds, IntPtr info)
+        {
+            try
+            {
+                string text = info != IntPtr.Zero ? Marshal.PtrToStringAnsi(info) : string.Empty;
+                ExecuteSubscribers(OnServerFreeze, "ServerFreezeEvent", (ServerFreezeType)type, frozenSeconds, text);
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    Logger.LogError($"ServerFreezeEvent Error: {ex}");
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
         }
     }
 }

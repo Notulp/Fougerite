@@ -229,6 +229,7 @@
     <Compile Include="Fougerite\Tools\Cloner.cs" />
     <Compile Include="Fougerite\Tools\Extensions.cs" />
     <Compile Include="Fougerite\Tools\FougeriteTickManager.cs" />
+    <Compile Include="Fougerite\Tools\FreezeContext.cs" />
     <Compile Include="Fougerite\Tools\PluginMessaging.cs" />
     <Compile Include="Fougerite\Tools\SteamAPITools.cs" />
     <Compile Include="Fougerite\Tools\SteamTicketValidator.cs" />
