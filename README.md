@@ -112,6 +112,9 @@ Two additional exports support this:
 
 ### Configuration
 
+These are native Rust convars, so set them the same way as any other server setting: in your server root's
+`cfg/server.cfg` (e.g. alongside `server.hostname`, `server.port`, etc.), one `key value` pair per line.
+
 | Key | Default | Meaning |
 |---|---|---|
 | `freeze.timeout` | `10` | Seconds without a heartbeat before the server is considered frozen |
@@ -119,6 +122,16 @@ Two additional exports support this:
 | `freeze.killafter` | `0` | Seconds frozen before the process is force-killed (`0` disables auto-kill) |
 | `freeze.maxdumps` | `3` | Maximum number of minidumps written per freeze episode |
 | `freeze.fulldump` | `0` | `1` to capture full process memory in the minidump instead of a lighter dump |
+
+> [!WARNING]
+> `freeze.timeout` should **not** be set to `0` (or anywhere near it) - the heartbeat is refreshed once per
+> server frame, so a timeout that low (or zero) can trip on normal frame hitches/lag spikes and report false
+> freezes, or even make the watchdog treat the server as frozen before it's finished a single tick. Keep it
+> at a few seconds at minimum (roughly **2-3 seconds** as a safe floor); the default of `10` is a good general
+> value. `freeze.dumpafter`/`freeze.killafter` are safe to set to `0`, that's their documented way to disable
+> dumping/auto-kill entirely, but `freeze.killafter` should otherwise be comfortably larger than
+> `freeze.timeout` so the server has a chance to recover and the watchdog isn't killing it the moment a freeze
+> is merely detected.
 
 ---
 
