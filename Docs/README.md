@@ -34,6 +34,17 @@ Fougerite plugins react to game events by either:
   (`[Fougerite]`, `[Modules]`, `[Engines]`, `[Logging]`).
 - [`Scripts.md`](Scripts.md) - The `AutoUpdate-Fougerite.ps1` and `Collect-Logs.ps1` maintenance scripts:
   what they do and how to use them.
+- [`Patcher.md`](Patcher.md) - How `Fougerite.Patcher` rewrites `Assembly-CSharp.dll`/`uLink.dll`/
+  `Facepunch.MeshBatch.dll`, what the `CleanPatchTargetDlls\` folder is for, and the skeleton-stub +
+  `OpenField`/`OpenMethod` pattern used to hook new private game members.
+- [`AdminAccess.md`](AdminAccess.md) - How to log in as RCON from the client console and bootstrap your first
+  permanent admin with `/setmasteradmin`, including how to make sure it's actually saved to disk.
+- [`RustPP.md`](RustPP.md) - The bundled Rust++ moderation plugin: its own admin/flag system, chat commands,
+  configuration, and JSON persistence.
+- [`PermissionManager.md`](PermissionManager.md) - The `/pem`/`/pemg` command reference for Fougerite's built-in
+  group/permission system (`Fougerite.Permissions.PermissionSystem`).
+- [`GlitchFix.md`](GlitchFix.md) - The bundled anti-glitch module: every `GlitchFix.cfg` setting and what each
+  building/griefing check actually does.
 - [`Hooks/`](Hooks/README.md) - Full reference of every hook/event exposed by Fougerite, one file per hook,
   grouped by category (Player, NPC, Entities, Items, Combat, World, Server).
 - [`Classes/`](Classes/README.md) - Reference and usage examples for important helper classes:

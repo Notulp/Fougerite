@@ -139,7 +139,10 @@ These are native Rust convars, so set them the same way as any other server sett
 1. First you need to decide wheather you are going to modify the patcher or not. If you are only here to modify or compile
    the Fougerite project, or one of the engines skip to step 7.
 2. Open the SLN, and compile the Fougerite patcher.
-3. Please go to the Fougerite\References\CleanPatchTargetDlls\ directory, and read the ReadMe.txt file.
+3. Please go to the Fougerite\References\CleanPatchTargetDlls\ directory, and read the ReadMe.txt file. These
+   are known-good, unmodified copies of the DLLs the patcher expects as input - **always patch from here**,
+   never from an already-patched or hand-edited DLL, since the patcher isn't idempotent and assumes a clean
+   starting point.
 4. Select the 3 dlls that you are going to patch (Assembly-CSharp.dll, uLink.dll, Facepunch.MeshBatch.dll)
    , and copy to the patcher's output directory. You may need other files as reference
    such as UnityEngine.dll
@@ -147,6 +150,10 @@ These are native Rust convars, so set them the same way as any other server sett
    If something went wrong, try to find out from the patcher's logs.
 6. Copy the 3 patched dlls to \Fougerite\References\PatchedRustDlls\ directory, and overwrite the existing ones.
 7. You can now build all the projects using JetBrains Rider, or Visual Studio as you like.
+
+See [`Docs/Patcher.md`](Docs/Patcher.md) for a deeper explanation of what the patcher actually does, and for the
+skeleton-stub + "patch member to public" workflow used whenever you need to hook something new that touches a
+private member on a game type.
 
 ## Installation
 Please see a release file from the releases tab to see how a release file should look like.

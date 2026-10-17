@@ -104,8 +104,10 @@ properties/methods on those arguments, and usage examples in C#, Python, JavaScr
 | [OnPluginInit](Server/On_PluginInit.md) | `On_PluginInit` | This plugin has finished initializing. |
 | [OnPluginLoaded](Server/On_PluginLoaded.md) | `On_PluginLoaded` | Any plugin (C#/CSScript/Python/JS/Lua) finished loading. |
 | [OnPluginUnloaded](Server/On_PluginUnloaded.md) | `On_PluginUnloaded` | Any plugin (C#/CSScript/Python/JS/Lua) was unloaded. |
+| [On_PluginShutdown](Server/On_PluginShutdown.md) | `On_PluginShutdown` | This script plugin is about to be unloaded/reloaded. |
 | [OnModulesLoaded](Server/On_ModulesLoaded.md) | *(C# plugins only)* | Every enabled C# based engine (DLL modules/CSScript) finished loading. |
 | [OnServerInit](Server/On_ServerInit.md) | `On_ServerInit` | The server started loading. |
+| [OnCustomMapLoaded](Server/On_CustomMapLoaded.md) | `On_CustomMapLoaded` | The server's level and save finished loading (stock or plugin-supplied map). |
 | [OnServerLoaded](Server/On_ServerLoaded.md) | `On_ServerLoaded` | The server finished loading. |
 | [OnServerShutdown](Server/On_ServerShutdown.md) | `On_ServerShutdown` | The server is stopping. |
 | [OnServerSaved](Server/On_ServerSaved.md) | `On_ServerSaved` | The server finished saving. |

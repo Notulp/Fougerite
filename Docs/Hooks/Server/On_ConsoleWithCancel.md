@@ -5,6 +5,11 @@
 Runs when a console command is received (either from the server console or an in-game F1 console), allowing
 the command to be cancelled.
 
+> There is also a legacy `Hooks.OnConsoleReceived` event (`public delegate void ConsoleHandlerDelegate(ref
+> ConsoleSystem.Arg arg, bool external)`, script method `On_Console`) with the same signature minus the
+> `ConsoleEvent`/cancellation support. It is marked `[Obsolete("Use OnConsoleReceivedWithCancel")]` - new
+> plugins should subscribe to `On_ConsoleWithCancel` instead, which fires alongside it for every command.
+
 ### C# Event
 ```csharp
 public static event ConsoleHandlerWithCancelDelegate OnConsoleReceivedWithCancel;

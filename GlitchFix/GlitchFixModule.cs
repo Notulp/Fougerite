@@ -80,7 +80,7 @@ namespace GlitchFix
 
         public override Version Version
         {
-            get { return new Version("2.0.1"); }
+            get { return new Version("2.0.2"); }
         }
 
         public override uint Order
@@ -398,7 +398,11 @@ namespace GlitchFix
                 else
                 {
                     var dep = collider.GetComponent<DeployableObject>();
-                    if (dep != null)
+                    // doors (and the open/closed collider swap that comes with them) are a
+                    // DeployableObject too, but they are a normal part of a base's structure,
+                    // not lootable loot being hidden - without this, placing a foundation next
+                    // to any doorway that already has a door installed would always be blocked.
+                    if (dep != null && !dep.name.ToLower().Contains("door"))
                     {
                         foundName = dep.name;
                         return true;
@@ -636,7 +640,11 @@ namespace GlitchFix
                 // another stash, or a door to disguise it.
                 if (Struct)
                 {
-                    bool isdoor = false;
+                    // only SmallStash cares about a nearby door (stash disguised behind a door) -
+                    // Pillar/Foundation/Ramp used to match "door" too via !isdoor, which meant any
+                    // of them placed near an already-installed door (e.g. expanding a base with a
+                    // foundation next to a doorway) got silently destroyed. That's not a glitch.
+                    bool checkDoor = false;
                     float d = 4.5f;
                     if (name.Contains("Pillar"))
                     {
@@ -644,11 +652,11 @@ namespace GlitchFix
                     }
                     else if (name.Contains("Door"))
                     {
-                        isdoor = true;
                         d = 0.40f;
                     }
                     else if (name.ToLower().Contains("smallstash"))
                     {
+                        checkDoor = true;
                         d = 0.40f;
                     }
                     else if (name.Contains("Foundation"))
@@ -669,7 +677,7 @@ namespace GlitchFix
                     if (
                         x.Any(l =>
                             l.name.ToLower().Contains("woodbox") || l.name.ToLower().Contains("smallstash") ||
-                            (l.name.ToLower().Contains("door") && !isdoor)))
+                            (checkDoor && l.name.ToLower().Contains("door"))))
                     {
                         Entity.Destroy();
                         RefundItem(actualplacer, name);
