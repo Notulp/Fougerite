@@ -43,6 +43,9 @@ Fougerite plugins react to game events by either:
   configuration, and JSON persistence.
 - [`PermissionManager.md`](PermissionManager.md) - The `/pem`/`/pemg` command reference for Fougerite's built-in
   group/permission system (`Fougerite.Permissions.PermissionSystem`).
+- [`Permissions.md`](Permissions.md) - Flat reference of every permission string/flag that exists in the
+  codebase (Fougerite core, Rust++'s `Can*` flags, GlitchFix's `glitchfix.*`, PermissionManager's `pem.admin`)
+  and what each one functionally gates.
 - [`GlitchFix.md`](GlitchFix.md) - The bundled anti-glitch module: every `GlitchFix.cfg` setting and what each
   building/griefing check actually does.
 - [`Hooks/`](Hooks/README.md) - Full reference of every hook/event exposed by Fougerite, one file per hook,

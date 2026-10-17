@@ -24,7 +24,8 @@ Everything is controlled from `RustPP\Configs\Rust++.cfg` (an `IniParser` file, 
 ## The admin/permission flag system
 
 RustPP has its own lightweight flag-based admin model, separate from the full group/permission system in
-[`PermissionManager.md`](PermissionManager.md):
+[`PermissionManager.md`](PermissionManager.md) (see [`Permissions.md`](Permissions.md) for a flat table of
+every flag/permission string in the whole project, including these):
 
 - `RustPP.Permissions.Administrator` wraps a SteamID64 + display name + a `List<string>` of flags, picked from
   the fixed `Administrator.PermissionsFlags` whitelist (`CanKick`, `CanBan`, `CanTeleport`, `RCON`, ...).

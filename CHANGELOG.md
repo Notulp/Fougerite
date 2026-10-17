@@ -58,6 +58,18 @@ large documentation catch-up. No new hooks or config settings, so updating is dr
   [`Docs/Hooks/Server/On_ServerFreeze.md`](Docs/Hooks/Server/On_ServerFreeze.md) with examples for every
   engine, and the expanded `freeze.*` convar section in the README (defaults, warnings and recommended
   values).
+- Added [`Docs/Permissions.md`](Docs/Permissions.md): a flat reference of every permission string/flag that
+  actually exists in the codebase and what it functionally gates - Fougerite core's `RCON`,
+  `fougerite.console` and `bansystem.notification` checks, Rust++'s full `Can*`/`RCON`/`Moderator` flag
+  whitelist and which command each one maps to, GlitchFix's `glitchfix.bypass`/`glitchfix.reload`, and
+  PermissionManager's `pem.admin` gatekeeper, including how granting the bare `RCON` string through
+  `PermissionManager` affects both Fougerite core and every Rust++ command at once.
+- Expanded `Docs/Permissions.md` after a more thorough scan of every `PlayerHasPermission` call site: documented
+  the (obsolete) `Player.Moderator` property, which checks the bare `Moderator` permission through Rust++
+  (flag or `PermissionSystem`, same dual check as every Rust++ command) when Rust++ is loaded, and otherwise
+  falls back to a third, older mechanism - membership in the `"Moderators"` `DataStore` table - that isn't part
+  of either permission system. Also noted that script plugins (JS/Lua/Python) get `PermissionSystem` injected
+  directly into their global scope, so they can call `PlayerHasPermission` without any C#-side glue.
 
 ## v1.9.97
 
