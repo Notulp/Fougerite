@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using Fougerite;
 
@@ -17,13 +18,40 @@ public class IniParser
     public string Name;
     private readonly List<SectionPair> _tmpList = new List<SectionPair>();
     private readonly Fougerite.Concurrent.ReaderWriterLock _readerWriterLock = new Fougerite.Concurrent.ReaderWriterLock();
-    private Thread _t;
+    private const int WriteBufferSize = 0x10000;
+    private static readonly UTF8Encoding Utf8NoBom = new UTF8Encoding(false);
     
     [StructLayout(LayoutKind.Sequential)]
-    public struct SectionPair
+    public struct SectionPair : IEquatable<SectionPair>
     {
         public string Section;
         public string Key;
+
+        /// <summary>
+        /// Without these overrides the struct falls back to <see cref="ValueType"/> equality, which
+        /// compares the fields through reflection and hashes the first field only. That means every
+        /// key of the same section lands in the same hash bucket, so lookups on a big ini degrade
+        /// into a linear scan with a reflection call per step.
+        /// </summary>
+        public bool Equals(SectionPair other)
+        {
+            return string.Equals(Section, other.Section, StringComparison.Ordinal)
+                   && string.Equals(Key, other.Key, StringComparison.Ordinal);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is SectionPair pair && Equals(pair);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = Section != null ? Section.GetHashCode() : 0;
+                return (hash * 397) ^ (Key != null ? Key.GetHashCode() : 0);
+            }
+        }
     }
 
     public IniParser(string iniPath)
@@ -354,22 +382,17 @@ public class IniParser
 
     /// <summary>
     /// Saves the current state of the ini from the memory to a file.
+    /// Runs synchronously; writing even a multi megabyte config only costs a few milliseconds.
     /// </summary>
     public void Save()
     {
-        FileInfo fi = new FileInfo(_iniFilePath);
-        float mega = (fi.Length / 1024f) / 1024f;
-        if (mega <= 0.6)
-        {
-            SaveSettings(_iniFilePath);
-            return;
-        }
-        _t = new Thread(() => SaveSettings(_iniFilePath));
-        _t.Start();
+        SaveSettings(_iniFilePath);
     }
 
     /// <summary>
     /// Saves the current state of the ini from the memory to a file.
+    /// The file is written to a temporary file first and swapped in afterwards, so an error halfway
+    /// through can never leave a half written config behind.
     /// </summary>
     /// <param name="newFilePath"></param>
     public void SaveSettings(string newFilePath)
@@ -378,39 +401,67 @@ public class IniParser
         {
             _readerWriterLock.AcquireWriterLock(Timeout.Infinite);
             
-            ArrayList list = new ArrayList();
-            string str = string.Empty;
-            string str2 = string.Empty;
+            List<string> sectionOrder = new List<string>();
+            Dictionary<string, List<SectionPair>> sections = new Dictionary<string, List<SectionPair>>(StringComparer.Ordinal);
+
             foreach (SectionPair pair in _tmpList)
             {
-                if (!list.Contains(pair.Section))
+                List<SectionPair> keys;
+                if (!sections.TryGetValue(pair.Section, out keys))
                 {
-                    list.Add(pair.Section);
+                    keys = new List<SectionPair>();
+                    sections.Add(pair.Section, keys);
+                    sectionOrder.Add(pair.Section);
                 }
-            }
 
-            foreach (string str3 in list)
+                keys.Add(pair);
+            }
+            
+            string tempFilePath = $"{newFilePath}.tmp";
+
+            using (FileStream stream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, WriteBufferSize))
+            using (StreamWriter writer = new StreamWriter(stream, Utf8NoBom, WriteBufferSize))
             {
-                str2 = $"{str2}[{str3}]\r\n";
-                foreach (SectionPair pair2 in _tmpList)
+                writer.NewLine = "\r\n";
+
+                foreach (string section in sectionOrder)
                 {
-                    if (pair2.Section == str3)
+                    writer.Write('[');
+                    writer.Write(section);
+                    writer.Write("]\r\n");
+
+                    foreach (SectionPair pair in sections[section])
                     {
-                        str = (string)_keyPairs[pair2];
-                        if (str != null)
+                        string key = pair.Key;
+                        if (key.IndexOf("%eq%", StringComparison.Ordinal) != -1)
                         {
-                            str = str == "%comment%" ? "" : $"={str}";
+                            key = key.Replace("%eq%", "=");
                         }
 
-                        str2 = $"{str2}{pair2.Key.Replace("%eq%", "=")}{str}\r\n";
+                        writer.Write(key);
+
+                        string value = (string)_keyPairs[pair];
+                        if (value != null && value != "%comment%")
+                        {
+                            writer.Write('=');
+                            writer.Write(value);
+                        }
+
+                        writer.Write("\r\n");
                     }
+
+                    writer.Write("\r\n");
                 }
 
-                str2 = $"{str2}\r\n";
+                writer.Flush();
             }
 
-            using (TextWriter writer = new StreamWriter(newFilePath))
-                writer.Write(str2);
+            if (File.Exists(newFilePath))
+            {
+                File.Delete(newFilePath);
+            }
+
+            File.Move(tempFilePath, newFilePath);
         }
         catch (Exception ex)
         {
