@@ -107,7 +107,7 @@ All diagnostics work (stack walking, symbol loading, minidump writing) happens o
 
 Two additional exports support this:
 
-- `FreezeMonitor_SetCallback(fnc)` lets managed code subscribe to freeze lifecycle events (`Detected`, `Dumped`, `Recovered`) with the elapsed seconds and a text description, e.g. to post a Discord/RCON alert. On the managed side this surfaces as [`Hooks.OnServerFreeze`](Docs/Hooks/README.md), wired up by [`Fougerite.Tools.FreezeContext`](Fougerite/Fougerite/Tools/FreezeContext.cs).
+- `FreezeMonitor_SetCallback(fnc)` lets managed code subscribe to freeze lifecycle events (`Detected`, `Dumped`, `Recovered`) with the elapsed seconds and a text description, e.g. to post a Discord/RCON alert. On the managed side this surfaces as [`Hooks.OnServerFreeze`](Docs/Hooks/Server/On_ServerFreeze.md) (`On_ServerFreeze` for Python/JS/Lua plugins too), wired up by [`Fougerite.Tools.FreezeContext`](Fougerite/Fougerite/Tools/FreezeContext.cs).
 - `FreezeMonitor_SetContext(context, record)` lets managed hooks announce "I'm about to run `<context>`" right before invoking a plugin hook. If the main thread then freezes, the report includes this context and a short history of recently-entered contexts, making it much easier to pin a freeze on a specific plugin hook.
 
 ### Configuration

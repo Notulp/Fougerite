@@ -117,7 +117,7 @@ properties/methods on those arguments, and usage examples in C#, Python, JavaScr
 | [OnConsoleReceivedWithCancel](Server/On_ConsoleWithCancel.md) | `On_ConsoleWithCancel` | A console command is received. |
 | [OnPermissionChange](Server/On_PermissionChange.md) | `On_PermissionChange` | A permission group/permission is being changed. |
 | [OnWebSocketMessage / Connected / Closed / Error](Server/On_WebSocket.md) | `On_WebSocketMessage` etc. | WebSocket client events. |
-| [OnServerFreeze](Server/On_ServerFreeze.md) | *(C# plugins only)* | The native [FreezeMonitor](../../README.md#freezemonitor-watchdog) watchdog detected/dumped/recovered from a frozen main thread. |
+| [OnServerFreeze](Server/On_ServerFreeze.md) | `On_ServerFreeze` | The native [FreezeMonitor](../../README.md#freezemonitor-watchdog) watchdog detected/dumped/recovered from a frozen main thread. |
 
 ---
 

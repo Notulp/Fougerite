@@ -1144,6 +1144,11 @@ namespace Fougerite.PluginLoaders
             Invoke(PluginLoaderEvents.OnLogger, ev);
         }
 
+        public void BaseOnServerFreeze(Hooks.ServerFreezeType type, int frozenSeconds, string info)
+        {
+            Invoke(PluginLoaderEvents.OnServerFreeze, type, frozenSeconds, info);
+        }
+
         public void BaseOnGrenade(GrenadeThrowEvent ev)
         {
             Invoke(PluginLoaderEvents.OnGrenadeThrow, ev);

@@ -138,7 +138,8 @@ namespace Fougerite.PluginLoaders
             PluginLoaderEvents.OnWebSocketError,
             PluginLoaderEvents.OnPermissionChange,
             PluginLoaderEvents.OnWaterDamage,
-            PluginLoaderEvents.OnAudibleSound
+            PluginLoaderEvents.OnAudibleSound,
+            PluginLoaderEvents.OnServerFreeze
         };
 
         /// <summary>
@@ -508,6 +509,9 @@ namespace Fougerite.PluginLoaders
                         case PluginLoaderEvents.OnLogger:
                             Hooks.OnLogger += plugin.BaseOnLogger;
                             break;
+                        case PluginLoaderEvents.OnServerFreeze:
+                            Hooks.OnServerFreeze += plugin.BaseOnServerFreeze;
+                            break;
                         case PluginLoaderEvents.OnGrenadeThrow:
                             Hooks.OnGrenadeThrow += plugin.BaseOnGrenade;
                             break;
@@ -823,6 +827,9 @@ namespace Fougerite.PluginLoaders
                             break;
                         case PluginLoaderEvents.OnLogger:
                             Hooks.OnLogger -= plugin.BaseOnLogger;
+                            break;
+                        case PluginLoaderEvents.OnServerFreeze:
+                            Hooks.OnServerFreeze -= plugin.BaseOnServerFreeze;
                             break;
                         case PluginLoaderEvents.OnGrenadeThrow:
                             Hooks.OnGrenadeThrow -= plugin.BaseOnGrenade;

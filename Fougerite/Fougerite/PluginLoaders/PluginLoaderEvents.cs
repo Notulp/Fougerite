@@ -97,5 +97,6 @@ namespace Fougerite.PluginLoaders
         public const string OnPermissionChange = "On_PermissionChange";
         public const string OnWaterDamage = "On_WaterDamage";
         public const string OnAudibleSound = "On_AudibleSound";
+        public const string OnServerFreeze = "On_ServerFreeze";
     }
 }
