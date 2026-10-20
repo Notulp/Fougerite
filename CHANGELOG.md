@@ -94,13 +94,15 @@ large documentation catch-up. No new hooks or config settings, so updating is dr
   JS), `UnityEngine.Vector3(...)` (Python) and `UnityEngine.Vector3.__new(...)` (Lua), and the fabricated
   `Vector3.Add`/`.Subtract` methods in `Recorder`'s JavaScript/Lua samples were replaced with explicit
   component-wise math.
-- Expanded [`Docs/Examples/HungerGames.md`](Docs/Examples/HungerGames.md), which previously only showed the
-  shrinking safe-zone damage tick in isolation. It now also covers the join/leave queue (inventory save/
-  restore, same pattern as `TDM`), the full radiation damage model (bleeding past `BleedRad` via
-  `HumanBodyTakeDmg.SetBleedingLevel`, extra random damage past `DamageRad`, leg-breaking past `BreakAtXRad`
-  via `FallDamage.SetLegInjury`, anti-rad regen while inside the safe zone), persistent kill tracking and
-  placement recording on `On_PlayerKilled`, and the end-of-match placement-based rewards/leaderboard - in all
-  four languages.
+- Rewrote [`Docs/Examples/HungerGames.md`](Docs/Examples/HungerGames.md) as a full, system-by-system
+  transition of the real `HungerGames.py` (1680 lines) instead of a partial excerpt: the C#, JavaScript and
+  Lua versions now each implement config bootstrap, every `/hg` subcommand (join/leave/announce/forcestart/
+  disable/admin setup/shop/toplist/stats/getreward/...), wall/chest/loot spawning from `HungerGames.ini`, the
+  full countdown and radiation timer chain, kill/placement tracking, the 60-second reconnect grace period, and
+  end-of-match rewards - and the page now embeds the actual original Python source in full for direct
+  comparison. Also documented two real, pre-existing bugs in the original that were intentionally not carried
+  into the ports (`Awaiting[Player.UID]` indexing a plain list instead of the player's `DisconnectLocation`;
+  Python-2-only `long()`/`xrange`).
 
 ## v1.9.97
 
