@@ -288,10 +288,10 @@ local xp = {}
 local db
 
 function On_PluginInit()
-    if not Plugin.IniExists("Database") then
-        Plugin.CreateIni("Database"):Save()
+    if not Plugin:IniExists("Database") then
+        Plugin:CreateIni("Database"):Save()
     end
-    db = Plugin.GetIni("Database")
+    db = Plugin:GetIni("Database")
 end
 
 function On_PlayerConnected(player)

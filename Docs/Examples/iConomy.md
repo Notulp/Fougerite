@@ -78,18 +78,22 @@ namespace iConomy
 
         private void OnPlayerKilled(DeathEvent de)
         {
-            if (!de.AttackerIsPlayer || !de.VictimIsPlayer || de.Attacker == null) return;
-            if (de.Attacker.UID == de.Victim.UID) return;
+            // DeathEvent inherits HurtEvent, so Attacker/Victim are still typed `object` - cast only after
+            // checking AttackerIsPlayer/VictimIsPlayer (Attacker can also legitimately be null/NPC/Entity).
+            if (!de.AttackerIsPlayer || !de.VictimIsPlayer) return;
+            Player attacker = (Player) de.Attacker;
+            Player victim = (Player) de.Victim;
+            if (attacker.UID == victim.UID) return;
 
-            double aMoney = GetMoney(de.Attacker.UID);
-            double vMoney = GetMoney(de.Victim.UID);
+            double aMoney = GetMoney(attacker.UID);
+            double vMoney = GetMoney(victim.UID);
             double newAMoney = Math.Round((aMoney == 0 ? 20.0 : aMoney) * KillPortion, 2);
             double newVMoney = Math.Round(vMoney * DeathPortion, 2);
 
-            SetMoney(de.Attacker.UID, newAMoney);
-            SetMoney(de.Victim.UID, newVMoney);
-            de.Attacker.MessageFrom(Name, "You found $" + (newAMoney - aMoney));
-            de.Victim.MessageFrom(Name, "You lost $" + (vMoney - newVMoney));
+            SetMoney(attacker.UID, newAMoney);
+            SetMoney(victim.UID, newVMoney);
+            attacker.MessageFrom(Name, "You found $" + (newAMoney - aMoney));
+            victim.MessageFrom(Name, "You lost $" + (vMoney - newVMoney));
         }
 
         private void OnCommand(Player player, string cmd, string[] args)

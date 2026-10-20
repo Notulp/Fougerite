@@ -79,6 +79,21 @@ large documentation catch-up. No new hooks or config settings, so updating is dr
   lock), `Recorder` (recording/respawning a structure as a blueprint), `TDM` (a round-based arena mode, plus a
   write-up of how to finish its never-completed team split with a locked `Zone3D` arena and a RustBuster GUI
   lobby), and `HungerGames` (a battle-royale shrinking safe zone). Linked from `Docs/README.md`.
+- Fixed a real bug found while reviewing the above: `Docs/CSScriptPluginTutorial.md` used
+  `((dynamic) plugin).Engine` to read a loaded C# plugin's `Module`. The `dynamic` keyword needs
+  `Microsoft.CSharp.dll`'s runtime binder, which isn't part of .NET 3.5 (added in .NET 4.0) and isn't
+  referenced anywhere in this solution, and the project's old Mono (Mini JIT) build predates DLR/dynamic
+  support entirely - so that line would never actually work. Replaced it with a plain `as`-cast against
+  `CSPlugin`/`CSScriptPlugin` (both expose the same `public Module Engine;` field), no reflection needed.
+- Corrected several inaccurate API calls across `Docs/Examples/*.md` found during the same pass:
+  `HurtEvent`/`DeathEvent.Attacker`/`.Victim` are typed `object` in C#, so every example that read
+  `he.Attacker.UID`/`.MessageFrom(...)` directly without first checking `AttackerIsPlayer`/`VictimIsPlayer`
+  and casting (`BambeeProtector`, `Clans`, `DestroySystem`, `iConomy`, `TDM`) would not have compiled;
+  `DataStore.Contains(...)` doesn't exist (it's `ContainsKey`, fixed in `DestroySystem` across all four
+  languages); and `Util.CreateVector(...)` doesn't exist - replaced with `new UnityEngine.Vector3(...)` (C#/
+  JS), `UnityEngine.Vector3(...)` (Python) and `UnityEngine.Vector3.__new(...)` (Lua), and the fabricated
+  `Vector3.Add`/`.Subtract` methods in `Recorder`'s JavaScript/Lua samples were replaced with explicit
+  component-wise math.
 
 ## v1.9.97
 

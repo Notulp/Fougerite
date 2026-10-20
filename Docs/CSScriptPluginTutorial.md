@@ -278,7 +278,29 @@ private void HandleModulesLoaded()
         if (plugin.Type != PluginType.CSharp && plugin.Type != PluginType.CSScript)
             continue; // only DLL modules/CSScript plugins expose an Engine field.
 
-        Module engine = ((dynamic) plugin).Engine; // CSPlugin.Engine / CSScriptPlugin.Engine
+        // Don't use `(dynamic) plugin).Engine` here: the `dynamic` keyword needs Microsoft.CSharp.dll's
+        // runtime binder, which isn't part of .NET 3.5 (added in .NET 4.0) and isn't referenced by this
+        // project - and the old Mono (Mini JIT) build bundled with Rust Legacy predates DLR/dynamic support
+        // entirely. It would either fail to compile or throw at runtime depending on the compiler used.
+        // Both CSPlugin and CSScriptPlugin expose the exact same `public Module Engine;` field, so a plain
+        // `as`-cast is all that's needed - no reflection, no dynamic:
+        Module engine = null;
+        CSPlugin csPlugin = plugin as CSPlugin;
+        if (csPlugin != null)
+        {
+            engine = csPlugin.Engine;
+        }
+        else
+        {
+            CSScriptPlugin csScriptPlugin = plugin as CSScriptPlugin;
+            if (csScriptPlugin != null)
+            {
+                engine = csScriptPlugin.Engine;
+            }
+        }
+        if (engine == null)
+            continue;
+
         Logger.Log("Found C# plugin: " + plugin.Name + " v" + engine.Version + " by " + engine.Author);
 
         if (plugin.Name == "EconomyCore")

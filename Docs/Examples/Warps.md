@@ -118,6 +118,9 @@ namespace Warps
 ### JavaScript
 
 ```javascript
+var warps = {};
+var adminOnly = {};
+
 function Warps()
 {
     if (!Plugin.IniExists("Warps"))
@@ -129,15 +132,13 @@ function Warps()
 
 function On_PluginInit()
 {
-    globalThis.warps = {};
-    globalThis.adminOnly = {};
     var ini = Warps();
     var keys = ini.EnumSection("Warps");
     for (var i = 0; i < keys.Count; i++)
     {
         var key = keys[i];
         var parts = ini.GetSetting("Warps", key).split(",");
-        warps[key.toLowerCase()] = Util.CreateVector(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
+        warps[key.toLowerCase()] = new UnityEngine.Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
         var flag = ini.GetSetting("AdminWarps", key);
         adminOnly[key.toLowerCase()] = flag !== null && flag.toLowerCase() === "true";
     }
@@ -206,7 +207,7 @@ class Warps:
         ini = self.Warps()
         for key in ini.EnumSection("Warps"):
             parts = ini.GetSetting("Warps", key).split(',')
-            self.warps[key.lower()] = Util.CreateVector(float(parts[0]), float(parts[1]), float(parts[2]))
+            self.warps[key.lower()] = UnityEngine.Vector3(float(parts[0]), float(parts[1]), float(parts[2]))
             flag = ini.GetSetting("AdminWarps", key)
             self.adminOnly[key.lower()] = flag is not None and flag.lower() == "true"
 
@@ -248,10 +249,10 @@ local warps = {}
 local adminOnly = {}
 
 local function Warps()
-    if not Plugin.IniExists("Warps") then
-        Plugin.CreateIni("Warps"):Save()
+    if not Plugin:IniExists("Warps") then
+        Plugin:CreateIni("Warps"):Save()
     end
-    return Plugin.GetIni("Warps")
+    return Plugin:GetIni("Warps")
 end
 
 function On_PluginInit()
@@ -259,7 +260,7 @@ function On_PluginInit()
     for _, key in ipairs(ini:EnumSection("Warps")) do
         local parts = {}
         for part in ini:GetSetting("Warps", key):gmatch("[^,]+") do table.insert(parts, tonumber(part)) end
-        warps[key:lower()] = Util.CreateVector(parts[1], parts[2], parts[3])
+        warps[key:lower()] = UnityEngine.Vector3.__new(parts[1], parts[2], parts[3])
         local flag = ini:GetSetting("AdminWarps", key)
         adminOnly[key:lower()] = flag ~= nil and flag:lower() == "true"
     end

@@ -96,7 +96,7 @@ namespace HungerGames
 
 ```javascript
 var players = [];
-var center = Util.CreateVector(0, 0, 0);
+var center = new UnityEngine.Vector3(0, 0, 0);
 var safeRadius = 310.0;
 var ShrinkPerTick = 40.0;
 var MinRadius = 95.0;
@@ -139,7 +139,7 @@ function HGRadiationCallback(ATimedEvent)
 
 ```python
 players = []
-center = Util.CreateVector(0, 0, 0)
+center = UnityEngine.Vector3(0, 0, 0)
 safeRadius = 310.0
 ShrinkPerTick = 40.0
 MinRadius = 95.0
@@ -175,7 +175,7 @@ class HungerGames:
 
 ```lua
 local players = {}
-local center = Util.CreateVector(0, 0, 0)
+local center = UnityEngine.Vector3.__new(0, 0, 0)
 local safeRadius = 310.0
 local ShrinkPerTick = 40.0
 local MinRadius = 95.0
@@ -186,7 +186,7 @@ function On_Command(player, cmd, args)
     if cmd == "hg" and #args == 1 and args[1] == "start" and player.Admin and not active then
         active = true
         safeRadius = 310.0
-        Plugin.CreateTimer("HGRadiation", 6000, true):Start()
+        Plugin:CreateTimer("HGRadiation", 6000, true):Start()
         player:MessageFrom("HungerGames", "HungerGames started! The safe zone will begin shrinking.")
     end
 end

@@ -78,20 +78,24 @@ namespace BambeeProtector
 
         private void OnPlayerHurt(HurtEvent he)
         {
-            if (he.Attacker == null || he.Victim == null || !he.AttackerIsPlayer)
+            // HurtEvent.Attacker/Victim are typed `object` - only safe to cast once you've checked
+            // AttackerIsPlayer/VictimIsPlayer; a bare `he.Attacker.UID` wouldn't even compile here.
+            if (!he.AttackerIsPlayer || !he.VictimIsPlayer)
             {
                 return;
             }
-            if (IsProtected(he.Victim.UID))
+            Player attacker = (Player) he.Attacker;
+            Player victim = (Player) he.Victim;
+            if (IsProtected(victim.UID))
             {
                 he.DamageAmount = 0f;
-                he.Attacker.MessageFrom(Name, he.Victim.Name + " is under new-player protection.");
+                attacker.MessageFrom(Name, victim.Name + " is under new-player protection.");
                 return;
             }
-            if (IsProtected(he.Attacker.UID))
+            if (IsProtected(attacker.UID))
             {
                 he.DamageAmount = 0f;
-                he.Attacker.MessageFrom(Name, "You can't attack anyone while you are under protection.");
+                attacker.MessageFrom(Name, "You can't attack anyone while you are under protection.");
             }
         }
 

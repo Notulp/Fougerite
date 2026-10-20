@@ -52,7 +52,7 @@ namespace DestroySystem
         private void OnCommand(Player player, string cmd, string[] args)
         {
             if (cmd != "destroy" && cmd != "crush") return;
-            if (DataStore.GetInstance().Contains(ModeTable, player.UID))
+            if (DataStore.GetInstance().ContainsKey(ModeTable, player.UID))
             {
                 DataStore.GetInstance().Remove(ModeTable, player.UID);
                 player.MessageFrom(Name, "You quit Destroy mode.");
@@ -67,11 +67,15 @@ namespace DestroySystem
 
         private void OnEntityHurt(HurtEvent he)
         {
-            if (!he.AttackerIsPlayer || he.Attacker == null || he.Entity == null || he.IsDecay) return;
+            // HurtEvent.Attacker/Victim are typed `object` (could be Player/Entity/NPC/null), so
+            // AttackerIsPlayer must be checked before casting - a plain `he.Attacker.UID` won't compile.
+            if (!he.AttackerIsPlayer || !he.VictimIsEntity || he.IsDecay) return;
+            Player attacker = (Player) he.Attacker;
+            Entity victim = (Entity) he.Victim;
             if (he.WeaponName == "Shotgun") return;
 
-            ulong ownerId = he.Entity.UOwnerID;
-            if (ownerId == 0 || ownerId != he.Attacker.UID) return; // only destroy things you own
+            ulong ownerId = victim.UOwnerID;
+            if (ownerId == 0 || ownerId != attacker.UID) return; // only destroy things you own
 
             object raidedAt = DataStore.GetInstance().Get(RaidTable, ownerId);
             if (raidedAt != null)
@@ -79,7 +83,7 @@ namespace DestroySystem
                 double secondsSince = (DateTime.UtcNow - (DateTime) raidedAt).TotalSeconds;
                 if (secondsSince < RaidCooldownSeconds)
                 {
-                    he.Attacker.MessageFrom(Name, "You can't destroy while under raid cooldown ("
+                    attacker.MessageFrom(Name, "You can't destroy while under raid cooldown ("
                         + Math.Round(secondsSince) + "/" + RaidCooldownSeconds + ").");
                     return;
                 }
@@ -88,17 +92,17 @@ namespace DestroySystem
             if (he.WeaponName != null && (he.WeaponName.ToLower().Contains("explosive")
                 || he.WeaponName.ToLower().Contains("grenade")))
             {
-                // Someone else's explosive hit would have gone through the `ownerId != Attacker.UID` check
+                // Someone else's explosive hit would have gone through the `ownerId != attacker.UID` check
                 // above and returned already; this branch exists only to (re-)arm the raid cooldown when the
                 // *owner themselves* detonates something nearby, matching the original's behavior.
                 DataStore.GetInstance().Add(RaidTable, ownerId, DateTime.UtcNow);
             }
 
-            if (!DataStore.GetInstance().Contains(ModeTable, he.Attacker.UID)) return;
+            if (!DataStore.GetInstance().ContainsKey(ModeTable, attacker.UID)) return;
 
-            string entityName = he.Entity.Name;
-            he.Entity.Destroy();
-            he.Attacker.Inventory.AddItem(entityName, 1);
+            string entityName = victim.Name;
+            victim.Destroy();
+            attacker.Inventory.AddItem(entityName, 1);
         }
     }
 }
@@ -114,7 +118,7 @@ var RaidCooldownSeconds = 300;
 function On_Command(Player, cmd, args)
 {
     if (cmd !== "destroy" && cmd !== "crush") return;
-    if (DataStore.Contains(ModeTable, Player.UID))
+    if (DataStore.ContainsKey(ModeTable, Player.UID))
     {
         DataStore.Remove(ModeTable, Player.UID);
         Player.MessageFrom("DestroySystem", "You quit Destroy mode.");
@@ -129,10 +133,13 @@ function On_Command(Player, cmd, args)
 
 function On_EntityHurt(HurtEvent)
 {
-    if (!HurtEvent.AttackerIsPlayer || HurtEvent.Attacker === null || HurtEvent.Entity === null || HurtEvent.IsDecay) return;
+    // Jint resolves members off the attacker/victim's actual runtime type, so no explicit cast is needed
+    // here the way C# requires - but the AttackerIsPlayer/VictimIsEntity checks still matter: Attacker can
+    // legitimately be null/an NPC/another Entity (decay), and Victim might not be an Entity at all.
+    if (!HurtEvent.AttackerIsPlayer || !HurtEvent.VictimIsEntity || HurtEvent.IsDecay) return;
     if (HurtEvent.WeaponName === "Shotgun") return;
 
-    var ownerId = HurtEvent.Entity.UOwnerID;
+    var ownerId = HurtEvent.Victim.UOwnerID;
     if (ownerId === 0 || ownerId !== HurtEvent.Attacker.UID) return;
 
     var raidedAt = DataStore.Get(RaidTable, ownerId);
@@ -154,10 +161,10 @@ function On_EntityHurt(HurtEvent)
         DataStore.Add(RaidTable, ownerId, new Date());
     }
 
-    if (!DataStore.Contains(ModeTable, HurtEvent.Attacker.UID)) return;
+    if (!DataStore.ContainsKey(ModeTable, HurtEvent.Attacker.UID)) return;
 
-    var entityName = HurtEvent.Entity.Name;
-    HurtEvent.Entity.Destroy();
+    var entityName = HurtEvent.Victim.Name;
+    HurtEvent.Victim.Destroy();
     HurtEvent.Attacker.Inventory.AddItem(entityName, 1);
 }
 ```
@@ -177,7 +184,7 @@ class DestroySystem:
     def On_Command(self, Player, cmd, args):
         if cmd not in ("destroy", "crush"):
             return
-        if DataStore.Contains(ModeTable, Player.UID):
+        if DataStore.ContainsKey(ModeTable, Player.UID):
             DataStore.Remove(ModeTable, Player.UID)
             Player.MessageFrom("DestroySystem", "You quit Destroy mode.")
         else:
@@ -186,12 +193,12 @@ class DestroySystem:
             Player.MessageFrom("DestroySystem", "Shotguns can't be used in Destroy mode.")
 
     def On_EntityHurt(self, HurtEvent):
-        if not HurtEvent.AttackerIsPlayer or HurtEvent.Attacker is None or HurtEvent.Entity is None or HurtEvent.IsDecay:
+        if not HurtEvent.AttackerIsPlayer or not HurtEvent.VictimIsEntity or HurtEvent.IsDecay:
             return
         if HurtEvent.WeaponName == "Shotgun":
             return
 
-        ownerId = HurtEvent.Entity.UOwnerID
+        ownerId = HurtEvent.Victim.UOwnerID
         if ownerId == 0 or ownerId != HurtEvent.Attacker.UID:
             return
 
@@ -199,7 +206,7 @@ class DestroySystem:
         if raidedAt is not None:
             secondsSince = (System.DateTime.UtcNow - raidedAt).TotalSeconds
             if secondsSince < RaidCooldownSeconds:
-                Player.MessageFrom("DestroySystem", "You can't destroy while under raid cooldown (" +
+                HurtEvent.Attacker.MessageFrom("DestroySystem", "You can't destroy while under raid cooldown (" +
                                    str(round(secondsSince)) + "/" + str(RaidCooldownSeconds) + ").")
                 return
 
@@ -207,11 +214,11 @@ class DestroySystem:
         if weapon is not None and ("explosive" in weapon.lower() or "grenade" in weapon.lower()):
             DataStore.Add(RaidTable, ownerId, System.DateTime.UtcNow)
 
-        if not DataStore.Contains(ModeTable, HurtEvent.Attacker.UID):
+        if not DataStore.ContainsKey(ModeTable, HurtEvent.Attacker.UID):
             return
 
-        entityName = HurtEvent.Entity.Name
-        HurtEvent.Entity.Destroy()
+        entityName = HurtEvent.Victim.Name
+        HurtEvent.Victim.Destroy()
         HurtEvent.Attacker.Inventory.AddItem(entityName, 1)
 ```
 
@@ -224,7 +231,7 @@ local RaidCooldownSeconds = 300
 
 function On_Command(player, cmd, args)
     if cmd ~= "destroy" and cmd ~= "crush" then return end
-    if DataStore:Contains(ModeTable, player.UID) then
+    if DataStore:ContainsKey(ModeTable, player.UID) then
         DataStore:Remove(ModeTable, player.UID)
         player:MessageFrom("DestroySystem", "You quit Destroy mode.")
     else
@@ -235,12 +242,12 @@ function On_Command(player, cmd, args)
 end
 
 function On_EntityHurt(hurtEvent)
-    if not hurtEvent.AttackerIsPlayer or hurtEvent.Attacker == nil or hurtEvent.Entity == nil or hurtEvent.IsDecay then
+    if not hurtEvent.AttackerIsPlayer or not hurtEvent.VictimIsEntity or hurtEvent.IsDecay then
         return
     end
     if hurtEvent.WeaponName == "Shotgun" then return end
 
-    local ownerId = hurtEvent.Entity.UOwnerID
+    local ownerId = hurtEvent.Victim.UOwnerID
     if ownerId == 0 or ownerId ~= hurtEvent.Attacker.UID then return end
 
     local raidedAt = DataStore:Get(RaidTable, ownerId)
@@ -258,10 +265,10 @@ function On_EntityHurt(hurtEvent)
         DataStore:Add(RaidTable, ownerId, System.DateTime.UtcNow)
     end
 
-    if not DataStore:Contains(ModeTable, hurtEvent.Attacker.UID) then return end
+    if not DataStore:ContainsKey(ModeTable, hurtEvent.Attacker.UID) then return end
 
-    local entityName = hurtEvent.Entity.Name
-    hurtEvent.Entity:Destroy()
+    local entityName = hurtEvent.Victim.Name
+    hurtEvent.Victim:Destroy()
     hurtEvent.Attacker.Inventory:AddItem(entityName, 1)
 end
 ```

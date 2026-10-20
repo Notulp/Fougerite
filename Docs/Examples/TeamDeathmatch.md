@@ -124,10 +124,15 @@ namespace TeamDeathmatch
 
         private void OnEntityHurt(HurtEvent he)
         {
-            if (he.Attacker != null && _players.Contains(he.Attacker) && he.Entity != null)
+            // HurtEvent.Attacker is typed `object` - AttackerIsPlayer must be checked before a cast/
+            // List<Player>.Contains call, since `object` doesn't implicitly convert to Player.
+            if (!he.AttackerIsPlayer || !he.VictimIsEntity) return;
+            Player attacker = (Player) he.Attacker;
+            Entity victim = (Entity) he.Victim;
+            if (_players.Contains(attacker))
             {
                 // Arena structures (walls, spawn points) are immortal during a match.
-                he.Entity.Health = he.Entity.MaxHealth;
+                victim.Health = victim.MaxHealth;
                 he.DamageAmount = 0f;
             }
         }
@@ -142,7 +147,7 @@ var players = [];
 var restrictedCommands = ["home", "tpa", "shop"];
 var InventoryTable = "TDMInventory";
 var ReturnLocationTable = "TDMReturnLocation";
-var lobby = Util.CreateVector(0, 0, 0);
+var lobby = new UnityEngine.Vector3(0, 0, 0);
 
 function SaveAndClearInventory(Player)
 {
@@ -218,7 +223,7 @@ players = []
 restrictedCommands = ["home", "tpa", "shop"]
 InventoryTable = "TDMInventory"
 ReturnLocationTable = "TDMReturnLocation"
-lobby = Util.CreateVector(0, 0, 0)
+lobby = UnityEngine.Vector3(0, 0, 0)
 
 
 class TDM:
@@ -279,7 +284,7 @@ local players = {}
 local restrictedCommands = { "home", "tpa", "shop" }
 local InventoryTable = "TDMInventory"
 local ReturnLocationTable = "TDMReturnLocation"
-local lobby = Util.CreateVector(0, 0, 0)
+local lobby = UnityEngine.Vector3.__new(0, 0, 0)
 
 local function IndexOf(list, value)
     for i, v in ipairs(list) do if v == value then return i end end

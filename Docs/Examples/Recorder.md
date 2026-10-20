@@ -162,7 +162,8 @@ function On_EntityDeployed(Player, Entity, ActualPlacer)
     {
         recordOrigin[Player.UID] = Entity.Location;
     }
-    var offset = Entity.Location.Subtract(recordOrigin[Player.UID]);
+    var origin = recordOrigin[Player.UID];
+    var offset = new UnityEngine.Vector3(Entity.Location.x - origin.x, Entity.Location.y - origin.y, Entity.Location.z - origin.z);
     blueprints[recName].push({
         Prefab: Entity.Name,
         Offset: offset,
@@ -184,7 +185,8 @@ function SpawnBlueprint(Player, recName, distance)
     var pieces = blueprints[recName];
     for (var i = 0; i < pieces.length; i++)
     {
-        var spawnPos = anchor.Add(pieces[i].Offset);
+        var off = pieces[i].Offset;
+        var spawnPos = new UnityEngine.Vector3(anchor.x + off.x, anchor.y + off.y, anchor.z + off.z);
         World.SpawnEntity(pieces[i].Prefab, spawnPos, pieces[i].Rotation);
     }
     Player.MessageFrom("Recorder", "Spawned '" + recName + "' (" + pieces.length + " pieces).");
@@ -273,7 +275,8 @@ function On_EntityDeployed(player, entity, actualPlacer)
     if recordOrigin[player.UID] == nil then
         recordOrigin[player.UID] = entity.Location
     end
-    local offset = entity.Location - recordOrigin[player.UID]
+    local origin = recordOrigin[player.UID]
+    local offset = UnityEngine.Vector3.__new(entity.Location.x - origin.x, entity.Location.y - origin.y, entity.Location.z - origin.z)
     table.insert(blueprints[recName], {
         Prefab = entity.Name,
         Offset = offset,
@@ -292,7 +295,8 @@ function SpawnBlueprint(player, recName, distance)
     anchor.y = World.GetGround(anchor.x, anchor.z)
 
     for _, piece in ipairs(pieces) do
-        local spawnPos = anchor + piece.Offset
+        local off = piece.Offset
+        local spawnPos = UnityEngine.Vector3.__new(anchor.x + off.x, anchor.y + off.y, anchor.z + off.z)
         World.SpawnEntity(piece.Prefab, spawnPos, piece.Rotation)
     end
     player:MessageFrom("Recorder", "Spawned '" .. recName .. "' (" .. #pieces .. " pieces).")

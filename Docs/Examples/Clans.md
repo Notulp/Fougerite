@@ -57,18 +57,22 @@ namespace Clans
 
         private void OnPlayerHurt(HurtEvent he)
         {
-            if (!he.AttackerIsPlayer || he.Attacker == null || he.Victim == null) return;
-            if (he.Attacker.UID == he.Victim.UID) return;
+            // HurtEvent.Attacker/Victim are typed `object`, so AttackerIsPlayer/VictimIsPlayer must be
+            // checked before casting to Player.
+            if (!he.AttackerIsPlayer || !he.VictimIsPlayer) return;
+            Player attacker = (Player) he.Attacker;
+            Player victim = (Player) he.Victim;
+            if (attacker.UID == victim.UID) return;
 
-            string attackerClan = GetClanOf(he.Attacker.SteamID);
-            string victimClan = GetClanOf(he.Victim.SteamID);
+            string attackerClan = GetClanOf(attacker.SteamID);
+            string victimClan = GetClanOf(victim.SteamID);
             if (attackerClan == null || attackerClan != victimClan) return;
 
             bool allowsFf = _friendlyFire.ContainsKey(attackerClan) && _friendlyFire[attackerClan];
             if (!allowsFf)
             {
                 he.DamageAmount = 0f;
-                he.Attacker.MessageFrom(Name, "Friendly fire is disabled for your clan.");
+                attacker.MessageFrom(Name, "Friendly fire is disabled for your clan.");
             }
         }
 
