@@ -103,6 +103,14 @@ large documentation catch-up. No new hooks or config settings, so updating is dr
   comparison. Also documented two real, pre-existing bugs in the original that were intentionally not carried
   into the ports (`Awaiting[Player.UID]` indexing a plain list instead of the player's `DisconnectLocation`;
   Python-2-only `long()`/`xrange`).
+- Fixed `Docs/Classes/Config.md`'s own-config-file example, which built a C# module's data folder with
+  `Path.Combine(Config.GetModulesFolder(), "MyPlugin")`. `Config.GetModulesFolder()` resolves `Modules\`,
+  which only ever holds the plugin's own `.dll`/`.cs` file(s) - a module's actual, writable data folder is the
+  built-in `ModuleFolder` property (`Fougerite.Module.ModuleFolder`/`BasePlugin`'s equivalent for `CSPlugin`/
+  `CSScriptPlugin`), already set by the loader under `Save\<Name>\` (or `Save\<DataFolder>\` per its
+  `[Modules]` entry) by the time `Initialize()` runs. The example, `Docs/Classes/Modules.md`, and
+  `Docs/Classes/Config.md`'s `GetModulesFolder()`/`GetPublicFolder()` bullets were corrected to say so and to
+  use `ModuleFolder` directly instead of hand-building the wrong path.
 
 ## v1.9.97
 

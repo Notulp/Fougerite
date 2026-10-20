@@ -20,8 +20,10 @@ to read (not typically to write) from a plugin.
   the shared `Fougerite.cfg`** - it exists for Fougerite's own startup options, not for a plugin's own settings
   (see the warning below).
 - `Save()` - flushes `Fougerite.cfg` to disk (call after one or more `AddDefault`/`AddSetting` calls).
-- `GetModulesFolder()` / `GetPublicFolder()` - resolves the modules/public (`Save`) folder paths from
-  `FougeriteDirectory.cfg`, expanding the `%RootFolder%` placeholder.
+- `GetModulesFolder()` - resolves the `Modules\` folder (where a C# module's/CSScript plugin's own `.dll`/`.cs`
+  files live) from `FougeriteDirectory.cfg`, expanding the `%RootFolder%` placeholder.
+- `GetPublicFolder()` - resolves the `Save\` folder (script plugins, `Fougerite.cfg`, and every module's own
+  data/config folder - see `ModuleFolder` below) the same way.
 - `FougeriteConfig` / `FougeriteDirectoryConfig` - the raw `IniParser` instances, for anything not covered by
   the helpers above.
 
@@ -57,14 +59,22 @@ larger - these are the ones most relevant to plugin authors):
 pointed at `Fougerite.cfg`), and it's public - a plugin can `new` up its own instance pointed at its own file,
 keeping its settings completely separate from `Fougerite.cfg` and from every other plugin.
 
-**Where to put it:** not in the shared `Save\` folder - every C# module/CSScript plugin already has **its own
-folder under `Modules\`** (e.g. `Modules\MyPlugin\`, the same folder `MyPlugin.dll` or `MyPlugin.cs` lives in,
-resolved via `Config.GetModulesFolder()`). Plugins should create their config **inside that module folder**,
-not dump it into `Save\` alongside `Fougerite.cfg`/other plugins' data.
+**Where to put it:** not in the shared `Save\` folder next to `Fougerite.cfg` - every C# Module/CSScript plugin
+already gets **its own data folder under `Save\`**, exposed to it as the built-in `ModuleFolder` property
+(`Fougerite.Module.ModuleFolder`, see [`Modules.md`](Modules.md)). Despite the name, `ModuleFolder` does **not**
+live under `Modules\` (that folder only ever holds the `.dll`/`.cs` source the plugin is *loaded from*, resolved
+via `Config.GetModulesFolder()`) - it is resolved under `Save\` instead (`Config.GetPublicFolder()`), by default
+`Save\<PluginName>\`, or `Save\<DataFolder>\` if the plugin's `[Modules]` entry in `Fougerite.cfg` maps it to a
+different `DataFolder` (see [`FougeriteCfg.md`](FougeriteCfg.md#modules-section)). It's already set by the
+loader (DLL Module or CSScript alike) by the time `Initialize()` runs, and the folder already exists on disk at
+that point - **never build this path yourself** with `Path.Combine(Config.GetModulesFolder(), ...)`, that
+points at the wrong folder (and at the plugin's own `.dll`/`.cs`, not a writable data directory) - just use
+`ModuleFolder` directly:
 
 **Important:** unlike `Config.AddDefault` (which lazily creates `Fougerite.cfg` itself at startup),
 `new IniParser(path)` throws a `FileNotFoundException` if the file doesn't exist yet - so the plugin must
-create its module folder and an empty file first (once) before constructing the parser:
+create the (empty) file first (once) before constructing the parser. `ModuleFolder` itself never needs to be
+created by the plugin - the loader already did that:
 ```csharp
 using System.IO;
 
@@ -74,13 +84,7 @@ public class MyPlugin : Fougerite.PluginLoaders.Module
 
     public override void Initialize()
     {
-        string moduleFolder = Path.Combine(Config.GetModulesFolder(), "MyPlugin");
-        if (!Directory.Exists(moduleFolder))
-        {
-            Directory.CreateDirectory(moduleFolder);
-        }
-
-        string path = Path.Combine(moduleFolder, "MyPlugin.cfg");
+        string path = Path.Combine(ModuleFolder, "MyPlugin.cfg");
         if (!File.Exists(path))
         {
             File.Create(path).Dispose();
@@ -97,18 +101,15 @@ public class MyPlugin : Fougerite.PluginLoaders.Module
     }
 }
 ```
-`Config.GetModulesFolder()` resolves the `Modules\` root from `FougeriteDirectory.cfg` (expanding
-`%RootFolder%`) - combining it with the plugin's own name gives exactly the folder the plugin itself is
-loaded from (`Modules\MyPlugin\MyPlugin.dll` for a DLL module, or `Modules\MyPlugin\MyPlugin.cs` + any other
-source files for a CSScript plugin), so `MyPlugin.cfg` ships and travels together with the plugin instead of
-being scattered into the shared `Save\` folder. `IniParser` also exposes `GetBoolSetting`, `AddSetting` (no
-"only if missing" check), `ContainsSetting`/`ContainsValue`, and `SaveSettings(newPath)` for a copy-to-another-
-file save, in addition to the `AddDefault`/`GetSetting`/`Save` used above.
+`MyPlugin.cfg` ends up at `Save\MyPlugin\MyPlugin.cfg` (or `Save\<DataFolder>\MyPlugin.cfg` for a custom
+`[Modules]` mapping), fully separate from `Fougerite.cfg` and from every other plugin's settings. `IniParser`
+also exposes `GetBoolSetting`, `AddSetting` (no "only if missing" check), `ContainsSetting`/`ContainsValue`, and
+`SaveSettings(newPath)` for a copy-to-another-file save, in addition to the `AddDefault`/`GetSetting`/`Save`
+used above.
 
 This is exactly the pattern real plugins use, e.g. an `AirDrops` plugin loading its own `Settings.ini` next to
-itself. `ModuleFolder` here isn't a hand-built path like `moduleFolder` above - it's a built-in
-`Fougerite.Module` property, already pointing at the plugin's own folder under `Modules\` by the time
-`Initialize()` runs, so a DLL module plugin can use it directly without resolving the folder itself.
+itself, via `ModuleFolder` directly as shown below - there's no folder to resolve or create, it's already
+pointing at the plugin's own `Save\AirDrops\` by the time `Initialize()` runs.
 
 **Don't trust the file's contents.** `Settings.ini` is a plain text file a server operator can (and will) hand-edit -
 a typo'd number, a missing key after a bad merge, or a half-written file from a crash mid-save are all normal

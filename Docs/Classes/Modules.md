@@ -17,7 +17,11 @@ websockets, etc.) for free, while exposing its own, older-style surface:
 - `Order` - load priority (lower loads first; defaults to `uint.MaxValue`, i.e. last).
 - `UpdateURL` - an optional URL describing where to fetch plugin updates from (purely informational, Fougerite
   does not auto-update plugins from it).
-- `ModuleFolder` - only valid once `Initialize()` has been called; the plugin's own data folder.
+- `ModuleFolder` - only valid once `Initialize()` has been called; the plugin's own data folder. Despite the
+  name, this is a `Save\<Name>\`-style folder (`Config.GetPublicFolder()`), **not** a path under `Modules\`
+  (`Config.GetModulesFolder()`, which only holds the plugin's own `.dll`/`.cs`) - see
+  [`Config.md`](Config.md#example---c-a-plugins-own-dedicated-config-file-via-iniparser) for the full
+  explanation and the correct usage pattern.
 - `Initialize()` / `DeInitialize()` - abstract lifecycle methods (same purpose as `BasePlugin`'s).
 - `Dispose()` / `Dispose(bool disposing)` - standard `IDisposable` pattern; a finalizer also calls
   `Dispose(false)` as a safety net.
