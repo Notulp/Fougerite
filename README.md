@@ -61,6 +61,19 @@ Starting from version **1.9.7**, Fougerite ships [Fougerite_LibRust_x64](https:/
 
 ---
 
+## Server Browser Visibility (Fougerite vs. RustBuster)
+
+Fougerite servers still use the same Steam integration as the client, so any Fougerite server will show up
+in the regular server browser list - this includes servers that are not running RustBuster, for example ones
+running Fougerite with only Magma-style plugins. Being listed there does **not** require RustBuster at all.
+
+However, the "official" category in the RustBuster client's server browser is filtered separately, and only
+shows servers that are detected as RustBuster-aware. A server only appears under "official" if it is running
+RustBuster on top of Fougerite. Plain Fougerite servers (without RustBuster) will still be visible to players
+in the normal/community server list, just not under the "official" tag.
+
+---
+
 ## Reverse Engineering & Future Unity Engine Upgrade
 
 Rust Legacy was originally built on **Unity 4.5.5f**, a 2013-era engine release. The x64 upgrade above is only
