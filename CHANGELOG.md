@@ -94,6 +94,13 @@ large documentation catch-up. No new hooks or config settings, so updating is dr
   JS), `UnityEngine.Vector3(...)` (Python) and `UnityEngine.Vector3.__new(...)` (Lua), and the fabricated
   `Vector3.Add`/`.Subtract` methods in `Recorder`'s JavaScript/Lua samples were replaced with explicit
   component-wise math.
+- Expanded [`Docs/Examples/HungerGames.md`](Docs/Examples/HungerGames.md), which previously only showed the
+  shrinking safe-zone damage tick in isolation. It now also covers the join/leave queue (inventory save/
+  restore, same pattern as `TDM`), the full radiation damage model (bleeding past `BleedRad` via
+  `HumanBodyTakeDmg.SetBleedingLevel`, extra random damage past `DamageRad`, leg-breaking past `BreakAtXRad`
+  via `FallDamage.SetLegInjury`, anti-rad regen while inside the safe zone), persistent kill tracking and
+  placement recording on `On_PlayerKilled`, and the end-of-match placement-based rewards/leaderboard - in all
+  four languages.
 
 ## v1.9.97
 
