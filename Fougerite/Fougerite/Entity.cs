@@ -432,6 +432,10 @@ namespace Fougerite
             return false;
         }
 
+        /// <summary>
+        /// Returns the underlying TakeDamage component, if the entity is a DeployableObject or StructureComponent.
+        /// </summary>
+        /// <returns>The TakeDamage component, or null if the entity doesn't have one.</returns>
         public TakeDamage GetTakeDamage()
         {
             if (GetObject(out DeployableObject deployableObject))

@@ -481,6 +481,10 @@ namespace Fougerite
             return keys;
         }
 
+        /// <summary>
+        /// Loads the datastore from disk. Supports both the current JSON format and the legacy binary
+        /// format (auto-detected), falling back to the legacy format if JSON parsing fails.
+        /// </summary>
         public void Load()
         {
             if (!File.Exists(PATH)) return;
@@ -769,12 +773,23 @@ namespace Fougerite
     /// </summary>
     public class UnityTypeConverter : JsonConverter
     {
+        /// <summary>
+        /// Checks whether this converter can (de)serialize the given type.
+        /// </summary>
+        /// <param name="t">The type to check.</param>
+        /// <returns>True for Vector3, Vector2, Quaternion, Color and Rect.</returns>
         public override bool CanConvert(Type t)
         {
             return t == typeof(Vector3) || t == typeof(Vector2) || t == typeof(Quaternion) ||
                    t == typeof(Color) || t == typeof(Rect);
         }
 
+        /// <summary>
+        /// Writes the given Unity value type as a flat JSON object of its components (e.g. x/y/z for Vector3).
+        /// </summary>
+        /// <param name="writer">The JSON writer to write to.</param>
+        /// <param name="value">The value to serialize.</param>
+        /// <param name="serializer">The calling JsonSerializer (unused).</param>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             writer.WriteStartObject();
@@ -839,6 +854,14 @@ namespace Fougerite
             writer.WriteEndObject();
         }
 
+        /// <summary>
+        /// Reads a Unity value type back from its flat JSON object representation written by <see cref="WriteJson"/>.
+        /// </summary>
+        /// <param name="reader">The JSON reader to read from.</param>
+        /// <param name="objectType">The target type to deserialize into.</param>
+        /// <param name="existingValue">The existing value (unused).</param>
+        /// <param name="serializer">The calling JsonSerializer (unused).</param>
+        /// <returns>The deserialized value, or null if the type isn't supported.</returns>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
             JsonSerializer serializer)
         {

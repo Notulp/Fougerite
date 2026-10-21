@@ -208,6 +208,10 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Internal callback used to populate this instance when the underlying NetUser connects.
+        /// </summary>
+        /// <param name="user">The connecting NetUser.</param>
         [Obsolete("Don't use this.", false)]
         public void OnConnect(NetUser user)
         {
@@ -218,6 +222,9 @@ namespace Fougerite
             ipaddr = user.networkPlayer.externalIP;
         }
 
+        /// <summary>
+        /// Internal callback used to update this instance's state when the underlying NetUser disconnects.
+        /// </summary>
         [Obsolete("Don't use this.", false)]
         public void OnDisconnect()
         {

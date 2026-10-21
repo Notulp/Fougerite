@@ -30,7 +30,7 @@ toggleable, and a trusted player/permission can be exempted from all of them.
 | `AntiRampObject` | - | Blocks a ramp placed over a nearby deployable/character (`RampObjectRadius`), only when `CheckForRampLoot` is also on. |
 | `AntiDoorStash` | - | Blocks a `SmallStash` hidden directly in a doorway. |
 | `AntiAnimalGlitch` | `false` | Destroys a dead animal's corpse after `AnimalHitsBeforeDestroy` further hits, so players can't glitch inside it. |
-| `AntiShacking` | - | Blocks deployables (shelter/spike/gate/etc., see `[Shacking]` below) placed too close to a door to grief it. |
+| `AntiShacking` | - | Blocks deployables (shelter/spike/gate/etc., see `[Shacking]` below) placed too close to a door to grief it. See "What is shacking?" below. |
 | `AntiBarricadeOnPillar` | - | Blocks a barricade placed directly on top of a pillar. |
 | `RampStackMax` | `1` | Max ramps allowed stacked against the same foundation/ceiling. |
 | `AnimalHitsBeforeDestroy` | `5` | Hits (at &le;0 HP) before a dead animal's corpse is force-destroyed. |
@@ -42,9 +42,38 @@ toggleable, and a trusted player/permission can be exempted from all of them.
 | `PillarBarricadeMessage` | `"Pillar Barricade glitching is not allowed!"` | Shown by `AntiBarricadeOnPillar`/`BarricadePillar`. |
 | `ShackingMessage` | `"Griefing is not allowed on this server"` | Shown by `AntiShacking`. |
 
+### What is "shacking"?
+
+"Shacking" is slang for a griefing trick where a player places cheap deployables (a shelter,
+spikes, a gate, a barricade...) directly against someone else's door, boxing it in so the owner
+can no longer open/use it or get in/out of their own base. It's called "shacking" because the
+classic version of this trick is wedging a small `Shelter` ("shack") right against a door.
+
+`AntiShacking` stops this by checking, every time a player places one of the deployable types
+listed in `[Shacking]`, whether there is a door collider within that deployable's configured
+radius of the spot it's being placed at (`GlitchFixModule.cs`'s `SphereContainsNamed`/
+`GetShackingRadius`, called from `EntityDeployed`). If a door is found that close, the placement
+is rejected: the entity is destroyed, the item is refunded to the placer when `giveback` is on,
+and the placer is shown `ShackingMessage`.
+
 `[Shacking]` section - one `key=radius` per deployable name fragment (case-insensitive substring match against
 the entity name), `0` disables the check for that entry. Defaults compiled in if the section is absent/empty:
-`Shelter=5`, `Spike=2`, `Barricade=0`, `Gate=5`.
+`Shelter=5`, `Spike=2`, `Barricade=0`, `Gate=5`. You can add your own `key=radius` lines here to cover any
+other deployable prefab name (e.g. `Campfire=3`).
+
+**Worked example** - with the default config (`Shelter=5`, `Spike=2`, `Gate=5`, `Barricade=0`):
+
+- A player tries to place a `Shelter` 3 meters from your base's front door. Since 3m is within the
+  configured `Shelter=5` radius and a door is found nearby, the placement is blocked, the `Shelter`
+  is destroyed, the item goes back to the placer's inventory (if `giveback=true`), and they see
+  `ShackingMessage` ("Griefing is not allowed on this server" by default).
+- The same player tries to place that `Shelter` 8 meters away from any door - that's outside the
+  5m radius, so no door is found nearby and the placement succeeds normally.
+- A player places `Spikes` 1.5 meters from a door - blocked (within the `Spike=2` radius).
+  Placing those same `Spikes` 4 meters from a door - allowed (outside the `Spike=2` radius).
+- `Barricade=0` means barricades are **never** checked by this rule (radius `0` disables the entry
+  entirely) - they can be placed right next to a door without triggering `AntiShacking` (barricades
+  next to pillars are instead covered separately by `AntiBarricadeOnPillar`).
 
 ## What each check actually does
 
@@ -55,8 +84,10 @@ the entity name), `0` disables the check for that entry. Defaults compiled in if
 - **Build-in-rock prevention** - on entity placement, raycasts from well below the target position upward; if
   an unnamed collider's bounds contain both the placement point and the placer's feet, the placement is
   rejected, the entity destroyed, and (if `giveback` is on) the item refunded.
-- **Anti-shacking** - for deployables matching a `[Shacking]` entry, checks whether a door-named collider exists
-  within that entry's configured radius; if so the placement is blocked as griefing.
+- **Anti-shacking** - "shacking" means boxing in someone's door with a cheap deployable (shelter/spikes/gate)
+  so they can't use it; see "What is shacking?" above for the full explanation and a worked example. For
+  deployables matching a `[Shacking]` entry, checks whether a door-named collider exists within that entry's
+  configured radius; if so the placement is blocked as griefing.
 - **Anti-barricade-on-pillar** - blocks a barricade placed directly above a pillar mesh (raycast straight down
   from slightly above the placement point).
 - **Anti-foundation-hide / anti-pillar-stash / anti-ramp-on-object** - sphere-overlap checks around a newly

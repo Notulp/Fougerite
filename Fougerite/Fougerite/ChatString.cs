@@ -66,11 +66,19 @@ namespace Fougerite
             return _origText.Contains(str);
         }
 
+        /// <summary>
+        /// Implicitly converts a ChatString to its original text.
+        /// </summary>
+        /// <param name="cs">The ChatString to convert.</param>
         public static implicit operator string(ChatString cs)
         {
             return cs._origText;
         }
 
+        /// <summary>
+        /// Implicitly wraps a string in a new ChatString.
+        /// </summary>
+        /// <param name="str">The string to wrap.</param>
         public static implicit operator ChatString(string str)
         {
             return new ChatString(str);
@@ -98,6 +106,9 @@ namespace Fougerite
             return _origText.Substring(start, length);
         }
 
+        /// <summary>
+        /// Returns the original chat message (same as <see cref="OriginalMessage"/>).
+        /// </summary>
         [Obsolete("Use OriginalMessage instead", false)]
         public override string ToString()
         {

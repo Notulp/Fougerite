@@ -367,6 +367,13 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Sets an HTTP header on the request, including headers that are normally restricted by
+        /// <see cref="HttpWebRequest"/> (e.g. Content-Type, User-Agent) and would otherwise throw.
+        /// </summary>
+        /// <param name="request">The request to set the header on.</param>
+        /// <param name="name">The header name.</param>
+        /// <param name="value">The header value.</param>
         public static void SetRawHeader(this HttpWebRequest request, string name, string value)
         {
             if (HeaderProperties.ContainsKey(name))

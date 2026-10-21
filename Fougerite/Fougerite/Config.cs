@@ -10,6 +10,11 @@ namespace Fougerite
         public static IniParser FougeriteDirectoryConfig;
         public static IniParser FougeriteConfig;
 
+        /// <summary>
+        /// Loads <c>FougeriteDirectory.cfg</c> from the given path and then loads <c>Fougerite.cfg</c>
+        /// from the public folder it points to. Called once during startup.
+        /// </summary>
+        /// <param name="DirectoryConfigPath">The full path to the <c>FougeriteDirectory.cfg</c> file.</param>
         public static void Init(string DirectoryConfigPath)
         {
             try
@@ -36,6 +41,12 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Reads a string setting from <c>Fougerite.cfg</c>.
+        /// </summary>
+        /// <param name="Section">The INI section the setting lives under.</param>
+        /// <param name="Setting">The key name of the setting.</param>
+        /// <returns>The setting's value, or null if <c>Fougerite.cfg</c> failed to load.</returns>
         public static string GetValue(string Section, string Setting)
         {
             if (FougeriteConfig == null)
@@ -50,6 +61,12 @@ namespace Fougerite
             return FougeriteConfig.GetSetting(Section, Setting);
         }
 
+        /// <summary>
+        /// Reads a boolean setting from <c>Fougerite.cfg</c>.
+        /// </summary>
+        /// <param name="Section">The INI section the setting lives under.</param>
+        /// <param name="Setting">The key name of the setting.</param>
+        /// <returns>The setting's boolean value, or false if <c>Fougerite.cfg</c> failed to load.</returns>
         public static bool GetBoolValue(string Section, string Setting)
         {
             if (FougeriteConfig == null)

@@ -137,6 +137,12 @@ namespace Fougerite
             bigStackThread.Start();
         }
 
+        /// <summary>
+        /// Queues the given action to run asynchronously on a thread-pool thread, throttled by the internal
+        /// max-thread limit.
+        /// </summary>
+        /// <param name="a">The action to run.</param>
+        /// <returns>Always returns null; the action is executed through the thread pool, not a dedicated Thread.</returns>
         public static Thread RunAsync(Action a)
         {
             Initialize();

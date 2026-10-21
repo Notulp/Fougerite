@@ -500,6 +500,11 @@ namespace Fougerite
             return new Ray(position, direction);
         }
 
+        /// <summary>
+        /// Loads a Hashtable that was previously saved with <see cref="HashtableToFile"/> from a binary file.
+        /// </summary>
+        /// <param name="path">The full path of the file to load.</param>
+        /// <returns>The deserialized Hashtable, or an empty Hashtable if loading fails.</returns>
         public static Hashtable HashtableFromFile(string path)
         {
             try
@@ -516,6 +521,11 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Saves a Hashtable to a binary file, skipping any values that aren't serializable.
+        /// </summary>
+        /// <param name="ht">The Hashtable (of Hashtables) to save.</param>
+        /// <param name="path">The full path of the file to write to.</param>
         public static void HashtableToFile(Hashtable ht, string path)
         {
             var storage = ht;
@@ -627,6 +637,13 @@ namespace Fougerite
             return (transform.position + transform.forward * length);
         }
 
+        /// <summary>
+        /// Invokes a static method on a class found by name, through reflection. Useful for Scripting languages.
+        /// </summary>
+        /// <param name="className">The full name of the class containing the static method.</param>
+        /// <param name="method">The name of the static method to invoke.</param>
+        /// <param name="args">The arguments to pass to the method.</param>
+        /// <returns>The method's return value, <c>true</c> if the method returns void, or <c>null</c> if the class/method couldn't be found.</returns>
         public object InvokeStatic(string className, string method, object[] args)
         {
             Type type;
@@ -650,6 +667,11 @@ namespace Fougerite
             return info.Invoke(null, args);
         }
 
+        /// <summary>
+        /// Checks whether the given object is null. Useful for Scripting languages that can't compare against null directly.
+        /// </summary>
+        /// <param name="obj">The object to check.</param>
+        /// <returns>True if the object is null.</returns>
         public bool IsNull(object obj)
         {
             return (obj == null);
@@ -664,26 +686,56 @@ namespace Fougerite
             Logger.Log(str);
         }
 
+        /// <summary>
+        /// Matches the given string against a regular expression pattern.
+        /// </summary>
+        /// <param name="input">The regular expression pattern.</param>
+        /// <param name="match">The string to match the pattern against.</param>
+        /// <returns>The resulting <see cref="Match"/>.</returns>
         public Match Regex(string input, string match)
         {
             return new Regex(input).Match(match);
         }
 
+        /// <summary>
+        /// Rotates the given quaternion around the X axis by the specified angle.
+        /// </summary>
+        /// <param name="q">The quaternion to rotate.</param>
+        /// <param name="angle">The angle, in degrees, to rotate by.</param>
+        /// <returns>The rotated quaternion.</returns>
         public Quaternion RotateX(Quaternion q, float angle)
         {
             return (q * Quaternion.Euler(angle, 0f, 0f));
         }
 
+        /// <summary>
+        /// Rotates the given quaternion around the Y axis by the specified angle.
+        /// </summary>
+        /// <param name="q">The quaternion to rotate.</param>
+        /// <param name="angle">The angle, in degrees, to rotate by.</param>
+        /// <returns>The rotated quaternion.</returns>
         public Quaternion RotateY(Quaternion q, float angle)
         {
             return (q * Quaternion.Euler(0f, angle, 0f));
         }
 
+        /// <summary>
+        /// Rotates the given quaternion around the Z axis by the specified angle.
+        /// </summary>
+        /// <param name="q">The quaternion to rotate.</param>
+        /// <param name="angle">The angle, in degrees, to rotate by.</param>
+        /// <returns>The rotated quaternion.</returns>
         public Quaternion RotateZ(Quaternion q, float angle)
         {
             return (q * Quaternion.Euler(0f, 0f, angle));
         }
 
+        /// <summary>
+        /// Sends a chat message to a specific player, shown as coming from the given sender name.
+        /// </summary>
+        /// <param name="player">The network player to send the message to.</param>
+        /// <param name="playername">The sender name to display in chat.</param>
+        /// <param name="arg">The message to send.</param>
         [Obsolete("Use the Player class's message system instead.", false)]
         public static void say(uLink.NetworkPlayer player, string playername, string arg)
         {
@@ -694,12 +746,21 @@ namespace Fougerite
                 ConsoleNetworker.SendClientCommand(player, $"chat.add {playername} {arg}");
         }
 
+        /// <summary>
+        /// Broadcasts a chat message to all players, shown as coming from the given sender name.
+        /// </summary>
+        /// <param name="customName">The sender name to display in chat.</param>
+        /// <param name="arg">The message to broadcast.</param>
         [Obsolete("Use the Server class's broadcast methods instead.", false)]
         public static void sayAll(string customName, string arg)
         {
             ConsoleNetworker.Broadcast($"chat.add {String.QuoteSafe(customName)} {String.QuoteSafe(arg)}");
         }
 
+        /// <summary>
+        /// Broadcasts a chat message to all players, shown as coming from the server's configured message name.
+        /// </summary>
+        /// <param name="arg">The message to broadcast.</param>
         [Obsolete("Use the Server class's broadcast methods instead.", false)]
         public static void sayAll(string arg)
         {
@@ -708,6 +769,11 @@ namespace Fougerite
                     $"chat.add {String.QuoteSafe(Server.GetServer().server_message_name)} {String.QuoteSafe(arg)}");
         }
 
+        /// <summary>
+        /// Sends a chat message to a specific player, shown as coming from the server's configured message name.
+        /// </summary>
+        /// <param name="player">The network player to send the message to.</param>
+        /// <param name="arg">The message to send.</param>
         [Obsolete("Use the Player class's message system instead.", false)]
         public static void sayUser(uLink.NetworkPlayer player, string arg)
         {
@@ -719,6 +785,12 @@ namespace Fougerite
                     $"chat.add {String.QuoteSafe(Server.GetServer().server_message_name)} {String.QuoteSafe(arg)}");
         }
 
+        /// <summary>
+        /// Sends a chat message to a specific player, shown as coming from the given sender name.
+        /// </summary>
+        /// <param name="player">The network player to send the message to.</param>
+        /// <param name="customName">The sender name to display in chat.</param>
+        /// <param name="arg">The message to send.</param>
         [Obsolete("Use the Player class's message system instead.", false)]
         public static void sayUser(uLink.NetworkPlayer player, string customName, string arg)
         {
@@ -730,6 +802,12 @@ namespace Fougerite
                     $"chat.add {String.QuoteSafe(customName)} {String.QuoteSafe(arg)}");
         }
 
+        /// <summary>
+        /// Sets a public static field's value on a class found by name, through reflection. Useful for Scripting languages.
+        /// </summary>
+        /// <param name="className">The full name of the class containing the static field.</param>
+        /// <param name="field">The name of the static field to set.</param>
+        /// <param name="val">The value to assign to the field.</param>
         public void SetStaticField(string className, string field, object val)
         {
             Type type;
@@ -777,6 +855,11 @@ namespace Fougerite
             return data;
         }
 
+        /// <summary>
+        /// Converts a number of ticks to a <see cref="TimeSpan"/>.
+        /// </summary>
+        /// <param name="ticks">The number of ticks to convert.</param>
+        /// <returns>The resulting TimeSpan.</returns>
         public TimeSpan ConvertToTime(long ticks)
         {
             TimeSpan ts = TimeSpan.FromTicks(ticks);
@@ -859,6 +942,11 @@ namespace Fougerite
             return false;
         }
 
+        /// <summary>
+        /// Finds the ItemDataBlock registered under the given item name.
+        /// </summary>
+        /// <param name="name">The name of the item.</param>
+        /// <returns>The matching ItemDataBlock, or null if none was found.</returns>
         public ItemDataBlock ConvertNameToData(string name)
         {
             ItemDataBlock byName = DatablockDictionary.GetByName(name);
@@ -870,17 +958,36 @@ namespace Fougerite
             return null;
         }
 
+        /// <summary>
+        /// Finds the blueprint that produces the given item, if any.
+        /// </summary>
+        /// <param name="item">The resulting item to search the blueprint for.</param>
+        /// <returns>The matching BlueprintDataBlock, or null if none was found.</returns>
         public BlueprintDataBlock BlueprintOfItem(ItemDataBlock item)
         {
             return DatablockDictionary.All.OfType<BlueprintDataBlock>().FirstOrDefault(obj => obj.resultItem == item);
         }
 
+        /// <summary>
+        /// Finds the closest deployable at the given position (legacy alias for <see cref="FindDeployableAt"/>).
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <param name="forceupdate">If true, forces the internal deployables cache to refresh first.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindDeployableAt", false)]
         public Entity FindChestAt(Vector3 givenPosition, float dist = 1f, bool forceupdate = false)
         {
             return FindDeployableAt(givenPosition, dist, forceupdate);
         }
 
+        /// <summary>
+        /// Finds the closest deployable entity to the given position, within the given distance.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <param name="forceupdate">If true, forces the internal deployables cache to refresh first.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindDeployableAt(Vector3 givenPosition, float dist = 1f, bool forceupdate = false)
         {
@@ -892,6 +999,13 @@ namespace Fougerite
             return null;
         }
 
+        /// <summary>
+        /// Finds the closest door entity to the given position, within the given distance.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <param name="forceupdate">If true, forces the internal doors cache to refresh first.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindDoorAt(Vector3 givenPosition, float dist = 2f, bool forceupdate = false)
         {
@@ -903,6 +1017,13 @@ namespace Fougerite
             return null;
         }
 
+        /// <summary>
+        /// Finds the closest structure component entity to the given position, within the given distance.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <param name="forceupdate">If true, forces the internal structure components cache to refresh first.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindStructureAt(Vector3 givenPosition, float dist = 1f, bool forceupdate = false)
         {
@@ -914,6 +1035,12 @@ namespace Fougerite
             return null;
         }
 
+        /// <summary>
+        /// Finds the closest lootable object entity to the given position, within the given distance.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindLootableAt(Vector3 givenPosition, float dist = 1f)
         {
@@ -925,6 +1052,12 @@ namespace Fougerite
             return null;
         }
 
+        /// <summary>
+        /// Finds the closest entity (of any registered type) to the given position, within the given distance.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public Entity FindEntityAt(Vector3 givenPosition, float dist = 1f)
         {
@@ -1082,6 +1215,13 @@ namespace Fougerite
         }
 
 
+        /// <summary>
+        /// Finds all deployable entities within the given distance of a position.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <param name="forceupdate">If true, forces the internal deployables cache to refresh first.</param>
+        /// <returns>A list of matching entities.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindDeployablesAround(Vector3 givenPosition, float dist = 100f, bool forceupdate = false)
         {
@@ -1094,6 +1234,13 @@ namespace Fougerite
             return l;
         }
 
+        /// <summary>
+        /// Finds all door entities within the given distance of a position.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <param name="forceupdate">If true, forces the internal doors cache to refresh first.</param>
+        /// <returns>A list of matching entities.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindDoorsAround(Vector3 givenPosition, float dist = 100f, bool forceupdate = false)
         {
@@ -1106,6 +1253,13 @@ namespace Fougerite
             return l;
         }
 
+        /// <summary>
+        /// Finds all structure component entities within the given distance of a position.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <param name="forceupdate">If true, forces the internal structure components cache to refresh first.</param>
+        /// <returns>A list of matching entities.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindStructuresAround(Vector3 givenPosition, float dist = 100f, bool forceupdate = false)
         {
@@ -1118,6 +1272,12 @@ namespace Fougerite
             return l;
         }
 
+        /// <summary>
+        /// Finds all lootable object entities within the given distance of a position.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <returns>A list of matching entities.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindLootablesAround(Vector3 givenPosition, float dist = 100f)
         {
@@ -1130,6 +1290,12 @@ namespace Fougerite
             return l;
         }
 
+        /// <summary>
+        /// Finds all entities (of any registered type) within the given distance of a position.
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <param name="dist">The maximum distance to search within.</param>
+        /// <returns>A list of matching entities.</returns>
         [Obsolete("Use FindClosestEntity, and distinguish between the object types.", false)]
         public List<Entity> FindEntitiesAround(Vector3 givenPosition, float dist = 100f)
         {
@@ -1142,24 +1308,48 @@ namespace Fougerite
             return l;
         }
 
+        /// <summary>
+        /// Finds the closest entity to the given position (legacy alias for <see cref="FindEntityAt(Vector3, float)"/>).
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindEntity", false)]
         public Entity GetEntityatCoords(Vector3 givenPosition)
         {
             return FindEntityAt(givenPosition);
         }
 
+        /// <summary>
+        /// Finds the closest entity to the given coordinates (legacy alias for <see cref="FindEntityAt(Vector3, float)"/>).
+        /// </summary>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">The Y coordinate.</param>
+        /// <param name="z">The Z coordinate.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindEntity", false)]
         public Entity GetEntityatCoords(float x, float y, float z)
         {
             return FindEntityAt(new Vector3(x, y, z));
         }
 
+        /// <summary>
+        /// Finds the closest door to the given position (legacy alias for <see cref="FindDoorAt(Vector3, float, bool)"/>).
+        /// </summary>
+        /// <param name="givenPosition">The position to search around.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindDoorAt", false)]
         public Entity GetDooratCoords(Vector3 givenPosition)
         {
             return FindDoorAt(givenPosition);
         }
 
+        /// <summary>
+        /// Finds the closest door to the given coordinates (legacy alias for <see cref="FindDoorAt(Vector3, float, bool)"/>).
+        /// </summary>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">The Y coordinate.</param>
+        /// <param name="z">The Z coordinate.</param>
+        /// <returns>The closest matching entity, or null if none was found.</returns>
         [Obsolete("Use FindDoorAt", false)]
         public Entity GetDooratCoords(float x, float y, float z)
         {

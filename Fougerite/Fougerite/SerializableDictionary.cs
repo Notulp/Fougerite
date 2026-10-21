@@ -24,6 +24,11 @@ namespace Fougerite
         {
         }
 
+        /// <summary>
+        /// Serializes this dictionary's key/value pairs to XML, writing each entry's runtime type so it
+        /// can be reconstructed by <see cref="ReadXml"/>.
+        /// </summary>
+        /// <param name="writer">The XmlWriter to write to.</param>
         public void WriteXml(XmlWriter writer)
         {
             for (int i = 0; i < Keys.Count; i++)
@@ -48,6 +53,10 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Deserializes key/value pairs previously written by <see cref="WriteXml"/> back into this dictionary.
+        /// </summary>
+        /// <param name="reader">The XmlReader to read from.</param>
         public void ReadXml(XmlReader reader)
         {
             bool empty = reader.IsEmptyElement;
@@ -87,6 +96,10 @@ namespace Fougerite
             }
         }
 
+        /// <summary>
+        /// Required by <see cref="IXmlSerializable"/>; this type doesn't use an XSD schema.
+        /// </summary>
+        /// <returns>Always null.</returns>
         public XmlSchema GetSchema()
         {
             return null;

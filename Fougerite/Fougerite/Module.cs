@@ -71,18 +71,36 @@ namespace Fougerite
             Dispose(false);
         }
 
+        /// <summary>
+        /// Releases resources held by the module. Calls the overridable <see cref="Dispose(bool)"/> and
+        /// suppresses finalization.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Override to release any unmanaged/managed resources held by the module. Does nothing by default.
+        /// </summary>
+        /// <param name="disposing">True when called from <see cref="Dispose()"/>, false when called from the finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {
         }
 
+        /// <summary>
+        /// Called when the module is being unloaded (e.g. on server shutdown or plugin reload).
+        /// Implementations should undo whatever <see cref="Initialize"/> set up (unhook events, dispose
+        /// resources, save state, etc.).
+        /// </summary>
         public abstract void DeInitialize();
 
+        /// <summary>
+        /// Called once when the module is loaded. Implementations should perform all of their setup here
+        /// (hook events, load configuration, start timers, etc.), since <see cref="ModuleFolder"/> is only
+        /// available from this point on.
+        /// </summary>
         public abstract void Initialize();
     }
 }

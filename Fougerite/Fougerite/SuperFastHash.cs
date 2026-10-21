@@ -14,6 +14,12 @@ namespace Fougerite
             [FieldOffset(0)] public UInt16[] UInts;
         }
 
+        /// <summary>
+        /// Computes the 'superfasthash' hash of the given byte array.
+        /// Check out: http://landman-code.blogspot.com/2009/02/c-superfasthash-and-murmurhash2.html
+        /// </summary>
+        /// <param name="dataToHash">The bytes to hash.</param>
+        /// <returns>The resulting 32-bit hash.</returns>
         public static UInt32 Hash(Byte[] dataToHash)
         {
             Int32 dataLength = dataToHash.Length;
