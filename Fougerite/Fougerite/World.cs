@@ -62,7 +62,7 @@ namespace Fougerite
         /// <summary>
         /// Calls an airdrop N times.
         /// </summary>
-        /// <param name="rep"></param>
+        /// <param name="rep">The number of times to call an airdrop.</param>
         public void Airdrop(int rep)
         {
             for (int i = 0; i < rep; i++)
@@ -93,12 +93,25 @@ namespace Fougerite
             onground = new Vector3(x, y, z);
         }*/
 
+        /// <summary>
+        /// Calls an airdrop to the specified coordinates.
+        /// </summary>
+        /// <param name="x">The X coordinate to call the airdrop at.</param>
+        /// <param name="y">The Y coordinate to call the airdrop at.</param>
+        /// <param name="z">The Z coordinate to call the airdrop at.</param>
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(float x, float y, float z)
         {
             AirdropAt(x, y, z, 1);
         }
 
+        /// <summary>
+        /// Calls an airdrop to the specified coordinates, N times.
+        /// </summary>
+        /// <param name="x">The X coordinate to call the airdrop at.</param>
+        /// <param name="y">The Y coordinate to call the airdrop at.</param>
+        /// <param name="z">The Z coordinate to call the airdrop at.</param>
+        /// <param name="rep">The number of times to call an airdrop.</param>
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(float x, float y, float z, int rep)
         {
@@ -106,18 +119,32 @@ namespace Fougerite
             AirdropAt(target, rep);
         }
 
+        /// <summary>
+        /// Calls an airdrop at the given player's location.
+        /// </summary>
+        /// <param name="p">The player whose location the airdrop will target.</param>
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAtPlayer(Player p)
         {
             AirdropAt(p.X, p.Y, p.Z, 1);
         }
 
+        /// <summary>
+        /// Calls an airdrop at the given player's location, N times.
+        /// </summary>
+        /// <param name="p">The player whose location the airdrop will target.</param>
+        /// <param name="rep">The number of times to call an airdrop.</param>
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAtPlayer(Player p, int rep)
         {
             AirdropAt(p.X, p.Y, p.Z, rep);
         }
 
+        /// <summary>
+        /// Calls an airdrop at the given vector, N times.
+        /// </summary>
+        /// <param name="target">The vector to call the airdrop at.</param>
+        /// <param name="rep">The number of times to call an airdrop.</param>
         [Obsolete("AirdropAt is deprecated, please use AirdropAtOriginal instead.", false)]
         public void AirdropAt(Vector3 target, int rep = 1)
         {
@@ -239,7 +266,7 @@ namespace Fougerite
         /// A structuremaster in the game gets created when the first foundation is placed by a player.
         /// Therefore an owner of the structuremaster must be specified.
         /// </summary>
-        /// <param name="p"></param>
+        /// <param name="p">The player who will own the newly created structuremaster.</param>
         /// <returns></returns>
         public StructureMaster CreateSM(Player p)
         {
@@ -252,10 +279,10 @@ namespace Fougerite
         /// Therefore an owner of the structuremaster must be specified.
         /// You may even specify the location, this is usually the foundation's position.
         /// </summary>
-        /// <param name="p"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
+        /// <param name="p">The player who will own the newly created structuremaster.</param>
+        /// <param name="x">The X coordinate to create the structuremaster at.</param>
+        /// <param name="y">The Y coordinate to create the structuremaster at.</param>
+        /// <param name="z">The Z coordinate to create the structuremaster at.</param>
         /// <returns></returns>
         public StructureMaster CreateSM(Player p, float x, float y, float z)
         {
@@ -268,11 +295,11 @@ namespace Fougerite
         /// Therefore an owner of the structuremaster must be specified.
         /// You may even specify the location, this is usually the foundation's position.
         /// </summary>
-        /// <param name="p"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <param name="rot"></param>
+        /// <param name="p">The player who will own the newly created structuremaster.</param>
+        /// <param name="x">The X coordinate to create the structuremaster at.</param>
+        /// <param name="y">The Y coordinate to create the structuremaster at.</param>
+        /// <param name="z">The Z coordinate to create the structuremaster at.</param>
+        /// <param name="rot">The rotation to create the structuremaster with.</param>
         /// <returns></returns>
         public StructureMaster CreateSM(Player p, float x, float y, float z, Quaternion rot)
         {
@@ -285,7 +312,7 @@ namespace Fougerite
         /// <summary>
         /// Creates a zone with a specific name.
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="name">The name to register the new zone under.</param>
         /// <returns></returns>
         public Zone3D CreateZone(string name)
         {
@@ -364,6 +391,9 @@ namespace Fougerite
         /// <summary>
         /// Renames an existing zone.
         /// </summary>
+        /// <param name="oldName">The current name of the zone.</param>
+        /// <param name="newName">The new name to give the zone.</param>
+        /// <returns>True if the zone was found and renamed.</returns>
         public bool RenameZone(string oldName, string newName)
         {
             if (_zones.ContainsKey(oldName) && !_zones.ContainsKey(newName))
@@ -392,6 +422,8 @@ namespace Fougerite
         /// Returns a list of all zones that contain the specified coordinates.
         /// Since zones can overlap, this is more accurate than GetWorld().GlobalContains().
         /// </summary>
+        /// <param name="location">The location to check all registered zones against.</param>
+        /// <returns>A list of all zones containing the location.</returns>
         public List<Zone3D> GetZonesAt(Vector3 location)
         {
             List<Zone3D> found = new List<Zone3D>();
@@ -406,6 +438,8 @@ namespace Fougerite
         /// <summary>
         /// Gets all players currently inside a specific zone.
         /// </summary>
+        /// <param name="name">The name of the zone.</param>
+        /// <returns>A list of players found in the zone.</returns>
         public List<Player> GetPlayersInZone(string name)
         {
             List<Player> playersInZone = new List<Player>();
@@ -425,6 +459,8 @@ namespace Fougerite
         /// Gets all entities (structures, deployables, etc.) inside a specific zone.
         /// Use this for zone-wide cleanups or protection logic.
         /// </summary>
+        /// <param name="name">The name of the zone.</param>
+        /// <returns>A list of entities found in the zone.</returns>
         public List<Entity> GetEntitiesInZone(string name)
         {
             List<Entity> entitiesInZone = new List<Entity>();
@@ -460,6 +496,8 @@ namespace Fougerite
         /// Finds the closest zone to a specific position based on the distance 
         /// to the first point of the zone.
         /// </summary>
+        /// <param name="pos">The position to measure the distance from.</param>
+        /// <returns>The closest zone, or null if no zones are registered.</returns>
         public Zone3D FindClosestZone(Vector3 pos)
         {
             Zone3D closest = null;
@@ -549,6 +587,9 @@ namespace Fougerite
         /// <summary>
         /// Checks if a specific NPC is within the named zone.
         /// </summary>
+        /// <param name="npc">The NPC to check.</param>
+        /// <param name="zoneName">The name of the zone.</param>
+        /// <returns>True if the NPC is within the zone.</returns>
         public bool IsNPCInZone(NPC npc, string zoneName)
         {
             Zone3D zone = Get(zoneName);
@@ -562,6 +603,9 @@ namespace Fougerite
         /// <summary>
         /// Checks if a specific Sleeper is within the named zone.
         /// </summary>
+        /// <param name="sleeper">The sleeper to check.</param>
+        /// <param name="zoneName">The name of the zone.</param>
+        /// <returns>True if the sleeper is within the zone.</returns>
         public bool IsSleeperInZone(Sleeper sleeper, string zoneName)
         {
             Zone3D zone = Get(zoneName);
@@ -575,8 +619,8 @@ namespace Fougerite
         /// <summary>
         /// Gets the ground Y position at the given X, Z coordinates.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="z"></param>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="z">The Z coordinate.</param>
         /// <returns></returns>
         public float GetGround(float x, float z)
         {
@@ -587,7 +631,7 @@ namespace Fougerite
         /// <summary>
         /// Gets the ground Y position at the given Vector.
         /// </summary>
-        /// <param name="target"></param>
+        /// <param name="target">The vector whose X, Z coordinates are used.</param>
         /// <returns></returns>
         public float GetGround(Vector3 target)
         {
@@ -598,7 +642,7 @@ namespace Fougerite
         /// <summary>
         /// Gets the TerrainHight at the given Vector.
         /// </summary>
-        /// <param name="target"></param>
+        /// <param name="target">The vector to sample the terrain height at.</param>
         /// <returns></returns>
         public float GetTerrainHeight(Vector3 target)
         {
@@ -608,9 +652,9 @@ namespace Fougerite
         /// <summary>
         /// Gets the TerrainHight at the given coordinates.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">Unused, kept for overload convenience (the Y value is not sampled).</param>
+        /// <param name="z">The Z coordinate.</param>
         /// <returns></returns>
         public float GetTerrainHeight(float x, float y, float z)
         {
@@ -620,7 +664,7 @@ namespace Fougerite
         /// <summary>
         /// Gets the terrain steepness at the target vector.
         /// </summary>
-        /// <param name="target"></param>
+        /// <param name="target">The vector whose X, Z coordinates are used.</param>
         /// <returns></returns>
         public float GetTerrainSteepness(Vector3 target)
         {
@@ -630,8 +674,8 @@ namespace Fougerite
         /// <summary>
         /// Gets the terrain steepness at the given X, Z coordinates.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="z"></param>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="z">The Z coordinate.</param>
         /// <returns></returns>
         public float GetTerrainSteepness(float x, float z)
         {
@@ -641,9 +685,9 @@ namespace Fougerite
         /// <summary>
         /// Returns the Ground Distance from the specified coordinates.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
+        /// <param name="x">The X coordinate.</param>
+        /// <param name="y">The Y coordinate to measure the distance to the ground from.</param>
+        /// <param name="z">The Z coordinate.</param>
         /// <returns></returns>
         public float GetGroundDist(float x, float y, float z)
         {
@@ -654,7 +698,7 @@ namespace Fougerite
         /// <summary>
         /// Returns the Ground Distance from the specified Vector.
         /// </summary>
-        /// <param name="target"></param>
+        /// <param name="target">The vector whose Y coordinate is measured against the ground below it.</param>
         /// <returns></returns>
         public float GetGroundDist(Vector3 target)
         {
@@ -726,8 +770,8 @@ namespace Fougerite
         /// <summary>
         /// Spawns a prefab at the vector position.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="location"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="location">The vector position to spawn the prefab at.</param>
         /// <returns></returns>
         public object Spawn(string prefab, Vector3 location)
         {
@@ -737,9 +781,9 @@ namespace Fougerite
         /// <summary>
         /// Spawns a prefab at the vector position N times.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="location"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="location">The vector position to spawn the prefab at.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public object Spawn(string prefab, Vector3 location, int rep)
         {
@@ -749,10 +793,10 @@ namespace Fougerite
         /// <summary>
         /// Spawns a prefab at the coordinates.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="x">The X coordinate to spawn the prefab at.</param>
+        /// <param name="y">The Y coordinate to spawn the prefab at.</param>
+        /// <param name="z">The Z coordinate to spawn the prefab at.</param>
         /// <returns></returns>
         public object Spawn(string prefab, float x, float y, float z)
         {
@@ -762,11 +806,11 @@ namespace Fougerite
         /// <summary>
         /// An overload for SpawnEntity below.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="x">The X coordinate to spawn the prefab at.</param>
+        /// <param name="y">The Y coordinate to spawn the prefab at.</param>
+        /// <param name="z">The Z coordinate to spawn the prefab at.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public Entity SpawnEntity(string prefab, float x, float y, float z, int rep = 1)
         {
@@ -776,9 +820,9 @@ namespace Fougerite
         /// <summary>
         /// An overload for SpawnEntity below.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="location"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="location">The vector position to spawn the prefab at.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public Entity SpawnEntity(string prefab, Vector3 location, int rep = 1)
         {
@@ -805,10 +849,10 @@ namespace Fougerite
         ///   StructureMaster.AddStructureComponent(...). If you spawn structures in bulk, It's recommended to
         ///   create (or find a nearby) StructureMaster and attach each component to It.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="location"></param>
-        /// <param name="rotation"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="location">The vector position to spawn the prefab at.</param>
+        /// <param name="rotation">The rotation to spawn the prefab with.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public Entity SpawnEntity(string prefab, Vector3 location, Quaternion rotation, int rep = 1)
         {
@@ -871,10 +915,10 @@ namespace Fougerite
         /// (StructureComponent, LootableObject, SupplyCrate, ResourceTarget, DeployableObject).
         /// Use World.SpawnEntity for structures/deployables/loot, and this method for animals/NPCs instead.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="location"></param>
-        /// <param name="rotation"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The animal/NPC prefab path name to spawn (e.g. ":stag_prefab"). See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="location">The vector position to spawn the prefab at.</param>
+        /// <param name="rotation">The rotation to spawn the prefab with.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public NPC SpawnAnimal(string prefab, Vector3 location, Quaternion rotation, int rep = 1)
         {
@@ -914,9 +958,9 @@ namespace Fougerite
         /// Spawns an animal/NPC prefab at the given vector, N times. See the other SpawnAnimal overload for
         /// more info.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="location"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The animal/NPC prefab path name to spawn (e.g. ":stag_prefab"). See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="location">The vector position to spawn the prefab at.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public NPC SpawnAnimal(string prefab, Vector3 location, int rep = 1)
         {
@@ -927,15 +971,22 @@ namespace Fougerite
         /// Spawns an animal/NPC prefab at the given player's location/rotation, N times. See the
         /// SpawnAnimal(string, Vector3, Quaternion, int) overload for more info.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="p"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The animal/NPC prefab path name to spawn (e.g. ":stag_prefab"). See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="p">The player at whose location and rotation the prefab is spawned.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public NPC SpawnAnimalAtPlayer(string prefab, Player p, int rep = 1)
         {
             return SpawnAnimal(prefab, p.Location, p.PlayerClient.transform.rotation, rep);
         }
 
+        /// <summary>
+        /// Internal implementation shared by the public Spawn overloads above.
+        /// </summary>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="location">The vector position to spawn the prefab at.</param>
+        /// <param name="rotation">The rotation to spawn the prefab with.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         private object Spawn(string prefab, Vector3 location, Quaternion rotation, int rep)
         {
             prefab = prefab.Trim();
@@ -998,11 +1049,11 @@ namespace Fougerite
         /// <summary>
         /// Spawns a prefab at the given coordinates, N times.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="x">The X coordinate to spawn the prefab at.</param>
+        /// <param name="y">The Y coordinate to spawn the prefab at.</param>
+        /// <param name="z">The Z coordinate to spawn the prefab at.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public object Spawn(string prefab, float x, float y, float z, int rep)
         {
@@ -1012,11 +1063,11 @@ namespace Fougerite
         /// <summary>
         /// Spawns a prefab at the given coordinates, rotation.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <param name="rot"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="x">The X coordinate to spawn the prefab at.</param>
+        /// <param name="y">The Y coordinate to spawn the prefab at.</param>
+        /// <param name="z">The Z coordinate to spawn the prefab at.</param>
+        /// <param name="rot">The rotation to spawn the prefab with.</param>
         /// <returns></returns>
         public object Spawn(string prefab, float x, float y, float z, Quaternion rot)
         {
@@ -1026,12 +1077,12 @@ namespace Fougerite
         /// <summary>
         /// Spawns a prefab at the given coordinates, rotation, N times.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <param name="rot"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="x">The X coordinate to spawn the prefab at.</param>
+        /// <param name="y">The Y coordinate to spawn the prefab at.</param>
+        /// <param name="z">The Z coordinate to spawn the prefab at.</param>
+        /// <param name="rot">The rotation to spawn the prefab with.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public object Spawn(string prefab, float x, float y, float z, Quaternion rot, int rep)
         {
@@ -1041,8 +1092,8 @@ namespace Fougerite
         /// <summary>
         /// Spawns a prefab at the given player.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="p"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="p">The player at whose location and rotation the prefab is spawned.</param>
         /// <returns></returns>
         public object SpawnAtPlayer(string prefab, Player p)
         {
@@ -1052,9 +1103,9 @@ namespace Fougerite
         /// <summary>
         /// Spawns a prefab at the given player, N times.
         /// </summary>
-        /// <param name="prefab"></param>
-        /// <param name="p"></param>
-        /// <param name="rep"></param>
+        /// <param name="prefab">The prefab path name to spawn. See <see cref="Prefabs"/> for examples.</param>
+        /// <param name="p">The player at whose location and rotation the prefab is spawned.</param>
+        /// <param name="rep">The number of times to spawn the prefab.</param>
         /// <returns></returns>
         public object SpawnAtPlayer(string prefab, Player p, int rep)
         {
@@ -1070,6 +1121,11 @@ namespace Fougerite
             set { env.daylength = value; }
         }
 
+        /// <summary>
+        /// Returns all the BasicDoor entities, using an internal time-based cache.
+        /// </summary>
+        /// <param name="forceupdate">If true, forces the internal cache to refresh instead of using the cached list.</param>
+        /// <returns>A list of door entities.</returns>
         [Obsolete(@"This API was originally created to not rely on World.Entities,
         which used to be an expensive call for plugins. You should use World.Entities as It is now thread safe.", false)]
         public IEnumerable<Entity> BasicDoors(bool forceupdate = false)
@@ -1106,6 +1162,11 @@ namespace Fougerite
             return _doors;
         }
 
+        /// <summary>
+        /// Returns all the DeployableObject entities, using an internal time-based cache.
+        /// </summary>
+        /// <param name="forceupdate">If true, forces the internal cache to refresh instead of using the cached list.</param>
+        /// <returns>A list of deployable entities.</returns>
         [Obsolete(@"This API was originally created to not rely on World.Entities,
         which used to be an expensive call for plugins. You should use World.Entities as It is now thread safe.", false)]
         public IEnumerable<Entity> DeployableObjects(bool forceupdate = false)
@@ -1143,6 +1204,11 @@ namespace Fougerite
             return _deployables;
         }
 
+        /// <summary>
+        /// Returns all the StructureComponent entities, using an internal time-based cache.
+        /// </summary>
+        /// <param name="forceupdate">If true, forces the internal cache to refresh instead of using the cached list.</param>
+        /// <returns>A list of structure component entities.</returns>
         [Obsolete(@"This API was originally created to not rely on World.Entities,
         which used to be an expensive call for plugins. You should use World.Entities as It is now thread safe.", false)]
         public IEnumerable<Entity> StructureComponents(bool forceupdate = false)
@@ -1179,6 +1245,11 @@ namespace Fougerite
             return _structures;
         }
 
+        /// <summary>
+        /// Returns all the StructureMaster entities, using an internal time-based cache.
+        /// </summary>
+        /// <param name="forceupdate">If true, forces the internal cache to refresh instead of using the cached list.</param>
+        /// <returns>A list of structure master entities.</returns>
         [Obsolete(@"This API was originally created to not rely on World.Entities,
         which used to be an expensive call for plugins. You should use World.Entities as It is now thread safe.", false)]
         public IEnumerable<Entity> StructureMasters(bool forceupdate = false)

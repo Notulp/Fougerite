@@ -40,7 +40,7 @@ its own Unity asset bundle at startup (used together with RustBuster's client-si
       `StructureMaster` and attach every spawned component to it.
   - `SpawnAnimal(string prefab, Vector3 location, Quaternion rotation = default, int rep = 1)` (+ overload
     taking just `Vector3 location, int rep = 1`) - spawns `rep` copies of an animal/NPC prefab (e.g.
-    `;stag_prefab`, `;wolf_prefab`, `;bear_prefab`, `;chicken_prefab`, see [`Prefabs`](Prefabs.md#animals)) and
+    `:stag_prefab`, `:wolf_prefab`, `:bear_prefab`, `:chicken_prefab`, see [`Prefabs`](Prefabs.md#animals-npc)) and
     returns the (first) resulting [`NPC`](#npc) instead of `Entity`. Internally this does exactly what the
     game itself does when wildlife naturally spawns (registers the `Character` into [`NPCCache`](Caches.md),
     same as the `AddWildlifeInstance` hook), so the returned `NPC` immediately shows up in `World.Animals`/

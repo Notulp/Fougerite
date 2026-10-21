@@ -78,7 +78,7 @@ created by the plugin - the loader already did that:
 ```csharp
 using System.IO;
 
-public class MyPlugin : Fougerite.PluginLoaders.Module
+public class MyPlugin : Fougerite.Module
 {
     private IniParser _config;
 

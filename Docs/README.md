@@ -105,7 +105,7 @@ correct amount of arguments, and the loader will hook it up automatically.
 
 **C#**
 ```csharp
-public class MyPlugin : Fougerite.PluginLoaders.BasePlugin // or your module's plugin base
+public class MyPlugin : Fougerite.Module
 {
     public override void Initialize()
     {

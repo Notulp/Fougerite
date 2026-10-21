@@ -1,5 +1,5 @@
 ### Class
-`Fougerite.World` (`SpawnEntity`/`Spawn`/`SpawnAtPlayer`)
+`Fougerite.World` (`SpawnEntity`/`Spawn`/`SpawnAtPlayer`/`SpawnAnimal`/`SpawnAnimalAtPlayer`)
 
 ### Description
 This page lists known prefab path names that can be passed as the `prefab` argument to
@@ -8,6 +8,13 @@ by the in-game `spawn`/`entity.spawn` console commands and by other Rust Legacy 
 does not maintain or validate this list itself, it is simply forwarded to the underlying engine's prefab
 lookup, so names may vary slightly between server/client builds. If a name doesn't resolve, `SpawnEntity`
 returns `null` (check the server console for a resolution warning).
+
+The `:` prefixed names under [Animals (NPC)](#animals-npc) below are meant to be used with
+[`World.SpawnAnimal`/`World.SpawnAnimalAtPlayer`](World.md#world) instead
+of `SpawnEntity`/`Spawn`. Unlike `SpawnEntity` (which returns an `Entity`), `SpawnAnimal`/`SpawnAnimalAtPlayer`
+return the Fougerite `NPC` class, since animals are `Character`/`BasicWildLifeAI` based and aren't one of the
+component types `Entity` wraps. If you pass an animal prefab to `SpawnEntity` instead, it will log a warning
+and skip it (no `Character` component found).
 
 > Prefixes are meaningful to the engine's own prefab categories: `;` denotes a structure/deployable prefab,
 > `:` denotes a Character/NPC prefab, and a few loot container prefabs (`AmmoLootBox`, `MedicalLootBox`,
@@ -101,10 +108,23 @@ public void GiveBox(Player player)
 }
 ```
 
+### Example - C# (spawning an animal via SpawnAnimal)
+```csharp
+public void SpawnBear(Vector3 location)
+{
+    // Returns an NPC, not an Entity - use World.SpawnAnimal/SpawnAnimalAtPlayer for ":" prefixed prefabs.
+    NPC npc = World.GetWorld().SpawnAnimal(":bear_prefab", location);
+    if (npc == null)
+    {
+        Logger.LogError("Failed to spawn :bear_prefab - unknown prefab name, or missing Character component?");
+    }
+}
+```
+
 ### Example - Python (spawning an animal at a player)
 ```python
 def SpawnWolf(self, Player):
-    World.GetWorld().SpawnAtPlayer(":wolf_prefab", Player, 1)
+    World.GetWorld().SpawnAnimalAtPlayer(":wolf_prefab", Player, 1)
 ```
 
 See also: [`World`](World.md) · [`Entity`](Entity.md)
