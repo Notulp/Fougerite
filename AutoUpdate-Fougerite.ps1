@@ -48,6 +48,54 @@ if (-not (Test-Path $serverExe)) {
 }
 Write-Host "[INFO] rust_server.exe found - correct server root folder confirmed." -ForegroundColor Green
 
+function Get-RunningServer {
+    $result = @()
+    foreach ($p in @(Get-Process -Name "rust_server" -ErrorAction SilentlyContinue)) {
+        $procPath = $null
+        try { $procPath = $p.MainModule.FileName } catch { $procPath = $null }
+        if ([string]::IsNullOrEmpty($procPath) -or $procPath -eq $serverExe) {
+            $result += [pscustomobject]@{ Id = $p.Id; Path = $procPath }
+        }
+    }
+    return ,$result
+}
+
+$runningServers = Get-RunningServer
+while ($runningServers.Count -gt 0) {
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Red
+    Write-Host "  ERROR: The Rust server is still running!" -ForegroundColor Red
+    Write-Host "============================================================" -ForegroundColor Red
+    Write-Host ""
+    foreach ($s in $runningServers) {
+        $procLabel = if ([string]::IsNullOrEmpty($s.Path)) { "(path not readable - run as administrator to verify)" } else { $s.Path }
+        Write-Host "    - PID $($s.Id)  $procLabel" -ForegroundColor Red
+    }
+    Write-Host ""
+    Write-Host "  Files in use cannot be replaced, and updating a running" -ForegroundColor White
+    Write-Host "  server would leave it half-updated. Stop the server first." -ForegroundColor White
+    Write-Host ""
+    Write-Host "  [R] Retry  (after stopping the server)" -ForegroundColor Cyan
+    Write-Host "  [Q] Quit" -ForegroundColor Yellow
+    Write-Host ""
+
+    $runningChoice = $null
+    while ($null -eq $runningChoice) {
+        $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        switch ($key.Character.ToString().ToUpper()) {
+            "R" { $runningChoice = "RETRY"; Write-Host "  > Checking again..." -ForegroundColor Cyan }
+            "Q" { $runningChoice = "QUIT";  Write-Host "  > Aborted by user." -ForegroundColor Yellow }
+            default { Write-Host "  Please press R or Q." -ForegroundColor Gray }
+        }
+    }
+
+    if ($runningChoice -eq "QUIT") {
+        exit 1
+    }
+    $runningServers = Get-RunningServer
+}
+Write-Host "[INFO] No running server instance detected for this folder." -ForegroundColor Green
+
 # ------------------------------------------------------------------------------
 # Legacy 32-bit Steam DLL check
 # Fougerite now runs the Rust server under 64-bit; the old Steam shim DLLs
@@ -205,6 +253,105 @@ if (-not (Test-Path $zipPath)) {
 $zipSize = (Get-Item $zipPath).Length
 Write-Host "[INFO] Download complete. File size: $([math]::Round($zipSize / 1MB, 2)) MB" -ForegroundColor Green
 
+Write-Host ""
+Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
+Write-Host "  Backup before update" -ForegroundColor Magenta
+Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
+Write-Host "  The update will overwrite files in this server folder." -ForegroundColor White
+Write-Host "  A backup lets you roll back if something goes wrong." -ForegroundColor White
+Write-Host ""
+Write-Host "  [Y] Yes  (RECOMMENDED - zip the whole server folder into Backups\)" -ForegroundColor Green
+Write-Host "  [N] No   (continue without a backup)" -ForegroundColor Yellow
+Write-Host ""
+
+$backupChoice = $null
+while ($null -eq $backupChoice) {
+    $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    switch ($key.Character.ToString().ToUpper()) {
+        "Y" { $backupChoice = $true;  Write-Host "  > You chose: Create a backup (recommended)." -ForegroundColor Green }
+        "N" { $backupChoice = $false; Write-Host "  > You chose: No backup." -ForegroundColor Yellow }
+        default { Write-Host "  Please press Y or N." -ForegroundColor Gray }
+    }
+}
+Write-Host "------------------------------------------------------------" -ForegroundColor Magenta
+
+if ($backupChoice) {
+    $backupDir       = Join-Path $scriptDir "Backups"
+    $backupPrefix    = $backupDir.TrimEnd('\') + '\'
+    $backupTimestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+    $backupPath      = Join-Path $backupDir "FougeriteBackup_$backupTimestamp.zip"
+    $backupActivity  = "Backing up server folder"
+
+    Write-Host ""
+    Write-Host "[INFO] Scanning server folder for backup..." -ForegroundColor Yellow
+
+    try {
+        $backupFiles = @(Get-ChildItem -Path $scriptDir -File -Recurse -Force | Where-Object {
+            -not $_.FullName.StartsWith($backupPrefix, [System.StringComparison]::OrdinalIgnoreCase) -and
+                    $_.FullName -ne $zipPath
+        })
+        $backupTotalBytes = [double](($backupFiles | Measure-Object -Property Length -Sum).Sum)
+
+        Write-Host "[INFO] $($backupFiles.Count) file(s), $([math]::Round($backupTotalBytes / 1MB, 2)) MB to back up." -ForegroundColor White
+        Write-Host "[INFO] Creating backup $backupPath ..." -ForegroundColor Yellow
+
+        if (-not (Test-Path $backupDir)) {
+            New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+        }
+        Add-Type -AssemblyName System.IO.Compression
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+        $buffer          = New-Object byte[] 1MB
+        $backupDoneBytes = 0
+        $backupFileCount = 0
+        $lastPercent     = -1
+        $backupZip = [System.IO.Compression.ZipFile]::Open($backupPath, [System.IO.Compression.ZipArchiveMode]::Create)
+        try {
+            foreach ($file in $backupFiles) {
+                $entryName = $file.FullName.Substring($scriptDir.Length).TrimStart('\', '/').Replace('\', '/')
+                $zipEntry  = $backupZip.CreateEntry($entryName, [System.IO.Compression.CompressionLevel]::Fastest)
+                try { $zipEntry.LastWriteTime = $file.LastWriteTime } catch { }
+
+                $inStream  = New-Object System.IO.FileStream -ArgumentList $file.FullName, ([System.IO.FileMode]::Open), ([System.IO.FileAccess]::Read), ([System.IO.FileShare]::ReadWrite)
+                $outStream = $zipEntry.Open()
+                try {
+                    while (($read = $inStream.Read($buffer, 0, $buffer.Length)) -gt 0) {
+                        $outStream.Write($buffer, 0, $read)
+                        $backupDoneBytes += $read
+                        $percent = if ($backupTotalBytes -gt 0) { [int][math]::Floor($backupDoneBytes * 100 / $backupTotalBytes) } else { 100 }
+                        if ($percent -ne $lastPercent) {
+                            $status = "$percent% - $([math]::Round($backupDoneBytes / 1MB, 1)) / $([math]::Round($backupTotalBytes / 1MB, 1)) MB - file $($backupFileCount + 1) of $($backupFiles.Count)"
+                            Write-Progress -Activity $backupActivity -Status $status -PercentComplete $percent -CurrentOperation $entryName
+                            $lastPercent = $percent
+                        }
+                    }
+                } finally {
+                    $outStream.Dispose()
+                    $inStream.Dispose()
+                }
+                $backupFileCount++
+            }
+        } finally {
+            $backupZip.Dispose()
+            Write-Progress -Activity $backupActivity -Completed
+        }
+    } catch {
+        Write-Progress -Activity $backupActivity -Completed
+        Write-Host ""
+        Write-Host "[ERROR] Backup failed. The update was NOT applied." -ForegroundColor Red
+        Write-Host "        Details: $_" -ForegroundColor Red
+        Write-Host ""
+        Remove-Item -Path $backupPath -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path $zipPath -Force -ErrorAction SilentlyContinue
+        Write-Host "Press any key to exit..." -ForegroundColor Gray
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        exit 1
+    }
+
+    $backupSize = (Get-Item $backupPath).Length
+    Write-Host "[INFO] Backup complete. $backupFileCount file(s), $([math]::Round($backupSize / 1MB, 2)) MB" -ForegroundColor Green
+}
+
 # ------------------------------------------------------------------------------
 # Step 4 - Extract the zip to the working directory (overwrite all files)
 #           Config/ini files inside Save\ are handled with a user prompt.
@@ -226,7 +373,7 @@ Write-Host ""
 Write-Host "  [A] Overwrite ALL  (RECOMMENDED - update to latest defaults," -ForegroundColor Green
 Write-Host "                      then tweak manually afterwards)" -ForegroundColor Green
 Write-Host "  [S] Skip ALL       (keep your current files untouched)" -ForegroundColor Yellow
-Write-Host "  [P] Prompt me      (decide file-by-file)" -ForegroundColor Cyan
+Write-Host "  [P] Prompt me      (decide file-by-file, with a diff of each change)" -ForegroundColor Cyan
 Write-Host ""
 
 $globalCfgChoice = $null
@@ -291,6 +438,117 @@ function Read-YesNo {
         }
     }
     return $ans
+}
+
+function Get-TextLines {
+    param([byte[]]$Bytes)
+    $lines  = New-Object System.Collections.Generic.List[string]
+    $ms     = New-Object System.IO.MemoryStream -ArgumentList (,$Bytes)
+    $reader = New-Object System.IO.StreamReader -ArgumentList $ms, ([System.Text.Encoding]::UTF8), $true
+    while ($null -ne ($line = $reader.ReadLine())) {
+        $lines.Add($line)
+    }
+    $reader.Dispose()
+    return ,$lines.ToArray()
+}
+
+function Show-ConfigDiff {
+    param(
+        [byte[]]$OldBytes,
+        [byte[]]$NewBytes,
+        [string]$OldLabel,
+        [string]$NewLabel,
+        [int]$Context = 3
+    )
+    $old = @(Get-TextLines -Bytes $OldBytes)
+    $new = @(Get-TextLines -Bytes $NewBytes)
+
+    $pre = 0
+    while ($pre -lt $old.Count -and $pre -lt $new.Count -and $old[$pre] -ceq $new[$pre]) {
+        $pre++
+    }
+    $suf = 0
+    while ($suf -lt ($old.Count - $pre) -and $suf -lt ($new.Count - $pre) -and
+            $old[$old.Count - 1 - $suf] -ceq $new[$new.Count - 1 - $suf]) {
+        $suf++
+    }
+
+    $n  = $old.Count - $pre - $suf
+    $m  = $new.Count - $pre - $suf
+    $dp = New-Object 'int[,]' ($n + 1), ($m + 1)
+    for ($i = $n - 1; $i -ge 0; $i--) {
+        for ($j = $m - 1; $j -ge 0; $j--) {
+            if ($old[$pre + $i] -ceq $new[$pre + $j]) {
+                $dp[$i, $j] = $dp[($i + 1), ($j + 1)] + 1
+            } elseif ($dp[($i + 1), $j] -ge $dp[$i, ($j + 1)]) {
+                $dp[$i, $j] = $dp[($i + 1), $j]
+            } else {
+                $dp[$i, $j] = $dp[$i, ($j + 1)]
+            }
+        }
+    }
+
+    $ops = New-Object System.Collections.Generic.List[object]
+    for ($k = 0; $k -lt $pre; $k++) {
+        $ops.Add([pscustomobject]@{ Kind = ' '; OldNo = $k + 1; NewNo = $k + 1; Text = $old[$k] })
+    }
+    $i = 0
+    $j = 0
+    while ($i -lt $n -or $j -lt $m) {
+        if ($i -lt $n -and $j -lt $m -and $old[$pre + $i] -ceq $new[$pre + $j]) {
+            $ops.Add([pscustomobject]@{ Kind = ' '; OldNo = $pre + $i + 1; NewNo = $pre + $j + 1; Text = $old[$pre + $i] })
+            $i++
+            $j++
+        } elseif ($j -lt $m -and ($i -ge $n -or $dp[$i, ($j + 1)] -gt $dp[($i + 1), $j])) {
+            $ops.Add([pscustomobject]@{ Kind = '+'; OldNo = ''; NewNo = $pre + $j + 1; Text = $new[$pre + $j] })
+            $j++
+        } else {
+            $ops.Add([pscustomobject]@{ Kind = '-'; OldNo = $pre + $i + 1; NewNo = ''; Text = $old[$pre + $i] })
+            $i++
+        }
+    }
+    for ($k = 0; $k -lt $suf; $k++) {
+        $oi = $old.Count - $suf + $k
+        $ni = $new.Count - $suf + $k
+        $ops.Add([pscustomobject]@{ Kind = ' '; OldNo = $oi + 1; NewNo = $ni + 1; Text = $old[$oi] })
+    }
+
+    $changes = @($ops | Where-Object { $_.Kind -ne ' ' }).Count
+    if ($changes -eq 0) {
+        return 0
+    }
+
+    $show = New-Object 'bool[]' $ops.Count
+    for ($k = 0; $k -lt $ops.Count; $k++) {
+        if ($ops[$k].Kind -ne ' ') {
+            $from = [math]::Max(0, $k - $Context)
+            $to   = [math]::Min($ops.Count - 1, $k + $Context)
+            for ($x = $from; $x -le $to; $x++) { $show[$x] = $true }
+        }
+    }
+
+    Write-Host "        --- $OldLabel" -ForegroundColor Red
+    Write-Host "        +++ $NewLabel" -ForegroundColor Green
+    $gap = $false
+    for ($k = 0; $k -lt $ops.Count; $k++) {
+        if (-not $show[$k]) {
+            if (-not $gap) {
+                Write-Host "        ..." -ForegroundColor DarkGray
+                $gap = $true
+            }
+            continue
+        }
+        $gap  = $false
+        $op   = $ops[$k]
+        $line = "        {0,5} {1,5} {2} {3}" -f $op.OldNo, $op.NewNo, $op.Kind, $op.Text
+        switch ($op.Kind) {
+            '-'     { Write-Host $line -ForegroundColor Red }
+            '+'     { Write-Host $line -ForegroundColor Green }
+            default { Write-Host $line -ForegroundColor DarkGray }
+        }
+    }
+    Write-Host "        $changes line(s) changed." -ForegroundColor Yellow
+    return $changes
 }
 
 try {
@@ -384,6 +642,15 @@ try {
                         Write-Host "        File is identical - skipping automatically." -ForegroundColor Gray
                         $shouldWrite = $false
                     } else {
+                        if ($fileExists) {
+                            $changedLines = Show-ConfigDiff -OldBytes ([System.IO.File]::ReadAllBytes($destPath)) `
+                                                            -NewBytes $bytes `
+                                                            -OldLabel "current : $destPath" `
+                                                            -NewLabel "release : $($entry.FullName)"
+                            if ($changedLines -eq 0) {
+                                Write-Host "        Text is identical - only line endings or encoding differ." -ForegroundColor Gray
+                            }
+                        }
                         $shouldWrite = Read-YesNo "        Overwrite this file? [Y/N] "
                     }
                 }
