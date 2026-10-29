@@ -105,6 +105,7 @@ namespace Fougerite.Tools
         private string _detail = string.Empty;
         private int _attempts;
         private bool _sawInvalidTicket;
+        private int _lastInvalidTicketErrorCode;
         private System.Threading.Timer _retryTimer;
 
         internal SteamWebValidation(ulong claimedSteamId, uint appId, bool requireRustOwnership,
@@ -276,11 +277,12 @@ namespace Fougerite.Tools
             }
         }
 
-        internal void MarkInvalidTicketSeen()
+        internal void MarkInvalidTicketSeen(int errorCode)
         {
             lock (_lock)
             {
                 _sawInvalidTicket = true;
+                _lastInvalidTicketErrorCode = errorCode;
             }
         }
 
@@ -322,15 +324,17 @@ namespace Fougerite.Tools
         internal void CompleteOnDeadline()
         {
             bool sawInvalid;
+            int errorCode;
             lock (_lock)
             {
                 sawInvalid = _sawInvalidTicket;
+                errorCode = _lastInvalidTicketErrorCode;
             }
 
             if (sawInvalid)
             {
                 TryComplete(SteamWebValidationStatus.InvalidTicket,
-                    $"101 Invalid ticket, deadline reached after {Attempts} attempt(s)");
+                    $"{errorCode} Invalid ticket, deadline reached after {Attempts} attempt(s)");
             }
             else
             {
@@ -421,8 +425,9 @@ namespace Fougerite.Tools
         private static readonly TimeSpan MaxAge = TimeSpan.FromMinutes(5);
 
         // Steam only accepts a session ticket after the client received GetAuthSessionTicketResponse_t,
-        // which can be later than the moment the client connects. Error 101 is retried with these delays.
+        // which can be later than the moment the client connects. Errors 100 and 101 are retried with these delays.
         private static readonly int[] InvalidTicketRetryDelaysMs = { 750, 1500, 2500 };
+        private const int SteamErrorUserOffline = 100;
         private const int SteamErrorInvalidTicket = 101;
 
         /// <summary>
@@ -750,10 +755,11 @@ namespace Fougerite.Tools
                     int errorCode = (int?)error["errorcode"] ?? 0;
                     string errorDesc = (string)error["errordesc"];
 
-                    // A genuine ticket reads as invalid until Steam registered it, so 101 is retried a few times.
-                    if (errorCode == SteamErrorInvalidTicket)
+                    // A genuine ticket reads as invalid (101) or the session as not yet online (100) until
+                    // Steam fully registered it, so both are retried a few times.
+                    if (errorCode == SteamErrorInvalidTicket || errorCode == SteamErrorUserOffline)
                     {
-                        v.MarkInvalidTicketSeen();
+                        v.MarkInvalidTicketSeen(errorCode);
                         int attempt = v.Attempts;
                         if (attempt <= InvalidTicketRetryDelaysMs.Length)
                         {

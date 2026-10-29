@@ -3,6 +3,21 @@
 This file collects the release notes that are normally posted on Discord and on the
 [GitHub releases page](https://github.com/Notulp/Fougerite/releases). Newest version first.
 
+## Unreleased
+
+- Fixed a false-positive Steam Web API rejection (`SteamAuthMode=RustOwners`/`SteamPaidAccounts`/
+  `SteamAccounts`/`AllowAll`) on a player's very first connection attempt after launching the game. A brand
+  new session ticket can race Steam's backend, which answers `AuthenticateUserTicket` with errorcode 100
+  ("User is offline") instead of errorcode 101 ("ticket not yet valid") while the ticket is still being
+  registered. Only 101 was retried, so a genuine ticket that hit 100 was rejected outright after a single
+  attempt (`InvalidTicket (100 User is offline after 1 attempt(s))`), even though reconnecting moments later
+  always succeeded. `SteamTicketValidator` now retries errorcode 100 the same way as 101, with the same
+  750/1500/2500 ms backoff, so the first connection attempt succeeds instead of requiring a reconnect.
+- Restored the Steam error code in the `InvalidTicket` message logged when all retries are exhausted and the
+  deadline is reached. `CompleteOnDeadline` now remembers the last errorcode (100 or 101) seen during the
+  retries and reports it again, e.g. `InvalidTicket (100 Invalid ticket, deadline reached after 4 attempt(s))`,
+  instead of the generic message that no longer mentioned which error code kept recurring.
+
 ## v1.9.971
 
 Full Changelog: https://github.com/Notulp/Fougerite/compare/v1.9.97...v1.9.971
