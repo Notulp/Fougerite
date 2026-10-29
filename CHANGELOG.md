@@ -3,7 +3,9 @@
 This file collects the release notes that are normally posted on Discord and on the
 [GitHub releases page](https://github.com/Notulp/Fougerite/releases). Newest version first.
 
-## Unreleased
+## v1.9.972
+
+Full Changelog: https://github.com/Notulp/Fougerite/compare/v1.9.971...v1.9.972
 
 - Fixed a false-positive Steam Web API rejection (`SteamAuthMode=RustOwners`/`SteamPaidAccounts`/
   `SteamAccounts`/`AllowAll`) on a player's very first connection attempt after launching the game. A brand
@@ -17,6 +19,13 @@ This file collects the release notes that are normally posted on Discord and on 
   deadline is reached. `CompleteOnDeadline` now remembers the last errorcode (100 or 101) seen during the
   retries and reports it again, e.g. `InvalidTicket (100 Invalid ticket, deadline reached after 4 attempt(s))`,
   instead of the generic message that no longer mentioned which error code kept recurring.
+- Updated the server side Mono build with the x64 fixes already shipped in the client. These fixes went into
+  the client a while ago but were never carried over to the server until now.
+- Improved `AutoUpdate-Fougerite.ps1`. It now refuses to update while `rust_server.exe` is still running
+  (lists the PID(s) and lets you retry or quit instead of corrupting a live install), offers to zip the
+  whole server folder into `Backups\` before touching anything, with a progress bar while it does, and when
+  a config file you're about to overwrite differs from the release's version, it shows a line-by-line
+  diff of what would change before asking you to confirm the overwrite.
 
 ## v1.9.971
 
