@@ -47,7 +47,7 @@ Core behavior toggles and gameplay-affecting settings.
 
 | Value | Safety rating | Behavior |
 |---|---|---|
-| `RustOnly` | **Most Safe** | Only native Rust (252490) players. Enforces strict native Steam authentication and blocks all Spacewar, emulated or cracked clients. **Requires** a legacy/original Rust client authenticated through Steam - no RustBuster/custom client or non-Steam client works here. |
+| `RustOnly` | **Most Safe** | Only native Rust (252490) players. Enforces strict native Steam authentication and blocks all Spacewar, emulated or cracked clients. **Requires** a client authenticated through Steam with the real Rust AppID - a legacy/original Rust client works out of the box, and so does **RustBuster**/another custom client as long as it is configured to use the Rust AppID (`252490`, not Spacewar) and its Steam account actually owns Rust; a client issuing a Spacewar ticket or one without Steam at all is always rejected. |
 | `RustOwners` | **High Safety** | Allows Spacewar tickets, but uses the Steam Web API to verify the account actually owns paid Rust. Requires the player's game details to be public. **Requires** a Steam-authenticated client (legacy Rust or a RustBuster/custom client issuing a Spacewar ticket). |
 | `SteamPaidAccounts` | **High Safety** | Allows Spacewar players whose ticket is verified through the Steam Web API and whose Steam account is not limited (i.e. has spent at least 5 USD on Steam). Rust ownership is **not** required - this keeps out freshly-made alt accounts without requiring the player to own Rust. Private profiles are fine, but the player must have set up a Steam Community profile at least once. **Requires** a Steam-authenticated client (legacy Rust or a RustBuster/custom client issuing a Spacewar ticket). |
 | `SteamAccounts` | **Medium Safety** | Verifies via the Web API that the Spacewar ticket belongs to a legitimate Steam account, but does not require Rust ownership or a non-limited account. **This is the most recommended setting to use with RustBuster.** **Requires** a Steam-authenticated client (legacy Rust or a RustBuster/custom client issuing a Spacewar ticket). |
@@ -66,7 +66,14 @@ mode already rejected.
 actually produced by Steam, which in practice means the player is joining with either:
 - a legacy/original Rust client authenticated through Steam with the real Rust app ID (`252490`), or
 - a client like **RustBuster** (or another custom client that re-implements Steam authentication) issuing a
-  Spacewar (`480`) app ticket.
+  Spacewar (`480`) app ticket - or, if RustBuster/the custom client is configured to authenticate under the
+  Rust app ID instead, a ticket that `RustOnly` itself will accept too.
+
+Note that `RustOnly` isn't exclusive to the legacy/original Rust client - **RustBuster works fine with
+`RustOnly`** as long as it's set to use the Rust AppID (`252490`, not Spacewar) and the underlying Steam
+account actually owns Rust; native Steam auth can't tell RustBuster apart from the original client once it
+authenticates under the real Rust AppID. It's only when RustBuster is left on the Spacewar AppID (its default,
+free-to-use mode) that `RustOnly` rejects it, since that ticket doesn't belong to the Rust AppID at all.
 
 A bare/offline client that doesn't talk to Steam at all has no ticket for these modes to check, so it will
 always be rejected by `RustOnly` through `SteamAccountsUnverified` - there is no configuration that makes them

@@ -77,6 +77,12 @@ admit it. The only modes that work without any Steam-integrating client are `Leg
 classic AuthAllow uses `SteamDenyEvent.ForceAllow` to let everyone in) and `AllowAll` (lets everyone in without
 needing a plugin at all).
 
+`RustOnly` is not limited to the legacy/original Rust client either: `RustBuster` (or another custom client)
+works with it too, as long as it's configured to authenticate under the **Rust** AppID (`252490`) rather than
+Spacewar, and the Steam account actually owns Rust - native auth validates the ticket the same way regardless
+of which client produced it. `RustOnly` only rejects RustBuster when it's left on its default Spacewar (`480`)
+ticket, since that AppID isn't Rust.
+
 ### SteamTicketValidator
 Static class that drives the Steam Web API calls and the final admit/deny decision:
 - `IsWebApiConfigured` - whether `Bootstrap.SteamWebAPIKey` is set.
