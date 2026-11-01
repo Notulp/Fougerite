@@ -47,19 +47,35 @@ Core behavior toggles and gameplay-affecting settings.
 
 | Value | Safety rating | Behavior |
 |---|---|---|
-| `RustOnly` | **Most Safe** | Only native Rust (252490) players. Enforces strict native Steam authentication and blocks all Spacewar, emulated or cracked clients. |
-| `RustOwners` | **High Safety** | Allows Spacewar tickets, but uses the Steam Web API to verify the account actually owns paid Rust. Requires the player's game details to be public. |
-| `SteamPaidAccounts` | **High Safety** | Allows Spacewar players whose ticket is verified through the Steam Web API and whose Steam account is not limited (i.e. has spent at least 5 USD on Steam). Rust ownership is **not** required - this keeps out freshly-made alt accounts without requiring the player to own Rust. Private profiles are fine, but the player must have set up a Steam Community profile at least once. |
-| `SteamAccounts` | **Medium Safety** | Verifies via the Web API that the Spacewar ticket belongs to a legitimate Steam account, but does not require Rust ownership or a non-limited account. **This is the most recommended setting to use with RustBuster.** |
-| `SteamAccountsUnverified` | **Low Safety** | Performs basic offline checks to filter out sloppy emulators; bypassable by well-forged tickets spoofing any SteamID. |
-| `Legacy` | **Very Low Safety** | Performs no ticket verification on its own, delegating access decisions entirely to plugins (e.g. the old AuthAllow plugin via `SteamDenyEvent.ForceAllow`). |
-| `AllowAll` | **Zero Safety** | Disables all checks and allows anyone to connect, including clients without Steam. |
+| `RustOnly` | **Most Safe** | Only native Rust (252490) players. Enforces strict native Steam authentication and blocks all Spacewar, emulated or cracked clients. **Requires** a legacy/original Rust client authenticated through Steam - no RustBuster/custom client or non-Steam client works here. |
+| `RustOwners` | **High Safety** | Allows Spacewar tickets, but uses the Steam Web API to verify the account actually owns paid Rust. Requires the player's game details to be public. **Requires** a Steam-authenticated client (legacy Rust or a RustBuster/custom client issuing a Spacewar ticket). |
+| `SteamPaidAccounts` | **High Safety** | Allows Spacewar players whose ticket is verified through the Steam Web API and whose Steam account is not limited (i.e. has spent at least 5 USD on Steam). Rust ownership is **not** required - this keeps out freshly-made alt accounts without requiring the player to own Rust. Private profiles are fine, but the player must have set up a Steam Community profile at least once. **Requires** a Steam-authenticated client (legacy Rust or a RustBuster/custom client issuing a Spacewar ticket). |
+| `SteamAccounts` | **Medium Safety** | Verifies via the Web API that the Spacewar ticket belongs to a legitimate Steam account, but does not require Rust ownership or a non-limited account. **This is the most recommended setting to use with RustBuster.** **Requires** a Steam-authenticated client (legacy Rust or a RustBuster/custom client issuing a Spacewar ticket). |
+| `SteamAccountsUnverified` | **Low Safety** | Performs basic offline checks to filter out sloppy emulators; bypassable by well-forged tickets spoofing any SteamID. **Requires** a Steam-authenticated client (legacy Rust or a RustBuster/custom client issuing a Spacewar ticket) - a non-Steam client still has no ticket to check. |
+| `Legacy` | **Very Low Safety** | Performs no ticket verification on its own, delegating access decisions entirely to plugins (e.g. the old AuthAllow plugin via `SteamDenyEvent.ForceAllow`). **No Steam-integrating client required** - a plugin like AuthAllow can let everyone in regardless of Steam status. |
+| `AllowAll` | **Zero Safety** | Disables all checks and allows anyone to connect, including clients without Steam. **No Steam-integrating client or plugin required.** |
 
 `RustOwners` and `SteamPaidAccounts` have their own profile requirement (public game details, and a
 Steam Community profile having existed at least once) - the startup log prints a warning about this for
 whichever of the two is active, so server owners aren't surprised by rejected players. Outside of `Legacy`,
 a plugin can still deny a player through `On_SteamDeny`, but it can never let in a connection the configured
 mode already rejected.
+
+**Important - every mode above `Legacy` requires a Steam-aware client.** `RustOnly`, `RustOwners`,
+`SteamPaidAccounts`, `SteamAccounts` and `SteamAccountsUnverified` all depend on a connection ticket that was
+actually produced by Steam, which in practice means the player is joining with either:
+- a legacy/original Rust client authenticated through Steam with the real Rust app ID (`252490`), or
+- a client like **RustBuster** (or another custom client that re-implements Steam authentication) issuing a
+  Spacewar (`480`) app ticket.
+
+A bare/offline client that doesn't talk to Steam at all has no ticket for these modes to check, so it will
+always be rejected by `RustOnly` through `SteamAccountsUnverified` - there is no configuration that makes them
+accept a non-Steam client. If you are **not** running RustBuster or another Steam-integrating client and don't
+want to require one, the only options that work are:
+- `Legacy` - performs no ticket verification itself, so a plugin (e.g. the classic **AuthAllow** plugin) can
+  call `SteamDenyEvent.ForceAllow` to let every connecting player in regardless of Steam status.
+- `AllowAll` - skips all ticket checks server-side and lets anyone connect, Steam or not, without needing any
+  plugin at all.
 
 #### `TrustedSteamIDs`: whitelisting specific players for `RustOwners`/`SteamPaidAccounts`
 `RustOwners` and `SteamPaidAccounts` can reject a perfectly legitimate player simply because their Steam

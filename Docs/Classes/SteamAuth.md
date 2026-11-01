@@ -68,6 +68,15 @@ admits:
 (public game details / an existing Community profile); the startup log warns about whichever is configured so
 the requirement isn't a surprise when players get rejected.
 
+**All of `RustOnly`, `RustOwners`, `SteamPaidAccounts`, `SteamAccounts` and `SteamAccountsUnverified` require a
+Steam-authenticated client**, i.e. a connection ticket actually issued by Steam - either a legacy/original Rust
+client authenticated through Steam under the real Rust AppID (`252490`), or `RustBuster`/another custom client
+that re-implements Steam auth and connects with a Spacewar (`480`) ticket. A client that doesn't talk to Steam
+at all has no ticket for `SteamTicketValidator`/`SteamAPITools` to parse, so none of these five modes can ever
+admit it. The only modes that work without any Steam-integrating client are `Legacy` (a plugin such as the
+classic AuthAllow uses `SteamDenyEvent.ForceAllow` to let everyone in) and `AllowAll` (lets everyone in without
+needing a plugin at all).
+
 ### SteamTicketValidator
 Static class that drives the Steam Web API calls and the final admit/deny decision:
 - `IsWebApiConfigured` - whether `Bootstrap.SteamWebAPIKey` is set.
