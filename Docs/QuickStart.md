@@ -40,11 +40,15 @@ Forward/allow these ports on your router and firewall before anyone can connect:
 | Port | Protocol | Purpose |
 |---|---|---|
 | `28015` | UDP | Main game port - Rust Legacy's default, used by every client to actually connect and play. |
-| `28016` | UDP | Query + RCON port - server browser queries and remote console (`rcon.login`, see step 4). |
-| `28017` | UDP | RustBuster client-side integration port - only needed if you want players using the [RustBuster](../README.md#server-browser-visibility-fougerite-vs-rustbuster) client to get its extra features. |
+| `28016` | TCP + UDP | Query (UDP, server browser queries) + RCON (TCP, remote console - `rcon.login`, see step 4). Both protocols need to be open. |
+| `28017` | TCP | RustBuster client-side integration port - only needed if you want players using the [RustBuster](../README.md#server-browser-visibility-fougerite-vs-rustbuster) client to get its extra features. |
 
-If you're not using RustBuster at all, `28017` can be left closed - everything else still works over
-`28015`/`28016`.
+These port numbers assume the default game port `28015`. If you changed the game port (in `server.cfg` or
+the server's `.bat` file), the query/RCON port is always **game port + 1** and the RustBuster port is always
+**game port + 2** - e.g. a game port of `28020` means `28021` for query/RCON and `28022` for RustBuster.
+
+If you're not using RustBuster at all, its port (`+2`) can be left closed - everything else still works over
+the game port and `+1`.
 
 ### 4. Set your RCON password and become admin
 
