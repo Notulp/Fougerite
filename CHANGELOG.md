@@ -25,7 +25,13 @@ Full Changelog: https://github.com/Notulp/Fougerite/compare/v1.9.971...v1.9.972
   (lists the PID(s) and lets you retry or quit instead of corrupting a live install), offers to zip the
   whole server folder into `Backups\` before touching anything, with a progress bar while it does, and when
   a config file you're about to overwrite differs from the release's version, it shows a line-by-line
-  diff of what would change before asking you to confirm the overwrite.
+  diff of what would change before asking you to confirm the overwrite. The Save-folder config prompt now
+  marks "Prompt me" (file-by-file review with that line-by-line diff) as the RECOMMENDED choice instead of
+  "Overwrite ALL", since reviewing the actual changes before applying them is the safer default. If
+  `Save\Fougerite.cfg` itself ends up overwritten (whether you chose "Overwrite ALL" or confirmed it during
+  the file-by-file prompt), the script now finishes with an explicit reminder to go back into
+  `Fougerite.cfg` and double-check `SteamAuthMode`/`SteamWebAPIKey`, since a reset config can otherwise
+  silently lock out players who aren't on Steam-verified/paid accounts.
 
 ## v1.9.971
 

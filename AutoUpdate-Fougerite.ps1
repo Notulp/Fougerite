@@ -370,19 +370,20 @@ Write-Host "  folder. These files may carry new default settings." -ForegroundCo
 Write-Host ""
 Write-Host "  How would you like to handle them?" -ForegroundColor White
 Write-Host ""
-Write-Host "  [A] Overwrite ALL  (RECOMMENDED - update to latest defaults," -ForegroundColor Green
-Write-Host "                      then tweak manually afterwards)" -ForegroundColor Green
+Write-Host "  [P] Prompt me      (RECOMMENDED - review a line-by-line diff of" -ForegroundColor Green
+Write-Host "                      each changed file and decide file-by-file)" -ForegroundColor Green
+Write-Host "  [A] Overwrite ALL  (update to latest defaults without reviewing," -ForegroundColor Yellow
+Write-Host "                      then tweak manually afterwards)" -ForegroundColor Yellow
 Write-Host "  [S] Skip ALL       (keep your current files untouched)" -ForegroundColor Yellow
-Write-Host "  [P] Prompt me      (decide file-by-file, with a diff of each change)" -ForegroundColor Cyan
 Write-Host ""
 
 $globalCfgChoice = $null
 while ($null -eq $globalCfgChoice) {
     $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     switch ($key.Character.ToString().ToUpper()) {
-        "A" { $globalCfgChoice = "OVERWRITE_ALL"; Write-Host "  > You chose: Overwrite ALL config files (recommended)." -ForegroundColor Green }
+        "A" { $globalCfgChoice = "OVERWRITE_ALL"; Write-Host "  > You chose: Overwrite ALL config files." -ForegroundColor Yellow }
         "S" { $globalCfgChoice = "SKIP_ALL";      Write-Host "  > You chose: Skip ALL config files." -ForegroundColor Yellow }
-        "P" { $globalCfgChoice = "PROMPT";        Write-Host "  > You chose: Prompt me for each file." -ForegroundColor Cyan }
+        "P" { $globalCfgChoice = "PROMPT";        Write-Host "  > You chose: Prompt me for each file (recommended)." -ForegroundColor Green }
         default { Write-Host "  Please press A, S, or P." -ForegroundColor Gray }
     }
 }
@@ -557,6 +558,7 @@ try {
     $totalEntries = $zip.Entries.Count
     $current      = 0
     $skippedCfg   = 0
+    $fougeriteCfgOverwritten = $false
 
     foreach ($entry in $zip.Entries) {
         $current++
@@ -663,6 +665,9 @@ try {
                 } else {
                     [System.IO.Compression.ZipFileExtensions]::ExtractToFile($entry, $destPath, $true)
                 }
+                if ($entry.Name -ieq "fougerite.cfg") {
+                    $fougeriteCfgOverwritten = $true
+                }
                 Write-Host "    [CFG] Overwrote: $($entry.FullName)" -ForegroundColor Green
             } else {
                 $skippedCfg++
@@ -753,6 +758,30 @@ Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "  Update complete! Fougerite $tagName is ready." -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
+
+if ($fougeriteCfgOverwritten) {
+    Write-Host ""
+    Write-Host "------------------------------------------------------------" -ForegroundColor Red
+    Write-Host "  IMPORTANT: fougerite.cfg was overwritten!" -ForegroundColor Red
+    Write-Host "------------------------------------------------------------" -ForegroundColor Red
+    Write-Host "  Your Save\fougerite.cfg file was just reset to the" -ForegroundColor Yellow
+    Write-Host "  release defaults. Head over to that file and review your" -ForegroundColor Yellow
+    Write-Host "  settings again, especially:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "    - SteamAuthMode  -> make sure it is set to the mode you" -ForegroundColor White
+    Write-Host "                        actually want (e.g. to allow all" -ForegroundColor White
+    Write-Host "                        kinds of players, not just those on" -ForegroundColor White
+    Write-Host "                        your friends/VAC-verified list)." -ForegroundColor White
+    Write-Host "    - SteamWebAPIKey -> add/re-add your Steam Web API key" -ForegroundColor White
+    Write-Host "                        here if your chosen SteamAuthMode" -ForegroundColor White
+    Write-Host "                        needs one, otherwise players may" -ForegroundColor White
+    Write-Host "                        fail to authenticate and join." -ForegroundColor White
+    Write-Host ""
+    Write-Host "  Without this, some or all players may be unable to join" -ForegroundColor Yellow
+    Write-Host "  your server after the update." -ForegroundColor Yellow
+    Write-Host "------------------------------------------------------------" -ForegroundColor Red
+}
+
 Write-Host ""
 Write-Host "Press any key to exit..." -ForegroundColor Gray
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
