@@ -27,11 +27,12 @@ to make sure you're on the newest Fougerite version:
    skip straight to step 2. If you started from the **original Rust Legacy server files** instead (no
    script present), download [`AutoUpdate-Fougerite.ps1`](../AutoUpdate-Fougerite.ps1) from this repository
    and place it directly in the server root (next to `rust_server.exe`).
-2. Run it (double-click, or `powershell -File .\AutoUpdate-Fougerite.ps1` from a terminal opened in that
-   folder) and follow the prompts.
+2. Run it - either double-click it, right-click it and choose **"Run with PowerShell"**, or run
+   `powershell -File .\AutoUpdate-Fougerite.ps1` from a terminal opened in that folder - and follow the
+   prompts.
 3. When asked how to handle `Save\*.cfg`/`*.ini` files, choose **`[P]` Prompt me** (recommended) - it shows
    you a line-by-line diff of anything that would change before overwriting, instead of silently resetting
-   `Fougerite.cfg` to defaults.
+   `Fougerite.cfg` - or any plugin's own default config/ini file under `Save\` - back to defaults.
 
 Full details and what each prompt means: [`Scripts.md`](Scripts.md). Run this same script again whenever a
 new Fougerite release comes out.
@@ -42,16 +43,16 @@ Forward/allow these ports on your router and firewall before anyone can connect:
 
 | Port | Protocol | Purpose |
 |---|---|---|
-| `28015` | UDP | Main game port - Rust Legacy's default, used by every client to actually connect and play. |
-| `28016` | TCP + UDP | Query (UDP, server browser queries) + RCON (TCP, remote console - `rcon.login`, see step 4). Both protocols need to be open. |
-| `28017` | TCP | RustBuster client-side integration port - only needed if you want players using the [RustBuster](../README.md#server-browser-visibility-fougerite-vs-rustbuster) client to get its extra features. |
+| game port | UDP | Main game port - used by every client to actually connect and play. Passed to `rust_server.exe` as `-port <number>` in the `.bat` file (the shipped example `.bat` uses `29015`, **not** `28015` - check your own `.bat` file for the real value). |
+| game port + 1 | TCP + UDP | Query (UDP, server browser queries) + RCON (TCP, remote console - `rcon.login`, see step 4). Both protocols need to be open. This offset is the common convention but can be overridden independently in `server.cfg`/the `.bat` file, so double-check yours. |
+| game port + 2 | TCP | RustBuster client-side integration port - only needed if you want players using the [RustBuster](../README.md#server-browser-visibility-fougerite-vs-rustbuster) client to get its extra features. Unlike the query/RCON port, this one is **always** the game port + 2, it isn't separately configurable. |
 
-These port numbers assume the default game port `28015`. If you changed the game port (in `server.cfg` or
-the server's `.bat` file), the query/RCON port is always **game port + 1** and the RustBuster port is always
-**game port + 2** - e.g. a game port of `28020` means `28021` for query/RCON and `28022` for RustBuster.
+For example, if your `.bat` file uses `-port 28015` (Rust Legacy's traditional default), that's `28016` for
+query/RCON and `28017` for RustBuster. If it uses `29015` (the port in the shipped example `.bat`), that's
+`29016` and `29017` instead - open whichever ports match **your actual** game port, not these examples.
 
-If you're not using RustBuster at all, its port (`+2`) can be left closed - everything else still works over
-the game port and `+1`.
+If you're not using RustBuster at all, its port (game port + 2) can be left closed - everything else still
+works over the game port and the query/RCON port.
 
 ### 4. Set your RCON password and become admin
 
@@ -69,7 +70,7 @@ the game port and `+1`.
 
 Full walkthrough and troubleshooting: [`AdminAccess.md`](AdminAccess.md).
 
-### 5. Fix `Fougerite.cfg` so the right players can actually join
+### 5. Adjust `Fougerite.cfg` so the right players can actually join
 
 This is the single most common reason a server looks "broken" to new players: `Fougerite.cfg` (in
 `Save\Fougerite.cfg`) ships with settings that may be too strict (or too loose) for what you want. Open it

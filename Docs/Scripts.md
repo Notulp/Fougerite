@@ -10,9 +10,10 @@ owners with day-to-day maintenance:
   asking for support.
 
 Both scripts must be placed **directly in the Rust Legacy server's root folder** - the same folder that
-contains `rust_server.exe` - and run from there (double-click, or `powershell -File .\Script.ps1` from a
-terminal opened in that folder). Both scripts check for `rust_server.exe` on startup and refuse to run
-(with a clear error message) if they're not in the right folder.
+contains `rust_server.exe` - and run from there: double-click it, right-click it and choose **"Run with
+PowerShell"**, or run `powershell -File .\Script.ps1` from a terminal opened in that folder. Both scripts
+check for `rust_server.exe` on startup and refuse to run (with a clear error message) if they're not in the
+right folder.
 
 ### 1. `AutoUpdate-Fougerite.ps1`
 
