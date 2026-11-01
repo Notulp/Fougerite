@@ -1,5 +1,10 @@
 # Fougerite Documentation
 
+> [!TIP]
+> **Just want to run a server, not write plugins?** Start with [`QuickStart.md`](QuickStart.md) - a short,
+> numbered checklist covering the premade server download, updating, ports to open, RCON/admin setup,
+> `Fougerite.cfg` (`SteamAuthMode`/`SteamWebAPIKey`), and installing your first plugin.
+
 This folder contains developer documentation for writing Fougerite plugins in **C#**, **Python** (IronPython),
 **JavaScript** (Jint) and **Lua** (MoonSharp).
 
@@ -10,6 +15,9 @@ Fougerite plugins react to game events by either:
 
 ### Contents
 
+- [`QuickStart.md`](QuickStart.md) - **Start here if you just want to run a server.** Premade server
+  download, updating, ports to open, RCON/admin setup, `Fougerite.cfg` basics, and installing your first
+  plugin, in one short checklist.
 - [`CSharpPluginTutorial.md`](CSharpPluginTutorial.md) - **Start here if you're new to C# modules.**
   A beginner-friendly, step-by-step walkthrough: setting up a Visual Studio (or JetBrains Rider) project,
   targeting .NET 3.5, writing your first `Module`, subscribing to hooks, and building/installing the

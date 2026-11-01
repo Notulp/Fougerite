@@ -1,5 +1,11 @@
 # Fougerite project
 
+> [!TIP]
+> **New here and just want to get a server running?** Skip straight to
+> [`Docs/QuickStart.md`](Docs/QuickStart.md) for a short, numbered checklist: premade server download,
+> updating with `AutoUpdate-Fougerite.ps1`, ports to open, setting your RCON password/admin, fixing
+> `SteamAuthMode`/`SteamWebAPIKey` so the right players can join, and installing your first plugin.
+
 ## About the Project
 Fougerite is a "fork" or conversion of Magma that was created by EquiFox and xEnt, back in 2013 after furnace mod.
 The project however became abandoned in 2014, and has been decompiled, and refactored by Riketta.
@@ -169,6 +175,9 @@ skeleton-stub + "patch member to public" workflow used whenever you need to hook
 private member on a game type.
 
 ## Installation
+New to Fougerite? [`Docs/QuickStart.md`](Docs/QuickStart.md) walks through the whole process end-to-end
+(premade server download, updating, ports, RCON/admin, `Fougerite.cfg`, first plugin) in one page.
+
 Please see a release file from the releases tab to see how a release file should look like.
 The release file also contains extra Python files, that you may want to grab.
 It's in the Save\Lib folder. Not all of the python files can be used due to the version of
