@@ -20,10 +20,13 @@ root** for every step below.
 
 ### 2. Update it to the latest Fougerite with `AutoUpdate-Fougerite.ps1`
 
-The premade download may not be on the latest Fougerite version, so update it right away:
+The latest premade server already ships with `AutoUpdate-Fougerite.ps1` in the server root, so just run it
+to make sure you're on the newest Fougerite version:
 
-1. Download [`AutoUpdate-Fougerite.ps1`](../AutoUpdate-Fougerite.ps1) from this repository and place it
-   directly in the server root (next to `rust_server.exe`).
+1. If you're using the premade download above, `AutoUpdate-Fougerite.ps1` is already in the server root -
+   skip straight to step 2. If you started from the **original Rust Legacy server files** instead (no
+   script present), download [`AutoUpdate-Fougerite.ps1`](../AutoUpdate-Fougerite.ps1) from this repository
+   and place it directly in the server root (next to `rust_server.exe`).
 2. Run it (double-click, or `powershell -File .\AutoUpdate-Fougerite.ps1` from a terminal opened in that
    folder) and follow the prompts.
 3. When asked how to handle `Save\*.cfg`/`*.ini` files, choose **`[P]` Prompt me** (recommended) - it shows
